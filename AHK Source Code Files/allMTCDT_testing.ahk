@@ -4,10 +4,57 @@
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 
-Gui Add, DropDownList, x26 y29 w341, DropDownList||
-Gui Add, GroupBox, x9 y6 w371 h65, Select Item Number
+Gui +hWndhMainWnd
+Gui Add, DropDownList, x19 y38 w217, DropDownList||
+Gui Add, GroupBox, x10 y11 w239 h65, Select Item Number
+Gui Add, CheckBox, x11 y84 w236 h23 +Checked, Included Configuration Step
+Gui Add, GroupBox, x10 y113 w239 h241, Process
+Gui Add, Button, x91 y369 w80 h23, &START
+Gui Font,, Consolas
+Gui Add, Text, x44 y129 w196 h21 +0x200, Load Configuration
+Gui Font
+Gui Font,, Consolas
+Gui Add, Text, x44 y151 w196 h21 +0x200, Rebooted After Config
+Gui Font
+Gui Add, Text, x17 y174 w223 h2 +0x10
+Gui Font, c0x000000, Consolas
+Gui Add, Text, hWndhTxtCheckEthernetPort3 x44 y178 w196 h21 +0x200, Check Ethernet Port
+Gui Font
+Gui Font,, Consolas
+Gui Add, Text, x44 y222 w196 h21 +0x200, Check Temperature
+Gui Font
+Gui Font,, Consolas
+Gui Add, Text, x44 y244 w196 h21 +0x200, Check SIM/ Cellular
+Gui Font
+Gui Font,, Consolas
+Gui Add, Text, x44 y266 w196 h21 +0x200, Check WiFi/ Bluetooth
+Gui Font
+Gui Font,, Consolas
+Gui Add, Text, x44 y200 w196 h21 +0x200, Check LED
+Gui Font
+Gui Font, c0x00FF00, Ms Shell Dlg 2
+Gui Add, Text, x19 y129 w12 h21 +0x200, ✔
+Gui Font
+Gui Font, c0xFF0000, Ms Shell Dlg 2
+Gui Add, Text, x19 y222 w12 h21 +0x200, ✘
+Gui Font
+Gui Font, c0x808000, Ms Shell Dlg 2
+Gui Add, Text, x19 y266 w12 h21 +0x200, ➜
+Gui Font
+Gui Font, c0x00FF00, Ms Shell Dlg 2
+Gui Add, Text, x19 y151 w12 h21 +0x200, ✔
+Gui Font
+Gui Font, c0x00FF00, Ms Shell Dlg 2
+Gui Add, Text, x19 y178 w12 h21 +0x200, ✔
+Gui Font
+Gui Font, c0x00FF00, Ms Shell Dlg 2
+Gui Add, Text, x19 y200 w12 h21 +0x200, ✔
+Gui Font
+Gui Font, c0x00FF00, Ms Shell Dlg 2
+Gui Add, Text, x19 y244 w12 h21 +0x200, ✔
+Gui Font
 
-Gui Show, w393 h420, All MTCDT Auto-Testing
+Gui Show, x1269 y324 w258 h400, All MTCDT Auto-Tester
 Return
 
 GuiEscape:
