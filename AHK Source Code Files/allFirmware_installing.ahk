@@ -2,13 +2,19 @@
     Author: Viet Ho
 */
 
+IfNotExist C:\AFAuto-Installer\Imgs-for-Search-Func
+    FileCreateDir C:\AFAuto-Installer\Imgs-for-Search-Func
+
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\u-boot.BMP, C:\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP, 1
+
 ;;;;;;;Variables Definition
 ;Firmware list
-Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 NO WiFi", "AEP 5.0.0", "AEP 5.1.2"]
+Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 NO WiFi", "AEP 1.4.3", "AEP 5.0.0", "AEP 5.1.2"]
 
 ;Paths and Links
 Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
 Global mli419NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-full-4.1.9.tcl"
+Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
 Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
 Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP"
 
@@ -20,6 +26,16 @@ Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
 #NoEnv
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
+
+;Menu bar
+Menu FileMenu, Add, Quit, quitHandler
+Menu MenuBar, Add, &File, :FileMenu
+Menu EditMenu, Add, Change File Location, changeFileHandler
+Menu MenuBar, Add, &Edit, :EditMenu
+Menu HelpMenu, Add, Keyboard Shortcuts, keyShcutHandler
+Menu HelpMenu, Add, About, aboutHandler
+Menu MenuBar, Add, &Help, :HelpMenu
+Gui Menu, MenuBar
 
 Gui -MinimizeBox -MaximizeBox
 Gui Add, Button, x63 y144 w80 h23 gmainRun, &RUN
@@ -36,10 +52,31 @@ Gui Font
 Gui Show, x856 y322 w208 h215, All Firmware Auto-Installer
 Return
 
+;;;;;;;;;All menu handlers
+quitHandler:
+ExitApp
+Return
+
+changeFileHandler:
+MsgBox 0, Message, This feature will be added in the future release!
+Return
+
+keyShcutHandler:
+MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App
+Return
+aboutHandler:
+MsgBox 0, Message, Created and Tested by Viet Ho
+Return
+
 GuiEscape:
 GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;HOT KEYS;;;;;;;;
+^q:: ExitApp
+^r:: mainRun()
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainRun() {
     setProgressBar(0) ;Set Progress to 0 everytime user hit RUN
@@ -51,27 +88,29 @@ mainRun() {
         SB_SetText("Missing COM port...")
         MsgBox, 8240, Alert, Please connect to PORT first! ;Uses 48 + 8192
         SB_SetText("...")
+        return
     }
-    Else {
-        SB_SetText("Starting...")
-        If (check = 1) {
-            MsgBox, 33, Question, Begin Auto-Reprogram firmware %fware%? ;Uses 1 + 32
-            IfMsgBox OK 
-            {
-                erase_firmware()
-                install_firmware(fware, check)
-            }
-            IfMsgBox Cancel
+    
+    SB_SetText("Starting...")
+    If (check = 1) {
+        MsgBox, 33, Question, Begin Auto-Reprogram firmware %fware%? ;Uses 1 + 32
+        IfMsgBox OK 
+        {
+            If (searchUboot() = 0)
                 return
-        } 
-        Else {
-            MsgBox, 33, Question, Begin Auto-Install firmware %fware%?
-            IfMsgBox OK
-                install_firmware(fware, check)
-            IfMsgBox Cancel
-            SB_SetText("Click button to start!")
-                return
+            erase_firmware()
+            install_firmware(fware, check)
         }
+        IfMsgBox Cancel
+            return
+    } 
+    Else {
+        MsgBox, 33, Question, Begin Auto-Install firmware %fware%?
+        IfMsgBox OK
+            install_firmware(fware, check)
+        IfMsgBox Cancel
+        SB_SetText("Click button to start!")
+            return
     }
 }
 
@@ -97,6 +136,7 @@ install_firmware(fw, chk) {
     If WinExist("Invalid.*") {
         WinActivate Invalid.*
         Send {Enter}
+        SB_SetText("Failed to connect to SAM-BA...")
         MsgBox, 16, Error, Cannot CONNECT to SAM-BA Port`nPlease try again!
         setProgressBar(0)
         return
@@ -120,6 +160,8 @@ install_firmware(fw, chk) {
             Send %mli419Path%
         If (fw = "mLinux 4.1.9 NO WiFi")
             Send %mli419NoWiFPath%
+        If (fw = "AEP 1.4.3")
+            Send %aep143Path%
         If (fw = "AEP 5.0.0")
             Send %aep500Path%
         If (fw = "AEP 5.1.2")
@@ -168,8 +210,20 @@ install_firmware(fw, chk) {
     }
 }
 
-;;;;;;;;;;;;;;;;Additional functions
+;;;;;;;;;;;;;;;;Additional Functions
 setProgressBar(number) {
     GuiControl,, progress, %number%
 }
 
+;;;;;;;;;;;;;;;Searching Images Functions
+searchUboot() {
+    SetTitleMatchMode, RegEx
+    WinActivate COM.*
+    CoordMode, Pixel, Window
+    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP
+    If ErrorLevel
+    {
+        MsgBox, 16, Error, Can't find U-Boot> prompt`nMake sure you get "U-Boot>" displayed on TeraTerm first!
+        return 0 ;Return false if not found
+    }
+}
