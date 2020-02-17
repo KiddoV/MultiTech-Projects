@@ -131,7 +131,7 @@ mainStart() {
 
 addConfigFile(itemN) {
     SetTitleMatchMode, RegEx
-    Global configPath := "%itemN% + "ConfigPath"
+    Global configPath := %itemN%ConfigPath
     If FileExist ("%itemN%ConfigPath") {
             MsgBox 16, FILE NOT FOUND, File NOT FOUND in this location: `n%configPath%`nMake sure you have the CONFIG file, and put in the exact location above!
             return
