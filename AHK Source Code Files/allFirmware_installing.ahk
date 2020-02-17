@@ -2,12 +2,12 @@
     Author: Viet Ho
 */
 
-IfNotExist C:\AFAuto-Installer\Imgs-for-Search-Func
-    FileCreateDir C:\AFAuto-Installer\Imgs-for-Search-Func
+IfNotExist C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
+    FileCreateDir C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\u-boot.BMP, C:\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\u-boot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP, 1
 
-;;;;;;;Variables Definition
+;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;Firmware list
 Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 NO WiFi", "AEP 1.4.3", "AEP 5.0.0", "AEP 5.1.2"]
 
@@ -16,12 +16,12 @@ Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4
 Global mli419NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-full-4.1.9.tcl"
 Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
 Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
-Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP"
+Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
 
 ;Application Dir
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
 
-;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
@@ -210,12 +210,12 @@ install_firmware(fw, chk) {
     }
 }
 
-;;;;;;;;;;;;;;;;Additional Functions
+;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 setProgressBar(number) {
     GuiControl,, progress, %number%
 }
 
-;;;;;;;;;;;;;;;Searching Images Functions
+;;;Search Images Functions
 searchUboot() {
     SetTitleMatchMode, RegEx
     WinActivate COM.*
