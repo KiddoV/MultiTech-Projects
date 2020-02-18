@@ -18,7 +18,7 @@ Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
 Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
 Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
 
-;Application Dir
+;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
 
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -220,7 +220,7 @@ searchUboot() {
     SetTitleMatchMode, RegEx
     WinActivate COM.*
     CoordMode, Pixel, Window
-    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP
+    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP
     If ErrorLevel
     {
         MsgBox, 16, Error, Can't find U-Boot> prompt`nMake sure you get "U-Boot>" displayed on TeraTerm first!
