@@ -17,7 +17,7 @@ Global 247_ItemNums := ["70000053L", ""]
 
 ;;;Paths and Links
 ;240L
-Global 70000041LConfigPath := "C:\MTCDT_REFRESH\240L\70000041L\70000041L-MLINUX-REFRESH-test-config.ttl"
+Global 70000041LConfigPath := "c"
 Global 70000041LTestPath := "C:\MTCDT_REFRESH\240L\70000041L\70000041L-MLINUX-LAT3-tst_002.ttl"
 ;246L
 Global 70000054LConfigPath := "C:\MTCDT_REFRESH\246L\70000054L\70000054L-MLINUX_4_1_9_eeprom_test_config.ttl"
@@ -132,8 +132,9 @@ mainStart() {
 addConfigFile(itemN) {
     SetTitleMatchMode, RegEx
     Global configPath := %itemN%ConfigPath
-    If FileExist ("%itemN%ConfigPath") {
-            MsgBox 16, FILE NOT FOUND, File NOT FOUND in this location: `n%configPath%`nMake sure you have the CONFIG file, and put in the exact location above!
+    
+    If FileExist ("%configPath%") {
+            MsgBox 16, FILE NOT FOUND, File NOT FOUND in this location: `n%configPath%`nMake sure you have the CONFIG file, and put it in the exact location above!
             return
         }
         
