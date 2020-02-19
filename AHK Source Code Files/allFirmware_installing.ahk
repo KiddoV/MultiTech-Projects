@@ -2,6 +2,8 @@
     Author: Viet Ho
 */
 
+SetTitleMatchMode, RegEx
+
 IfNotExist C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
     FileCreateDir C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
 
@@ -9,7 +11,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;Firmware list
-Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 NO WiFi", "AEP 1.4.3", "AEP 5.0.0", "AEP 5.1.2"]
+Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "AEP 1.4.3", "AEP 5.0.0", "AEP 5.1.2"]
 
 ;Paths and Links
 Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
@@ -25,6 +27,8 @@ Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
 #SingleInstance Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
+Global WorkingDir
+StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 ;Menu bar
@@ -83,7 +87,6 @@ mainRun() {
     GuiControlGet, fware ;Get value from DropDownList
     GuiControlGet, check ;Get value from CheckBox
     
-    SetTitleMatchMode, RegEx
     If !WinExist("COM.*") {
         SB_SetText("Missing COM port...")
         MsgBox, 8240, Alert, Please connect to PORT first! ;Uses 48 + 8192
@@ -128,7 +131,6 @@ install_firmware(fw, chk) {
     Run %SAM_BA%
     SB_SetText("Opening SAM-BA...")
     setProgressBar(+10)
-    SetTitleMatchMode, RegEx
     
     WinWaitActive SAM-BA.*
     Send {Enter}
@@ -143,7 +145,7 @@ install_firmware(fw, chk) {
     }
     Else {
         setProgressBar(40)
-        BlockInput On
+        BlockInput MouseMove
         WinActivate SAM-BA.*
         Sleep 300
         Click, 82, 43 Left, , Down
@@ -152,13 +154,13 @@ install_firmware(fw, chk) {
         Send {Down}{Down}{Down}{Down}{Enter}
         WinWaitActive Select Script File.*
         WinActivate Select Script File.*
-        BlockInput Off
+        BlockInput MouseMoveOff
         
         setProgressBar(50)
         BlockInput On
         If (fw = "mLinux 4.1.9")
             Send %mli419Path%
-        If (fw = "mLinux 4.1.9 NO WiFi")
+        If (fw = "mLinux 4.1.9 - NO WiFi")
             Send %mli419NoWiFPath%
         If (fw = "AEP 1.4.3")
             Send %aep143Path%
@@ -172,6 +174,7 @@ install_firmware(fw, chk) {
         Sleep 200
         Send {Enter}
         Sleep 300
+        
         ;This if stmt fix bug on some old computer
         If WinExist("Select Script File.*") {
             WinActivate Select Script File.*
@@ -217,7 +220,6 @@ setProgressBar(number) {
 
 ;;;Search Images Functions
 searchUboot() {
-    SetTitleMatchMode, RegEx
     WinActivate COM.*
     CoordMode, Pixel, Window
     ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP

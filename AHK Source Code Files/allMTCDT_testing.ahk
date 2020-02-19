@@ -3,6 +3,7 @@
 */
 SetTitleMatchMode, RegEx
 
+;;;;Installs files for app to run
 IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
     FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
 
@@ -38,13 +39,10 @@ Global TeraTerm := "C:\teraterm\ttermpro.exe"
 #SingleInstance Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
+Global WorkingDir
+StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
-;Gui +hWndhMainWnd
-;For each, item in allItemNum
-;    itemNum .= (each == 1 ? "" : "|") . item
-;Gui Add, DropDownList, x22 y32 w176 vitmNum Choose1, %itemNum%
-;Gui Add, GroupBox, x9 y8 w300 h70, Select Item Number
 Gui Add, Text, x17 y5 w136 h21 +0x200 , Select Item Number
 
 Gui Add, Tab3, x9 y27 w202 h65 vwhichTab gchangeTab, 240L|246L|247L
@@ -81,7 +79,7 @@ Gui Add, Text, x64 y263 w136 h21 +0x200, Check Temperature
 Gui Font,, Consolas
 Gui Add, Text, x64 y285 w136 h21 +0x200, Check SIM/ Cellular
 Gui Font,, Consolas
-Gui Add, Text, x64 y307 w136 h21 +0x200, Check GPS
+Gui Add, Text, x64 y307 w136 h21 +0x200 +Disabled vcheckGps, Check GPS
 Gui Font,, Consolas
 Gui Add, Text, x64 y329 w136 h21 +0x200 +Disabled vcheckWifi, Check WiFi/ Bluetooth
 
@@ -108,7 +106,7 @@ GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-mainStart() {  
+mainStart() {
     GuiControlGet, itemNum1 ;Get value from DropDownList
     GuiControlGet, itemNum2 ;Get value from DropDownList
     GuiControlGet, itemNum3 ;Get value from DropDownList
@@ -259,11 +257,19 @@ checkBoxToggle() {
 
 changeTab() {
     GuiControlGet, whichTab ;Get value from Tab Title
-    If (whichTab = "247L")
-        GuiControl Enabled, checkWifi
-    Else
+    
+    If (whichTab = "246L") {
+        GuiControl Enabled, checkGps
         GuiControl Disable, checkWifi
-        
+    }
+    Else If (whichTab = "247L") {
+        GuiControl Enabled, checkGps
+        GuiControl Enabled, checkWifi
+    }
+   Else {
+        GuiControl Disable, checkGps
+        GuiControl Disable, checkWifi
+   }
 }
 
 clearAllProcessImgs() {
@@ -282,7 +288,7 @@ searchForZeros() {
     Loop, 2 ;Search the image 2 times
     {
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\Users\Administrator\Pictures\zeros.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\zeros.bmp
         If ErrorLevel
         {
             return 0 ;Return false if not found
@@ -292,7 +298,7 @@ searchForZeros() {
 
 searchForFFs(){
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\Users\Administrator\Pictures\ffs.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\ffs.bmp
         If ErrorLevel
             return 0 ;Return false if NOT found
         If ErrorLevel = 0
@@ -304,7 +310,7 @@ searchForFirmwareVersion() {
     {
         WinActivate COM.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\mli419.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\mli419.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep, 3000
@@ -318,7 +324,7 @@ searchLed1111() {
     {
         WinActivate 192.168.2.1.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\1111.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep, 2000
