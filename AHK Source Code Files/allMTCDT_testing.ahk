@@ -3,9 +3,11 @@
 */
 SetTitleMatchMode, RegEx
 
-;;;;Installs files for app to run
+;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
     FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
+IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
+    FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
@@ -213,13 +215,13 @@ functionalTestStep(itemN) {
     Send !om
     WinWait MACRO.*
     Send %testPath% {Enter}
-    WinWait SECURITY WARNING|SSH.*
+    WinWait SECURITY.*|SSH.*
+    WinWait SECURITY.*, , 3
     GuiControl , , process4, %checkImg%
-    If WinExist(SECURITY WARNING) {
-        WinActivate SECURITY WARNING
+    If WinExist("SECURITY.*") {
+        WinActivate SECURITY.*
         Send {Tab} {Tab} {Tab} {Enter}
     }
-    
     ;Check LED
     GuiControl , , process5, %arrowImg%
     WinWait Visual test
@@ -232,14 +234,19 @@ functionalTestStep(itemN) {
         return
     }
     GuiControl , , process5, %checkImg%
+    WinWait LED TEST, , 7
+    If WinExist("LED TEST") {
+        WinActivate LED TEST
+        Send {Enter}
+    }
     
-    ;WinWait LED, ,6 ;Wait for 6 secs
     GuiControl , , process6, %arrowImg%
     WinWait temp, ,6
     GuiControl , , process6, %checkImg%
     GuiControl , , process7, %arrowImg%
 }
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 checkBoxToggle() {
     GuiControlGet, check ;Get value from CheckBox
@@ -283,18 +290,19 @@ clearAllProcessImgs() {
     GuiControl , , process8, ""
     GuiControl , , process9, ""
 }
-;;;Search Images Functions
-searchForZeros() {
-    Loop, 2 ;Search the image 2 times
-    {
-        CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\zeros.bmp
-        If ErrorLevel
-        {
-            return 0 ;Return false if not found
-        }     
-    }
-}
+
+;;;Search Images Functions;;;
+;searchForZeros() {
+    ;Loop, 2 ;Search the image 2 times
+    ;{
+        ;CoordMode, Pixel, Window
+        ;ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\zeros.bmp
+        ;If ErrorLevel
+        ;{
+            ;return 0 ;Return false if not found
+        ;}     
+    ;}
+;}
 
 searchForFFs(){
         CoordMode, Pixel, Window
