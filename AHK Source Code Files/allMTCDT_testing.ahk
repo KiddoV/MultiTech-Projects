@@ -45,9 +45,9 @@ Global WorkingDir
 StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
-Gui Add, Text, x17 y5 w136 h21 +0x200 , Select Item Number
+Gui Add, Text, x17 y5 w136 h21 +0x200 vtopLabel, Select Item Number
 
-Gui Add, Tab3, x9 y27 w202 h65 vwhichTab gchangeTab, 240L|246L|247L
+Gui Add, Tab3, x9 y27 w202 h65 vwhichTab gchangeTab +0x8, 240L|246L|247L
 Gui Tab, 1
 For each, item in 240_ItemNums
     itmNum1 .= (each == 1 ? "" : "|") . item
@@ -64,7 +64,7 @@ Gui Tab
 
 Gui Add, CheckBox, x10 y101 w200 h23 +Checked vcheck gcheckBoxToggle, % "Included Configuration Step"
 
-Gui Add, GroupBox, x9 y132 w202 h230, Processes
+Gui Add, GroupBox, x9 y132 w202 h225 vprocessGbox, Processes
 Gui Font,, Consolas
 Gui Add, Text, x64 y148 w136 h21 +0x200 vloadConfig, Load Configuration
 Gui Font,, Consolas
@@ -79,11 +79,15 @@ Gui Add, Text, x64 y241 w136 h21 +0x200, Check LED
 Gui Font,, Consolas
 Gui Add, Text, x64 y263 w136 h21 +0x200, Check Temperature
 Gui Font,, Consolas
-Gui Add, Text, x64 y285 w136 h21 +0x200, Check SIM/ Cellular
+Gui Add, Text, x64 y285 w136 h21 +0x200, Check LORA/MTAC
 Gui Font,, Consolas
-Gui Add, Text, x64 y307 w136 h21 +0x200 +Disabled vcheckGps, Check GPS
+Gui Add, Text, x64 y307 w136 h21 +0x200, Check SIM/ Cellular
 Gui Font,, Consolas
-Gui Add, Text, x64 y329 w136 h21 +0x200 +Disabled vcheckWifi, Check WiFi/ Bluetooth
+Gui Add, Text, x64 y329 w136 h21 +0x200, Check Others
+Gui Font,, Consolas
+Gui Add, Text, x64 y351 w136 h21 +0x200 +Hidden vcheckGps, Check GPS
+Gui Font,, Consolas
+Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/ Bluetooth
 
 Gui Font, c0x00FF00, Ms Shell Dlg 2
 
@@ -97,10 +101,12 @@ Gui Add, Picture, x30 y263 w21 h21 vprocess6
 Gui Add, Picture, x30 y285 w21 h21 vprocess7
 Gui Add, Picture, x30 y307 w21 h21 vprocess8
 Gui Add, Picture, x30 y329 w21 h21 vprocess9
+Gui Add, Picture, x30 y351 w21 h21 vprocess10
+Gui Add, Picture, x30 y373 w21 h21 vprocess11
 
-Gui Add, Button, x70 y372 w80 h23 gmainStart, &START
+Gui Add, Button, x70 y367 w80 h23 vstartBttn gmainStart, &START
 
-Gui Show, x1269 y324 w220 h404, All MTCDT Auto-Tester
+Gui Show, x1269 y324 w220 h400, All MTCDT Auto-Tester
 Return
 
 GuiEscape:
@@ -119,11 +125,6 @@ mainStart() {
     
     clearAllProcessImgs()
     
-    If !WinExist("COM.*") {
-        MsgBox, 8240, Alert, Please connect to PORT first!`nAnd make sure the device is booted. ;Uses 48 + 8192
-        return
-    }
-    
     If (whichTab = "240L")
         itemNum := itemNum1
     If (whichTab = "246L")
@@ -136,26 +137,61 @@ mainStart() {
         IfMsgBox Cancel
             return
         IfMsgBox OK
-        functionalTestStep(itemNum)
+        {
+            If (functionalTestStep(itemNum) = 0) {
+                disableGuis("Enable")
+                return
+            }     
+        }
     } 
     Else {
+        If !WinExist("COM.*") {
+            MsgBox, 8240, Alert, Please connect to PORT first!`nAnd make sure the device is booted. ;Uses 48 + 8192
+            return
+        }
         MsgBox, 33, Question, Begin Auto-Full Test for %itemNum%?
         IfMsgBox Cancel
             return
         IfMsgBox OK
-        configStep(itemNum)
-        functionalTestStep(itemNum)
+        {
+            If (configStep(itemNum) = 0) {
+                disableGuis("Enable")
+                return
+            }
+                
+            If (functionalTestStep(itemNum) = 0) {
+                disableGuis("Enable")
+                return
+            }
+        }
+    }
+    WinWait PORT.*
+    WinActivate PORT.*
+    If (searchTestComplete() = 0) {
+        MsgBox ALL TEST FAILED
+        disableGuis("Enable")
+        return
     }
 
+    WinActivate PORT.*
+    Send {Enter}
+    GuiControl , , process9, %checkImg%
+    
+    WinActivate COM.*
+    Send !i
+    
+    MsgBox ALL DONE!
+    disableGuis("Enable")
 }
 
 configStep(itemN) {
+    disableGuis("Disable")
     Global configPath := %itemN%ConfigPath
     
     IfNotExist %configPath%
     {
         MsgBox 16, FILE NOT FOUND, File NOT FOUND in this location: `n%configPath%`nMake sure you have the CONFIG file, and put it in the exact location above!
-        return
+        return = 0
     }
     
     WinActivate COM.*
@@ -181,7 +217,7 @@ configStep(itemN) {
     If (searchForFirmwareVersion() = 0) {
         GuiControl , , process2, %timeImg%
         MsgBox Could not Reboot device!
-        return
+        return 0
     }
     GuiControl , , process2, %checkImg%
     
@@ -196,7 +232,8 @@ configStep(itemN) {
         Loop 50
         Click WheelDown
         GuiControl , , process3, %timeImg%
-        return
+        MsgBox Failed to load configuration file!
+        return 0
     }
     Loop 50
         Click WheelDown
@@ -204,7 +241,14 @@ configStep(itemN) {
 }
 
 functionalTestStep(itemN) {
+    disableGuis("Disable")
     Global testPath := %itemN%TestPath
+    
+    IfNotExist %testPath%
+    {
+        MsgBox 16, FILE NOT FOUND, File NOT FOUND in this location: `n%testPath%`nMake sure you have the TEST file, and put it in the exact location above!
+        return = 0
+    }
     
     GuiControl , , process4, %arrowImg%
     Run %TeraTerm%
@@ -230,26 +274,68 @@ functionalTestStep(itemN) {
     
     If (searchLed1111() = 0) {
         GuiControl , , process5, %timeImg%
-        MsgBox Failed LED test!
-        return
+        WinWait LED TEST, , 6
+        If WinExist("LED TEST") {
+            WinActivate LED TEST
+            Send {Right}{Enter}
+        }
+        return 0
     }
     GuiControl , , process5, %checkImg%
-    WinWait LED TEST, , 7
+    GuiControl , , process6, %arrowImg%
+    WinWait LED TEST, , 6
     If WinExist("LED TEST") {
         WinActivate LED TEST
         Send {Enter}
     }
     
-    GuiControl , , process6, %arrowImg%
+    ;Check temparature
+    ;GuiControl , , process6, %arrowImg%
     WinWait temp, ,6
     GuiControl , , process6, %checkImg%
+    
+    ;Check LORA/MTAC
     GuiControl , , process7, %arrowImg%
+    If (searchCatCantOpen() = 1) {
+        GuiControl , , process7, %timeImg%
+        MsgBox LORA/MTAC failure!
+        return 0
+    }
+    
+    GuiControl , , process7, %checkImg%
+    
+    ;Check SIM/CELL
+    GuiControl , , process8, %arrowImg%
+    If (searchAtCpin() = 1) {
+        If (searchCpinReady() = 1) {
+            GuiControl , , process8, %checkImg%
+        } Else {
+            GuiControl , , process8, %timeImg%
+            WinClose 192.168.*
+            WinWaitActive Tera.*
+            Send {Left} {Enter}
+            WinWait PORT.*, , 1
+            WinClose PORT.*
+            WinWait MACRO.*, , 1
+            If WinExist("MACRO.*")
+                Send y
+            MsgBox SIM/CELL Failue!
+            return 0
+        }
+    }
+    
+    ;Other checks
+    GuiControl , , process9, %arrowImg%
+    WinWait RSSI.*
+    WinWait Signal.*
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 checkBoxToggle() {
     GuiControlGet, check ;Get value from CheckBox
+    clearAllProcessImgs()
+    
     If (check = 0) {
         GuiControl Disable, loadConfig
         GuiControl Disable, rebootAfterConfig
@@ -264,18 +350,28 @@ checkBoxToggle() {
 
 changeTab() {
     GuiControlGet, whichTab ;Get value from Tab Title
+    clearAllProcessImgs()
     
     If (whichTab = "246L") {
-        GuiControl Enabled, checkGps
-        GuiControl Disable, checkWifi
+        Gui Show, w220 h422, All MTCDT Auto-Tester
+        GuiControl Move, processGbox, h247
+        GuiControl Move, startBttn, y389
+        GuiControl Show, checkGps
+        GuiControl Hide, checkWifi
     }
     Else If (whichTab = "247L") {
-        GuiControl Enabled, checkGps
-        GuiControl Enabled, checkWifi
+        Gui Show, w220 h444, All MTCDT Auto-Tester
+        GuiControl Move, processGbox, h269
+        GuiControl Move, startBttn, y411
+        GuiControl Show, checkGps
+        GuiControl Show, checkWifi
     }
    Else {
-        GuiControl Disable, checkGps
-        GuiControl Disable, checkWifi
+        Gui Show, w220 h400, All MTCDT Auto-Tester
+        GuiControl Move, processGbox, h225
+        GuiControl Move, startBttn, y367
+        GuiControl Hide, checkGps
+        GuiControl Hide, checkWifi
    }
 }
 
@@ -289,21 +385,18 @@ clearAllProcessImgs() {
     GuiControl , , process7, ""
     GuiControl , , process8, ""
     GuiControl , , process9, ""
+    GuiControl , , process10, ""
+    GuiControl , , process11, ""
+}
+
+disableGuis(option) {
+    GuiControl %option%, topLabel
+    GuiControl %option%, whichTab
+    GuiControl %option%, check
+    GuiControl %option%, startBttn
 }
 
 ;;;Search Images Functions;;;
-;searchForZeros() {
-    ;Loop, 2 ;Search the image 2 times
-    ;{
-        ;CoordMode, Pixel, Window
-        ;ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\zeros.bmp
-        ;If ErrorLevel
-        ;{
-            ;return 0 ;Return false if not found
-        ;}     
-    ;}
-;}
-
 searchForFFs(){
         CoordMode, Pixel, Window
         ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\ffs.bmp
@@ -328,7 +421,7 @@ searchForFirmwareVersion() {
 }
 
 searchLed1111() {
-    Loop, 5
+    Loop, 3
     {
         WinActivate 192.168.2.1.*
         CoordMode, Pixel, Window
@@ -338,5 +431,57 @@ searchLed1111() {
         Sleep, 2000
     }
     If ErrorLevel
-            return 0 ;Return false if NOT found
+        return 0 ;Return false if NOT found
+}
+
+searchAtCpin() {
+    Loop, 10
+    {
+        WinActivate 192.168.2.1.*
+        CoordMode, Pixel, Window
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\at-cpin.bmp
+        If ErrorLevel = 0
+            return 1 ;Return true if found
+        Sleep, 2000
+    }
+    If ErrorLevel
+        return 0 ;Return false if NOT found
+}
+
+searchCpinReady() {
+    WinActivate 192.168.2.1.*
+    CoordMode, Pixel, Window
+    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\cpin-ready.bmp
+    If ErrorLevel = 0
+        return 1 ;Return true if found
+    If ErrorLevel
+        return 0 ;Return false if NOT found
+}
+
+searchCatCantOpen() {
+    Loop, 6
+    {
+        WinActivate 192.168.2.1.*
+        CoordMode, Pixel, Window
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\cat-cant-open.bmp
+        If ErrorLevel = 0
+            return 1 ;Return true if found
+        Sleep, 2000
+    }
+    If ErrorLevel
+        return 0 ;Return false if NOT found
+}
+
+searchTestComplete() {
+    Loop, 2
+    {
+        WinActivate PORT.*
+        CoordMode, Pixel, Window
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\test-complete.bmp
+        If ErrorLevel = 0
+            return 1 ;Return true if found
+        Sleep 500
+    }
+    If ErrorLevel
+        return 0 ;Return false if NOT found
 }
