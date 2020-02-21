@@ -170,6 +170,7 @@ install_firmware(fw, chk) {
     addToProgressBar(5)
     
     WinWaitActive SAM-BA.*
+    WinActivate SAM-BA.*
     Send {Enter}
     WinWaitActive SAM-BA.*|Invalid.*
     If WinExist("Invalid.*") {
@@ -262,6 +263,7 @@ install_firmware(fw, chk) {
     }
 }
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 addToProgressBar(number) {
     index := probarNum += number
@@ -300,11 +302,12 @@ searchRomBoot() {
         return 1 ;Return true if FOUND
 }
 
-;;;Icon for Message Box
-;;Usage
-;OnMessage(0x44, "CheckIcon")
-;MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
-;OnMessage(0x44, "")
+;;;Icon for MsgBox
+/*Usage Sample
+OnMessage(0x44, "CheckIcon") ;Add icon
+MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
+OnMessage(0x44, "") ;Clear icon
+*/
 CheckIcon() {
     DetectHiddenWindows, On
     Process, Exist

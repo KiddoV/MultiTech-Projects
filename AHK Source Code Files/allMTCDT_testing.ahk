@@ -13,6 +13,13 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\che
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
 
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\mli419.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cpin-ready.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cpin-ready.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cat-cant-open.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cat-cant-open.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\test-complete.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\test-complete.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000041L", ""]
@@ -44,6 +51,16 @@ SetWorkingDir %A_ScriptDir%
 Global WorkingDir
 StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
+
+;;;Menu bar
+Menu FileMenu, Add, Quit, quitHandler
+Menu MenuBar, Add, &File, :FileMenu
+Menu EditMenu, Add, Change File Location, changeFileHandler
+Menu MenuBar, Add, &Edit, :EditMenu
+Menu HelpMenu, Add, Keyboard Shortcuts, keyShcutHandler
+Menu HelpMenu, Add, About, aboutHandler
+Menu MenuBar, Add, &Help, :HelpMenu
+Gui Menu, MenuBar
 
 Gui Add, Text, x17 y5 w136 h21 +0x200 vtopLabel, Select Item Number
 
@@ -91,28 +108,49 @@ Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/ Bluetoot
 
 Gui Font, c0x00FF00, Ms Shell Dlg 2
 
-Gui Add, Picture, x30 y148 w21 h21 vprocess1 ;GuiControl , , process1, %arrowImg%
-Gui Add, Picture, x30 y170 w21 h21 vprocess2
-Gui Add, Picture, x30 y192 w21 h21 vprocess3
+Gui Add, Picture, x30 y148 w21 h21 +BackgroundTrans vprocess1
+Gui Add, Picture, x30 y170 w21 h21 +BackgroundTrans vprocess2
+Gui Add, Picture, x30 y192 w21 h21 +BackgroundTrans vprocess3
 ;------------------------------------------
-Gui Add, Picture, x30 y219 w21 h21 vprocess4
-Gui Add, Picture, x30 y241 w21 h21 vprocess5
-Gui Add, Picture, x30 y263 w21 h21 vprocess6
-Gui Add, Picture, x30 y285 w21 h21 vprocess7
-Gui Add, Picture, x30 y307 w21 h21 vprocess8
-Gui Add, Picture, x30 y329 w21 h21 vprocess9
-Gui Add, Picture, x30 y351 w21 h21 vprocess10
-Gui Add, Picture, x30 y373 w21 h21 vprocess11
+Gui Add, Picture, x30 y219 w21 h21 +BackgroundTrans vprocess4
+Gui Add, Picture, x30 y241 w21 h21 +BackgroundTrans vprocess5
+Gui Add, Picture, x30 y263 w21 h21 +BackgroundTrans vprocess6
+Gui Add, Picture, x30 y285 w21 h21 +BackgroundTrans vprocess7
+Gui Add, Picture, x30 y307 w21 h21 +BackgroundTrans vprocess8
+Gui Add, Picture, x30 y329 w21 h21 +BackgroundTrans vprocess9
+Gui Add, Picture, x30 y351 w21 h21 +BackgroundTrans vprocess10
+Gui Add, Picture, x30 y373 w21 h21 +BackgroundTrans vprocess11
 
 Gui Add, Button, x70 y367 w80 h23 vstartBttn gmainStart, &START
 
 Gui Show, x1269 y324 w220 h400, All MTCDT Auto-Tester
 Return
 
+;;;;;;;;;All menu handlers
+quitHandler:
+ExitApp
+Return
+
+changeFileHandler:
+MsgBox 0, Message, This feature will be added in the future release!
+Return
+
+keyShcutHandler:
+MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App
+Return
+aboutHandler:
+MsgBox 0, Message, Created and Tested by Viet Ho
+Return
+
 GuiEscape:
 GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;HOT KEYS;;;;;;;;
+^q:: ExitApp
+^r:: mainStart()
+;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainStart() {
     GuiControlGet, itemNum1 ;Get value from DropDownList
@@ -180,7 +218,9 @@ mainStart() {
     WinActivate COM.*
     Send !i
     
-    MsgBox ALL DONE!
+    OnMessage(0x44, "CheckIcon") ;Add icon
+    MsgBox 0x80, DONE, FINISHED Auto-Testing for %itemNum%!
+    OnMessage(0x44, "") ;Clear icon
     disableGuis("Enable")
 }
 
@@ -200,7 +240,7 @@ configStep(itemN) {
     GuiControl , , process1, %arrowImg%
     WinWait MACRO.*
     WinActivate MACRO.*
-    Send %configPath% {Enter}
+    SendInput %configPath% {Enter}
     WinWait PORT STATUS|DEBUG PORT
     ;WinActivate COM.*
     ;Sleep 300
@@ -258,7 +298,8 @@ functionalTestStep(itemN) {
     WinActivate .*disconnected.*
     Send !om
     WinWait MACRO.*
-    Send %testPath% {Enter}
+    WinActivate MACRO.*
+    SendInput %testPath% {Enter}
     WinWait SECURITY.*|SSH.*
     WinWait SECURITY.*, , 3
     GuiControl , , process4, %checkImg%
@@ -322,6 +363,10 @@ functionalTestStep(itemN) {
             MsgBox SIM/CELL Failue!
             return 0
         }
+    } Else {
+        GuiControl , , process8, %timeImg%
+        MsgBox Can't find command for SIM TEST
+        return 0
     }
     
     ;Other checks
@@ -376,17 +421,13 @@ changeTab() {
 }
 
 clearAllProcessImgs() {
-    GuiControl , , process1, ""
-    GuiControl , , process2, ""
-    GuiControl , , process3, ""
-    GuiControl , , process4, ""
-    GuiControl , , process5, ""
-    GuiControl , , process6, ""
-    GuiControl , , process7, ""
-    GuiControl , , process8, ""
-    GuiControl , , process9, ""
-    GuiControl , , process10, ""
-    GuiControl , , process11, ""
+    index := 1
+    While index < 12
+    {
+        GuiControl , , process%index%, ""
+        index += 1
+        Sleep 5
+    }
 }
 
 disableGuis(option) {
@@ -396,10 +437,10 @@ disableGuis(option) {
     GuiControl %option%, startBttn
 }
 
-;;;Search Images Functions;;;
+;;;;Search Images Functions;;;;
 searchForFFs(){
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\ffs.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp
         If ErrorLevel
             return 0 ;Return false if NOT found
         If ErrorLevel = 0
@@ -407,14 +448,14 @@ searchForFFs(){
 }
 
 searchForFirmwareVersion() {
-    Loop, 25
+    Loop, 40
     {
         WinActivate COM.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\mli419.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
-        Sleep, 3000
+        Sleep, 2000
     }
     If ErrorLevel
             return 0 ;Return false if NOT found
@@ -425,7 +466,7 @@ searchLed1111() {
     {
         WinActivate 192.168.2.1.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\1111.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep, 2000
@@ -439,7 +480,7 @@ searchAtCpin() {
     {
         WinActivate 192.168.2.1.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\at-cpin.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep, 2000
@@ -451,7 +492,7 @@ searchAtCpin() {
 searchCpinReady() {
     WinActivate 192.168.2.1.*
     CoordMode, Pixel, Window
-    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\cpin-ready.bmp
+    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cpin-ready.bmp
     If ErrorLevel = 0
         return 1 ;Return true if found
     If ErrorLevel
@@ -463,7 +504,7 @@ searchCatCantOpen() {
     {
         WinActivate 192.168.2.1.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\cat-cant-open.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cat-cant-open.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep, 2000
@@ -477,11 +518,34 @@ searchTestComplete() {
     {
         WinActivate PORT.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, %WorkingDir%\Imgs-for-Search-Func\test-complete.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\test-complete.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep 500
     }
     If ErrorLevel
         return 0 ;Return false if NOT found
+}
+
+;;;Icon for MsgBox
+/*Usage Sample
+OnMessage(0x44, "CheckIcon") ;Add icon
+MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
+OnMessage(0x44, "") ;Clear icon
+*/
+CheckIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
+PlayInCircleIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
 }
