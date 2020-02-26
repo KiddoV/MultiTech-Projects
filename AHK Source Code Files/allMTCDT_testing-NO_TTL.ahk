@@ -4,22 +4,22 @@
 SetTitleMatchMode, RegEx
 
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
-IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
-    FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
-IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
-    FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
+;IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
+    ;FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
+;IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
+    ;FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\mli419.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cpin-ready.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cpin-ready.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cat-cant-open.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cat-cant-open.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\test-complete.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\test-complete.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\mli419.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cpin-ready.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cpin-ready.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cat-cant-open.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cat-cant-open.bmp, 1
+;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\test-complete.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\test-complete.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000041L", ""]
