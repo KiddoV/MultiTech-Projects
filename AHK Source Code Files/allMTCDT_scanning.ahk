@@ -6,7 +6,7 @@ SetTitleMatchMode, RegEx
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["94557700LF", ""]
-Global 246_SKUNums := ["", ""]
+Global 246_SKUNums := ["94557601LF", ""]
 Global 247_SKUNums := ["", ""]
 
 ;;;Paths and Links
@@ -108,38 +108,47 @@ mainStart() {
         return
     }
     
-    Send !om
-    WinWait MACRO.*
-    WinActivate MACRO.*
-    Send %skuNumPath% {Enter}
-        
-    WinWait PORT.*
-    WinActivate PORT.*
-    Send {Enter}
-        
-    WinWait PORT.*
-    WinActivate PORT.*
-    Send {Enter}
+    WinActivate COM.*
+    SendInput mtadm{Enter}
+    Sleep 200
+    SendInput root{Enter}
+    Sleep 200
+    SendInput sudo -s{Enter}
+    Sleep 200
+    SendInput root{Enter}
     
-    SERIAL_SCAN:
-    WinWait .*Serial.*
-    WinActivate .*Serial.*
-    Send %serialN% {Enter}
-    
-    NODEID_SCAN:
-    WinWait .*NODE.*
-    WinActivate .*NODE.*
-    Send %nodeIdN% {Enter}
-    
-    IMEI_SCAN:
-    WinWait .*IMEI.*
-    WinActivate .*IMEI.*
-    Send %imeiN% {Enter}
-    
-    UUID_SCAN:
-    WinWait .*UUID.*
-    WinActivate .*UUID.*
-    Send %uuidN% {Enter}
+    ;Send !om
+    ;WinWait MACRO.*
+    ;WinActivate MACRO.*
+    ;Send %skuNumPath% {Enter}
+        ;
+    ;WinWait PORT.*
+    ;WinActivate PORT.*
+    ;Send {Enter}
+        ;
+    ;WinWait PORT.*
+    ;WinActivate PORT.*
+    ;Send {Enter}
+    ;
+    ;SERIAL_SCAN:
+    ;WinWait .*Serial.*
+    ;WinActivate .*Serial.*
+    ;Send %serialN% {Enter}
+    ;
+    ;NODEID_SCAN:
+    ;WinWait .*NODE.*
+    ;WinActivate .*NODE.*
+    ;Send %nodeIdN% {Enter}
+    ;
+    ;IMEI_SCAN:
+    ;WinWait .*IMEI.*
+    ;WinActivate .*IMEI.*
+    ;Send %imeiN% {Enter}
+    ;
+    ;UUID_SCAN:
+    ;WinWait .*UUID.*
+    ;WinActivate .*UUID.*
+    ;Send %uuidN% {Enter}
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

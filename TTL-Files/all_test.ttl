@@ -1,0 +1,376 @@
+;
+;
+timeout = 10
+clearscreen 1
+show 0
+isLAT1 = -1
+isLAT3 = -1
+
+:INPUT_MTCDT_TYPE
+inputbox 'Enter MTCDT Type:' 'MTCDT TYPE' '240L'
+toupper mtcdtType inputstr
+;Check user input
+strlen mtcdtType
+if result=0 then
+    messagebox 'Please Enter MTCDT Type' 'INPUT ERROR'
+   	end
+endif
+strcompare mtcdtType '240L'
+is240L = result
+if is240L=0 goto INPUT_RADIO_TYPE
+strcompare mtcdtType '246L'
+is246L = result
+if is246L=0 goto INPUT_RADIO_TYPE
+strcompare mtcdtType '247L'
+is247L = result
+if is247L=0 goto INPUT_RADIO_TYPE
+if result!=0 then
+   messagebox 'Please Enter Valid Type' 'INPUT ERROR'
+   goto INPUT_MTCDT_TYPE
+endif
+
+:INPUT_RADIO_TYPE
+inputbox 'Enter Radio Type:' 'RADIO TYPE' 'LAT1'
+toupper radioType inputstr
+strcompare radioType 'LAT1'
+isLAT1 = result
+if isLAT1=0 goto START
+strcompare radioType 'LAT3'
+isLAT3 = result
+if isLAT3=0 goto START
+if result!=0 then
+   messagebox 'Please Enter Valid Type' 'INPUT ERROR'
+   goto INPUT_RADIO_TYPE
+endif
+
+:START
+if isLAT1=0 then 
+   radioVersion = '17.00.503'
+endif
+
+wait '$'
+mpause 1000
+sendln 'sudo -s'
+wait 'word:'
+mpause 1000
+sendln 'root'
+wait '#'
+mpause 500
+
+:LED_TEST
+statusbox 'Please do a visual check on LED!' 'CHECK LED'
+for i 1 3
+	mpause 300
+	sendln 'mts-io-sysfs store led-a 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-b 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-c 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-d 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-a 0'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-b 0'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-c 0'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-d 0'
+	wait "mtcdt:/home/mtadm#"
+	mpause 500
+next
+closesbox
+mpause 500
+;wait4all "No such file"
+;if result=1 then
+;   goto LED_FAILURE
+;endif
+mpause 500
+
+:TEMPERATURE_TEST
+flushrecv
+sendln 'cat /sys/class/hwmon/hwmon0/device/temp1_input'
+waitln '4' '3'
+str2int strvar inputstr
+statusbox strvar 'temp'
+pause 2 
+closesbox
+if strvar > 45000 then
+	messagebox 'TEMP VALUE HIGH LIMIT FAILURE!' 'TEMP FAILURE'
+	messagebox strvar 'Temperature Value'
+	disconnect
+	end
+endif
+wait "mtcdt:/home/mtadm#"
+mpause 3000
+
+:LORA_TEST
+flushrecv
+sendln 'mts-io-sysfs show ap1/*'
+wait "MTAC"
+if result=1 then
+	mpause 1000
+else
+	beep
+	messagebox 'MTCDT LORA AP1 READ FAILURE!' 'LORA AP1 FAILURE'
+	end
+	disconnect
+endif
+mpause 1000
+flushrecv
+sendln 'mts-io-sysfs show ap2/*'
+wait "MTAC"
+if result=1 then
+	mpause 1000
+else
+	beep
+	messagebox 'MTCDT LORA AP2 READ FAILURE!' 'LORA AP2 FAILURE'
+	end
+	disconnect
+endif
+mpause 1000
+
+:THUMB_DRIVE_TEST
+mpause 1000
+flushrecv
+sendln 'df'
+wait "/dev/sda1" "/dev/sdb1"
+if result=0 then
+  beep
+  messagebox "THUMB DRIVE NOT DETECTED ****ERROR****" "THUMB DRIVE FAILURE"
+  disconnect
+  closett
+  end
+endif
+mpause 500
+
+:SIM_TEST
+sendln 'microcom /dev/modem_at0'
+mpause 2000
+sendln 'at+cpin?'
+wait "OK"
+if result=1 then
+  mpause 1000
+else
+  beep
+  messagebox 'SIM TEST FAILURE!' 'SIM FAILURE'
+  disconnect
+  closett
+  end
+endif
+mpause 1000
+
+:SMC_TEST
+flushrecv
+sendln 'at+gmi'
+wait "OK"
+mpause 1000
+sendln 'at+gmm'
+wait "OK"
+mpause 1000
+sendln 'at+gmr'
+;wait "20.00.526"
+wait radioVersion
+if result=1 then
+  mpause 2000
+else
+  beep
+  messagebox 'MTSMC-Lx TEST FAILURE!' 'PORT 7 STATUS'
+  end
+  disconnect
+endif
+mpause 1000
+
+:CSQ_TEST
+timeout = 3
+pause 1
+sendln 'AT+CSQ'
+wait '99,99'
+if result=1 goto CSQ_TEST
+pause 2
+sendln 'at+csq'
+wait 'OK'
+pause 2
+sendln 'at+csq'
+wait 'OK'
+timeout = 30
+mpause 500
+sendln 'at+csq'
+waitrecv '+CSQ: ' 10 1
+strconcat rssi3 inputstr
+strremove rssi3 1 6
+strremove rssi3 3 2
+str2int strvar rssi3
+strtrim rssi3 ','
+statusbox rssi3 'RSSI'
+if strvar >= 7 then
+  mpause 1000
+  else
+  beep
+  messagebox "CSQ SIGNAL STRENGTH FAILURE!" "PORT STATUS
+  goto LOW_RSSI
+endif
+mpause 500
+mpause 1000
+closesbox
+flushrecv
+timeout=5
+mpause 500
+if isLAT3=0 then
+   sendln 'at#gpio=1,0,2'
+   waitln'OK'
+endif
+mpause 500
+sendln 'at#sled=2'
+waitln 'OK'
+mpause 500
+sendln 'at#sledsav'
+wait 'OK'
+mpause 500
+if isLAT3=0 then
+   sendln 'at#rxdiv=1,3'
+   wait 'OK'
+   mpause 1000
+   sendln 'at#rxdiv?
+   wait '#RXDIV: 1,3'
+   if result=0 then
+   	  beep
+   	  messagebox "DIVERSITY FAILURE **** Please  RETEST THIS DEVICE" "PORT STATUS"
+   	  disconnect
+   	  closett
+   	  end
+	endif
+endif
+flushrecv
+mpause 500
+flushrecv
+sendln 'at+cpin?'
+wait "READY"
+if result=1 then
+  mpause 1000
+else
+  beep
+  messagebox "SIM NOT DETECTED **** Please CHECK SIM AND RETEST THIS DEVICE" "PORT STATUS"
+  end
+  disconnect
+endif
+mpause 500
+
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+	   if result=0 goto NETWORK_CONNECTION_FAILURE
+strscan inputstr "-"
+;messagebox result 'string found in location'
+strcopy inputstr result 4 rssi_level
+strtrim rssi_level ','
+statusbox  rssi_level 'Signal Level'
+str2int rssi rssi_level
+		if rssi < -99 goto LOW_RSSI
+mpause 1000
+flushrecv
+sendln 'at#moni'
+waitln '#MONI:'
+	   if result=0 goto NETWORK_CONNECTION_FAILURE
+strscan inputstr  'PWR:'
+;messagebox result 'string found in location'
+result= result+4
+strcopy inputstr result 4 sig_level
+strtrim sig_level 'd'
+statusbox  sig_level 'Signal Level'
+str2int rssi2 sig_level
+		if rssi2 < -99 goto LOW_RSSI
+mpause 1000
+closesbox
+mpause 500
+flushrecv
+sendln 'at#servinfo'
+waitln 'T-Mobile' 'AT&T' 'Verizon'
+	if result=0 goto NETWORK_CONNECTION_FAILURE
+pause 1
+sendln 'at#moni'
+waitln 'T-Mobile' 'AT&T' 'Verizon'
+	if result=0 goto NETWORK_CONNECTION_FAILURE
+pause 1
+
+:APN1_CHECK
+sendln 'at+cgdcont?'
+waitln '+CGDCONT: 1,"IPV4V6","","",0,0'
+   if result =0 then
+   sendln 'at+cgdcont=1,"IPV4V6",""'
+   goto APN1_CHECK
+endif
+pause 1
+sendln 'at+cgsn'
+wait 'OK'
+mpause 500
+flushrecv
+if isLAT3=0 then
+   sendln 'at#cfvr'
+   wait '#CFVR: 0'
+   if result=1 then
+   	  mpause 1000
+   else
+   	   beep
+  	   messagebox "FIRMWARE SUB VERSION FAILURE" "FIRMWARE SUB FAILURE"
+  	   disconnect
+	   closett
+	   end
+	endif
+endif
+mpause 500
+mpause 1000
+flushrecv
+sendln 'at+cgsn'
+wait "OK"
+mpause 1000
+
+if is240L=0 goto TEST_DONE
+if is246L=0 goto GPS_TEST 
+
+timeout =60
+:GPS_TEST
+send 24 ;Quit 'at' command promt
+wait '#'
+flushrecv
+sendln 'gpspipe -r'
+wait '4505.' '4506.' 
+if result=0 then 
+   messagebox 'UNABLE TO GET GPS LOCATION' ' GPS TEST FAILURE'
+   disconnect
+   closett
+   end
+endif
+send 3
+wait '#'
+pause 1
+send 3
+wait '#'
+pause 1
+timeout=2
+
+:TEST_DONE
+beep
+send 24
+messagebox "MTCDT TEST COMPLETE" "TEST DONE"
+disconnect
+closett
+end
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:LED_FAILURE
+messagebox 'Fix failing LEDs and test this unit again' ' LED FAILURE'
+disconnect
+closett
+end
+
+:NETWORK_CONNECTION_FAILURE
+messagebox 'Modem was unable to find Wireless network. Cycle power the device and run this script again' 'NETWORK_CONNECTION_FAILURE'
+disconnect
+closett
+end
+
+:LOW_RSSI
+messagebox ' CSQ signal level too low. Check the Antennal connection and run this script again' ' WIRELESS SIGNAL MEASUREMENT FAILURE'
+disconnect
+closett
+end

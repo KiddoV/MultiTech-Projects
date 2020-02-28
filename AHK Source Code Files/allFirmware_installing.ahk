@@ -196,17 +196,17 @@ install_firmware(fw, chk) {
         
         addToProgressBar(10)
         If (fw = "mLinux 4.1.9")
-            Send %mli419Path%
+            SendInput %mli419Path%
         If (fw = "mLinux 4.1.9 - NO WiFi")
-            Send %mli419NoWiFPath%
+            SendInput %mli419NoWiFPath%
         If (fw = "AEP 1.4.3")
-            Send %aep143Path%
+            SendInput %aep143Path%
         If (fw = "AEP 1.6.4")
-            Send %aep164Path%
+            SendInput %aep164Path%
         If (fw = "AEP 5.0.0")
-            Send %aep500Path%
+            SendInput %aep500Path%
         If (fw = "AEP 5.1.2")
-            Send %aep512Path%
+            SendInput %aep512Path%
         
         Sleep 400
         ControlClick Button2, Select Script File.*
@@ -255,7 +255,7 @@ install_firmware(fw, chk) {
         }
         Else {
             OnMessage(0x44, "CheckIcon")
-            MsgBox 0x80, DONE, FINISHED Auto-install %fw%!
+            MsgBox 0x80, DONE, FINISHED Auto-Install %fw%!
             OnMessage(0x44, "")
         }
         GuiControl,, progress, 0

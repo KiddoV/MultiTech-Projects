@@ -23,8 +23,8 @@ SetTitleMatchMode, RegEx
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000041L", ""]
-Global 246_ItemNums := ["70000007L","70000054L", ""]
-Global 247_ItemNums := ["70000053L", ""]
+Global 246_ItemNums := ["","", ""]
+Global 247_ItemNums := ["", ""]
 
 ;;;Paths and Links
 ;GUI images
@@ -268,7 +268,7 @@ functionalTestStep(itemN) {
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    RunWait, %ComSpec% /c start %TeraTerm%  192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root, , Hide
+    RunWait, %ComSpec% /c start %TeraTerm%  192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root /nosecuritywarning /M=%WorkingDir%\TTL-Files\all_test.ttl, , Hide
     WinWait SSH.*, , 2
     If WinExist(".*Error.*") {
         WinActivate .*Error.*
@@ -283,39 +283,20 @@ functionalTestStep(itemN) {
     GuiControl , , process4, %checkImg%
     GuiControl , , process5, %arrowImg%
     
-    Sleep 200
-    Send sudo -s{Enter}
-    Sleep 200
-    Send root{Enter}
-    
     ;Check LED
-    WinActivate 192.168.*
-    Sleep 400
-    SendInput mts-io-sysfs store led-a 1{Enter}
-    Sleep 200
-    SendInput mts-io-sysfs store led-b 1{Enter}
-    Sleep 200
-    SendInput mts-io-sysfs store led-c 1{Enter}
-    Sleep 200
-    SendInput mts-io-sysfs store led-d 1{Enter}
-    Sleep 2000
-    SendInput mts-io-sysfs store led-a 0{Enter}
-    Sleep 200
-    SendInput mts-io-sysfs store led-b 0{Enter}
-    Sleep 200
-    SendInput mts-io-sysfs store led-c 0{Enter}
-    Sleep 200
-    SendInput mts-io-sysfs store led-d 0{Enter}
     If (searchLed1111() = 0) {
         GuiControl , , process5, %timeImg%
         MsgBox LED TEST FAILED
         return 0
     }
     GuiControl , , process5, %checkImg%
+    WinWait LED TEST
+    WinActivate LED TEST
+    Send {Enter}
     
     ;Check Temparature
     GuiControl , , process6, %arrowImg%
-    SendInput cat /sys/class/hwmon/hwmon0/device/temp1_input{Enter}
+    ;SendInput cat /sys/class/hwmon/hwmon0/device/temp1_input{Enter}
 /*
     
     ;Check temparature
