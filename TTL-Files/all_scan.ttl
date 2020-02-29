@@ -1,0 +1,28 @@
+;
+;
+;connect '/C=41'
+mpause 1000
+sendln '^C'
+clearscreen 1
+show 0
+isLAT1 = -1
+isLAT3 = -1
+
+wait 'login:' '#'
+if result=2 then
+   sendln 'exit'
+   wait '$'
+   sendln 'exit'
+   wait 'login:'
+endif
+timeout = 10
+sendln 'mtadm'
+wait 'word:'
+sendln 'root'
+wait '$'
+sendln 'sudo -s'
+wait 'word:'
+mpause 1000
+sendln 'root'
+wait '#'
+mpause 500

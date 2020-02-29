@@ -104,7 +104,7 @@ mainStart() {
     Send ^c
     Sleep 100
     If (searchForFirmwareVersion() = 0) {
-        MsgBox  Please reboot device first
+        MsgBox  Please reboot device first!
         return
     }
     
@@ -112,9 +112,9 @@ mainStart() {
     SendInput mtadm{Enter}
     Sleep 200
     SendInput root{Enter}
-    Sleep 200
+    Sleep 300
     SendInput sudo -s{Enter}
-    Sleep 200
+    Sleep 300
     SendInput root{Enter}
     
     ;Send !om
