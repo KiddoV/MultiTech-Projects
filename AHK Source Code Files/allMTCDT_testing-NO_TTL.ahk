@@ -268,7 +268,7 @@ functionalTestStep(itemN) {
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    RunWait, %ComSpec% /c start %TeraTerm%  192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root /nosecuritywarning /M=%WorkingDir%\TTL-Files\all_test.ttl, , Hide
+    RunWait, %ComSpec% /c cd C:\teraterm`nTTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl 240L LAT1
     WinWait SSH.*, , 2
     If WinExist(".*Error.*") {
         WinActivate .*Error.*

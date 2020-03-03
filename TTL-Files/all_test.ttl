@@ -1,47 +1,31 @@
 ;
 ;
+connect '192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root /nosecuritywarning'
+
 timeout = 10
 clearscreen 1
 show 0
 isLAT1 = -1
 isLAT3 = -1
 
-:INPUT_MTCDT_TYPE
-inputbox 'Enter MTCDT Type:' 'MTCDT TYPE' '240L'
-toupper mtcdtType inputstr
-;Check user input
-strlen mtcdtType
-if result=0 then
-    messagebox 'Please Enter MTCDT Type' 'INPUT ERROR'
-   	end
-endif
-strcompare mtcdtType '240L'
+:CHECK_MTCDT_TYPE
+strcompare param2 '240L'
 is240L = result
-if is240L=0 goto INPUT_RADIO_TYPE
-strcompare mtcdtType '246L'
+if is240L=0 goto CHECK_RADIO_TYPE
+strcompare param2 '246L'
 is246L = result
-if is246L=0 goto INPUT_RADIO_TYPE
-strcompare mtcdtType '247L'
+if is246L=0 goto CHECK_RADIO_TYPE
+strcompare param2 '247L'
 is247L = result
-if is247L=0 goto INPUT_RADIO_TYPE
-if result!=0 then
-   messagebox 'Please Enter Valid Type' 'INPUT ERROR'
-   goto INPUT_MTCDT_TYPE
-endif
+if is247L=0 goto CHECK_RADIO_TYPE
 
-:INPUT_RADIO_TYPE
-inputbox 'Enter Radio Type:' 'RADIO TYPE' 'LAT1'
-toupper radioType inputstr
-strcompare radioType 'LAT1'
+:CHECK_RADIO_TYPE
+strcompare param3 'LAT1'
 isLAT1 = result
 if isLAT1=0 goto START
-strcompare radioType 'LAT3'
+strcompare param3 'LAT3'
 isLAT3 = result
 if isLAT3=0 goto START
-if result!=0 then
-   messagebox 'Please Enter Valid Type' 'INPUT ERROR'
-   goto INPUT_RADIO_TYPE
-endif
 
 :START
 if isLAT1=0 then 
@@ -49,10 +33,8 @@ if isLAT1=0 then
 endif
 
 wait '$'
-mpause 1000
 sendln 'sudo -s'
 wait 'word:'
-mpause 1000
 sendln 'root'
 wait '#'
 mpause 500
