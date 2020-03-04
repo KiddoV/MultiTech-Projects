@@ -23,7 +23,7 @@ SetTitleMatchMode, RegEx
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000041L", ""]
-Global 246_ItemNums := ["","", ""]
+Global 246_ItemNums := ["70000043L","", ""]
 Global 247_ItemNums := ["", ""]
 
 ;;;Paths and Links
@@ -268,18 +268,18 @@ functionalTestStep(itemN) {
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    RunWait, %ComSpec% /c cd C:\teraterm`nTTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl 240L LAT1
+    RunWait, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl 240L LAT1, ,Hide
     WinWait SSH.*, , 2
-    If WinExist(".*Error.*") {
-        WinActivate .*Error.*
-        Send {Enter}
-    }
     If !WinExist("SSH.*") {
         GuiControl , , process4, %timeImg%
         MsgBox Failed to connect to E-Net
         return 0
     }
-    WinWaitClose SSH.*
+    If WinExist(".*Error.*") {
+        WinActivate .*Error.*
+        Send {Enter}
+    }
+    ;WinWaitClose SSH.*
     GuiControl , , process4, %checkImg%
     GuiControl , , process5, %arrowImg%
     

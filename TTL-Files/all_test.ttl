@@ -63,10 +63,10 @@ for i 1 3
 next
 closesbox
 mpause 500
-;wait4all "No such file"
-;if result=1 then
-;   goto LED_FAILURE
-;endif
+wait4all "No such file"
+if result=1 then
+   goto LED_FAILURE
+endif
 mpause 500
 
 :TEMPERATURE_TEST
