@@ -155,7 +155,6 @@ mainStart() {
     
     Global itemNum
     Global mtcdtType := whichTab
-    Global radioType := ""
     
     clearAllProcessImgs()
     
@@ -166,7 +165,7 @@ mainStart() {
     If (whichTab = "247L")
         itemNum := itemNum3
     
-    
+    Global radioType := getRadioType(itemNum)
     
     if (check = 0) {
         MsgBox, 33, Question, Begin ONLY Auto-Functional Test for %itemNum%?
@@ -174,7 +173,7 @@ mainStart() {
             return
         IfMsgBox OK
         {
-            If (functionalTestStep(itemNum, mtcdtType) = 0) {
+            If (functionalTestStep(itemNum, mtcdtType, radioType) = 0) {
                 disableGuis("Enable")
                 return
             }     
@@ -195,7 +194,7 @@ mainStart() {
                 return
             }
                 
-            If (functionalTestStep(itemNum, mtcdtType) = 0) {
+            If (functionalTestStep(itemNum, mtcdtType, radioType) = 0) {
                 disableGuis("Enable")
                 return
             }
@@ -267,12 +266,12 @@ configStep(itemN) {
     GuiControl , , process3, %checkImg%
 }
 
-functionalTestStep(itemN, mtcType) {
+functionalTestStep(itemN, mtcType, radType) {
     disableGuis("Disable")
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl %mtcType% LAT1, ,Hide
+    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl %mtcType% %radType%, ,Hide
     WinWait SSH.*, , 2
     If !WinExist("SSH.*") {
         GuiControl , , process4, %timeImg%
@@ -421,30 +420,22 @@ loginToMTCDT() {
     Send root{Enter}
 }
 
-getRadioType(itemNum) {
-    LAT1 := [""]
+getRadioType(itemN) {
+    LAT1 := ["70000041L"]
     LAT3 := [""]
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", ""]
     
-    ;for index, val in LAT1
-        ;if (val = itemNum)
-        ;return "LAT1"
-    ;return 0
-    ;for index, val in LAT3
-        ;if (val = itemNum)
-        ;return "LAT3"
-    ;return 0
-    ;for index, val in LEU1
-        ;if (val = itemNum)
-        ;return "LEU1"
-    ;return 0
-    ;for index, val in L4E1
-        ;if (val = itemNum)
-        ;return "L4E1"
-    ;return 0
+   allRadioType := "LAT1,LAT3,LEU1,L4E1"
     
-    
+    getRadioLoop:
+    Loop Parse, allRadioType, `,
+    {
+        For key, value in %A_LoopField%
+        If (value = itemN) 
+            return %A_LoopField%
+        Continue getRadioLoop
+    }
 }
 
 ;;;;Search Images Functions;;;;
