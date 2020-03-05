@@ -23,7 +23,7 @@ SetTitleMatchMode, RegEx
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000041L", ""]
-Global 246_ItemNums := ["70000043L","", ""]
+Global 246_ItemNums := ["70000043L","70000033L", ""]
 Global 247_ItemNums := ["", ""]
 
 ;;;Paths and Links
@@ -154,6 +154,8 @@ mainStart() {
     GuiControlGet, whichTab ;Get value from Tab Title
     
     Global itemNum
+    Global mtcdtType := whichTab
+    Global radioType := ""
     
     clearAllProcessImgs()
     
@@ -164,13 +166,15 @@ mainStart() {
     If (whichTab = "247L")
         itemNum := itemNum3
     
+    
+    
     if (check = 0) {
         MsgBox, 33, Question, Begin ONLY Auto-Functional Test for %itemNum%?
         IfMsgBox Cancel
             return
         IfMsgBox OK
         {
-            If (functionalTestStep(itemNum) = 0) {
+            If (functionalTestStep(itemNum, mtcdtType) = 0) {
                 disableGuis("Enable")
                 return
             }     
@@ -191,7 +195,7 @@ mainStart() {
                 return
             }
                 
-            If (functionalTestStep(itemNum) = 0) {
+            If (functionalTestStep(itemNum, mtcdtType) = 0) {
                 disableGuis("Enable")
                 return
             }
@@ -263,12 +267,12 @@ configStep(itemN) {
     GuiControl , , process3, %checkImg%
 }
 
-functionalTestStep(itemN) {
+functionalTestStep(itemN, mtcType) {
     disableGuis("Disable")
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    RunWait, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl 240L LAT1, ,Hide
+    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl %mtcType% LAT1, ,Hide
     WinWait SSH.*, , 2
     If !WinExist("SSH.*") {
         GuiControl , , process4, %timeImg%
@@ -280,6 +284,7 @@ functionalTestStep(itemN) {
         Send {Enter}
     }
     ;WinWaitClose SSH.*
+    WinWaitClose SSH.*
     GuiControl , , process4, %checkImg%
     GuiControl , , process5, %arrowImg%
     
@@ -289,10 +294,8 @@ functionalTestStep(itemN) {
         MsgBox LED TEST FAILED
         return 0
     }
+    WinWaitClose CHECK LED
     GuiControl , , process5, %checkImg%
-    WinWait LED TEST
-    WinActivate LED TEST
-    Send {Enter}
     
     ;Check Temparature
     GuiControl , , process6, %arrowImg%
@@ -416,6 +419,32 @@ loginToMTCDT() {
     Send sudo -s{Enter}
     Sleep 100
     Send root{Enter}
+}
+
+getRadioType(itemNum) {
+    LAT1 := [""]
+    LAT3 := [""]
+    LEU1 := ["70000033L", ""]
+    L4E1 := ["70000043L", ""]
+    
+    ;for index, val in LAT1
+        ;if (val = itemNum)
+        ;return "LAT1"
+    ;return 0
+    ;for index, val in LAT3
+        ;if (val = itemNum)
+        ;return "LAT3"
+    ;return 0
+    ;for index, val in LEU1
+        ;if (val = itemNum)
+        ;return "LEU1"
+    ;return 0
+    ;for index, val in L4E1
+        ;if (val = itemNum)
+        ;return "L4E1"
+    ;return 0
+    
+    
 }
 
 ;;;;Search Images Functions;;;;

@@ -12,7 +12,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;Firmware list
-Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2"]
+Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5"]
 
 ;Paths and Links
 Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
@@ -21,6 +21,7 @@ Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
 Global aep164Path := "C:\vbtest\MTCDT\AEP-1_6_4\mtcdt-flash-full-AEP.tcl"
 Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
 Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
+Global aep515Path := "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"
 
 ;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
@@ -207,6 +208,8 @@ install_firmware(fw, chk) {
             SendInput %aep500Path%
         If (fw = "AEP 5.1.2")
             SendInput %aep512Path%
+        If (fw = "AEP 5.1.5")
+            SendInput %aep515Path%
         
         Sleep 400
         ControlClick Button2, Select Script File.*

@@ -1,0 +1,65 @@
+;
+;
+timeout = 30
+pctime = ''
+imeistr = ''
+barcode = ''
+clearscreen 1
+
+sendln 'mtadm'
+wait "word:"
+mpause 1000
+sendln 'root'
+wait '$'
+pause 1
+sendln 'sudo -s'
+wait "word"
+pause 1
+sendln 'root'
+wait '#'
+pause 1
+send 13
+wait "#"
+mpause 1000
+send 'date "'
+mpause 1000
+gettime pctime "%Y-%m-%d %H:%M"
+send pctime 
+mpause 1000
+sendln '"'
+mpause 1000
+sendln '/etc/init.d/hwclock.sh stop'
+wait "mtcdt:/home/mtadm#"
+mpause 500
+out =''
+strconcat out' --out-file '
+strconcat out '/sys/bus/i2c/devices/0-0056/eeprom '
+strconcat out '--out-format bin '
+strconcat out '--vendor-id '
+strconcat out '"Multi-Tech Systems" '
+strconcat out '--product-id '
+strconcat out 'MTCDT-XXX-XXX '
+strconcat out '--device-id '
+strconcat out '87654321 '
+strconcat out '--hw-version '
+strconcat out 'MTCDT-0.1 '
+strconcat out '--mac-addr '
+strconcat out '00:08:00:4A:1F:F1 '
+strconcat out '--mac-bluetooth '
+strconcat out '00:23:A7:49:66:C5 '
+strconcat out '--mac-wifi '
+strconcat out '00:23:A7:43:C6:98 '
+strconcat out '--imei '
+strconcat out '358942053416591 '
+strconcat out '--capa-gps --capa-wifi --capa-bluetooth '
+strconcat out '--uuid '
+strconcat out '6c7a6a18ccf0a5cbffbd1cc495bc0c43'
+
+sendln 'mts-id-eeprom ' out
+wait '#'
+pause 2
+messagebox "MTCDT TEST CONFIGURATION COMPLETE" "PORT STATUS
+sendln 'reboot'
+mpause 1000
+wait 'login:'
+end

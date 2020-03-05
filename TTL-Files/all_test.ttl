@@ -5,8 +5,10 @@ connect '192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root /nosecuritywar
 timeout = 10
 clearscreen 1
 show 0
+radioVersion = '00.00.000'
 isLAT1 = -1
 isLAT3 = -1
+isLEU1 = -1
 
 :CHECK_MTCDT_TYPE
 strcompare param2 '240L'
@@ -26,6 +28,9 @@ if isLAT1=0 goto START
 strcompare param3 'LAT3'
 isLAT3 = result
 if isLAT3=0 goto START
+strcompare param3 'LEU1'
+isLEU1 = result
+if isLEU1=0 goto START
 
 :START
 if isLAT1=0 then 
@@ -62,13 +67,15 @@ for i 1 3
 	mpause 500
 next
 closesbox
+timeout = 3
 mpause 500
-wait4all "No such file"
+wait "No such file"
 if result=1 then
    goto LED_FAILURE
 endif
 mpause 500
 
+timeout = 10
 :TEMPERATURE_TEST
 flushrecv
 sendln 'cat /sys/class/hwmon/hwmon0/device/temp1_input'
@@ -157,9 +164,10 @@ if result=1 then
   mpause 2000
 else
   beep
-  messagebox 'MTSMC-Lx TEST FAILURE!' 'PORT 7 STATUS'
-  end
+  messagebox 'WRONG RADIO VERSION!' 'SMC FAILURE'
   disconnect
+  closett
+  end
 endif
 mpause 1000
 
@@ -330,6 +338,8 @@ send 3
 wait '#'
 pause 1
 timeout=2
+
+:WIFI_BT_TEST
 
 :TEST_DONE
 beep
