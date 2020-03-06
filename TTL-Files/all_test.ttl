@@ -9,6 +9,7 @@ radioVersion = '00.00.000'
 isLAT1 = -1
 isLAT3 = -1
 isLEU1 = -1
+isL4E1 = -1
 
 :CHECK_MTCDT_TYPE
 strcompare param2 '240L'
@@ -31,10 +32,17 @@ if isLAT3=0 goto START
 strcompare param3 'LEU1'
 isLEU1 = result
 if isLEU1=0 goto START
+strcompare param3 'L4E1'
+isL4E1 = result
+if isL4E1=0 goto START
 
 :START
 if isLAT1=0 then 
-   radioVersion = '17.00.503'
+    radioVersion = '17.00.503'
+elseif isLEU1=0 then
+    radioVersion = '17.00.523'
+elseif isL4E1=0 then
+	radioVersion = '25.20.673'
 endif
 
 wait '$'
@@ -46,6 +54,7 @@ mpause 500
 
 :LED_TEST
 statusbox 'Please do a visual check on LED!' 'CHECK LED'
+bringupbox
 for i 1 3
 	mpause 300
 	sendln 'mts-io-sysfs store led-a 1'
@@ -197,7 +206,7 @@ if strvar >= 7 then
   mpause 1000
   else
   beep
-  messagebox "CSQ SIGNAL STRENGTH FAILURE!" "PORT STATUS
+  messagebox 'CSQ SIGNAL STRENGTH FAILURE!' 'CSQ FAILURE'
   goto LOW_RSSI
 endif
 mpause 500
@@ -225,7 +234,7 @@ if isLAT3=0 then
    wait '#RXDIV: 1,3'
    if result=0 then
    	  beep
-   	  messagebox "DIVERSITY FAILURE **** Please  RETEST THIS DEVICE" "PORT STATUS"
+   	  messagebox "DIVERSITY FAILURE **** Please  RETEST THIS DEVICE" "DIVERSITY FAILURE"
    	  disconnect
    	  closett
    	  end

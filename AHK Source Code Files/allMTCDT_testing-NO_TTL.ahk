@@ -189,7 +189,7 @@ mainStart() {
             return
         IfMsgBox OK
         {
-            If (configStep(itemNum) = 0) {
+            If (configStep(whichTab, itemNum, mtcdtType, radioType) = 0) {
                 disableGuis("Enable")
                 return
             }
@@ -221,8 +221,34 @@ mainStart() {
     disableGuis("Enable")
 }
 
-configStep(itemN) {
+configStep(mtcdtType, itemN, mtcType, radType) {
     disableGuis("Disable")
+    
+    outString1 =
+    (
+    mts-id-eeprom  --out-file /sys/bus/i2c/devices/0-0056/eeprom --out-format bin 
+    --vendor-id "Multi-Tech Systems"
+    --product-id MTCDT-%radType%-%mtcType%
+    --device-id 12345678
+    --hw-version MTCDT-0.1
+    --mac-addr 00:08:00:4A:1F:F1
+    --imei 358942053416591
+    --uuid 6c7a6a18ccf0a5cbffbd1cc495bc0c43
+    )
+    outString:= RegExReplace(outString1, "([^\r\n])\R(?=[^\r\n])", "$1$2")
+    outString2 =
+    (
+    --capa-gps
+    )
+    outStrWithGPS:= RegExReplace(outString2, "([^\r\n])\R(?=[^\r\n])", "$1$2")
+    outString3 =
+    (
+    --mac-bluetooth 00:23:A7:49:66:C5
+    --mac-wifi 00:23:A7:43:C6:98
+    --capa-wifi
+    --capa-bluetooth
+    )
+    outStrWithWifi:= RegExReplace(outString3, "([^\r\n])\R(?=[^\r\n])", "$1$2")
     
     WinActivate COM.*
     Send ^c
@@ -230,13 +256,18 @@ configStep(itemN) {
     GuiControl , , process1, %arrowImg%
     loginToMTCDT()
     Sleep 200
-    Send date "%localTime%"{Enter}
-    Send /etc/init.d/hwclock.sh stop{Enter}
+    SendInput date "%localTime%"{Enter}
+    SendInput /etc/init.d/hwclock.sh stop{Enter}
     Sleep 500
-    Send /media/card/%itemN%-test-config.sh{Enter}
+    if (mtcdtType = "240L")
+        SendInput %outString%{Enter}
+    If (mtcdtType = "246L")
+        SendInput %outString% %outStrWithGPS%{Enter}
+    If (mtcdtType = "247L")
+        SendInput %outString% %outStrWithWifi% %outStrWithGPS%{Enter}
+    ;Send /media/card/%itemN%-test-config.sh{Enter}
     GuiControl , , process1, %checkImg%
     Sleep 2000
-    
     Send reboot{Enter}
     GuiControl , , process2, %arrowImg%
     Sleep 20000
@@ -298,6 +329,9 @@ functionalTestStep(itemN, mtcType, radType) {
     
     ;Check Temparature
     GuiControl , , process6, %arrowImg%
+    WinWait temp, ,5
+    WinGetText temp, temp
+    MsgBox %temp%
     ;SendInput cat /sys/class/hwmon/hwmon0/device/temp1_input{Enter}
 /*
     
@@ -411,13 +445,13 @@ disableGuis(option) {
 
 loginToMTCDT() {
     WinActivate COM.*
-    Send mtadm{Enter}
-    Sleep 100
-    Send root{Enter}
+    SendInput mtadm{Enter}
     Sleep 300
-    Send sudo -s{Enter}
-    Sleep 100
-    Send root{Enter}
+    SendInput root{Enter}
+    Sleep 300
+    SendInput sudo -s{Enter}
+    Sleep 300
+    SendInput root{Enter}
 }
 
 getRadioType(itemN) {

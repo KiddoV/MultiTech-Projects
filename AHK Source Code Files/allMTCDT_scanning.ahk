@@ -117,6 +117,23 @@ mainStart() {
     Sleep 300
     SendInput root{Enter}
     
+    
+    MsgBox %Clipboard%
+
+Loop, parse, Clipboard, `n, `r
+  max:=a_index
+
+msgbox %max%
+Loop, parse, Clipboard, `n, `r
+{
+  if A_Index = %max%
+  {
+    Clipboard := A_LoopField
+    break
+  }
+}
+
+MsgBox %Clipboard%
     ;Send !om
     ;WinWait MACRO.*
     ;WinActivate MACRO.*
