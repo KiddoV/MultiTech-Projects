@@ -193,6 +193,20 @@ checkInput() {
     }
 }
 
+getLastLineClipboard() {
+    Clipboard := Trim(Clipboard, "`r`n`t ") 
+    Loop, parse, Clipboard, `n, `r
+        max:=A_index
+    Loop, parse, Clipboard, `n, `r
+    {
+        if A_Index = %max%
+        {
+            Clipboard := A_LoopField
+            break
+        }
+    }
+}
+
 ;;;;Search Images Functions;;;;
 searchForFirmwareVersion() {
         WinActivate COM.*
