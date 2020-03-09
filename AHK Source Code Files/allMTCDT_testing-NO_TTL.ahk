@@ -459,8 +459,9 @@ getRadioType(itemN) {
     LAT3 := [""]
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", ""]
+    LAP3 := ["70000045L"]
     
-   allRadioType := "LAT1,LAT3,LEU1,L4E1"
+   allRadioType := "LAT1,LAT3,LEU1,L4E1,LAP3"
     
     getRadioLoop:
     Loop Parse, allRadioType, `,

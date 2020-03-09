@@ -8,6 +8,9 @@ SetTitleMatchMode, RegEx
 Global 240_SKUNums := ["94557700LF", ""]
 Global 246_SKUNums := ["94557601LF", ""]
 Global 247_SKUNums := ["", ""]
+    
+FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
+Global localTime := TimeString
 
 ;;;Paths and Links
 ;240L
@@ -108,47 +111,42 @@ mainStart() {
         return
     }
     
-    WinActivate COM.*
-    SendInput mtadm{Enter}
-    Sleep 200
-    SendInput root{Enter}
-    Sleep 300
-    SendInput sudo -s{Enter}
-    Sleep 300
-    SendInput root{Enter}
+    ;Login to Conduit
+    SetKeyDelay 1,0
+    While ((RegExMatch(getLastLineTeraTerm(), ".*mtadm#.*")) != 1) {
+        If ((RegExMatch(getLastLineTeraTerm(), ".*login.*")) = 1) {
+        ControlSend, ,mtadm{Enter}, COM.*
+        } Else If ((RegExMatch(getLastLineTeraTerm(), ".*Password.*")) = 1) {
+            ControlSend, ,root{Enter}, COM.*
+        } Else If ((RegExMatch(getLastLineTeraTerm(), ".*mtcdt.*")) = 1) {
+            ControlSend, ,sudo -s{Enter}, COM.*
+        }
+    }
     
-    ;Send !om
-    ;WinWait MACRO.*
-    ;WinActivate MACRO.*
-    ;Send %skuNumPath% {Enter}
-        ;
-    ;WinWait PORT.*
-    ;WinActivate PORT.*
-    ;Send {Enter}
-        ;
-    ;WinWait PORT.*
-    ;WinActivate PORT.*
-    ;Send {Enter}
-    ;
-    ;SERIAL_SCAN:
-    ;WinWait .*Serial.*
-    ;WinActivate .*Serial.*
-    ;Send %serialN% {Enter}
-    ;
-    ;NODEID_SCAN:
-    ;WinWait .*NODE.*
-    ;WinActivate .*NODE.*
-    ;Send %nodeIdN% {Enter}
-    ;
-    ;IMEI_SCAN:
-    ;WinWait .*IMEI.*
-    ;WinActivate .*IMEI.*
-    ;Send %imeiN% {Enter}
-    ;
-    ;UUID_SCAN:
-    ;WinWait .*UUID.*
-    ;WinActivate .*UUID.*
-    ;Send %uuidN% {Enter}
+    Sleep 200
+    WinActivate COM.*
+    SendInput date "%localTime%"{Enter}
+    Sleep 200
+    ControlSend, ,/etc/init.d/hwclock.sh stop{Enter}, COM.*
+    Sleep 300
+    ControlSend, ,cd{Space}/media/sda1/MTCDT{Enter}, COM.*
+    
+    While ((RegExMatch(getLastLineTeraTerm(), ".*media.*")) != 1) {
+        MsgBox 5, ERROR, Thumb Drive not detect`nPlease check and try again!
+
+        IfMsgBox Retry, {
+            Sleep 200
+            WinActivate COM.*
+            SendInput ^c
+            ControlSend, ,cd{Space}/media/sda1/MTCDT{Enter}, COM.*
+        } Else IfMsgBox Cancel, {
+            return 0
+        }
+    }
+    
+    Sleep 200
+    WinActivate COM.*
+    SendInput ./%skuNum%.sh %serialN% %nodeIdN% %imeiN% %uuidN%{Enter}
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -161,17 +159,17 @@ checkInput() {
     GuiControlGet, loraN
     GuiControlGet, wifiN
     
-    If (serialN = null) {
-        MsgBox Serial Number cannot be blank!
+    If (StrLen(serialN) < 8) {
+        MsgBox Wrong SERIAL NUMBER! Rescan!
         return 0
-    } Else If (imeiN = null) {
-        MsgBox IMEI Number cannot be blank!
+    } Else If (StrLen(nodeIdN) < 17) {
+        MsgBox Wrong NODE ID! Rescan!
         return 0
-    } Else If (nodeIdN = null) {
-        MsgBox Node ID Number cannot be blank!
+    } Else If (StrLen(imeiN) < 15) {
+        MsgBox Wrong IMEI NUMBER! Rescan!
         return 0
-    } Else If (uuidN = null) {
-        MsgBox UUID Number cannot be blank!
+    } Else If (StrLen(uuidN) < 32) {
+        MsgBox Wrong UUID! Rescan!
         return 0
     }
 }
@@ -187,6 +185,18 @@ getLastLineClipboard() {
             Clipboard := A_LoopField
             break
         }
+    }
+}
+
+getLastLineTeraTerm() {
+    IfWinExist COM.*
+    {
+        WinActivate COM.*
+        Send !ee
+        Send !el
+        ;ControlSend,,{AltDown}om, ahk_exe ttermpro.exe
+        getLastLineClipboard()
+        return %Clipboard%
     }
 }
 
