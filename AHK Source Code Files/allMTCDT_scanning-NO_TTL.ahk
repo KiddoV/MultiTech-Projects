@@ -14,13 +14,11 @@ Global localTime := TimeString
 
 ;;;Paths and Links
 ;240L
-Global allScanPath := "C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_scan.ttl"
+Global 94557700LFPath := "C:\MTCDT_REFRESH\240L\94557700LF\94557700LF-eepromSCAN.ttl"
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
-Global WorkingDir
-StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
     
 Gui Add, Text, x17 y5 w136 h21 +0x200 vtopLabel, Select SKU Number
@@ -113,43 +111,42 @@ mainStart() {
         return
     }
     
-    WinClose MACRO.*
+    ;Login to Conduit
+    SetKeyDelay 1,0
+    While ((RegExMatch(getLastLineTeraTerm(), ".*mtadm#.*")) != 1) {
+        If ((RegExMatch(getLastLineTeraTerm(), ".*login.*")) = 1) {
+        ControlSend, ,mtadm{Enter}, COM.*
+        } Else If ((RegExMatch(getLastLineTeraTerm(), ".*Password.*")) = 1) {
+            ControlSend, ,root{Enter}, COM.*
+        } Else If ((RegExMatch(getLastLineTeraTerm(), ".*mtcdt.*")) = 1) {
+            ControlSend, ,sudo -s{Enter}, COM.*
+        }
+    }
+    
+    Sleep 200
     WinActivate COM.*
-    Send !om
-    WinWait MACRO.*
-    ControlSetText, Edit1, %allScanPath%, MACRO.*
-    ControlClick, Button1, MACRO.*, , Left, 2
+    SendInput date "%localTime%"{Enter}
+    Sleep 200
+    ControlSend, ,/etc/init.d/hwclock.sh stop{Enter}, COM.*
+    Sleep 300
+    ControlSend, ,cd{Space}/media/sda1/MTCDT{Enter}, COM.*
     
-    ;Input datas
-    WinWait SKU.*
-    ControlSetText, Edit1, %skuNum%, SKU.*
-    ControlClick, Button1, SKU.*, , Left, 2
+    While ((RegExMatch(getLastLineTeraTerm(), ".*media.*")) != 1) {
+        MsgBox 5, ERROR, Thumb Drive not detect`nPlease check and try again!
+
+        IfMsgBox Retry, {
+            Sleep 200
+            WinActivate COM.*
+            SendInput ^c
+            ControlSend, ,cd{Space}/media/sda1/MTCDT{Enter}, COM.*
+        } Else IfMsgBox Cancel, {
+            return 0
+        }
+    }
     
-    WinWait SERIAL.*
-    ControlSetText, Edit1, %serialN%, SERIAL.*
-    ControlClick, Button1, SERIAL.*, , Left, 2
-    
-    WinWait NODE.*
-    ControlSetText, Edit1, %nodeIdN%, NODE.*
-    ControlClick, Button1, NODE.*, , Left, 2
-        
-    WinWait IMEI.*
-    ControlSetText, Edit1, %imeiN%, IMEI.*
-    ControlClick, Button1, IMEI.*, , Left, 2
-        
-    WinWait UUID.*
-    ControlSetText, Edit1, %uuidN%, UUID.*
-    ControlClick, Button1, UUID.*, , Left, 2
-        
-    WinWait NODE LORA.*
-    ControlSetText, Edit1, %loraN%, NODE LORA.*
-    ControlClick, Button1, NODE LORA.*, , Left, 2
-        
-    WinWait NODE WIFI.*
-    ControlSetText, Edit1, %wifiN%, NODE WIFI.*
-    ControlClick, Button1, NODE WIFI.*, , Left, 2
-    
-    
+    Sleep 200
+    WinActivate COM.*
+    SendInput ./%skuNum%.sh %serialN% %nodeIdN% %imeiN% %uuidN%{Enter}
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -163,16 +160,16 @@ checkInput() {
     GuiControlGet, wifiN
     
     If (StrLen(serialN) < 8) {
-        MsgBox Invalid SERIAL NUMBER! Rescan!
+        MsgBox Wrong SERIAL NUMBER! Rescan!
         return 0
     } Else If (StrLen(nodeIdN) < 17) {
-        MsgBox Invalid NODE ID! Rescan!
+        MsgBox Wrong NODE ID! Rescan!
         return 0
     } Else If (StrLen(imeiN) < 15) {
-        MsgBox Invalid IMEI NUMBER! Rescan!
+        MsgBox Wrong IMEI NUMBER! Rescan!
         return 0
     } Else If (StrLen(uuidN) < 32) {
-        MsgBox Invalid UUID! Rescan!
+        MsgBox Wrong UUID! Rescan!
         return 0
     }
 }

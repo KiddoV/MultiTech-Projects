@@ -1,28 +1,138 @@
 ;
+; Author: Viet Ho
 ;
-;connect '/C=41'
-mpause 1000
-sendln '^C'
-clearscreen 1
 show 0
-isLAT1 = -1
-isLAT3 = -1
-
-wait 'login:' '#'
-if result=2 then
-   sendln 'exit'
-   wait '$'
-   sendln 'exit'
-   wait 'login:'
-endif
 timeout = 10
-sendln 'mtadm'
-wait 'word:'
-sendln 'root'
-wait '$'
-sendln 'sudo -s'
-wait 'word:'
-mpause 1000
-sendln 'root'
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:LOGIN
+timeout = 1
+send 03
+:waitLogin
+wait '#' 'login' 'word' '$'
+until result = 1
+	if result = 2 then
+	   	sendln 'mtadm'
+		goto waitLogin
+	elseif result = 3 then
+	    sendln 'root'
+		goto waitLogin
+	elseif result = 4 then
+	   	sendln 'sudo -s'
+		goto waitLogin
+	endif
+enduntil
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:GET_DATA
+timeout = 2
+skuNum = ''
+serialNum = ''
+nodeIDNum = ''
+imeiNum = ''
+uuidNum = ''
+nodeLoraNum = ''
+nodeWifiNum = ''
+
+inputbox '' 'SKU NUMBER'
+skuNum = inputstr
+inputbox '' 'SERIAL NUMBER'
+serialNum = inputstr
+inputbox '' 'NODE ID NUMBER'
+nodeIDNum = inputstr
+inputbox '' 'IMEI NUMBER'
+imeiNum = inputstr
+inputbox '' 'UUID NUMBER'
+uuidNum = inputstr
+inputbox '' 'NODE LORA NUMBER'
+nodeLoraNum = inputstr
+inputbox '' 'NODE WIFI NUMBER'
+nodeWifiNum = inputstr
+/*		
+sprintf2 msg 'SKU NUMBER: %s \nSERIAL NUMBER: %s \nNODE ID NUMBER: %s \nIMEI NUMBER: %s \nUUID NUMBER: %s \nNODE LORA NUMBER: %s \nNODE WIFI NUMBER: %s \n' skuNum serialNum nodeIDNum imeiNum uuidNum nodeLoraNum nodeWifiNum
+strspecial msg
+messagebox msg 'Information'
+*/
+  
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:CONFIRM_DATA
+flushrecv
+:check_imei
+sendln 'microcom /dev/modem_at0'
+mpause 200
+:recheck_imei
+sendln 'at+cgsn'
+waitln '2' '3' '4' '5'
+strcompare inputstr imeiNum
+if result <> 0 then
+    yesnobox 'IMEI MISMATCH!! DO YOU WANT TO RESCAN?' 'IMEI MISMATCH'
+    if result = 1 then
+        inputbox 'NEW SERIAL #:' 'SERIAL NUMBER'
+		imeiNum = inputstr
+		goto recheck_imei
+    else
+    	send 24
+    	end
+    endif
+else
+	send 24
+endif
+	 
+:check_lora
+flushrecv
 wait '#'
-mpause 500
+sendln 'mts-io-sysfs show ap*/*'
+waitln 'No such file'
+if result = 1 then
+    messagebox 'PLEASE REBOOT DEVICE WITH LORA INSTALLED' 'LORA FAILURE'
+    end
+endif
+waitln '00:' '80:'
+messagebox inputstr 'nodelora'
+strcompare inputstr nodeLoraNum
+if result <> 0 then
+    yesnobox 'NODE LORA MISMATCH!! DO YOU WANT TO RESCAN?' 'LORA MISMATCH'
+    if result = 1 then
+        inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
+		nodeLoraNum = inputstr
+		goto check_lora
+	else
+		end
+	endif
+endif
+	 
+:check_wifi_bt
+wait '#'
+sendln '/media/sda1/wifiscan2-check.sh'
+wait '#'
+sendln 'ifconfig wifi0'
+waitln 'HWaddr'
+messagebox inputstr 'inputstr'
+baseNodeWifiNum = inputstr
+messagebox baseNodeWifiNum 'wifi'
+strremove baseNodeWifiNum 1 38
+messagebox baseNodeWifiNum 'wifi'
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:START_EEPROM
+send 'date "'
+gettime pctime "%Y-%m-%d %H:%M"
+send pctime
+sendln '"'
+wait '#'
+sendln '/etc/init.d/hwclock.sh stop'
+:check_thumbdrive
+wait '#'
+sendln 'cd /media/sda1/MTCDT'
+wait 'No such file or directory'
+if result = 1 then
+    yesnobox 'ARE YOU SURE THUMBDRIVE IS INSTALLED?' 'THUMBDRIVE FAILURE'
+    if result = 1 then
+        send 03
+   	    goto check_thumbdrive
+    else
+    	messagebox 'REBOOT DEVICE AND TRY AGAIN!' 'THUMBDRIVE FAILURE'
+        disconnect
+        end
+    endif
+endif
+
+
+
