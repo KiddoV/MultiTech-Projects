@@ -6,7 +6,7 @@ SetTitleMatchMode, RegEx
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["94557700LF", ""]
-Global 246_SKUNums := ["94557601LF", ""]
+Global 246_SKUNums := ["94557601LF", "94557249LF"]
 Global 247_SKUNums := ["", ""]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
@@ -56,8 +56,8 @@ Gui Add, Edit, x79 y123 w145 h21 vserialN Limit8 Number
 Gui Add, Edit, x79 y148 w145 h21 vnodeIdN Limit17
 Gui Add, Edit, x79 y173 w145 h21 vimeiN Limit15
 Gui Add, Edit, x79 y198 w145 h21 vuuidN Limit32
-Gui Add, Edit, x79 y233 w145 h21 vloraN +Disabled
-Gui Add, Edit, x79 y259 w145 h21 vwifiN +Disabled
+Gui Add, Edit, x79 y233 w145 h21 vloraN 
+Gui Add, Edit, x79 y259 w145 h21 vwifiN 
 
 Gui Add, Button, x80 y300 w80 h23 gmainStart, &START
 
@@ -118,36 +118,36 @@ mainStart() {
     Send !om
     WinWait MACRO.*
     ControlSetText, Edit1, %allScanPath%, MACRO.*
-    ControlClick, Button1, MACRO.*, , Left, 2
+    ControlClick, Button1, MACRO.*, , Left, 3
     
     ;Input datas
     WinWait SKU.*
     ControlSetText, Edit1, %skuNum%, SKU.*
-    ControlClick, Button1, SKU.*, , Left, 2
+    ControlClick, Button1, SKU.*, , Left, 3
     
     WinWait SERIAL.*
     ControlSetText, Edit1, %serialN%, SERIAL.*
-    ControlClick, Button1, SERIAL.*, , Left, 2
+    ControlClick, Button1, SERIAL.*, , Left, 3
     
     WinWait NODE.*
     ControlSetText, Edit1, %nodeIdN%, NODE.*
-    ControlClick, Button1, NODE.*, , Left, 2
+    ControlClick, Button1, NODE.*, , Left, 3
         
     WinWait IMEI.*
     ControlSetText, Edit1, %imeiN%, IMEI.*
-    ControlClick, Button1, IMEI.*, , Left, 2
+    ControlClick, Button1, IMEI.*, , Left, 3
         
     WinWait UUID.*
     ControlSetText, Edit1, %uuidN%, UUID.*
-    ControlClick, Button1, UUID.*, , Left, 2
+    ControlClick, Button1, UUID.*, , Left, 3
         
     WinWait NODE LORA.*
     ControlSetText, Edit1, %loraN%, NODE LORA.*
-    ControlClick, Button1, NODE LORA.*, , Left, 2
+    ControlClick, Button1, NODE LORA.*, , Left, 3
         
     WinWait NODE WIFI.*
     ControlSetText, Edit1, %wifiN%, NODE WIFI.*
-    ControlClick, Button1, NODE WIFI.*, , Left, 2
+    ControlClick, Button1, NODE WIFI.*, , Left, 3
     
     
 }
@@ -168,39 +168,17 @@ checkInput() {
     } Else If (StrLen(nodeIdN) < 17) {
         MsgBox Invalid NODE ID! Rescan!
         return 0
-    } Else If (StrLen(imeiN) < 15) {
-        MsgBox Invalid IMEI NUMBER! Rescan!
-        return 0
+    ;} Else If (StrLen(imeiN) < 15) {
+        ;MsgBox Invalid IMEI NUMBER! Rescan!
+        ;return 0
     } Else If (StrLen(uuidN) < 32) {
         MsgBox Invalid UUID! Rescan!
         return 0
     }
 }
 
-getLastLineClipboard() {
-    Clipboard := Trim(Clipboard, "`r`n`t ") 
-    Loop, parse, Clipboard, `n, `r
-        max:=A_index
-    Loop, parse, Clipboard, `n, `r
-    {
-        if A_Index = %max%
-        {
-            Clipboard := A_LoopField
-            break
-        }
-    }
-}
-
-getLastLineTeraTerm() {
-    IfWinExist COM.*
-    {
-        WinActivate COM.*
-        Send !ee
-        Send !el
-        ;ControlSend,,{AltDown}om, ahk_exe ttermpro.exe
-        getLastLineClipboard()
-        return %Clipboard%
-    }
+getLabelType(skuN) {
+    
 }
 
 ;;;;Search Images Functions;;;;

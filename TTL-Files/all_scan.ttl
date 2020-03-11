@@ -51,11 +51,35 @@ sprintf2 msg 'SKU NUMBER: %s \nSERIAL NUMBER: %s \nNODE ID NUMBER: %s \nIMEI NUM
 strspecial msg
 messagebox msg 'Information'
 */
-  
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_DATA
+:check_lora
 flushrecv
+wait '#'
+sendln 'mts-io-sysfs show ap*/*'
+waitln 'No such file' '00:' '80:'
+if result = 1 then
+    messagebox 'PLEASE REBOOT DEVICE WITH LORA INSTALLED' 'LORA FAILURE'
+    end
+endif
+strcompare inputstr nodeLoraNum
+if result <> 0 then
+    yesnobox 'NODE LORA MISMATCH!! DO YOU WANT TO RESCAN?' 'LORA MISMATCH'
+    if result = 1 then
+        inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
+		nodeLoraNum = inputstr
+		goto check_lora
+	else
+		end
+	endif
+endif
+
+strcompare skuNum '94557249LF'
+if result = 0 goto START_EEPROM
+
 :check_imei
+flushrecv
 sendln 'microcom /dev/modem_at0'
 mpause 200
 :recheck_imei
@@ -76,42 +100,33 @@ else
 	send 24
 endif
 	 
-:check_lora
+:check_wifi_bt
 flushrecv
 wait '#'
-sendln 'mts-io-sysfs show ap*/*'
-waitln 'No such file'
-if result = 1 then
-    messagebox 'PLEASE REBOOT DEVICE WITH LORA INSTALLED' 'LORA FAILURE'
-    end
-endif
-waitln '00:' '80:'
-messagebox inputstr 'nodelora'
-strcompare inputstr nodeLoraNum
+sendln '/media/sda1/wifiscan2-check.sh'
+:recheck_wifi
+wait '#'
+sendln 'ifconfig wifi0'
+timeout = 8
+waitln 'HWaddr' '88:'
+strremove inputstr 1 38
+strtrim inputstr ' \t' ;clear the whitespace
+strcompare inputstr nodeWifiNum
 if result <> 0 then
-    yesnobox 'NODE LORA MISMATCH!! DO YOU WANT TO RESCAN?' 'LORA MISMATCH'
+    yesnobox 'NODE WIFI MISMATCH!! DO YOU WANT TO RESCAN?' 'WIFI MISMATCH'
     if result = 1 then
-        inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
-		nodeLoraNum = inputstr
-		goto check_lora
+        inputbox 'NEW NODE WIFI #:' 'NODE WIFI NUMBER'
+		nodeWifiNum = inputstr
+		goto recheck_wifi
 	else
 		end
 	endif
 endif
-	 
-:check_wifi_bt
-wait '#'
-sendln '/media/sda1/wifiscan2-check.sh'
-wait '#'
-sendln 'ifconfig wifi0'
-waitln 'HWaddr'
-messagebox inputstr 'inputstr'
-baseNodeWifiNum = inputstr
-messagebox baseNodeWifiNum 'wifi'
-strremove baseNodeWifiNum 1 38
-messagebox baseNodeWifiNum 'wifi'
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :START_EEPROM
+timeout = 2
+eepromstr = ''
+flushrecv
 send 'date "'
 gettime pctime "%Y-%m-%d %H:%M"
 send pctime
@@ -134,5 +149,27 @@ if result = 1 then
     endif
 endif
 
+strconcat eepromstr './'
+strconcat eepromstr skuNum
+strconcat eepromstr '.sh'
+strconcat eepromstr ' '
+strconcat eepromstr serialNum
+strconcat eepromstr ' '
+strconcat eepromstr nodeIDNum
+strconcat eepromstr ' '
+strconcat eepromstr nodeWifiNum
+strconcat eepromstr ' '
+strconcat eepromstr imeiNum
+strconcat eepromstr ' '
+strconcat eepromstr uuidNum
+messagebox eepromstr 'eeprom'
+wait '#'
+sendln eepromstr
+wait '#'
 
-
+:DONE
+sendln 'halt'
+wait "Power down"
+messagebox 'MTCDT EEPROM CONFIGURATION COMPLETE' 'DONE'
+disconnect
+end

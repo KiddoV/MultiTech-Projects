@@ -12,11 +12,13 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;Firmware list
-Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5"]
+Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5"]
 
 ;Paths and Links
 Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
 Global mli419NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-full-4.1.9.tcl"
+Global mli518Path := "C:\vbtest\MTCDT\mLinux-5.1.8-2x7\mtcdt-rs9113-flash-full-5.1.8.tcl"
+Global mli518NoWiFPath := "C:\vbtest\MTCDT\mLinux-5.1.8-no-WiFiBT\mtcdt-flash-full-5.1.8.tcl"
 Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
 Global aep164Path := "C:\vbtest\MTCDT\AEP-1_6_4\mtcdt-flash-full-AEP.tcl"
 Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
@@ -148,14 +150,9 @@ mainRun() {
 
 erase_firmware() {
     addToProgressBar(5)
-    BlockInput On
-    BlockInput MouseMove
-    WinActivate COM.*
-    Send nand{Space}erase.chip{Enter}
+    ControlSend, ,nand{Space}erase.chip{Enter}, COM.*
     Sleep 1700
-    Send reset{Enter}
-    BlockInput MouseMoveOff
-    BlockInput Off
+    ControlSend, ,reset{Enter}, COM.*
     addToProgressBar(5)
 }
 
@@ -197,25 +194,26 @@ install_firmware(fw, chk) {
         
         addToProgressBar(10)
         If (fw = "mLinux 4.1.9")
-            SendInput %mli419Path%
+            ControlSetText, Edit1, %mli419Path%, Select Script File.*
         If (fw = "mLinux 4.1.9 - NO WiFi")
-            SendInput %mli419NoWiFPath%
+            ControlSetText, Edit1, %mli419NoWiFPath%, Select Script File.*
+        If (fw = "mLinux 5.1.8")
+            ControlSetText, Edit1, %mli518Path%, Select Script File.*
+        If (fw = "mLinux 5.1.8 - NO WiFi")
+            ControlSetText, Edit1, %mli518NoWiFPath%, Select Script File.*
         If (fw = "AEP 1.4.3")
-            SendInput %aep143Path%
+            ControlSetText, Edit1, %aep143Path%, Select Script File.*
         If (fw = "AEP 1.6.4")
-            SendInput %aep164Path%
+            ControlSetText, Edit1, %aep164Path%, Select Script File.*
         If (fw = "AEP 5.0.0")
-            SendInput %aep500Path%
+            ControlSetText, Edit1, %aep500Path%, Select Script File.*
         If (fw = "AEP 5.1.2")
-            SendInput %aep512Path%
+            ControlSetText, Edit1, %aep512Path%, Select Script File.*
         If (fw = "AEP 5.1.5")
-            SendInput %aep515Path%
+            ControlSetText, Edit1, %aep515Path%, Select Script File.*
         
         Sleep 400
-        ControlClick Button2, Select Script File.*
-        Sleep 200
-        Send {Enter}
-        Sleep 300
+        ControlClick Button2, Select Script File.*, , Left, 3
         
         ;This if statement fix a bug on some old computer
         If WinExist("Select Script File.*") {
@@ -233,7 +231,7 @@ install_firmware(fw, chk) {
         addToProgressBar(10)
         SB_SetText("Waiting for process...")
         
-        Loop, 45
+        Loop, 50
         {
             addToProgressBar(1)
             If !WinExist("Please Wait.*")
