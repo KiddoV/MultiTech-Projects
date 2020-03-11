@@ -1,0 +1,4 @@
+document.getElementById("login-name").value="viet.ho.03@gmail.com"
+document.getElementById("login-password").value="hoangviet123"
+
+-args -auto-open-devtools-for-tabs
