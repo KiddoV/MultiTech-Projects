@@ -1,23 +1,46 @@
 ;
+; Author: Viet Ho
 ;
-timeout = 30
-pctime = ''
-imeistr = ''
-barcode = ''
+timeout = 10
 clearscreen 1
+show 0
 
-sendln 'mtadm'
-wait "word:"
-mpause 1000
-sendln 'root'
-wait '$'
-pause 1
-sendln 'sudo -s'
-wait "word"
-pause 1
-sendln 'root'
-wait '#'
-pause 1
+is240L = -1
+is246L = -1
+is247L = -1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:LOGIN
+timeout = 1
+send 03
+:waitLogin
+wait '#' 'login' 'word' '$'
+until result = 1
+	if result = 2 then
+	   	sendln 'mtadm'
+		goto waitLogin
+	elseif result = 3 then
+	    sendln 'root'
+		goto waitLogin
+	elseif result = 4 then
+	   	sendln 'sudo -s'
+		goto waitLogin
+	endif
+enduntil
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:GET_MTCDT_TYPE
+inputbox 'ENTER MTCDT TYPE' 'MTCDT TYPE'
+strcompare inputstr '240L'
+is240L = result
+if is240L = 0 goto START
+strcompare inputstr '246L'
+is246L = result
+if is246L = 0 goto START
+strcompare inputstr '247L'
+is247L = result
+if is247L = 0 goto START
+goto GET_MTCDT_TYPE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:START
 send 13
 wait "#"
 mpause 1000
@@ -38,28 +61,33 @@ strconcat out '--out-format bin '
 strconcat out '--vendor-id '
 strconcat out '"Multi-Tech Systems" '
 strconcat out '--product-id '
-strconcat out 'MTCDT-XXX-XXX '
+strconcat out 'MTCDT-XXXX-XXX '
 strconcat out '--device-id '
 strconcat out '87654321 '
 strconcat out '--hw-version '
 strconcat out 'MTCDT-0.1 '
 strconcat out '--mac-addr '
 strconcat out '00:08:00:4A:1F:F1 '
-strconcat out '--mac-bluetooth '
-strconcat out '00:23:A7:49:66:C5 '
-strconcat out '--mac-wifi '
-strconcat out '00:23:A7:43:C6:98 '
 strconcat out '--imei '
 strconcat out '358942053416591 '
-strconcat out '--capa-gps --capa-wifi --capa-bluetooth '
+if is246L = 0 then
+   strconcat out '--capa-gps '
+endif
+if is247L = 0 then
+   strconcat out '--mac-bluetooth '
+   strconcat out '00:23:A7:49:66:C5 '
+   strconcat out '--mac-wifi '
+   strconcat out '00:23:A7:43:C6:98 '
+   strconcat out '--capa-gps --capa-wifi --capa-bluetooth '
+endif
 strconcat out '--uuid '
 strconcat out '6c7a6a18ccf0a5cbffbd1cc495bc0c43'
 
 sendln 'mts-id-eeprom ' out
 wait '#'
 pause 2
-messagebox "MTCDT TEST CONFIGURATION COMPLETE" "PORT STATUS
+messagebox 'MTCDT TEST CONFIGURATION COMPLETE' 'DONE CONFIGURATION'
 sendln 'reboot'
 mpause 1000
-wait 'login:'
+;wait 'login:'
 end

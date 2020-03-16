@@ -6,10 +6,12 @@ timeout = 10
 clearscreen 1
 show 0
 radioVersion = '00.00.000'
+isNONE = -1
 isLAT1 = -1
 isLAT3 = -1
 isLEU1 = -1
 isL4E1 = -1
+isL4N1 = -1
 
 :CHECK_MTCDT_TYPE
 strcompare param2 '240L'
@@ -23,6 +25,9 @@ is247L = result
 if is247L=0 goto CHECK_RADIO_TYPE
 
 :CHECK_RADIO_TYPE
+strcompare param3 'NONE'
+isNONE = result
+if isNONE=0 goto START
 strcompare param3 'LAT1'
 isLAT1 = result
 if isLAT1=0 goto START
@@ -35,6 +40,10 @@ if isLEU1=0 goto START
 strcompare param3 'L4E1'
 isL4E1 = result
 if isL4E1=0 goto START
+strcompare param3 'L4N1'
+isL4N1 = result
+if isL4N1=0 goto START
+
 
 :START
 if isLAT1=0 then 
@@ -43,6 +52,8 @@ elseif isLEU1=0 then
     radioVersion = '17.00.523'
 elseif isL4E1=0 then
 	radioVersion = '25.20.673'
+elseif isL4N1=0 then
+	radioVersion = '25.20.666'
 endif
 
 wait '$'
@@ -100,14 +111,16 @@ if strvar > 45000 then
 	end
 endif
 wait "mtcdt:/home/mtadm#"
-mpause 3000
+mpause 1000
 
 :LORA_TEST
 flushrecv
 sendln 'mts-io-sysfs show ap1/*'
 wait "MTAC"
 if result=1 then
+    statusbox 'MTAC1 PASSED' 'PASSED1'
 	mpause 1000
+	closesbox
 else
 	beep
 	messagebox 'MTCDT LORA AP1 READ FAILURE!' 'LORA AP1 FAILURE'
@@ -119,7 +132,9 @@ flushrecv
 sendln 'mts-io-sysfs show ap2/*'
 wait "MTAC"
 if result=1 then
+	statusbox 'MTAC2 PASSED' 'PASSED2'
 	mpause 1000
+	closesbox
 else
 	beep
 	messagebox 'MTCDT LORA AP2 READ FAILURE!' 'LORA AP2 FAILURE'
@@ -135,20 +150,24 @@ sendln 'df'
 wait "/dev/sda1" "/dev/sdb1"
 if result=0 then
   beep
-  messagebox "THUMB DRIVE NOT DETECTED ****ERROR****" "THUMB DRIVE FAILURE"
+  messagebox 'THUMB DRIVE NOT DETECTED' 'THUMB DRIVE FAILURE'
   disconnect
   closett
   end
 endif
 mpause 500
 
+if isNONE=0 goto SHORTING_MTCDT
+
 :SIM_TEST
 sendln 'microcom /dev/modem_at0'
-mpause 2000
+mpause 500
 sendln 'at+cpin?'
-wait "OK"
+wait 'OK' 'not found' 'ERROR'
 if result=1 then
-  mpause 1000
+    statusbox 'SIM CHECK PASSED' 'PASSED'
+	mpause 1000
+	closesbox
 else
   beep
   messagebox 'SIM TEST FAILURE!' 'SIM FAILURE'
@@ -166,11 +185,10 @@ mpause 1000
 sendln 'at+gmm'
 wait "OK"
 mpause 1000
-sendln 'at+gmr'
-;wait "20.00.526"
-wait radioVersion
+sendln 'at#swpkgv'
+wait radioVersion ;Check radio version
 if result=1 then
-  mpause 2000
+  mpause 1000
 else
   beep
   messagebox 'WRONG RADIO VERSION!' 'SMC FAILURE'
@@ -234,7 +252,7 @@ if isLAT3=0 then
    wait '#RXDIV: 1,3'
    if result=0 then
    	  beep
-   	  messagebox "DIVERSITY FAILURE **** Please  RETEST THIS DEVICE" "DIVERSITY FAILURE"
+   	  messagebox 'DIVERSITY FAILURE! PLEASE RETEST' 'DIVERSITY FAILURE'
    	  disconnect
    	  closett
    	  end
@@ -249,7 +267,7 @@ if result=1 then
   mpause 1000
 else
   beep
-  messagebox "SIM NOT DETECTED **** Please CHECK SIM AND RETEST THIS DEVICE" "PORT STATUS"
+  messagebox "**** SIM NOT DETECTED ****" "SIM FAILURE"
   end
   disconnect
 endif
@@ -260,7 +278,6 @@ sendln 'at#servinfo'
 waitln '#SERVINFO:'
 	   if result=0 goto NETWORK_CONNECTION_FAILURE
 strscan inputstr "-"
-;messagebox result 'string found in location'
 strcopy inputstr result 4 rssi_level
 strtrim rssi_level ','
 statusbox  rssi_level 'Signal Level'
@@ -272,8 +289,7 @@ sendln 'at#moni'
 waitln '#MONI:'
 	   if result=0 goto NETWORK_CONNECTION_FAILURE
 strscan inputstr  'PWR:'
-;messagebox result 'string found in location'
-result= result+4
+result = result + 4
 strcopy inputstr result 4 sig_level
 strtrim sig_level 'd'
 statusbox  sig_level 'Signal Level'
@@ -304,19 +320,18 @@ sendln 'at+cgsn'
 wait 'OK'
 mpause 500
 flushrecv
-if isLAT3=0 then
-   sendln 'at#cfvr'
-   wait '#CFVR: 0'
-   if result=1 then
-   	  mpause 1000
-   else
-   	   beep
-  	   messagebox "FIRMWARE SUB VERSION FAILURE" "FIRMWARE SUB FAILURE"
-  	   disconnect
-	   closett
-	   end
-	endif
+sendln 'at#cfvr'
+wait '0' '2' '6'
+if result > 0 then
+   	mpause 1000
+else
+   	beep
+  	messagebox "FIRMWARE SUB VERSION FAILURE" "FIRMWARE SUB FAILURE"
+    disconnect
+    closett
+	end
 endif
+
 mpause 500
 mpause 1000
 flushrecv
@@ -324,8 +339,10 @@ sendln 'at+cgsn'
 wait "OK"
 mpause 1000
 
+:SHORTING_MTCDT
 if is240L=0 goto TEST_DONE
-if is246L=0 goto GPS_TEST 
+if is246L=0 goto GPS_TEST
+if is247L=0 goto GPS_TEST
 
 timeout =60
 :GPS_TEST
@@ -335,7 +352,7 @@ flushrecv
 sendln 'gpspipe -r'
 wait '4505.' '4506.' 
 if result=0 then 
-   messagebox 'UNABLE TO GET GPS LOCATION' ' GPS TEST FAILURE'
+   messagebox 'UNABLE TO GET GPS LOCATION' 'GPS TEST FAILURE'
    disconnect
    closett
    end
@@ -350,6 +367,7 @@ timeout=2
 
 :WIFI_BT_TEST
 
+
 :TEST_DONE
 beep
 send 24
@@ -359,19 +377,19 @@ closett
 end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :LED_FAILURE
-messagebox 'Fix failing LEDs and test this unit again' ' LED FAILURE'
+messagebox 'FIX FAILING LEDs. RETEST!' 'LED FAILURE'
 disconnect
 closett
 end
 
 :NETWORK_CONNECTION_FAILURE
-messagebox 'Modem was unable to find Wireless network. Cycle power the device and run this script again' 'NETWORK_CONNECTION_FAILURE'
+messagebox 'UNABLE TO FIND WIRELESS NETWORK. RETEST!' 'NETWORK CONNECTION FAILURE'
 disconnect
 closett
 end
 
 :LOW_RSSI
-messagebox ' CSQ signal level too low. Check the Antennal connection and run this script again' ' WIRELESS SIGNAL MEASUREMENT FAILURE'
+messagebox 'CSQ SIGNAL TOO LOW. RETEST!' 'WIRELESS SIGNAL MEASUREMENT FAILURE'
 disconnect
 closett
 end

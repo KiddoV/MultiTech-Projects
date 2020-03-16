@@ -4,26 +4,27 @@
 SetTitleMatchMode, RegEx
 
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
-;IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
-    ;FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
-;IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
-    ;FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
+IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
+    FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-GUI
+IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
+    FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
+IfNotExist C:\V-Projects\AMAuto-Tester\TTL-Files
+    FileCreateDir C:\V-Projects\AMAuto-Tester\TTL-Files
 
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl, C:\V-Projects\AMAuto-Tester\TTL-Files\all_test.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_config.ttl, C:\V-Projects\AMAuto-Tester\TTL-Files\all_config.ttl, 1
 
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\mli419.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cpin-ready.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cpin-ready.bmp, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\cat-cant-open.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cat-cant-open.bmp, 1
-;FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\test-complete.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\test-complete.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\mli419.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
-Global 240_ItemNums := ["70000041L", ""]
-Global 246_ItemNums := ["70000043L","70000033L", ""]
+Global 240_ItemNums := ["70000041L", "70000049L"]
+Global 246_ItemNums := ["70000033L", "70000043L", ""]
 Global 247_ItemNums := ["", ""]
 
 ;;;Paths and Links
@@ -91,13 +92,13 @@ Gui Add, Text, x64 y263 w136 h21 +0x200, Check Temperature
 Gui Font,, Consolas
 Gui Add, Text, x64 y285 w136 h21 +0x200, Check LORA/MTAC
 Gui Font,, Consolas
-Gui Add, Text, x64 y307 w136 h21 +0x200, Check SIM/ Cellular
+Gui Add, Text, x64 y307 w136 h21 +0x200, Check SIM/Cellular
 Gui Font,, Consolas
-Gui Add, Text, x64 y329 w136 h21 +0x200, Check Others
+Gui Add, Text, x64 y329 w136 h21 +0x200, Check Others/SMC
 Gui Font,, Consolas
 Gui Add, Text, x64 y351 w136 h21 +0x200 +Hidden vcheckGps, Check GPS
 Gui Font,, Consolas
-Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/ Bluetooth
+Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/Bluetooth
 
 Gui Font, c0x00FF00, Ms Shell Dlg 2
 
@@ -200,21 +201,11 @@ mainStart() {
             }
         }
     }
-    WinWait PORT.*
-    WinActivate PORT.*
-    If (searchTestComplete() = 0) {
-        MsgBox ALL TEST FAILED
-        disableGuis("Enable")
-        return
+    if WinExist("COM.*") {
+        WinActivate COM.*
+        Send !i
     }
-
-    WinActivate PORT.*
-    Send {Enter}
-    GuiControl , , process9, %checkImg%
-    
-    WinActivate COM.*
-    Send !i
-    
+     
     OnMessage(0x44, "CheckIcon") ;Add icon
     MsgBox 0x80, DONE, FINISHED Auto-Testing for %itemNum%!
     OnMessage(0x44, "") ;Clear icon
@@ -224,51 +215,22 @@ mainStart() {
 configStep(mtcdtType, itemN, mtcType, radType) {
     disableGuis("Disable")
     
-    outString1 =
-    (
-    mts-id-eeprom  --out-file /sys/bus/i2c/devices/0-0056/eeprom --out-format bin 
-    --vendor-id "Multi-Tech Systems"
-    --product-id MTCDT-%radType%-%mtcType%
-    --device-id 12345678
-    --hw-version MTCDT-0.1
-    --mac-addr 00:08:00:4A:1F:F1
-    --imei 358942053416591
-    --uuid 6c7a6a18ccf0a5cbffbd1cc495bc0c43
-    )
-    outString:= RegExReplace(outString1, "([^\r\n])\R(?=[^\r\n])", "$1$2")
-    outString2 =
-    (
-    --capa-gps
-    )
-    outStrWithGPS:= RegExReplace(outString2, "([^\r\n])\R(?=[^\r\n])", "$1$2")
-    outString3 =
-    (
-    --mac-bluetooth 00:23:A7:49:66:C5
-    --mac-wifi 00:23:A7:43:C6:98
-    --capa-wifi
-    --capa-bluetooth
-    )
-    outStrWithWifi:= RegExReplace(outString3, "([^\r\n])\R(?=[^\r\n])", "$1$2")
-    
     WinActivate COM.*
-    Send ^c
-    Sleep 200
     GuiControl , , process1, %arrowImg%
-    loginToMTCDT()
-    Sleep 200
-    SendInput date "%localTime%"{Enter}
-    SendInput /etc/init.d/hwclock.sh stop{Enter}
-    Sleep 500
-    if (mtcdtType = "240L")
-        SendInput %outString%{Enter}
-    If (mtcdtType = "246L")
-        SendInput %outString% %outStrWithGPS%{Enter}
-    If (mtcdtType = "247L")
-        SendInput %outString% %outStrWithWifi% %outStrWithGPS%{Enter}
-    ;Send /media/card/%itemN%-test-config.sh{Enter}
+    SendInput !om
+    WinWait MACRO.*
+    ControlSetText, Edit1, C:\V-Projects\AMAuto-Tester\TTL-Files\all_config.ttl, MACRO.*
+    ControlSend, Edit1, {Enter}, MACRO.*
+    ControlClick Button1, MACRO.*, , Left, 3
+    WinWait MTCDT TYPE.*
+    ControlSetText, Edit1, %mtcdtType%, MTCDT TYPE.*
+    ControlClick Button1, MTCDT TYPE.*, , Left, 2
+    WinWait DONE CONFIGURATION.*
+    Sleep 1000
+    ControlClick Button1, DONE CONFIGURATION.*, , Left, 2
     GuiControl , , process1, %checkImg%
-    Sleep 2000
-    Send reboot{Enter}
+    
+    ;Recheck Config
     GuiControl , , process2, %arrowImg%
     Sleep 20000
     If (searchForFirmwareVersion(40, 2000) = 0) {
@@ -302,8 +264,8 @@ functionalTestStep(itemN, mtcType, radType) {
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test.ttl %mtcType% %radType%, ,Hide
-    WinWait SSH.*, , 2
+    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\V-Projects\AMAuto-Tester\TTL-Files\all_test.ttl %mtcType% %radType%, ,Hide
+    WinWait SSH.*, , 4
     If !WinExist("SSH.*") {
         GuiControl , , process4, %timeImg%
         MsgBox Failed to connect to E-Net
@@ -329,56 +291,43 @@ functionalTestStep(itemN, mtcType, radType) {
     
     ;Check Temparature
     GuiControl , , process6, %arrowImg%
-    WinWait temp, ,5
-    WinGetText temp, temp
-    MsgBox %temp%
-    ;SendInput cat /sys/class/hwmon/hwmon0/device/temp1_input{Enter}
-/*
-    
-    ;Check temparature
-    ;GuiControl , , process6, %arrowImg%
-    WinWait temp, ,6
+    WinWait temp, , 5
     GuiControl , , process6, %checkImg%
     
-    ;Check LORA/MTAC
+    ;Check Lora
     GuiControl , , process7, %arrowImg%
-    If (searchCatCantOpen() = 1) {
+    WinWait LORA.*|PASSED1
+    if WinExist("LORA.*") {
         GuiControl , , process7, %timeImg%
-        MsgBox LORA/MTAC failure!
         return 0
     }
-    
+    WinWait PASSED2
+    WinWaitClose PASSED2
     GuiControl , , process7, %checkImg%
     
-    ;Check SIM/CELL
+    ;Check Thumb Drive
+    
+    ;Check Sim
     GuiControl , , process8, %arrowImg%
-    If (searchAtCpin() = 1) {
-        If (searchCpinReady() = 1) {
-            GuiControl , , process8, %checkImg%
-        } Else {
-            GuiControl , , process8, %timeImg%
-            WinClose 192.168.*
-            WinWaitActive Tera.*
-            Send {Left} {Enter}
-            WinWait PORT.*, , 1
-            WinClose PORT.*
-            WinWait MACRO.*, , 1
-            If WinExist("MACRO.*")
-                Send y
-            MsgBox SIM/CELL Failue!
-            return 0
-        }
-    } Else {
-        GuiControl , , process8, %timeImg%
-        MsgBox Can't find command for SIM TEST
+    WinWait SIM FAILURE.*|PASSED.*|THUMB DRIVE FAILURE.*
+    if WinExist("THUMB DRIVE FAILURE.*") {
         return 0
     }
+    if WinExist("SIM FAILURE.*") {
+        GuiControl , , process8, %timeImg%
+        return 0
+    }
+    WinWaitClose PASSED.*
+    GuiControl , , process8, %checkImg%
     
     ;Other checks
     GuiControl , , process9, %arrowImg%
     WinWait RSSI.*
     WinWait Signal.*
-    */
+    WinWait TEST DONE.*
+    GuiControl , , process9, %checkImg%
+    Sleep 1000
+    ControlClick, Button1, TEST DONE.*, , Left, 2
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -432,7 +381,7 @@ clearAllProcessImgs() {
     {
         GuiControl , , process%index%, ""
         index += 1
-        Sleep 5
+        Sleep 1
     }
 }
 
@@ -443,25 +392,16 @@ disableGuis(option) {
     GuiControl %option%, startBttn
 }
 
-loginToMTCDT() {
-    WinActivate COM.*
-    SendInput mtadm{Enter}
-    Sleep 300
-    SendInput root{Enter}
-    Sleep 300
-    SendInput sudo -s{Enter}
-    Sleep 300
-    SendInput root{Enter}
-}
-
 getRadioType(itemN) {
+    NONE := [""]
     LAT1 := ["70000041L"]
     LAT3 := [""]
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", ""]
     LAP3 := ["70000045L"]
+    L4N1 := ["70000049L"]
     
-   allRadioType := "LAT1,LAT3,LEU1,L4E1,LAP3"
+   allRadioType := "NONE,LAT1,LAT3,LEU1,L4E1,LAP3,L4N1"
     
     getRadioLoop:
     Loop Parse, allRadioType, `,
@@ -473,7 +413,7 @@ getRadioType(itemN) {
     }
 }
 
-;;;;Search Images Functions;;;;
+;;;;;;Search Images Functions;;;;;;
 searchForFFs(){
         CoordMode, Pixel, Window
         ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp
@@ -520,44 +460,6 @@ searchAtCpin() {
         If ErrorLevel = 0
             return 1 ;Return true if found
         Sleep, 2000
-    }
-    If ErrorLevel
-        return 0 ;Return false if NOT found
-}
-
-searchCpinReady() {
-    WinActivate 192.168.2.1.*
-    CoordMode, Pixel, Window
-    ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cpin-ready.bmp
-    If ErrorLevel = 0
-        return 1 ;Return true if found
-    If ErrorLevel
-        return 0 ;Return false if NOT found
-}
-
-searchCatCantOpen() {
-    Loop, 6
-    {
-        WinActivate 192.168.2.1.*
-        CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\cat-cant-open.bmp
-        If ErrorLevel = 0
-            return 1 ;Return true if found
-        Sleep, 2000
-    }
-    If ErrorLevel
-        return 0 ;Return false if NOT found
-}
-
-searchTestComplete() {
-    Loop, 2
-    {
-        WinActivate PORT.*
-        CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\test-complete.bmp
-        If ErrorLevel = 0
-            return 1 ;Return true if found
-        Sleep 500
     }
     If ErrorLevel
         return 0 ;Return false if NOT found
