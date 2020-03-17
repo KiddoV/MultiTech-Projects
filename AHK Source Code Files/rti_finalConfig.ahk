@@ -7,12 +7,12 @@ SetTitleMatchMode, RegEx
 IfNotExist C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func
     FileCreateDir C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func
     
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\first-setup.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\first-setup.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\first-setupArea.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\first-setupArea.bmp, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\advancedButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\advancedButton.bmp, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\toUnsafe.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\toUnsafe.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\browseButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\browseButton.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\restoreButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\restoreButton.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\okButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\okButton.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\browseArea.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\browseArea.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\restoreButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\restoreArea.bmp, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\okButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\okArea.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -24,10 +24,10 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui Add, GroupBox, x8 y10 w138 h95, Step by Step
-Gui Add, Button, x37 y30 w80 h17 gloginStep, &LOGIN
-Gui Add, Button, x37 y55 w80 h17 grunStep1, STEP &1
-Gui Add, Button, x37 y80 w80 h17 grunStep2, STEP &2
-Gui Add, Button, x37 y121 w80 h25 gmainRun, &RUN A to Z
+Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn, &LOGIN
+Gui Add, Button, x37 y55 w80 h17 grunStep1 vstep1Bttn, STEP &1
+Gui Add, Button, x37 y80 w80 h17 grunStep2 vstep2Bttn, STEP &2
+Gui Add, Button, x37 y121 w80 h25 gmainRun vallStepBttn, &RUN A to Z
 Gui Add, StatusBar,, ...
 
 Gui -MaximizeBox
@@ -39,18 +39,20 @@ GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
-
+^e:: disableGuis("Enable")
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainRun() {
-    
+    disableGuis("Disable")
     loginStep()
     
     if (runStep1() = 0) {
+        disableGuis("Enable")
         return
     }
     
     if (runStep2() = 0) {
+        disableGuis("Enable")
         return
     }
     
@@ -61,6 +63,7 @@ mainRun() {
 }
 
 loginStep() {
+    GuiControl Disable, loginBttn
     addTipMsg("BEGIN LOGIN STEP", 3000)
     SB_SetText("Begin login step...")
     Run, %A_DesktopCommon%\Google Chrome.lnk
@@ -72,21 +75,22 @@ loginStep() {
         searchToUnsafeLink(2, 1000)
         WinWait Commissioning.*
     }
+    SB_SetText("Typing username and password")
     if WinExist("Commissioning.*") {
         WinActivate Commissioning.*
         WinWaitActive Commissioning.*
-        
+        Sleep 2000
         ControlSend, ,admin{Enter}, Commissioning.*
         Sleep 3000
         Send admin2205{!}{Enter}
-        Sleep 2000
+        Sleep 1500
         Send admin2205{!}{Enter}
         WinWait Sign In.*
     }
     ;https://192.168.2.1/sign-in
     if WinExist("Sign In.*") {
         WinActivate Sign In.*
-        Sleep 1000
+        Sleep 3000
         Send admin{Tab}
         Send admin2205{!}{Enter}
         WinWait mPower.*
@@ -94,23 +98,29 @@ loginStep() {
     
     WinWait mPower.*
     WinActivate mPower.*
-    searchFirstSetup(7, 500)
+    searchFirstSetup(10, 500)
     
+    SB_SetText("Getting the source file")
     Run, %ComSpec% /c start chrome.exe https://192.168.2.1/administration/save-restore, ,Hide
     WinWait Save.*
     WinActivate Save.*
-    searchBrowseButton(3, 1000)
+    searchFirstSetup(4, 500)
+    WinActivate Save.*
+    searchBrowseButton(6, 1000)
     WinWait Open.*
     ControlSetText, Edit1, C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, Open.*
+    ControlSend, Edit1, {Enter}, Open.*
     ControlClick Button1, Open.*, , Left, 2
-    searchRestoreButton(3, 1000)
-    searchOkButton(3, 1000)
+    SB_SetText("Resetting...")
+    searchRestoreButton(6, 1000)
+    searchOkButton(6, 1000)
     SB_SetText("Waiting for conduit to reset")
     WinWaitClose Save.*
     SB_SetText("Finished reseting conduit!")
 }
 
 runStep1() {
+    GuiControl Disable, step1Bttn
     if !FileExist("C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\Step1.PINGTESTappinstall.ttl") {
         MsgBox 16, FILE NOT FOUND, The file:`nStep1.PINGTESTappinstall.ttl`nwas not found in this location:`nC:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\`nPlease check and run again!
         return 0
@@ -123,18 +133,24 @@ runStep1() {
     ControlClick, Button2, SECURITY.*, , Left, 2
     
     ;WinWait Connection Error.*, ,10000
-    WinWait TTSH.*
-    SB_SetText("Waiting for process")
-    WinWaitClose TTSH.*
+    WinWait TTSSH.*
+    SB_SetText("Transfering files...")
+    WinWaitClose TTSSH.*
     WinWait DONE.*
+    SB_SetText("Waiting for process")
     WinWaitClose DONE.*
     
     WinWait Status.*
+    ControlClick, Button1, Status.*, , Left, 2
     WinWaitClose Status.*
+    WinWait Tera.*
+    ControlClick, Button1, Tera.*, , Left, 2
+    WinClose .*Chrome.*
     SB_SetText("Finished step 1!")
 }
 
 runStep2() {
+    GuiControl Disable, step2Bttn
     if !FileExist("C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\Step2.saveOEM.ttl") {
         MsgBox 16, FILE NOT FOUND, The file:`nStep2.saveOEM.ttl`nwas not found in this location:`nC:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\`nPlease check and run again!
         return 0
@@ -146,6 +162,7 @@ runStep2() {
     WinWait SECURITY.*
     ControlClick, Button2, SECURITY.*, , Left, 2
     
+    SB_SetText("Waiting for token")
     WinWait Display Token.*
     WinGetText token, Display Token.*
     foundQuoMark := InStr(token, """") ;Search for quotation mark
@@ -175,17 +192,25 @@ addTipMsg(text, time) {
     return
 }
 
+;option is Disable or Enable
+disableGuis(option) {
+    GuiControl %option%, loginBttn
+    GuiControl %option%, step1Bttn
+    GuiControl %option%, step2Bttn
+    GuiControl %option%, allStepBttn
+}
+
 ;;;;Search Images Functions;;;;
 searchFirstSetup(loopCount, sleepTime) {
     Loop, %loopCount%
     {
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\first-setup.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\first-setupArea.bmp
         If ErrorLevel = 0
         {
-            FoundX += 370
-            FoundY += 9
-            ControlClick x%FoundX% y%FoundY%, mPower.*, , Left, 1 ;Click button when found
+            FoundX += 136
+            FoundY += 8
+            ControlClick x%FoundX% y%FoundY%, mPower.*, , Left, 2 ;Click button when found
         }
             
         Sleep, %sleepTime%
@@ -233,9 +258,11 @@ searchBrowseButton(loopCount, sleepTime) {
     {
         WinActivate Save.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\browseButton.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\browseArea.bmp
         If ErrorLevel = 0
         {
+            FoundX += 30
+            FoundY += 15
             ControlClick x%FoundX% y%FoundY%, Save.*, , Left, 1 ;Click button when found
             return 1 ;Return true if found
         }
@@ -250,7 +277,7 @@ searchRestoreButton(loopCount, sleepTime) {
     {
         WinActivate Save.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\restoreButton.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\restoreArea.bmp
         If ErrorLevel = 0
         {
             ControlClick x%FoundX% y%FoundY%, Save.*, , Left, 1 ;Click button when found
@@ -267,7 +294,7 @@ searchOkButton(loopCount, sleepTime) {
     {
         WinActivate Save.*
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\okButton.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\okArea.bmp
         If ErrorLevel = 0
         {
             ControlClick x%FoundX% y%FoundY%, Save.*, , Left, 1 ;Click button when found

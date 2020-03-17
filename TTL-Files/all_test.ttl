@@ -177,6 +177,8 @@ else
 endif
 mpause 1000
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;
 :SMC_TEST
 flushrecv
 sendln 'at+gmi'
@@ -338,6 +340,7 @@ flushrecv
 sendln 'at+cgsn'
 wait "OK"
 mpause 1000
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDT
 if is240L=0 goto TEST_DONE

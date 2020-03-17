@@ -224,7 +224,12 @@ configStep(mtcdtType, itemN, mtcType, radType) {
     ControlClick Button1, MACRO.*, , Left, 3
     WinWait MTCDT TYPE.*
     ControlSetText, Edit1, %mtcdtType%, MTCDT TYPE.*
+    ControlSend, Edit1, {Enter}, MTCDT TYPE.*
     ControlClick Button1, MTCDT TYPE.*, , Left, 2
+    WinWait RADIO TYPE.*
+    ControlSetText, Edit1, %radType%, RADIO TYPE.*
+    ControlSend, Edit1, {Enter}, RADIO TYPE.*
+    ControlClick Button1, RADIO TYPE.*, , Left, 2
     WinWait DONE CONFIGURATION.*
     Sleep 1000
     ControlClick Button1, DONE CONFIGURATION.*, , Left, 2
@@ -377,7 +382,7 @@ changeTab() {
 
 clearAllProcessImgs() {
     index := 1
-    While index < 12
+    While index < 20
     {
         GuiControl , , process%index%, ""
         index += 1
