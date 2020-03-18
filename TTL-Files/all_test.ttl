@@ -95,7 +95,7 @@ if result=1 then
 endif
 mpause 500
 
-timeout = 10
+timeout = 5
 :TEMPERATURE_TEST
 flushrecv
 sendln 'cat /sys/class/hwmon/hwmon0/device/temp1_input'
@@ -113,7 +113,100 @@ endif
 wait "mtcdt:/home/mtadm#"
 mpause 1000
 
+:DRIVE_TEST
+timeout = 2
+flushrecv
+wait '#'
+sendln 'df'
+wait '/dev/sda1' '/dev/sdb1'
+if result=0 then
+  beep
+  messagebox 'THUMB DRIVE NOT DETECTED' 'THUMB DRIVE FAILURE'
+  disconnect
+  closett
+  end
+endif
+mpause 500
+wait '#'
+sendln 'ls /media/card'
+wait 'No such file' 'mmcblk0p1'
+if result>1 then
+   beep
+   messagebox 'SD CARD NOT DETECTED' 'SD CARD FAILURE'
+   disconnect
+   closett
+   end
+endif
+
+:read_write_sd_test
+flushrecv
+sendln 'cp /bin/bash /media/card/'
+wait "#"
+sendln 'ls /media/card'
+waitln 'bash'
+if result=0 then
+    beep
+    messagebox 'SD CARD READ-WRITE FAILED' 'SD CARD FAILURE'
+    disconnect
+    closett
+    end
+endif
+mpause 500
+wait '#'
+sendln "md5sum /bin/bash |awk '{print $1}'"
+strconcat cksum1 inputstr
+pause 1
+sendln "md5sum /media/card/bash |awk '{print $1}'"
+strconcat cksum2 inputstr
+pause 1
+strcompare cksum1 cksum2
+if result<>0 then
+    messagebox 'SD READ-WRITE TEST FAILURE' 'SD CARD FAILURE'
+    disconnect
+    closett
+    end
+endif
+mpause 1000
+sendln 'rm /media/card/bash'
+wait "#"
+
+:read_write_thumbdrive_test
+flushrecv
+usbdrive=''
+pause 1
+sendln "df |grep sd |awk '{print $1}'"
+waitln '/dev'
+strconcat usbdrive inputstr
+strremove usbdrive 1 5
+mpause 1
+sendln 'cp /bin/bash /media/'usbdrive
+wait "#"
+flushrecv
+sendln 'ls /media/'usbdrive'
+mpause 500
+sendln "md5sum /bin/bash |awk '{print $1}'"
+strconcat cksum3 inputstr
+wait '#'
+sendln "md5sum /media/"usbdrive"/bash |awk '{print $1}'"
+strconcat cksum4 inputstr
+pause 1
+strcompare cksum3 cksum4
+if result<>0 then
+    messagebox 'THUMB DRIVE READ-WRITE TEST FAILURE' 'THUMB DRIVE FAILURE'
+	disconnect
+    closett
+    end
+endif
+flushrecv
+mpause 500
+sendln 'rm /media/'usbdrive'/bash'
+statusbox 'THUMB DRIVE AND SD CARD PASSED' 'PASSED'
+mpause 500
+closesbox
+mpause 1000
+
 :LORA_TEST
+timeout = 5
 flushrecv
 sendln 'mts-io-sysfs show ap1/*'
 wait "MTAC"
@@ -127,7 +220,7 @@ else
 	end
 	disconnect
 endif
-mpause 1000
+mpause 2000
 flushrecv
 sendln 'mts-io-sysfs show ap2/*'
 wait "MTAC"
@@ -142,20 +235,6 @@ else
 	disconnect
 endif
 mpause 1000
-
-:THUMB_DRIVE_TEST
-mpause 1000
-flushrecv
-sendln 'df'
-wait "/dev/sda1" "/dev/sdb1"
-if result=0 then
-  beep
-  messagebox 'THUMB DRIVE NOT DETECTED' 'THUMB DRIVE FAILURE'
-  disconnect
-  closett
-  end
-endif
-mpause 500
 
 if isNONE=0 goto SHORTING_MTCDT
 
@@ -340,6 +419,7 @@ flushrecv
 sendln 'at+cgsn'
 wait "OK"
 mpause 1000
+send 24 ;Quit 'at' command promt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDT
@@ -347,10 +427,9 @@ if is240L=0 goto TEST_DONE
 if is246L=0 goto GPS_TEST
 if is247L=0 goto GPS_TEST
 
-timeout =60
 :GPS_TEST
-send 24 ;Quit 'at' command promt
-wait '#'
+timeout = 70
+mpause 500
 flushrecv
 sendln 'gpspipe -r'
 wait '4505.' '4506.' 
@@ -363,21 +442,24 @@ endif
 send 3
 wait '#'
 pause 1
-send 3
-wait '#'
+statusbox 'GPS TEST PASSED' 'PASSED'
+mpause 500
+closesbox
 pause 1
-timeout=2
+
+if is246L=0 goto TEST_DONE
 
 :WIFI_BT_TEST
-
+timeout = 10
 
 :TEST_DONE
 beep
-send 24
-messagebox "MTCDT TEST COMPLETE" "TEST DONE"
+messagebox 'MTCDT TEST COMPLETE' 'TEST DONE'
 disconnect
 closett
 end
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :LED_FAILURE
 messagebox 'FIX FAILING LEDs. RETEST!' 'LED FAILURE'

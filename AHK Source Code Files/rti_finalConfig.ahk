@@ -23,15 +23,19 @@ Global WorkingDir
 StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
-Gui Add, GroupBox, x8 y10 w138 h95, Step by Step
+Gui Add, GroupBox, x8 y10 w138 h117, Step by Step
 Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn, &LOGIN
-Gui Add, Button, x37 y55 w80 h17 grunStep1 vstep1Bttn, STEP &1
-Gui Add, Button, x37 y80 w80 h17 grunStep2 vstep2Bttn, STEP &2
-Gui Add, Button, x37 y121 w80 h25 gmainRun vallStepBttn, &RUN A to Z
+Gui Add, Text, x16 y52 w124 h2 +0x10
+Gui Add, Button, x37 y60 w70 h17 grunStep1 vstep1Bttn, STEP &1
+Gui Add, Text, x112 y61 w15 h15 +0x200, ┐
+Gui Add, Button, x108 y76 w27 h23 gstep1and2 vstep1and2Bttn, 1&&2
+Gui Add, Text, x112 y98 w15 h15 +0x200, ┘
+Gui Add, Button, x37 y96 w70 h17 grunStep2 vstep2Bttn, STEP &2
+Gui Add, Button, x37 y132 w80 h25 gmainRun vallStepBttn, &RUN A to Z
 Gui Add, StatusBar,, ...
 
 Gui -MaximizeBox
-Gui Show, h176, RTI Auto-Final Configer
+Gui Show, h186, RTI Auto-Final Configer
 Return
 
 GuiEscape:
@@ -46,6 +50,18 @@ mainRun() {
     disableGuis("Disable")
     loginStep()
     
+    step1and2()
+    
+    SB_SetText("All done!")
+    OnMessage(0x44, "CheckIcon") ;Add icon
+    MsgBox 0x80, DONE, FINISHED Auto-Last Config for RTI!
+    OnMessage(0x44, "") ;Clear icon
+}
+
+step1and2() {
+    GuiControl Disable, step1Bttn
+    GuiControl Disable, step2Bttn
+    GuiControl Disable, step1and2Bttn
     if (runStep1() = 0) {
         disableGuis("Enable")
         return
@@ -55,11 +71,6 @@ mainRun() {
         disableGuis("Enable")
         return
     }
-    
-    SB_SetText("All done!")
-    OnMessage(0x44, "CheckIcon") ;Add icon
-    MsgBox 0x80, DONE, FINISHED Auto-Last Config for RTI!
-    OnMessage(0x44, "") ;Clear icon
 }
 
 loginStep() {
@@ -198,6 +209,7 @@ disableGuis(option) {
     GuiControl %option%, step1Bttn
     GuiControl %option%, step2Bttn
     GuiControl %option%, allStepBttn
+    GuiControl %option%, step1and2Bttn
 }
 
 ;;;;Search Images Functions;;;;

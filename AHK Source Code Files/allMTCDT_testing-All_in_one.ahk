@@ -24,7 +24,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000041L", "70000049L"]
-Global 246_ItemNums := ["70000033L", "70000043L", ""]
+Global 246_ItemNums := ["70000005L", "70000033L", "70000043L", ""]
 Global 247_ItemNums := ["", ""]
 
 ;;;Paths and Links
@@ -73,32 +73,23 @@ For each, item in 247_ItemNums
 Gui Add, DropDownList, x22 y59 w176 vitemNum3 Choose1, %itmNum3%
 Gui Tab
 
-Gui Add, CheckBox, x10 y101 w200 h23 +Checked vcheck gcheckBoxToggle, % "Included Configuration Step"
+Gui Add, CheckBox, x10 y101 w200 h23 +Checked vcheck gcheckBox, % "Included Configuration Step"
 
-Gui Add, GroupBox, x9 y132 w202 h225 vprocessGbox, Processes
+Gui Add, GroupBox, x9 y132 w202 h246 vprocessGbox, Processes
 Gui Font,, Consolas
 Gui Add, Text, x64 y148 w136 h21 +0x200 vloadConfig, Load Configuration
-Gui Font,, Consolas
 Gui Add, Text, x64 y170 w136 h21 +0x200 vrebootAfterConfig, Rebooted After Config
-Gui Font,, Consolas
 Gui Add, Text, x64 y192 w136 h21 +0x200 vrecheckConfig, Recheck Configuration
 Gui Add, Text, x17 y215 w189 h2 +0x10 ;The line in between
-Gui Font,, Consolas
 Gui Add, Text, x64 y219 w136 h21 +0x200, Check Ethernet Port
-Gui Font,, Consolas
 Gui Add, Text, x64 y241 w136 h21 +0x200, Check LED
-Gui Font,, Consolas
 Gui Add, Text, x64 y263 w136 h21 +0x200, Check Temperature
-Gui Font,, Consolas
-Gui Add, Text, x64 y285 w136 h21 +0x200, Check LORA/MTAC
-Gui Font,, Consolas
-Gui Add, Text, x64 y307 w136 h21 +0x200, Check SIM/Cellular
-Gui Font,, Consolas
-Gui Add, Text, x64 y329 w136 h21 +0x200, Check Others/SMC
-Gui Font,, Consolas
-Gui Add, Text, x64 y351 w136 h21 +0x200 +Hidden vcheckGps, Check GPS
-Gui Font,, Consolas
-Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/Bluetooth
+Gui Add, Text, x64 y285 w136 h21 +0x200, Check Thumb Drive/SD
+Gui Add, Text, x64 y307 w136 h21 +0x200, Check LORA/MTAC
+Gui Add, Text, x64 y329 w136 h21 +0x200 vcheckSimCell, Check SIM/Cellular
+Gui Add, Text, x64 y351 w136 h21 +0x200 vcheckOthSMC, Check Others/SMC
+Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckGps, Check GPS
+Gui Add, Text, x64 y393 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/Bluetooth
 
 Gui Font, c0x00FF00, Ms Shell Dlg 2
 
@@ -114,10 +105,11 @@ Gui Add, Picture, x30 y307 w21 h21 +BackgroundTrans vprocess8
 Gui Add, Picture, x30 y329 w21 h21 +BackgroundTrans vprocess9
 Gui Add, Picture, x30 y351 w21 h21 +BackgroundTrans vprocess10
 Gui Add, Picture, x30 y373 w21 h21 +BackgroundTrans vprocess11
+Gui Add, Picture, x30 y395 w21 h21 +BackgroundTrans vprocess12
 
-Gui Add, Button, x70 y367 w80 h23 vstartBttn gmainStart, &START
+Gui Add, Button, x70 y388 w80 h23 vstartBttn gmainStart, &START
 
-Gui Show, x1269 y324 w220 h400, All MTCDT Auto-Tester
+Gui Show, x1269 y324 w220 h420, All MTCDT Auto-Tester
 Return
 
 ;;;;;;;;;All menu handlers
@@ -130,7 +122,7 @@ MsgBox 0, Message, This feature will be added in the future release!
 Return
 
 keyShcutHandler:
-MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App
+MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App`nCtrl + I  to Toggle Check Box
 Return
 aboutHandler:
 MsgBox 0, Message, Created and Tested by Viet Ho
@@ -145,6 +137,7 @@ GuiClose:
 ^q:: ExitApp
 ^t:: 
 ^r:: mainStart()
+^i:: checkBoxToggle()
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainStart() {
@@ -167,6 +160,14 @@ mainStart() {
         itemNum := itemNum3
     
     Global radioType := getRadioType(itemNum)
+    
+    if (radioType = "NONE") {
+        GuiControl Disable, checkSimCell
+        GuiControl Disable, checkOthSMC
+    } else {
+        GuiControl Enable, checkSimCell
+        GuiControl Enable, checkOthSMC
+    }
     
     if (check = 0) {
         MsgBox, 33, Question, Begin ONLY Auto-Functional Test for %itemNum%?
@@ -201,11 +202,16 @@ mainStart() {
             }
         }
     }
+    
+    WinWait TEST DONE.*
+    Sleep 1000
+    ControlClick, Button1, TEST DONE.*, , Left, 2
+    
     if WinExist("COM.*") {
         WinActivate COM.*
         Send !i
     }
-     
+    
     OnMessage(0x44, "CheckIcon") ;Add icon
     MsgBox 0x80, DONE, FINISHED Auto-Testing for %itemNum%!
     OnMessage(0x44, "") ;Clear icon
@@ -221,11 +227,13 @@ configStep(mtcdtType, itemN, mtcType, radType) {
     WinWait MACRO.*
     ControlSetText, Edit1, C:\V-Projects\AMAuto-Tester\TTL-Files\all_config.ttl, MACRO.*
     ControlSend, Edit1, {Enter}, MACRO.*
-    ControlClick Button1, MACRO.*, , Left, 3
+    ControlClick Button1, MACRO.*, , Left, 3 ;Additional if Enter not working
+    
     WinWait MTCDT TYPE.*
     ControlSetText, Edit1, %mtcdtType%, MTCDT TYPE.*
     ControlSend, Edit1, {Enter}, MTCDT TYPE.*
     ControlClick Button1, MTCDT TYPE.*, , Left, 2
+    
     WinWait RADIO TYPE.*
     ControlSetText, Edit1, %radType%, RADIO TYPE.*
     ControlSend, Edit1, {Enter}, RADIO TYPE.*
@@ -299,45 +307,58 @@ functionalTestStep(itemN, mtcType, radType) {
     WinWait temp, , 5
     GuiControl , , process6, %checkImg%
     
-    ;Check Lora
+    ;Check Thumb Drive
     GuiControl , , process7, %arrowImg%
+    WinWait PASSED.*|THUMB DRIVE FAILURE.*|SD CARD FAILURE.*
+    if WinExist("PASSED.*") {
+        GuiControl , , process7, %checkImg%
+    } else {
+        GuiControl , , process7, %timeImg%
+        return 0
+    }
+    
+    ;Check Lora
+    GuiControl , , process8, %arrowImg%
     WinWait LORA.*|PASSED1
     if WinExist("LORA.*") {
-        GuiControl , , process7, %timeImg%
+        GuiControl , , process8, %timeImg%
         return 0
     }
     WinWait PASSED2
     WinWaitClose PASSED2
-    GuiControl , , process7, %checkImg%
-    
-    ;Check Thumb Drive
-    
-    ;Check Sim
-    GuiControl , , process8, %arrowImg%
-    WinWait SIM FAILURE.*|PASSED.*|THUMB DRIVE FAILURE.*
-    if WinExist("THUMB DRIVE FAILURE.*") {
-        return 0
-    }
-    if WinExist("SIM FAILURE.*") {
-        GuiControl , , process8, %timeImg%
-        return 0
-    }
-    WinWaitClose PASSED.*
     GuiControl , , process8, %checkImg%
     
-    ;Other checks
-    GuiControl , , process9, %arrowImg%
-    WinWait RSSI.*
-    WinWait Signal.*
-    WinWait TEST DONE.*
-    GuiControl , , process9, %checkImg%
-    Sleep 1000
-    ControlClick, Button1, TEST DONE.*, , Left, 2
+    if (radType != "NONE") {
+        ;Check Sim
+        GuiControl , , process9, %arrowImg%
+        WinWait SIM FAILURE.*|PASSED.*
+        if WinExist("SIM FAILURE.*") {
+            GuiControl , , process9, %timeImg%
+            return 0
+        }
+        WinWaitClose PASSED.*
+        GuiControl , , process9, %checkImg%
+    
+        ;Other checks/ SMC
+        GuiControl , , process10, %arrowImg%
+        WinWait RSSI.*
+        WinWait Signal.*
+        GuiControl , , process10, %checkImg%
+    }
+    
+    ;Check GPS
+    GuiControl , , process11, %arrowImg%
+    WinWait GPS TEST FAILURE.*|PASSED.*
+    if WinExist("GPS TEST FAILURE.*") {
+        GuiControl , , process11, %timeImg%
+        return 0
+    }
+    GuiControl , , process11, %checkImg%
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
-checkBoxToggle() {
+checkBox() {
     GuiControlGet, check ;Get value from CheckBox
     clearAllProcessImgs()
     
@@ -353,28 +374,39 @@ checkBoxToggle() {
     }
 }
 
+checkBoxToggle() {
+    GuiControlGet, check ;Get value from CheckBox
+    If (check = 0) {
+        GuiControl , , check, 1
+        checkBox()
+    } Else {
+        GuiControl , , check, 0
+        checkBox()
+    }
+}
+
 changeTab() {
     GuiControlGet, whichTab ;Get value from Tab Title
     clearAllProcessImgs()
     
     If (whichTab = "246L") {
-        Gui Show, w220 h422, All MTCDT Auto-Tester
-        GuiControl Move, processGbox, h247
-        GuiControl Move, startBttn, y389
+        Gui Show, w220 h441, All MTCDT Auto-Tester
+        GuiControl Move, processGbox, h267
+        GuiControl Move, startBttn, y409
         GuiControl Show, checkGps
         GuiControl Hide, checkWifi
     }
     Else If (whichTab = "247L") {
-        Gui Show, w220 h444, All MTCDT Auto-Tester
-        GuiControl Move, processGbox, h269
-        GuiControl Move, startBttn, y411
+        Gui Show, w220 h462, All MTCDT Auto-Tester
+        GuiControl Move, processGbox, h288
+        GuiControl Move, startBttn, y430
         GuiControl Show, checkGps
         GuiControl Show, checkWifi
     }
    Else {
-        Gui Show, w220 h400, All MTCDT Auto-Tester
-        GuiControl Move, processGbox, h225
-        GuiControl Move, startBttn, y367
+        Gui Show, w220 h420, All MTCDT Auto-Tester
+        GuiControl Move, processGbox, h246
+        GuiControl Move, startBttn, y388
         GuiControl Hide, checkGps
         GuiControl Hide, checkWifi
    }
@@ -386,8 +418,10 @@ clearAllProcessImgs() {
     {
         GuiControl , , process%index%, ""
         index += 1
-        Sleep 1
     }
+    
+    GuiControl Enable, checkSimCell
+    GuiControl Enable, checkOthSMC
 }
 
 disableGuis(option) {
@@ -398,7 +432,7 @@ disableGuis(option) {
 }
 
 getRadioType(itemN) {
-    NONE := [""]
+    NONE := ["70000005L"]
     LAT1 := ["70000041L"]
     LAT3 := [""]
     LEU1 := ["70000033L", ""]

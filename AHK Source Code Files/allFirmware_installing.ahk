@@ -47,19 +47,19 @@ Menu HelpMenu, Add, About, aboutHandler
 Menu MenuBar, Add, &Help, :HelpMenu
 Gui Menu, MenuBar
 
-Gui -MinimizeBox -MaximizeBox
-Gui Add, Button, x63 y144 w80 h23 gmainRun, &RUN
-Gui Add, GroupBox, x8 y4 w194 h77, Select Firmware Version
-Gui Add, CheckBox, x9 y101 w191 h23 vcheck, % " Included Re-Program Step"
-Gui Add, Progress, x8 y175 w193 h13 -Smooth vprogress, 0
+Gui -MaximizeBox
+Gui Add, GroupBox, x8 y4 w186 h77, Select Firmware Version
 For each, item in allFirmwares
     firmware .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, x16 y36 w177 vfware Choose1, %firmware%
+Gui Add, DropDownList, x16 y36 w169 vfware Choose1, %firmware%
+Gui Add, CheckBox, x9 y90 h23 vcheck, % " Included Re-Program Step"
+Gui Add, Button, x60 y124 w80 h23 gmainRun, &RUN
+Gui Add, Progress, x8 y155 w185 h13 -Smooth vprogress, 0
 Gui Font,, Times New Roman
 Gui Add, StatusBar,, Click button to start!
 Gui Font
 
-Gui Show, x856 y322 w208 h215, All Firmware Auto-Installer
+Gui Show, x856 y322 w200 h195, All Firmware Auto-Installer
 Return
 
 ;;;;;;;;;All menu handlers
@@ -212,8 +212,9 @@ install_firmware(fw, chk) {
         If (fw = "AEP 5.1.5")
             ControlSetText, Edit1, %aep515Path%, Select Script File.*
         
-        Sleep 400
-        ControlClick Button2, Select Script File.*, , Left, 3
+        Sleep 300
+        ControlSend Edit1, {Enter}, Select Script File.*
+        ControlClick Button2, Select Script File.*, , Left, 3 ;Click button if Enter not working
         
         ;This if statement fix a bug on some old computer
         If WinExist("Select Script File.*") {
@@ -222,6 +223,7 @@ install_firmware(fw, chk) {
             Sleep 100
             Click, 511, 365 Left, , Up
         }
+        
         BlockInput MouseMoveOff
         BlockInput Off
         

@@ -1,0 +1,21 @@
+-----L4N1 (70000049L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmm => 	LE910C4-NF
+at#swpkgv (list RADIO version)
+at#cfvr => 	#CFVR: 2
+at#fwswitch? => 	#FWSWITCH: 0,0
+at#gpio=1,0,2
+at#sled=2
+at#sledsav
+at#tempcfg? => 	#TEMPCFG: -273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3
+at+cpin? => 	+CPIN: READY
+at#rxdiv? => 	#RXDIV: 1,1
+AT+CSQ => 	+CSQ: ##,#
+at+csq => 	+CSQ: ##,#
+at#servinfo => 	#SERVINFO: 1007,-75,"AT&T","310410",235,7F03,256,0,-88,"II",01,4294967295
+at#moni => 	#MONI: AT&T PSC:235 RSCP:-88 LAC:7F03 Id:5792AF5 EcIo:-13.0 UARFCN:1007 PWR:-75dbm DRX:256 SCR:3760 URA:4294967295
+at+cgdcont? => 	+CGDCONT: 1,"IPV4V6","nxtgenphone","",0,0,0,0
+		+CGDCONT: 2,"IPV4V6","ims","",0,0,0,0
+		+CGDCONT: 3,"IPV4V6","sos","",0,0,0,1
