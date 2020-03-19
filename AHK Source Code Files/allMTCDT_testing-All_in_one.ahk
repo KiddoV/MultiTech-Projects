@@ -354,6 +354,9 @@ functionalTestStep(itemN, mtcType, radType) {
         return 0
     }
     GuiControl , , process11, %checkImg%
+    
+    ;Check Wifi/BT
+    
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

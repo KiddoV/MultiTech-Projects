@@ -1,9 +1,9 @@
------L4N1 (70000049L)------------------------
+-----L4N1 (70000049L, 70000054L)------------------------
 at
 ate1
 at+cgsn (print imei)
 at+gmm => 	LE910C4-NF
-at#swpkgv (list RADIO version)
+at#swpkgv (list RADIO version) *Other command* at+gmr => 25.20.666 (M0F.660006)
 at#cfvr => 	#CFVR: 2
 at#fwswitch? => 	#FWSWITCH: 0,0
 at#gpio=1,0,2

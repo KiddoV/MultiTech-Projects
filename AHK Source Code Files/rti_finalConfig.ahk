@@ -24,14 +24,14 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui Add, GroupBox, x8 y10 w138 h117, Step by Step
-Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn, &LOGIN
+Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn +Disabled, &LOGIN
 Gui Add, Text, x16 y52 w124 h2 +0x10
 Gui Add, Button, x37 y60 w70 h17 grunStep1 vstep1Bttn, STEP &1
 Gui Add, Text, x112 y61 w15 h15 +0x200, ┐
 Gui Add, Button, x108 y76 w27 h23 gstep1and2 vstep1and2Bttn, 1&&2
 Gui Add, Text, x112 y98 w15 h15 +0x200, ┘
 Gui Add, Button, x37 y96 w70 h17 grunStep2 vstep2Bttn, STEP &2
-Gui Add, Button, x37 y132 w80 h25 gmainRun vallStepBttn, &RUN A to Z
+Gui Add, Button, x37 y132 w80 h25 gmainRun vallStepBttn +Disabled, &RUN A to Z
 Gui Add, StatusBar,, ...
 
 Gui -MaximizeBox
@@ -44,6 +44,7 @@ GuiClose:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
 ^e:: disableGuis("Enable")
+^3:: step1and2()
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainRun() {
@@ -71,6 +72,15 @@ step1and2() {
         disableGuis("Enable")
         return
     }
+    
+    SB_SetText("All done!")
+    OnMessage(0x44, "CheckIcon") ;Add icon
+    MsgBox 0x80, DONE, FINISHED Auto-Last Config for RTI!
+    OnMessage(0x44, "") ;Clear icon
+    
+    GuiControl Enable, step1Bttn
+    GuiControl Enable, step2Bttn
+    GuiControl Enable, step1and2Bttn
 }
 
 loginStep() {
@@ -131,33 +141,60 @@ loginStep() {
 }
 
 runStep1() {
+    SB_SetText("Waiting for conduit to reset")
+    WinWaitClose Save.*
     GuiControl Disable, step1Bttn
     if !FileExist("C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\Step1.PINGTESTappinstall.ttl") {
         MsgBox 16, FILE NOT FOUND, The file:`nStep1.PINGTESTappinstall.ttl`nwas not found in this location:`nC:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\`nPlease check and run again!
         return 0
     }
+    begin_step1:
     SB_SetText("Begin step 1...")
     addTipMsg("BEGIN STEP 1", 3000)
     Run, %ComSpec% /c start C:\teraterm\ttermpro.exe   /M=C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\Step1.PINGTESTappinstall.ttl, ,Hide
     
-    WinWait SECURITY.*
-    ControlClick, Button2, SECURITY.*, , Left, 2
-    
+    WinWait SECURITY.*|MACRO: Error.*
+    If WinExist("SECURITY.*") {
+        ControlClick, Button2, SECURITY.*, , Left, 3
+    }
+    WinWait MACRO: Error.*, , 6
+    If WinExist("MACRO: Error.*") {
+        SB_SetText("Failed to connect MACRO...")
+        ControlClick, Button1, MACRO: Error.*, , Left, 2
+        Sleep 2000
+        Goto begin_step1
+    }
     ;WinWait Connection Error.*, ,10000
     WinWait TTSSH.*
     SB_SetText("Transfering files...")
     WinWaitClose TTSSH.*
     WinWait DONE.*
-    SB_SetText("Waiting for process")
+    SB_SetText("Waiting for process...")
     WinWaitClose DONE.*
     
+    SB_SetText("Checking cell connection...")
     WinWait Status.*
-    ControlClick, Button1, Status.*, , Left, 2
+    SB_SetText("Cell connection OK")
     WinWaitClose Status.*
-    WinWait Tera.*
-    ControlClick, Button1, Tera.*, , Left, 2
+    
+    SB_SetText("Waiting for ping test...")
+    WinWait Status.*
+    ControlClick, Button1, Status.*, , Left, 3
+    WinWaitClose Status.*
+    SB_SetText("Ping test passed!")
+    WinWait Tera Term
+    ControlClick, Button1, Tera Term, , Left, 3
+    
+    While WinExist("Tera Term") {
+        WinActivate Tera Term
+        Send {Left}{Enter}
+        Sleep 500
+    }
+    WinWaitClose 192.168.2.1.*
+    Sleep 1000
     WinClose .*Chrome.*
     SB_SetText("Finished step 1!")
+    GuiControl Enable, step1Bttn
 }
 
 runStep2() {
@@ -177,17 +214,19 @@ runStep2() {
     WinWait Display Token.*
     WinGetText token, Display Token.*
     foundQuoMark := InStr(token, """") ;Search for quotation mark
-    Sleep 2000
-    ControlClick, Button1, Display Token.*, , Left, 2
     if (foundQuoMark > 0) {
         MsgBox 16, ERROR, Bad TOKEN, Please reboot device!
+        SB_SetText("Found bad token!")
         return 0
     }
-    
+    Sleep 2000
+    ControlClick, Button1, Display Token.*, , Left, 2
+    SB_SetText("Token is good!")
     WinWait Port.*
     Sleep 2000
     ControlClick, Button1, Port.*, , Left, 2
     SB_SetText("Finished step 2!")
+    GuiControl Enable, step2Bttn
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

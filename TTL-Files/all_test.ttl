@@ -258,6 +258,11 @@ mpause 1000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;
+:L4N1_TEST
+mpause 500
+sendln 'at'
+waitln 'OK'
+if result =0 goto INIT
 :SMC_TEST
 flushrecv
 sendln 'at+gmi'
