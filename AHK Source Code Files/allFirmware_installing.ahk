@@ -12,9 +12,11 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;Firmware list
-Global allFirmwares := ["mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5"]
+Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5"]
 
 ;Paths and Links
+Global mli401Path := "C:\vbtest\MTCDT\mLinux-4.0.1-2x7\mtcdt-rs9113-flash-full-4.0.1.tcl"
+Global mli401NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.0.1-no-WiFiBT\mtcdt-flash-full-4.0.1.tcl"
 Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
 Global mli419NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-full-4.1.9.tcl"
 Global mli518Path := "C:\vbtest\MTCDT\mLinux-5.1.8-2x7\mtcdt-rs9113-flash-full-5.1.8.tcl"
@@ -193,6 +195,10 @@ install_firmware(fw, chk) {
         WinActivate Select Script File.*
         
         addToProgressBar(10)
+        If (fw = "mLinux 4.0.1")
+            ControlSetText, Edit1, %mli401Path%, Select Script File.*
+        If (fw = "mLinux 4.0.1 - NO WiFi")
+            ControlSetText, Edit1, %mli401NoWiFPath%, Select Script File.*
         If (fw = "mLinux 4.1.9")
             ControlSetText, Edit1, %mli419Path%, Select Script File.*
         If (fw = "mLinux 4.1.9 - NO WiFi")

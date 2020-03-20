@@ -1,4 +1,4 @@
-SKUTYPE1 -- Serial, NodeID, UUID 			-- (94557252LF, )
-SKUTYPE2 -- Serial, NodeID, UUID, IMEI 		-- ()
-SKUTYPE3 -- Serial, NodeID, UUID, IMEI, LORA		-- ()
-SKUTYPE4 -- Serial, NodeID, UUID, IMEI, LORA, WIFI	-- ()
+LABELTYPE1 -- Serial, NodeID, UUID 			-- (94557252LF, )
+LABELTYPE2 -- Serial, NodeID, UUID, IMEI 		-- (94557574LF, )
+LABELTYPE3 -- Serial, NodeID, UUID, IMEI, LORA		-- (94557576LF, )
+LABELTYPE4 -- Serial, NodeID, UUID, IMEI, LORA, WIFI	-- ()

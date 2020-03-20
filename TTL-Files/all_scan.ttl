@@ -24,6 +24,7 @@ enduntil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :GET_DATA
 timeout = 2
+labelType = ''
 skuNum = ''
 serialNum = ''
 nodeIDNum = ''
@@ -31,6 +32,19 @@ imeiNum = ''
 uuidNum = ''
 nodeLoraNum = ''
 nodeWifiNum = ''
+nodeBTNum = ''
+
+inputbox '' 'LABEL TYPE'
+labelType = inputstr
+
+strcompare labelType 'LABELTYPE1'
+isType1 = result
+strcompare labelType 'LABELTYPE2'
+isType2 = result
+strcompare labelType 'LABELTYPE3'
+isType3 = result
+strcompare labelType 'LABELTYPE4'
+isType4 = result
 
 inputbox '' 'SKU NUMBER'
 skuNum = inputstr
@@ -52,32 +66,9 @@ strspecial msg
 messagebox msg 'Information'
 */
 
+if isType1 = 0 goto START_EEPROM
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_DATA
-:check_lora
-flushrecv
-wait '#'
-sendln 'mts-io-sysfs show ap*/*'
-waitln 'No such file' '00:' '80:'
-if result = 1 then
-    messagebox 'PLEASE REBOOT DEVICE WITH LORA INSTALLED' 'LORA FAILURE'
-    end
-endif
-strcompare inputstr nodeLoraNum
-if result <> 0 then
-    yesnobox 'NODE LORA MISMATCH!! DO YOU WANT TO RESCAN?' 'LORA MISMATCH'
-    if result = 1 then
-        inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
-		nodeLoraNum = inputstr
-		goto check_lora
-	else
-		end
-	endif
-endif
-
-strcompare skuNum '94557249LF'
-if result = 0 goto START_EEPROM
-
 :check_imei
 flushrecv
 sendln 'microcom /dev/modem_at0'
@@ -99,6 +90,31 @@ if result <> 0 then
 else
 	send 24
 endif
+
+if isType2 = 0 goto START_EEPROM
+	 
+:check_lora
+flushrecv
+wait '#'
+sendln 'mts-io-sysfs show ap*/*'
+waitln 'No such file' '00:' '80:'
+if result = 1 then
+    messagebox 'PLEASE REBOOT DEVICE WITH LORA INSTALLED' 'LORA FAILURE'
+    end
+endif
+strcompare inputstr nodeLoraNum
+if result <> 0 then
+    yesnobox 'NODE LORA MISMATCH!! DO YOU WANT TO RESCAN?' 'LORA MISMATCH'
+    if result = 1 then
+        inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
+		nodeLoraNum = inputstr
+		goto check_lora
+	else
+		end
+	endif
+endif
+
+if isType3 = 0 goto START_EEPROM
 	 
 :check_wifi_bt
 flushrecv
@@ -122,6 +138,18 @@ if result <> 0 then
 		end
 	endif
 endif
+:get_bt
+pause 1
+flushrecv
+sendln 'hcitool dev'
+waitln 'hci0' 
+strconcat nodeBTNum inputstr
+strremove nodeBTNum 1 6
+pause 1
+send 13
+wait '#'
+mpause 1000
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :START_EEPROM
 timeout = 2
@@ -158,6 +186,8 @@ strconcat eepromstr ' '
 strconcat eepromstr nodeIDNum
 strconcat eepromstr ' '
 strconcat eepromstr nodeWifiNum
+strconcat eepromstr ' '
+strconcat eepromstr nodeBTNum
 strconcat eepromstr ' '
 strconcat eepromstr imeiNum
 strconcat eepromstr ' '
