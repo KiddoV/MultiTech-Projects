@@ -69,4 +69,41 @@ GuiControl,, lineNo, % lines
 GuiEscape:
 GuiClose:
     ExitApp
-    
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+autoGenerateNodeID(firstNode, amount) {
+    amount -= 1
+    listNode := [firstNode]
+    SetFormat Integer, Hex
+    Loop, %amount%
+    {
+        firstNode += 1
+        listNode.Insert(firstNode)
+    }
+   
+    return listNode
+}
+
+
+
+
+
+/*
+;Open file location
+Gui, Add, Button, gBrowse x316 y60 w90 h20 v1, Browse
+Gui, Add, Button,gBrowse x316 y80 w90 h20 v2, Browse
+Gui, Add, Button,gBrowse x316 y100 w90 h20 v3, Browse
+Gui, Add, Edit, x106 y80 w190 h20 vSelect1, Select1
+Gui, Add, Edit, x106 y100 w190 h20 vSelect2, Select2
+; Generated using SmartGUI Creator 4.0
+Gui, Show, x171 y142 h458 w645, New GUI Window
+Return
+
+
+Browse:
+FileSelectFile, SelectedFile, 3, , Open a file
+GuiControl,,Select%A_GuiControl%,%SelectedFile%
+Return
+*/
