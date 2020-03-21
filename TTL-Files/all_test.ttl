@@ -258,173 +258,123 @@ mpause 1000
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;
-:L4N1_TEST
+:SMC_TEST
+imei = ''
+timeout = 2
+
+mpause 500
+wait '#'
+sendln 'microcom /dev/modem_at0'
+:init
 mpause 500
 sendln 'at'
 waitln 'OK'
-if result =0 goto INIT
-:SMC_TEST
-flushrecv
-sendln 'at+gmi'
-wait "OK"
-mpause 1000
-sendln 'at+gmm'
-wait "OK"
-mpause 1000
-sendln 'at#swpkgv'
-wait radioVersion ;Check radio version
-if result=1 then
-  mpause 1000
-else
-  beep
-  messagebox 'WRONG RADIO VERSION!' 'SMC FAILURE'
-  disconnect
-  closett
-  end
-endif
-mpause 1000
-
-:CSQ_TEST
-timeout = 3
-pause 1
-sendln 'AT+CSQ'
-wait '99,99'
-if result=1 goto CSQ_TEST
-pause 2
-sendln 'at+csq'
+if result=0 goto init
+mpause 500
+sendln 'ate1'
 wait 'OK'
-pause 2
-sendln 'at+csq'
+mpause 500
+sendln 'at+cgsn'
+waitln 'ERROR' '35' '0'
+if result = 1 then
+    messagebox 'COULD NOT FIND IMEI. PLEASE REPORT!' 'IMEI CHECK FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+strconcat imei inputstr
+mpause 500
+sendln 'at+cgsn'
 wait 'OK'
-timeout = 30
 mpause 500
-sendln 'at+csq'
-waitrecv '+CSQ: ' 10 1
-strconcat rssi3 inputstr
-strremove rssi3 1 6
-strremove rssi3 3 2
-str2int strvar rssi3
-strtrim rssi3 ','
-statusbox rssi3 'RSSI'
-if strvar >= 7 then
-  mpause 1000
-  else
-  beep
-  messagebox 'CSQ SIGNAL STRENGTH FAILURE!' 'CSQ FAILURE'
-  goto LOW_RSSI
-endif
-mpause 500
-mpause 1000
-closesbox
-flushrecv
-timeout=5
-mpause 500
-if isLAT3=0 then
-   sendln 'at#gpio=1,0,2'
-   waitln'OK'
-endif
+sendln 'at#gpio=1,0,2'
+waitln'OK'
 mpause 500
 sendln 'at#sled=2'
 waitln 'OK'
 mpause 500
 sendln 'at#sledsav'
 wait 'OK'
+:temp_setting
+flushrecv
 mpause 500
-if isLAT3=0 then
-   sendln 'at#rxdiv=1,3'
-   wait 'OK'
-   mpause 1000
-   sendln 'at#rxdiv?
-   wait '#RXDIV: 1,3'
-   if result=0 then
-   	  beep
-   	  messagebox 'DIVERSITY FAILURE! PLEASE RETEST' 'DIVERSITY FAILURE'
-   	  disconnect
-   	  closett
-   	  end
-	endif
+sendln 'at#tempcfg?'
+waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+if result=0 goto temp_setting
+mpause 500
+sendln 'at#rxdiv?
+wait '#RXDIV: 1,1'
+if result = 0 then
+    mpause 500
+    sendln 'at#rxdiv=1,1'
 endif
+:apn1_check
 flushrecv
 mpause 500
-flushrecv
-sendln 'at+cpin?'
-wait "READY"
-if result=1 then
-  mpause 1000
-else
-  beep
-  messagebox "**** SIM NOT DETECTED ****" "SIM FAILURE"
-  end
-  disconnect
-endif
-mpause 500
-
-mpause 500
-sendln 'at#servinfo'
-waitln '#SERVINFO:'
-	   if result=0 goto NETWORK_CONNECTION_FAILURE
-strscan inputstr "-"
-strcopy inputstr result 4 rssi_level
-strtrim rssi_level ','
-statusbox  rssi_level 'Signal Level'
-str2int rssi rssi_level
-		if rssi < -99 goto LOW_RSSI
-mpause 1000
-flushrecv
-sendln 'at#moni'
-waitln '#MONI:'
-	   if result=0 goto NETWORK_CONNECTION_FAILURE
-strscan inputstr  'PWR:'
-result = result + 4
-strcopy inputstr result 4 sig_level
-strtrim sig_level 'd'
-statusbox  sig_level 'Signal Level'
-str2int rssi2 sig_level
-		if rssi2 < -99 goto LOW_RSSI
-mpause 1000
-closesbox
-mpause 500
-flushrecv
-sendln 'at#servinfo'
-waitln 'T-Mobile' 'AT&T' 'Verizon'
-	if result=0 goto NETWORK_CONNECTION_FAILURE
-pause 1
-sendln 'at#moni'
-waitln 'T-Mobile' 'AT&T' 'Verizon'
-	if result=0 goto NETWORK_CONNECTION_FAILURE
-pause 1
-
-:APN1_CHECK
 sendln 'at+cgdcont?'
-waitln '+CGDCONT: 1,"IPV4V6","","",0,0'
-   if result =0 then
-   sendln 'at+cgdcont=1,"IPV4V6",""'
-   goto APN1_CHECK
+waitln '+CGDCONT: 1,"IPV4V6",""'
+if result =0 then
+    sendln 'at+cgdcont=1,"IPV4V6","",""'
+    goto apn1_check
 endif
-pause 1
-sendln 'at+cgsn'
-wait 'OK'
 mpause 500
+sendln 'at+cgdcont?'
+waitln '+CGDCONT: 2,"IPV4V6","ims"'
+if result =0 then
+    sendln 'at+cgdcont=2,"IPV4V6","ims"'
+    goto apn1_check
+endif
+mpause 500
+sendln 'at+cgdcont?'
+waitln '+CGDCONT: 3,"IPV4V6","sos"'
+if result =0 then
+    sendln 'at+cgdcont=3,"IPV4V6","sos"'
+    goto apn1_check
+endif
+
+if isL4E1 = 0 goto l4e1_test
+if isL4N1 = 0 goto l4n1_test
+
+:l4e1_test
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C4-EU'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C4-EU' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '25.20.673'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.673' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
 flushrecv
 sendln 'at#cfvr'
-wait '0' '2' '6'
-if result > 0 then
-   	mpause 1000
-else
-   	beep
-  	messagebox "FIRMWARE SUB VERSION FAILURE" "FIRMWARE SUB FAILURE"
-    disconnect
-    closett
-	end
+waitln '2'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
 endif
-
-mpause 500
-mpause 1000
-flushrecv
-sendln 'at+cgsn'
-wait "OK"
-mpause 1000
 send 24 ;Quit 'at' command promt
+goto SHORTING_MTCDT
+
+:l4n1_test
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C4-NF'
+;Still working on...........
+send 24 ;Quit 'at' command promt
+goto SHORTING_MTCDT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDT

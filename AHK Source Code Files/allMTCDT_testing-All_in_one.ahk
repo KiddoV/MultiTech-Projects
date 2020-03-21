@@ -170,7 +170,9 @@ mainStart() {
     }
     
     if (check = 0) {
-        MsgBox, 33, Question, Begin ONLY Auto-Functional Test for %itemNum%?
+        OnMessage(0x44, "PlayInCircleIcon")
+        MsgBox 0x81, Question, Begin ONLY Auto-Functional Test for %itemNum%?
+        OnMessage(0x44, "")
         IfMsgBox Cancel
             return
         IfMsgBox OK
@@ -186,7 +188,9 @@ mainStart() {
             MsgBox, 8240, Alert, Please connect to PORT first!`nAnd make sure the device is booted. ;Uses 48 + 8192
             return
         }
-        MsgBox, 33, Question, Begin Auto-Full Test for %itemNum%?
+        OnMessage(0x44, "PlayInCircleIcon")
+        MsgBox 0x81, Question, Begin Auto-Full Test for %itemNum%?
+        OnMessage(0x44, "")
         IfMsgBox Cancel
             return
         IfMsgBox OK

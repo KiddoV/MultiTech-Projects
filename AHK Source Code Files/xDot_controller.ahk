@@ -69,21 +69,35 @@ GuiControl,, lineNo, % lines
 GuiEscape:
 GuiClose:
     ExitApp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+/*
+    Return a list of node in String
+*/
 autoGenerateNodeID(firstNode, amount) {
     amount -= 1
-    listNode := [firstNode]
+    listNode := [firstNode] ;included first node
+    listNodeStr := ""
+    
     SetFormat Integer, Hex
     Loop, %amount%
     {
         firstNode += 1
-        listNode.Insert(firstNode)
+        listNode.Push(firstNode)
     }
-   
-    return listNode
+    
+    For index, value In listNode
+    {
+        Format((InStr(value,0x)?"0":"")"{:X}", value)
+        listNodeStr .= "`n" . value 
+    }
+    listNodeStr := LTrim(listNodeStr, "`n") ;remove first while space
+    
+    return listNodeStr
 }
 
 

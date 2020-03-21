@@ -1,3 +1,5 @@
+microcom /dev/modem_at0
+
 -----L4N1 (70000049L, 70000054L)------------------------
 at
 ate1
@@ -19,3 +21,20 @@ at#moni => 	#MONI: AT&T PSC:235 RSCP:-88 LAC:7F03 Id:5792AF5 EcIo:-13.0 UARFCN:1
 at+cgdcont? => 	+CGDCONT: 1,"IPV4V6","nxtgenphone","",0,0,0,0
 		+CGDCONT: 2,"IPV4V6","ims","",0,0,0,0
 		+CGDCONT: 3,"IPV4V6","sos","",0,0,0,1
+-----L4E1 (70000043L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmm =>	LE910C4-EU
+at+gmr =>	25.20.673
+at#cfvr =>	#CFVR: 2
+at#gpio=1,0,2
+at#sled=2
+at#sledsav
+at#tempcfg? =>	#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3
+at+cpin? =>	+CPIN: READY
+at#rxdiv? =>	#RXDIV: 1,1
+at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0,0,0
+		+CGDCONT: 2,"IPV4V6","ims","",0,0,0,0
+		+CGDCONT: 3,"IPV4V6","sos","",0,0,0,1
+
