@@ -7,7 +7,9 @@
 
 Gui Add, GroupBox, xm+205 ym+3 w324 h485 Section, xDot Node IDs
 Gui, Add, Edit, xs+10 y31 w35 r34.3 -VScroll -HScroll -Border Disabled Right vlineNo
-Gui, Add, Edit, xs+45 y31 r33 hwndEdit w270 +HScroll vedit , % text
+Gui Font, Bold q5, Consolas
+Gui, Add, Edit, xs+45 y31 r33 hwndEdit w270 +HScroll veditNode
+Gui Font
 Gui, Show, w550 h500, xDot Controller
 
 Gui Add, GroupBox, xm+1 ym+3 w200 h160 Section, xDot Pannel
@@ -41,16 +43,16 @@ Gui Add, Button, xs+133 ys+120 w30 h30, P23
 Gui Add, Button, xs+165 ys+120 w30 h30, P24
 Gui Font
 
-GuiControlGet, edit, Pos, edit
+GuiControlGet, editNode, Pos, editNode
 
 SetTimer, timer, 1
 return
 
 timer:
 pos := DllCall("GetScrollPos", "UInt", Edit, "Int", 1)
-ifEqual, pos, % posPrev, return                       ; nothing new
+ifEqual, pos, % posPrev, return                       ;if nothing new
 posPrev := pos
-drawLineNumbers(pos)                                  ; draw line numbers
+drawLineNumbers(pos)                                  ;draw line numbers
 return
 
 drawLineNumbers(firstLine = "") {
@@ -71,8 +73,8 @@ GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
-
-
+^g::
+GuiControl Text, editNode, % autoGenerateNodeID(0x08000fafbbfff1, 500)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 /*
@@ -80,10 +82,10 @@ GuiClose:
 */
 autoGenerateNodeID(firstNode, amount) {
     amount -= 1
-    listNode := [firstNode] ;included first node
+    listNode := [firstNode]     ;included first node
     listNodeStr := ""
     
-    SetFormat Integer, Hex
+    SetFormat Integer, Hex      ;convert value to Hex
     Loop, %amount%
     {
         firstNode += 1
@@ -92,17 +94,13 @@ autoGenerateNodeID(firstNode, amount) {
     
     For index, value In listNode
     {
-        Format((InStr(value,0x)?"0":"")"{:X}", value)
         listNodeStr .= "`n" . value 
     }
-    listNodeStr := LTrim(listNodeStr, "`n") ;remove first while space
+    listNodeStr := LTrim(listNodeStr, "`n")     ;remove first while space
     
+    StringReplace, listNodeStr, listNodeStr, 0x, 0, All
     return listNodeStr
 }
-
-
-
-
 
 /*
 ;Open file location
