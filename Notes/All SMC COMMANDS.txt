@@ -1,5 +1,24 @@
 microcom /dev/modem_at0
 
+-----LAT3 (70000041L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmi =>	Telit
+at+gmm =>	LE910-NA1
+at+gmr =>	20.00.526
+at#cfvr => 	#CFVR: 0
+at#gpio=1,0,2
+at#sled=2
+at#sledsav
+at#rxdiv=1,3
+at#rxdiv? =>	#RXDIV: 1,3
+AT+CSQ => 	+CSQ: ##,#
+at+csq => 	+CSQ: ##,#
+at#servinfo =>	#SERVINFO: 2300,-67,"T-Mobile","310260",0000119,0000,128,0,-105
+at#moni =>	#MONI: T-Mobile RSRP:-105 RSRQ:-14.0 TAC:0000 Id:0000000 EARFCN:2300 PWR:-67dbm DRX:128 pci:281 QRxLevMin:16	
+at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0
+
 -----L4N1 (70000049L, 70000054L)------------------------
 at
 ate1

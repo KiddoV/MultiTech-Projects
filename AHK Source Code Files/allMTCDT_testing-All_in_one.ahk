@@ -23,8 +23,8 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
-Global 240_ItemNums := ["70000041L", "70000049L"]
-Global 246_ItemNums := ["70000005L", "70000033L", "70000043L", ""]
+Global 240_ItemNums := ["70000041L", ""]
+Global 246_ItemNums := ["70000005L", "", "70000043L", ""]
 Global 247_ItemNums := ["", ""]
 
 ;;;Paths and Links
@@ -87,7 +87,7 @@ Gui Add, Text, x64 y263 w136 h21 +0x200, Check Temperature
 Gui Add, Text, x64 y285 w136 h21 +0x200, Check Thumb Drive/SD
 Gui Add, Text, x64 y307 w136 h21 +0x200, Check LORA/MTAC
 Gui Add, Text, x64 y329 w136 h21 +0x200 vcheckSimCell, Check SIM/Cellular
-Gui Add, Text, x64 y351 w136 h21 +0x200 vcheckOthSMC, Check Others/SMC
+Gui Add, Text, x64 y351 w136 h21 +0x200 vcheckOthSMC, Check SMC/Others
 Gui Add, Text, x64 y372 w136 h21 +0x200 +Hidden vcheckGps, Check GPS
 Gui Add, Text, x64 y393 w136 h21 +0x200 +Hidden vcheckWifi, Check WiFi/Bluetooth
 
@@ -135,8 +135,8 @@ GuiClose:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
 ^q:: ExitApp
-^t:: 
-^r:: mainStart()
+^s:: 
+^t:: mainStart()
 ^i:: checkBoxToggle()
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -184,7 +184,7 @@ mainStart() {
         }
     } 
     Else {
-        If !WinExist("COM.*") {
+        If !WinExist("^COM.*") {
             MsgBox, 8240, Alert, Please connect to PORT first!`nAnd make sure the device is booted. ;Uses 48 + 8192
             return
         }
@@ -211,8 +211,8 @@ mainStart() {
     Sleep 1000
     ControlClick, Button1, TEST DONE.*, , Left, 2
     
-    if WinExist("COM.*") {
-        WinActivate COM.*
+    if WinExist("^COM") {
+        WinActivate ^COM
         Send !i
     }
     
@@ -225,7 +225,7 @@ mainStart() {
 configStep(mtcdtType, itemN, mtcType, radType) {
     disableGuis("Disable")
     
-    WinActivate COM.*
+    WinActivate ^COM
     GuiControl , , process1, %arrowImg%
     SendInput !om
     WinWait MACRO.*
@@ -259,10 +259,10 @@ configStep(mtcdtType, itemN, mtcType, radType) {
     
     ;Recheck config
     GuiControl , , process3, %arrowImg%
-    WinActivate COM.*
+    WinActivate ^COM
     Loop 50
         Click WheelUp
-    WinActivate COM.*
+    WinActivate ^COM
     Sleep 300
     if (searchForFFs() = 1) {
         Loop 50
@@ -323,8 +323,8 @@ functionalTestStep(itemN, mtcType, radType) {
     
     ;Check Lora
     GuiControl , , process8, %arrowImg%
-    WinWait LORA.*|PASSED1
-    if WinExist("LORA.*") {
+    WinWait .*FAILURE|PASSED1
+    if WinExist(".*FAILURE") {
         GuiControl , , process8, %timeImg%
         return 0
     }
@@ -345,19 +345,26 @@ functionalTestStep(itemN, mtcType, radType) {
     
         ;Other checks/ SMC
         GuiControl , , process10, %arrowImg%
-        WinWait RSSI.*
-        WinWait Signal.*
+        ;WinWait RSSI.*
+        ;WinWait Signal.*
+        WinWait .*FAILURE|PASSED
+        if WinExist(".*FAILURE") {
+            GuiControl , , process10, %timeImg%
+            return 0
+        }
         GuiControl , , process10, %checkImg%
     }
-    
-    ;Check GPS
-    GuiControl , , process11, %arrowImg%
-    WinWait GPS TEST FAILURE.*|PASSED.*
-    if WinExist("GPS TEST FAILURE.*") {
-        GuiControl , , process11, %timeImg%
-        return 0
+    if (mtcType != "240L") {
+        ;Check GPS
+        GuiControl , , process11, %arrowImg%
+        Sleep 600
+        WinWait GPS TEST FAILURE.*|PASSED.*
+        if WinExist("GPS TEST FAILURE.*") {
+            GuiControl , , process11, %timeImg%
+            return 0
+        }
+        GuiControl , , process11, %checkImg%
     }
-    GuiControl , , process11, %checkImg%
     
     ;Check Wifi/BT
     
@@ -440,8 +447,8 @@ disableGuis(option) {
 
 getRadioType(itemN) {
     NONE := ["70000005L"]
-    LAT1 := ["70000041L"]
-    LAT3 := [""]
+    LAT1 := [""]
+    LAT3 := ["70000041L"]
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", ""]
     LAP3 := ["70000045L"]

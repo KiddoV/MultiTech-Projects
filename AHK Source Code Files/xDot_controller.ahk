@@ -5,12 +5,18 @@
 #SingleInstance force
 #NoEnv
 
-Gui Add, GroupBox, xm+205 ym+3 w324 h485 Section, xDot Node IDs
-Gui, Add, Edit, xs+10 y31 w35 r34.3 -VScroll -HScroll -Border Disabled Right vlineNo
+Gui Add, GroupBox, xm+205 ym+55 w325 h370 Section, xDot NodeIDs
+Gui, Add, Edit, xs+10 ys+22 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
 Gui Font, Bold q5, Consolas
-Gui, Add, Edit, xs+45 y31 r33 hwndEdit w270 +HScroll veditNode
+Gui, Add, Edit, xs+45 ys+22 r24 hwndEdit w270 +HScroll veditNode
 Gui Font
-Gui, Show, w550 h500, xDot Controller
+
+Gui Add, GroupBox, xm+300 ym+3 w230 h50 Section, Auto Generate NodeIDs
+Gui, Add, Edit, xs+10 ys+22 w110 hwndHED1 vfirstNodeID Limit16
+SetEditCueBanner(HED1, "First nodeIDs")
+Gui, Add, Edit, xs+124 ys+22 w42 Limit4 +Number hwndHED2 vnodeAmout
+SetEditCueBanner(HED2, "Amount")
+Gui, Add, Button, xs+170 ys+22 w50 h21 ggenerateNode, Generate
 
 Gui Add, GroupBox, xm+1 ym+3 w200 h160 Section, xDot Pannel
 Gui Font, Bold, Ms Shell Dlg 2
@@ -43,6 +49,9 @@ Gui Add, Button, xs+133 ys+120 w30 h30, P23
 Gui Add, Button, xs+165 ys+120 w30 h30, P24
 Gui Font
 
+
+Gui, Show, w550 h500, xDot Controller
+
 GuiControlGet, editNode, Pos, editNode
 
 SetTimer, timer, 1
@@ -60,7 +69,7 @@ local lines
 static prevFirstLine
 prevFirstLine := firstLine != "" ? firstLine : prevFirstLine
 firstLine := prevFirstLine
-loop, 33
+loop, 24
 {
     lines .= ++firstLine . "`n"
 }
@@ -73,35 +82,67 @@ GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
-^g::
-GuiControl Text, editNode, % autoGenerateNodeID(0x08000fafbbfff1, 500)
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+generateNode() {
+    GuiControlGet, firstNodeID
+    GuiControlGet, nodeAmout
+    
+    if (StrLen(firstNodeID) < 16) {
+        MsgBox NodeID should have 16 digits!
+        return
+    } else if (RegExMatch(firstNodeID, "^[0-9A-Fa-f]+$") = 0) {
+        MsgBox Please enter only Hexadecimal for NodeID!
+        return
+    } else if (StrLen(nodeAmout) < 1) {
+        MsgBox Please enter an amount for NodeID!
+        return
+    }
+    
+    firstNodeID = 0x%firstNodeID%   ;convert value to Hex
+    
+    GuiControl Text, editNode, % autoGenerateNodeID(firstNodeID, nodeAmout)
+}
+
 /*
     Return a list of node in String
 */
 autoGenerateNodeID(firstNode, amount) {
-    amount -= 1
-    listNode := [firstNode]     ;included first node
+    listNode := []
     listNodeStr := ""
-    
     SetFormat Integer, Hex      ;convert value to Hex
+    index := 0
     Loop, %amount%
     {
-        firstNode += 1
+        firstNode += index
         listNode.Push(firstNode)
+        index++
     }
-    
+    ;00800FAFAFAFAFAF
     For index, value In listNode
     {
-        listNodeStr .= "`n" . value 
+        listNodeStr .= "`n" . value
     }
     listNodeStr := LTrim(listNodeStr, "`n")     ;remove first while space
     
-    StringReplace, listNodeStr, listNodeStr, 0x, 0, All
+    SetFormat Integer, D
+    nodelength := StrLen(firstNode)
+    if (nodelength = 16)
+        StringReplace, listNodeStr, listNodeStr, 0x, 00, All
+    else if (nodelength = 17)
+        StringReplace, listNodeStr, listNodeStr, 0x, 0, All
+    else if (nodelength = 18)
+        StringReplace, listNodeStr, listNodeStr, 0x, , All
+        
     return listNodeStr
 }
 
+SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
+   Static EM_SETCUEBANNER := (0x1500 + 1)
+   Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
+}
 /*
 ;Open file location
 Gui, Add, Button, gBrowse x316 y60 w90 h20 v1, Browse

@@ -255,12 +255,12 @@ else
   end
 endif
 mpause 1000
-
+send 24 ;Exit 'at' command promt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;
 :SMC_TEST
 imei = ''
-timeout = 2
+timeout = 3
 
 mpause 500
 wait '#'
@@ -295,11 +295,12 @@ waitln 'OK'
 mpause 500
 sendln 'at#sledsav'
 wait 'OK'
+
 :temp_setting
 flushrecv
 mpause 500
 sendln 'at#tempcfg?'
-waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3' '#TEMPCFG: -40,-15,55,85'
 if result=0 goto temp_setting
 mpause 500
 sendln 'at#rxdiv?
@@ -332,10 +333,117 @@ if result =0 then
     goto apn1_check
 endif
 
-if isL4E1 = 0 goto l4e1_test
-if isL4N1 = 0 goto l4n1_test
+if isLAT3 = 0 goto LAT3_TEST
+if isL4E1 = 0 goto L4E1_TEST
+if isL4N1 = 0 goto L4N1_TEST
 
-:l4e1_test
+;;;;;;;;;;;;;;
+:LAT3_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-NA1'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-NA1' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '20.00.526'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 20.00.526' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '0'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 0' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+:csq_check
+mpause 500
+sendln 'AT+CSQ'
+wait '99'
+if result =1 goto csq_check
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+timeout = 30
+mpause 500
+sendln 'at+csq'
+waitrecv '+CSQ: ' 10 1
+strconcat rssi3 inputstr
+strremove rssi3 1 6
+strremove rssi3 3 2
+str2int strvar rssi3
+strtrim rssi3 ','
+statusbox rssi3 'RSSI'
+if strvar >= 7 then
+    mpause 1000
+else
+    beep
+    messagebox 'LOW RSSI. CSQ SIGNAL STRENGTH FAILURE!' 'CSQ CHECK FAILURE'
+    disconnect
+    closett
+    end
+endif
+
+flushrecv
+mpause 500
+sendln 'at#moni'
+waitln '#MONI:'
+	   if result=0 goto NETWORK_CONNECTION_FAILURE
+strscan inputstr  'PWR:'
+result= result+4
+strcopy inputstr result 4 sig_level
+strtrim sig_level 'd'
+statusbox  sig_level 'Signal Level'
+str2int rssi2 sig_level
+if rssi2 < -99 goto LOW_RSSI
+mpause 1000
+closesbox
+mpause 500
+flushrecv
+sendln 'at#servinfo'
+waitln 'T-Mobile' 'AT&T' 'Verizon'
+	if result=0 goto NETWORK_CONNECTION_FAILURE
+pause 1
+sendln 'at#moni'
+waitln 'T-Mobile' 'AT&T' 'Verizon'
+	if result=0 goto NETWORK_CONNECTION_FAILURE
+pause 1
+
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+
+;;;;;;;;;;;;;;
+:L4E1_TEST
 mpause 500
 sendln 'at+gmm'
 waitln 'LE910C4-EU'
@@ -365,15 +473,19 @@ if result=0 then
    	closett
    	end
 endif
-send 24 ;Quit 'at' command promt
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
 goto SHORTING_MTCDT
 
-:l4n1_test
+;;;;;;;;;;;;;;
+:L4N1_TEST
 mpause 500
 sendln 'at+gmm'
 waitln 'LE910C4-NF'
 ;Still working on...........
-send 24 ;Quit 'at' command promt
+send 24 ;Exit 'at' command promt
 goto SHORTING_MTCDT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

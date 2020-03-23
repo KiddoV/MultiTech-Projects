@@ -12,7 +12,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;Firmware list
-Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5"]
+Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6"]
 
 ;Paths and Links
 Global mli401Path := "C:\vbtest\MTCDT\mLinux-4.0.1-2x7\mtcdt-rs9113-flash-full-4.0.1.tcl"
@@ -26,6 +26,7 @@ Global aep164Path := "C:\vbtest\MTCDT\AEP-1_6_4\mtcdt-flash-full-AEP.tcl"
 Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
 Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
 Global aep515Path := "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"
+Global aep516Path := "C:\vbtest\MTCDT\AEP-5_1_6\mtcdt-flash-full-AEP.tcl"
 
 ;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
@@ -217,6 +218,8 @@ install_firmware(fw, chk) {
             ControlSetText, Edit1, %aep512Path%, Select Script File.*
         If (fw = "AEP 5.1.5")
             ControlSetText, Edit1, %aep515Path%, Select Script File.*
+        If (fw = "AEP 5.1.6")
+            ControlSetText, Edit1, %aep516Path%, Select Script File.*
         
         Sleep 300
         ControlSend Edit1, {Enter}, Select Script File.*
