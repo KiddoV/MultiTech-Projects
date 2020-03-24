@@ -66,7 +66,7 @@ mpause 500
 :LED_TEST
 statusbox 'Please do a visual check on LED!' 'CHECK LED'
 bringupbox
-for i 1 3
+for i 1 2
 	mpause 300
 	sendln 'mts-io-sysfs store led-a 1'
 	wait "mtcdt:/home/mtadm#"
@@ -94,6 +94,16 @@ if result=1 then
    goto LED_FAILURE
 endif
 mpause 500
+:all_led_on
+send 13
+wait '#'
+sendln 'mts-io-sysfs store led-a 1'
+wait "#"
+sendln 'mts-io-sysfs store led-b 1'
+wait "#"
+sendln 'mts-io-sysfs store led-c 1'
+wait "#"
+sendln 'mts-io-sysfs store led-d 1'
 
 timeout = 5
 :TEMPERATURE_TEST
@@ -104,10 +114,10 @@ str2int strvar inputstr
 statusbox strvar 'temp'
 pause 2 
 closesbox
-if strvar > 45000 then
+if strvar > 46000 then
 	messagebox 'TEMP VALUE HIGH LIMIT FAILURE!' 'TEMP FAILURE'
-	messagebox strvar 'Temperature Value'
 	disconnect
+	closett
 	end
 endif
 wait "mtcdt:/home/mtadm#"
@@ -236,6 +246,7 @@ else
 endif
 mpause 1000
 
+imei = ''
 if isNONE=0 goto SHORTING_MTCDT
 
 :SIM_TEST
@@ -300,7 +311,13 @@ wait 'OK'
 flushrecv
 mpause 500
 sendln 'at#tempcfg?'
-waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3' '#TEMPCFG: -40,-15,55,85'
+if isL4N1=0 || isL4E1=0 then
+    waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+elseif isLAT3=0 then
+	waitln '#TEMPCFG: -40,-15,55,85'
+elseif isLAT1=0 then
+	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+endif
 if result=0 goto temp_setting
 mpause 500
 sendln 'at#rxdiv?
@@ -333,9 +350,71 @@ if result =0 then
     goto apn1_check
 endif
 
+if isLAT1 = 0 goto LAT1_TEST
 if isLAT3 = 0 goto LAT3_TEST
 if isL4E1 = 0 goto L4E1_TEST
 if isL4N1 = 0 goto L4N1_TEST
+
+;;;;;;;;;;;;;;
+:LAT1_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-NAG'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-NAG' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '17.00.503'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 17.00.503' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '10'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 10' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'AT+CSQ'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+chup'
+wait 'OK'
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
 
 ;;;;;;;;;;;;;;
 :LAT3_TEST
@@ -499,8 +578,8 @@ timeout = 70
 mpause 500
 flushrecv
 sendln 'gpspipe -r'
-wait '4505.' '4506.' 
-if result=0 then 
+wait '4505.' '4506.' 'could not connect'
+if result=0 || result=3 then
    messagebox 'UNABLE TO GET GPS LOCATION' 'GPS TEST FAILURE'
    disconnect
    closett
@@ -514,10 +593,101 @@ mpause 500
 closesbox
 pause 1
 
-if is246L=0 goto TEST_DONE
+if is247L != 0 goto TEST_DONE
 
 :WIFI_BT_TEST
-timeout = 10
+timeout = 15
+wifiAddr = ''
+bluetoothAddr = ''
+
+mpause 500
+sendln '/etc/init.d/rs9113 stop >/dev/null 2>&1'
+wait '#'
+mpause 500
+sendln 'export COEX_MODE=5'
+wait '#'
+mpause 500
+sendln 'cd /opt/rs9113;bash /opt/rs9113/wlan_enable.sh >/dev/null 2>&1'
+wait '#' 'No such file or directory'
+if result=2 goto WIFI_FAILURE
+mpause 500
+sendln '/opt/rs9113/onebox_util rpine0 create_vap wifi1 sta sw_bmiss'
+wait '#' 'No such file or directory'
+if result=2 goto WIFI_FAILURE
+mpause 500
+sendln 'ip link set dev wifi1 up'
+wait '#'
+:wifi_addr_check
+flushrecv
+mpause 500
+sendln "ifconfig |grep -i wifi1 |awk '{print $5}'"
+waitln '00:' '88:'
+strlen inputstr
+if result <>17 goto wifi_addr_check
+strconcat wifiAddr inputstr
+
+timeout=30
+:wifi_scan
+mpause 500
+sendln 'iw dev wifi1 scan |grep -i SSID'
+waitln  'Dummy' 'MTS-MOBILE' 'MTS-PRINTERS' 'MTS-MFG' 'MTS-IT'
+if result > 0 then
+    statusbox 'WIFI PASSED' 'PASSED1'
+elseif result = 0 then
+	goto WIFI_FAILURE
+endif
+mpause 1000
+closesbox
+send 13
+wait '#'
+mpause 500
+sendln '/etc/init.d/rs9113 start >/dev/null 2>&1'
+wait '#'
+mpause 500
+sendln 'hciconfig hci0 up'
+wait '#'
+
+:bt_addr_check
+flushrecv
+mpause 500
+sendln "hcitool dev |grep -i hci0 |awk '{print $2}'"
+waitln '00:' '88:'
+strlen inputstr
+if result <>17 goto bt_addr_check
+strconcat bluetoothAddr inputstr
+
+timeout=50
+:bt_scan
+mpause 500
+sendln "hcitool scan"
+waitln 'Windows CE' 'MUSKYS_blue' 'slave' 'G5' 'WindowsCE' 'OPERATOR-PC' 'ADMIN-PC' 'MTHS' 'TESTROOM'
+if result > 0 then
+    statusbox 'BLUETOOTH PASS' 'PASSED2'
+elseif result = 0 then
+	goto BT_FAILURE
+endif
+mpause 1000
+closesbox
+send 13
+
+:write_data_to_file
+mpause 1000
+fileopen fhandle 'C:\temp\wifimacinfo.txt' 1
+filewrite fhandle #13#10
+filewrite fhandle imei
+filewrite fhandle ","
+filewrite fhandle ","
+filewrite fhandle wifiAddr
+filewrite fhandle ","
+filewrite fhandle ","
+filewrite fhandle bluetoothAddr
+fileclose fhandle
+pause 1
+
+:VERIFY_WIFI_BT_RECORD
+mpause 500
+messagebox 'PLEASE VERIFY IF WIFI AND BLUETOOTH ADDRESS WERE RECORDED CORRECTLY!' 'WIFI/BT MAC ADDRESS VERIFICATION'
+exec 'notepad c:\temp\wifimacinfo.txt'
 
 :TEST_DONE
 beep
@@ -525,7 +695,6 @@ messagebox 'MTCDT TEST COMPLETE' 'TEST DONE'
 disconnect
 closett
 end
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :LED_FAILURE
@@ -542,6 +711,18 @@ end
 
 :LOW_RSSI
 messagebox 'CSQ SIGNAL TOO LOW. RETEST!' 'WIRELESS SIGNAL MEASUREMENT FAILURE'
+disconnect
+closett
+end
+
+:WIFI_FAILURE
+messagebox 'UNABLE TO START WIFI SERVICE. REBOOT!' "WIFI TEST FAILURE'
+disconnect
+closett
+end
+
+:BT_FAILURE
+messagebox 'UNABLE TO GET BLUETOOTH SERVICE. REBOOT!' "BLUETOOTH TEST FAILURE'
 disconnect
 closett
 end

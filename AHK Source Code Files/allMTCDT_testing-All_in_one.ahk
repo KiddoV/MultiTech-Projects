@@ -23,9 +23,9 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
-Global 240_ItemNums := ["70000041L", ""]
+Global 240_ItemNums := ["70000037L", "70000041L", ""]
 Global 246_ItemNums := ["70000005L", "", "70000043L", ""]
-Global 247_ItemNums := ["", ""]
+Global 247_ItemNums := ["70000044L", ""]
 
 ;;;Paths and Links
 ;GUI images
@@ -107,9 +107,9 @@ Gui Add, Picture, x30 y351 w21 h21 +BackgroundTrans vprocess10
 Gui Add, Picture, x30 y373 w21 h21 +BackgroundTrans vprocess11
 Gui Add, Picture, x30 y395 w21 h21 +BackgroundTrans vprocess12
 
-Gui Add, Button, x70 y388 w80 h23 vstartBttn gmainStart, &START
+Gui Add, Button, x70 y388 w80 h23 vstartBttn gmainStart, S&TART
 
-Gui Show, x1269 y324 w220 h420, All MTCDT Auto-Tester
+Gui Show, w220 h420, All MTCDT Auto-Tester
 Return
 
 ;;;;;;;;;All menu handlers
@@ -122,7 +122,7 @@ MsgBox 0, Message, This feature will be added in the future release!
 Return
 
 keyShcutHandler:
-MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App`nCtrl + I  to Toggle Check Box
+MsgBox 0, Keyboard Shortcuts, Ctrl + T to RUN`nCtrl + Q to Exit App`nCtrl + I  to Toggle Check Box
 Return
 aboutHandler:
 MsgBox 0, Message, Created and Tested by Viet Ho
@@ -134,8 +134,7 @@ GuiClose:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
-^q:: ExitApp
-^s:: 
+^q:: ExitApp 
 ^t:: mainStart()
 ^i:: checkBoxToggle()
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -225,6 +224,21 @@ mainStart() {
 configStep(mtcdtType, itemN, mtcType, radType) {
     disableGuis("Disable")
     
+    if WinExist("MACRO") {
+        WinKill MACRO
+    }
+    
+    ;Check if device rebooted
+    WinActivate ^COM
+    SendInput !es
+    WinActivate ^COM
+    SendInput ^c
+    If (searchForFirmwareVersion(2, 500) = 0) {
+        MsgBox 48, Not Ready or Wrong Port, MTCDT is not ready!`nPlease check PORT or reboot device first!
+        return 0
+    }
+    
+    ;Begin Test
     WinActivate ^COM
     GuiControl , , process1, %arrowImg%
     SendInput !om
@@ -279,13 +293,24 @@ configStep(mtcdtType, itemN, mtcType, radType) {
 functionalTestStep(itemN, mtcType, radType) {
     disableGuis("Disable")
     
+    if WinExist("MACRO") {
+        WinKill MACRO
+    }
+    if WinExist("192.168.*") {
+        WinKill 192.168.*
+    }
+    
+    if WinExist("wifimacinfo") {
+        WinKill wifimacinfo
+    }
+    
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
     Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\V-Projects\AMAuto-Tester\TTL-Files\all_test.ttl %mtcType% %radType%, ,Hide
     WinWait SSH.*, , 4
     If !WinExist("SSH.*") {
         GuiControl , , process4, %timeImg%
-        MsgBox Failed to connect to E-Net
+        MsgBox 16, E-Net Connection Failed, Failed to connect to E-Net!`nReboot Device!
         return 0
     }
     If WinExist(".*Error.*") {
@@ -308,7 +333,12 @@ functionalTestStep(itemN, mtcType, radType) {
     
     ;Check Temparature
     GuiControl , , process6, %arrowImg%
-    WinWait temp, , 5
+    WinWait temp
+    WinWait FAILURE, , 8
+    if WinExist("FAILURE") {
+        GuiControl , , process6, %timeImg%
+        return 0
+    }
     GuiControl , , process6, %checkImg%
     
     ;Check Thumb Drive
@@ -332,6 +362,7 @@ functionalTestStep(itemN, mtcType, radType) {
     WinWaitClose PASSED2
     GuiControl , , process8, %checkImg%
     
+    ;SMC check
     if (radType != "NONE") {
         ;Check Sim
         GuiControl , , process9, %arrowImg%
@@ -354,8 +385,9 @@ functionalTestStep(itemN, mtcType, radType) {
         }
         GuiControl , , process10, %checkImg%
     }
+    
+    ;Check GPS
     if (mtcType != "240L") {
-        ;Check GPS
         GuiControl , , process11, %arrowImg%
         Sleep 600
         WinWait GPS TEST FAILURE.*|PASSED.*
@@ -367,6 +399,21 @@ functionalTestStep(itemN, mtcType, radType) {
     }
     
     ;Check Wifi/BT
+    if (mtcType = "247L") {
+        GuiControl , , process12, %arrowImg%
+        Sleep 1000
+        WinWait FAILURE|PASSED2
+        if WinExist("FAILURE") {
+            GuiControl , , process12, %timeImg%
+            return 0
+        }
+        GuiControl , , process12, %checkImg%
+        
+        WinWait VERIFICATION
+        Sleep 1000
+        ControlClick, Button1, VERIFICATION.*, , Left, 2
+        WinWait Notepad
+    }
     
 }
 
@@ -447,10 +494,10 @@ disableGuis(option) {
 
 getRadioType(itemN) {
     NONE := ["70000005L"]
-    LAT1 := [""]
+    LAT1 := ["70000037L"]
     LAT3 := ["70000041L"]
     LEU1 := ["70000033L", ""]
-    L4E1 := ["70000043L", ""]
+    L4E1 := ["70000043L", "70000044L"]
     LAP3 := ["70000045L"]
     L4N1 := ["70000049L"]
     
@@ -479,7 +526,7 @@ searchForFFs(){
 searchForFirmwareVersion(loopCount, sleepTime) {
     Loop, %loopCount%
     {
-        WinActivate COM.*
+        WinActivate ^COM
         CoordMode, Pixel, Window
         ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp
         If ErrorLevel = 0

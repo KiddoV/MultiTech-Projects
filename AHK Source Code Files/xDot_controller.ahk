@@ -143,6 +143,11 @@ SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
    Static EM_SETCUEBANNER := (0x1500 + 1)
    Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
 }
+
+getCmdOut(command) {
+    RunWait, PowerShell.exe -ExecutionPolicy Bypass -Command %command% | clip , , Hide
+    return Clipboard
+}
 /*
 ;Open file location
 Gui, Add, Button, gBrowse x316 y60 w90 h20 v1, Browse

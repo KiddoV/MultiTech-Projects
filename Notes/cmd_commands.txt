@@ -6,3 +6,20 @@
 >>> $port.ReadLine()
 >>> $port.Close()
 >>> $port.ReadExisting()
+
+
+command = cmd /c echo Hello
+DetectHiddenWindows On
+Run %ComSpec%,, Hide, pid
+WinWait ahk_pid %pid%
+DllCall("AttachConsole", "UInt", pid)
+objShell := ComObjCreate("WScript.Shell")
+objExec := objShell.Exec(command)
+while, !objExec.StdOut.AtEndOfStream
+{
+    output .= objExec.StdOut.Read(1)
+    tooltip, %output%
+}
+DllCall("FreeConsole")
+Process Close, %pid%
+tooltip, %output%

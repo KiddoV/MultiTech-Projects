@@ -1,5 +1,28 @@
 microcom /dev/modem_at0
 
+-----LAT1 (70000037L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmi =>	Telit
+at+gmm =>	LE910-NAG
+at+gmr =>	17.00.503
+at#cfvr =>	#CFVR: 10
+at#sled=2
+at#sledsav
+at#tempcfg? =>	#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3
+at+cpin? => 	+CPIN: READY
+at#rxdiv? =>	#rxdiv: 1,1
+AT+CSQ => 	+CSQ: ##,#
+at+csq => 	+CSQ: ##,#
+at+chup
+at#servinfo =>	#SERVINFO: 1007,-73,"AT&T","310410",235,7F03,128,0,-83,"II",01,4294967295
+at#moni =>	#MONI: AT&T PSC:235 RSCP:-83 LAC:7F03 Id:5792AF5 EcIo:-10.0 UARFCN:1007 PWR:-73 dBm DRX:128 SCR:3760 URA:4294967295
+at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0
+		+CGDCONT: 2,"IPV4V6","ims","",0,0
+		+CGDCONT: 3,"IPV4V6","sos","",0,0
+
+
 -----LAT3 (70000041L)------------------------
 at
 ate1
@@ -18,7 +41,7 @@ at+csq => 	+CSQ: ##,#
 at#servinfo =>	#SERVINFO: 2300,-67,"T-Mobile","310260",0000119,0000,128,0,-105
 at#moni =>	#MONI: T-Mobile RSRP:-105 RSRQ:-14.0 TAC:0000 Id:0000000 EARFCN:2300 PWR:-67dbm DRX:128 pci:281 QRxLevMin:16	
 at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0
-
+at+cpin? => 	+CPIN: READY
 -----L4N1 (70000049L, 70000054L)------------------------
 at
 ate1
@@ -40,7 +63,7 @@ at#moni => 	#MONI: AT&T PSC:235 RSCP:-88 LAC:7F03 Id:5792AF5 EcIo:-13.0 UARFCN:1
 at+cgdcont? => 	+CGDCONT: 1,"IPV4V6","nxtgenphone","",0,0,0,0
 		+CGDCONT: 2,"IPV4V6","ims","",0,0,0,0
 		+CGDCONT: 3,"IPV4V6","sos","",0,0,0,1
------L4E1 (70000043L)------------------------
+-----L4E1 (70000043L, 70000044L)------------------------
 at
 ate1
 at+cgsn (print imei)
