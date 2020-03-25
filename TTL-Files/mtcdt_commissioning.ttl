@@ -1,0 +1,25 @@
+;
+; Author: Viet Ho
+;
+connect "localhost /ssh /2 /auth=password /user=admin /passwd=admin"
+testlink
+if result = 0 then
+  messagebox "Cannot link Tera Term with Macro. Click Ok to exit." "Connection Error"
+  showtt 1
+  end
+elseif result = 1 then
+  messagebox "Failed to connect to 192.168.2.1 on port 22. Click Ok to exit." "Connection Error"
+  showtt 1
+  end
+endif
+setsync 1
+showtt 1
+wait '$'
+pause 1
+
+sendln 'sudo -s'
+wait 'word:'
+pause 1
+sendln 'ThanksForFish42!'
+wait "#"
+pause 1

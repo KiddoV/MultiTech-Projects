@@ -13,8 +13,8 @@ at#sledsav
 at#tempcfg? =>	#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3
 at+cpin? => 	+CPIN: READY
 at#rxdiv? =>	#rxdiv: 1,1
-AT+CSQ => 	+CSQ: ##,#
-at+csq => 	+CSQ: ##,#
+AT+CSQ => 	+CSQ: ##,# OK only
+at+csq => 	+CSQ: ##,# OK only
 at+chup
 at#servinfo =>	#SERVINFO: 1007,-73,"AT&T","310410",235,7F03,128,0,-83,"II",01,4294967295
 at#moni =>	#MONI: AT&T PSC:235 RSCP:-83 LAC:7F03 Id:5792AF5 EcIo:-10.0 UARFCN:1007 PWR:-73 dBm DRX:128 SCR:3760 URA:4294967295

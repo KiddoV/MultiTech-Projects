@@ -1,0 +1,50 @@
+Step 1: Commissioning mode
+---------------------------
+curl -k "https://192.168.2.1/api/commissioning"
+
+curl -k -X POST -H "Content-Type: json/application" -d '{"username":"admin", "aasID": "<aasID>", "aasAnswer":""}' https://192.168.2.1:443/api/commissioning
+
+curl -k -X POST -H "Content-Type: json/application" -d '{"username":"admin", "aasID": "<aasID>", "aasAnswer":"ThanksForFish42!"}' https://192.168.2.1:443/api/commissioning
+
+curl -k -X POST -H "Content-Type: json/application" -d '{"username":"admin", "aasID": "<aasID>", "aasAnswer":"ThanksForFish42!"}' https://192.168.2.1:443/api/commissioning
+
+-------------------------------------------
+Step 2: Upload Config
+--------------------------------------------
+Login: curl -k -X GET -H "Content-Type:application/json" -d '' "https://192.168.2.1/api/login?username=admin&password=ThanksForFish42!"
+
+Use the token obtained to upload config. 
+
+upload config:curl -i -k -b /tmp/headers --http1.0 -F file=@config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz "https://192.168.2.1/api/command/upload_config?token=<token>"
+
+--------------------------------------------
+Step 3: After reboot
+-------------------------------------------
+
+Copy RT_Python_Deps.tar files from sftp to /tmp
+cd /tmp
+tar -xcvf RT_Python_Deps.tar
+sudo sh rt_deps_install.sh
+
+Copy RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz to /tmp
+
+-------------------------------------------
+Step 4: Install application ( You can remove this process from Ping test ) 
+-------------------------------------------
+sudo app-manager --command local --appid 5b02f4783b181632c6ac5b18 --apptype CUSTOM --appname RT_CDC --appfile RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz
+
+--------------------------------------------
+Step 5: Save as user defined defaults/oem
+--------------------------------------------
+
+Login: curl -k -X GET -H "Content-Type:application/json" -d '' "https://192.168.2.1/api/login?username=admin&password=ThanksForFish42!"
+
+Use the token obtained to save config as default config. 
+
+Save OEM: curl -k -X POST -d "" 'https://192.168.2.1/api/command/save_oem?token=<token>'
+
+--------------------------------------------
+Step 6: Save & restarts
+--------------------------------------------
+Use the token to do save and restarts/oem
+save & restart: curl -k -X POST -d "" 'https://192.168.2.1/api/command/save_restart?token=<token>'

@@ -1,0 +1,36 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#NoEnv
+#SingleInstance, Force
+
+InputBox, pass, Password, Enter password.
+URL := "http://auto-hotkey.com/boards/ucp.php?mode=login"
+PostData := "username=Pulover&password=" pass "&login=Login"
+
+oHTTP := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+;Post request
+oHTTP.Open("POST", URL , False)
+;Add User-Agent header
+oHTTP.SetRequestHeader("User-Agent", "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; WOW64; Trident/5.0)")
+;Add Referer header
+oHTTP.SetRequestHeader("Referer", URL)
+;Add Content-Type
+oHTTP.SetRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+;Send POST request
+oHTTP.Send(PostData)
+;Get received data
+Gui, Add, Edit, w800 r30, % oHTTP.ResponseText
+Gui, Show
+return
+
+GuiClose:
+ExitApp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+link := "https://192.168.2.1/api/commissioning"
+ 
+req := ComObjCreate("Msxml2.XMLHTTP")
+req.open("GET", link, False)
+req.Send()
+MsgBox, % req.responseText
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

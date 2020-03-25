@@ -33,6 +33,10 @@ uuidNum = ''
 nodeLoraNum = ''
 nodeWifiNum = ''
 nodeBTNum = ''
+isType1 = -1
+isType2 = -1
+isType3 = -1
+isType4 = -1
 
 inputbox '' 'LABEL TYPE'
 labelType = inputstr
@@ -48,6 +52,7 @@ isType4 = result
 
 inputbox '' 'SKU NUMBER'
 skuNum = inputstr
+
 inputbox '' 'SERIAL NUMBER'
 serialNum = inputstr
 inputbox '' 'NODE ID NUMBER'

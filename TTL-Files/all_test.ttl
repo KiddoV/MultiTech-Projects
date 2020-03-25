@@ -5,6 +5,9 @@ connect '192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root /nosecuritywar
 timeout = 10
 clearscreen 1
 show 0
+is240L = -1
+is246L = -1
+is247L = -1
 radioVersion = '00.00.000'
 isNONE = -1
 isLAT1 = -1
@@ -219,7 +222,7 @@ mpause 1000
 timeout = 5
 flushrecv
 sendln 'mts-io-sysfs show ap1/*'
-wait "MTAC"
+wait 'MTAC' 'No such file'
 if result=1 then
     statusbox 'MTAC1 PASSED' 'PASSED1'
 	mpause 1000
@@ -227,13 +230,14 @@ if result=1 then
 else
 	beep
 	messagebox 'MTCDT LORA AP1 READ FAILURE!' 'LORA AP1 FAILURE'
-	end
 	disconnect
+  	closett
+  	end
 endif
 mpause 2000
 flushrecv
 sendln 'mts-io-sysfs show ap2/*'
-wait "MTAC"
+wait 'MTAC' 'No such file'
 if result=1 then
 	statusbox 'MTAC2 PASSED' 'PASSED2'
 	mpause 1000
@@ -241,8 +245,9 @@ if result=1 then
 else
 	beep
 	messagebox 'MTCDT LORA AP2 READ FAILURE!' 'LORA AP2 FAILURE'
-	end
 	disconnect
+  	closett
+  	end
 endif
 mpause 1000
 
@@ -267,6 +272,7 @@ else
 endif
 mpause 1000
 send 24 ;Exit 'at' command promt
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;
 :SMC_TEST
@@ -311,8 +317,10 @@ wait 'OK'
 flushrecv
 mpause 500
 sendln 'at#tempcfg?'
-if isL4N1=0 || isL4E1=0 then
+if isL4E1=0 then
     waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+elseif isL4N1=0 then
+	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 elseif isLAT3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
 elseif isLAT1=0 then
@@ -320,8 +328,12 @@ elseif isLAT1=0 then
 endif
 if result=0 goto temp_setting
 mpause 500
-sendln 'at#rxdiv?
-wait '#RXDIV: 1,1'
+sendln 'at#rxdiv?'
+if isLat3=0 then
+    wait '#RXDIV: 1,3'
+else
+ 	wait '#RXDIV: 1,1'
+endif
 if result = 0 then
     mpause 500
     sendln 'at#rxdiv=1,1'
@@ -459,6 +471,83 @@ if result=0 then
    	closett
    	end
 endif
+
+goto csq_check
+
+;;;;;;;;;;;;;;
+:L4E1_TEST
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C4-EU'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C4-EU' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '25.20.673'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.673' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '2'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+
+;;;;;;;;;;;;;;
+:L4N1_TEST
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C4-NF'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C4-NF' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at#swpkgv'
+waitln '25.20.666'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.666' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '2'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#fwswitch?'
+wait '#FWSWITCH: 0,0'
+goto csq_check
+
+;;;;;;;;;;;
 :csq_check
 mpause 500
 sendln 'AT+CSQ'
@@ -521,51 +610,6 @@ send 24 ;Exit 'at' command promt
 closesbox
 goto SHORTING_MTCDT
 
-;;;;;;;;;;;;;;
-:L4E1_TEST
-mpause 500
-sendln 'at+gmm'
-waitln 'LE910C4-EU'
-if result = 0 then
-    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C4-EU' 'MODULE FAILURE'
-   	disconnect
-   	closett
-   	end
-endif
-flushrecv
-mpause 500
-sendln 'at+gmr'
-waitln '25.20.673'
-if result = 0 then
-    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.673' 'FIRMWARE FAILURE'
-	disconnect
-   	closett
-   	end
-endif
-mpause 500 
-flushrecv
-sendln 'at#cfvr'
-waitln '2'
-if result=0 then
-    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
-	disconnect
-   	closett
-   	end
-endif
-statusbox 'SMC TEST PASSED' 'PASSED'
-mpause 500
-send 24 ;Exit 'at' command promt
-closesbox
-goto SHORTING_MTCDT
-
-;;;;;;;;;;;;;;
-:L4N1_TEST
-mpause 500
-sendln 'at+gmm'
-waitln 'LE910C4-NF'
-;Still working on...........
-send 24 ;Exit 'at' command promt
-goto SHORTING_MTCDT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDT

@@ -7,8 +7,8 @@
 >>> $port.Close()
 >>> $port.ReadExisting()
 
-
-command = cmd /c echo Hello
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+command = powershell.exe -command echo Hello
 DetectHiddenWindows On
 Run %ComSpec%,, Hide, pid
 WinWait ahk_pid %pid%
@@ -23,3 +23,102 @@ while, !objExec.StdOut.AtEndOfStream
 DllCall("FreeConsole")
 Process Close, %pid%
 tooltip, %output%
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#Persistent
+SetTitleMatchMode, 2
+;RespecDos.ahk
+;See e.g. http://www.autohotkey.com/board/topic/3489-cmdret-return-output-from-console-progs-dll-version/page-12 ---
+;Thanks to ReSpecto for the inspiration.
+;Please advise if you wrote this!
+;Modified by burque505
+;April 26, 2018
+#NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
+; #Warn  ; Enable warnings to assist with detecting common errors.
+;~ SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
+SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+
+global Folder := A_ScriptDir
+global ScriptFolder := A_ScriptDir
+
+DetectHiddenWindows,On
+Run,%ComSpec% /k,,Hide UseErrorLevel,pid
+if not ErrorLevel
+{
+while !WinExist("ahk_pid" pid)
+Sleep,10
+DllCall("AttachConsole","UInt",pid)
+}
+
+
+Gui,font,s14,Terminal ;wolf_II's tip from ... somewhere ...
+Gui,Add,Edit,W540 H650 vText
+Gui, Add, Button, ,Change_Folder
+Gui, Add, Button,x+5,Start_Folder
+Gui,Add,Button, x15 Default,Command
+Gui,Add,Edit, x+5 w465
+Gui,Show,w580 H700 Autosize
+Send, {Tab}
+Send, {Tab}
+Send, {Tab}
+Send, {Tab}
+return
+
+ButtonCommand:
+outvar := ""
+Gui, Show
+ControlSetText, Edit1
+ControlGetText, outvar, Edit2
+objShell:=ComObjCreate("WScript.Shell")
+ObjShell.CurrentDirectory := Folder
+mydir := objShell.CurrentDirectory
+CMD := "%ComSpec% /c "outvar
+objExec:=objShell.Exec(CMD)
+ControlSetText, Edit2, Please wait ...
+while,!objExec.StdOut.AtEndOfStream
+{
+GuiControlGet,Text
+strStdOut:=objExec.StdOut.ReadAll()
+GuiControl,,Edit1,%Text%`r`n%strStdOut%`r`n%mydir%>
+}
+objShell:=""
+ObjExec:=""
+ControlSetText, Edit2
+Gui, Show
+Return
+
+
+ButtonChange_Folder:
+;~ objShell:=ComObjCreate("WScript.Shell")
+FileSelectFolder, NewFolder, , 3
+If NewFolder =
+	MsgBox,,, No Folder selected.,1
+Else {
+NewFolder := RegExReplace(NewFolder, "\\$")  ; Removes the trailing backslash, if present.
+objShell.CurrentDirectory := NewFolder
+Folder := NewFolder
+;msgbox, , , Changed folders to %Folder%, 2
+}
+objShell:=""
+ObjExec:=""
+ControlSetText, Edit1,  , ahk_exe AutoHotkey.exe
+ControlSetText, Edit1, %Folder%>, ahk_exe AutoHotkey.exe
+ControlFocus, Edit2, ahk_exe Autohotkey.exe
+return
+
+ButtonStart_Folder:
+;objShell:=ComObjCreate("WScript.Shell")
+Folder := ScriptFolder
+;msgbox, , , Changed folders to %ScriptFolder%, 2
+objShell:=""
+ObjExec:=""
+ControlSetText, Edit1
+sleep, 10
+ControlSetText, Edit1, %Folder%>, ahk_exe AutoHotkey.exe
+ControlFocus, Edit2, ahk_exe Autohotkey.exe
+return
+
+GuiClose:
+ButtonCancel:
+Esc::
+exitapp

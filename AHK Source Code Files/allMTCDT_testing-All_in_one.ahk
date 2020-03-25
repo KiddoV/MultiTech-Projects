@@ -24,7 +24,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000037L", "70000041L", ""]
-Global 246_ItemNums := ["70000005L", "", "70000043L", ""]
+Global 246_ItemNums := ["70000005L", "", "70000043L", "70000049L", "70000054L"]
 Global 247_ItemNums := ["70000044L", ""]
 
 ;;;Paths and Links
@@ -325,6 +325,7 @@ functionalTestStep(itemN, mtcType, radType) {
     ;Check LED
     If (searchLed1111() = 0) {
         GuiControl , , process5, %timeImg%
+        WinKill MACRO
         MsgBox LED TEST FAILED
         return 0
     }
@@ -499,7 +500,7 @@ getRadioType(itemN) {
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", "70000044L"]
     LAP3 := ["70000045L"]
-    L4N1 := ["70000049L"]
+    L4N1 := ["70000049L", "70000054L"]
     
    allRadioType := "NONE,LAT1,LAT3,LEU1,L4E1,LAP3,L4N1"
     
