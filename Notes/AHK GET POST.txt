@@ -26,10 +26,10 @@ GuiClose:
 ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-link := "https://192.168.2.1/api/commissioning"
+url:= "https://192.168.2.1/api/commissioning"
  
 req := ComObjCreate("Msxml2.XMLHTTP")
-req.open("GET", link, False)
+req.open("GET", url, False)
 req.Send()
 MsgBox, % req.responseText
 

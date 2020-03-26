@@ -2,6 +2,7 @@ Step 1: Commissioning mode
 ---------------------------
 curl -k "https://192.168.2.1/api/commissioning"
 
+curl --location --insecure --header "Content-Type: application/json" --request POST --data-raw '{"username":"admin","aasID":"","aasAnswer":"ThanksForFish42!"}' https://192.168.2.1:443/api/commissioning
 curl -k -X POST -H "Content-Type: json/application" -d '{"username":"admin", "aasID": "<aasID>", "aasAnswer":""}' https://192.168.2.1:443/api/commissioning
 
 curl -k -X POST -H "Content-Type: json/application" -d '{"username":"admin", "aasID": "<aasID>", "aasAnswer":"ThanksForFish42!"}' https://192.168.2.1:443/api/commissioning
