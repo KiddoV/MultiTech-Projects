@@ -10,6 +10,7 @@ is246L = -1
 is247L = -1
 radioVersion = '00.00.000'
 isNONE = -1
+isH5 = -1
 isLAT1 = -1
 isLAT3 = -1
 isLEU1 = -1
@@ -31,6 +32,9 @@ if is247L=0 goto CHECK_RADIO_TYPE
 strcompare param3 'NONE'
 isNONE = result
 if isNONE=0 goto START
+strcompare param3 'H5'
+isH5 = result
+if isH5=0 goto START
 strcompare param3 'LAT1'
 isLAT1 = result
 if isLAT1=0 goto START
@@ -51,6 +55,8 @@ if isL4N1=0 goto START
 :START
 if isLAT1=0 then 
     radioVersion = '17.00.503'
+elseif isH5=0 then
+    radioVersion = '12.00.026'
 elseif isLEU1=0 then
     radioVersion = '17.00.523'
 elseif isL4E1=0 then
@@ -259,7 +265,31 @@ sendln 'microcom /dev/modem_at0'
 mpause 500
 sendln 'at+cpin?'
 wait 'OK' 'not found' 'ERROR'
-if result=1 then
+simResult = result
+:check_live_sim
+if isH5 = 0 then
+    :registration
+	mpause 500
+    sendln 'at+cgdcont=1,"IP","fast.t-mobile.com"'
+    wait 'OK'
+    mpause 500
+    sendln 'at+creg?'
+	waitln '+CREG: 0,1' '+CREG: 0,2'
+	:connection
+    mpause 500
+    sendln 'at#sgact=1,1'
+    wait '#SGACT:' 'ERROR'
+    if result = 2 then
+        messagebox 'THIS SMC NEED A LIVE SIM. PLEASE ADD!' 'LIVE SIM FAILURE'
+        disconnect
+  		closett
+  		end
+	endif
+	sendln 'at#sgact=1,0'
+	wait 'OK'
+endif
+
+if simResult=1 then
     statusbox 'SIM CHECK PASSED' 'PASSED'
 	mpause 1000
 	closesbox
@@ -319,6 +349,8 @@ mpause 500
 sendln 'at#tempcfg?'
 if isL4E1=0 then
     waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+elseif isH5=0 then
+	waitln '#TEMPCFG: -30,-10,55,80'
 elseif isL4N1=0 then
 	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 elseif isLAT3=0 then
@@ -331,6 +363,8 @@ mpause 500
 sendln 'at#rxdiv?'
 if isLat3=0 then
     wait '#RXDIV: 1,3'
+elseif isH5=0 then
+ 	wait '#RXDIV: 0,1'
 else
  	wait '#RXDIV: 1,1'
 endif
@@ -342,6 +376,13 @@ endif
 flushrecv
 mpause 500
 sendln 'at+cgdcont?'
+if isH5=0 then
+    wait 'OK'
+     mpause 500
+    sendln 'at+cgdcont=1'
+    wait 'OK'
+    goto H5_TEST
+endif
 waitln '+CGDCONT: 1,"IPV4V6",""'
 if result =0 then
     sendln 'at+cgdcont=1,"IPV4V6","",""'
@@ -362,10 +403,57 @@ if result =0 then
     goto apn1_check
 endif
 
+if isH5 = 0 goto H5_TEST
 if isLAT1 = 0 goto LAT1_TEST
 if isLAT3 = 0 goto LAT3_TEST
 if isL4E1 = 0 goto L4E1_TEST
 if isL4N1 = 0 goto L4N1_TEST
+
+;;;;;;;;;;;;;;
+:H5_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'HE910-D'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: HE910-D' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '12.00.026'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 12.00.026' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '1'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 1' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+
+goto csq_check
 
 ;;;;;;;;;;;;;;
 :LAT1_TEST
@@ -641,6 +729,9 @@ if is247L != 0 goto TEST_DONE
 
 :WIFI_BT_TEST
 timeout = 15
+if isNONE = 0 then
+    imei = 'NO'
+endif
 wifiAddr = ''
 bluetoothAddr = ''
 

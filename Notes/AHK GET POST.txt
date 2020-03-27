@@ -48,7 +48,7 @@ xhr.withCredentials = false;
 
 xhr.addEventListener("readystatechange", function() {
   if(this.readyState === 4) {
-    var foo = this.responseText
+    var foo = this.responseText;
     alert(this.responseText);
   }
 });
@@ -133,3 +133,54 @@ WBGet(WinTitle="ahk_class IEFrame", Svr#=1) {               ;// based on ComObjQ
    }
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;GUI WITH HTML;;;;;;;;;;;;;;;;;;;;;;
+#SingleInstance Force
+#NoEnv
+SetWorkingDir %A_ScriptDir%
+SetBatchLines -1
+
+html =
+(
+<!doctype html>
+<html>
+<h1>TEST</h1>
+<button>TEST BUTTON</button>
+<body>
+</body>
+
+<script>
+var testVar = "hi";
+
+var div = document.createElement("div");
+document.body.appendChild(div);
+
+div.innerText = testVar;
+
+function updateText() {
+    div.innerText = testVar;
+}
+</script>
+
+</html>
+)
+
+Gui, Add, ActiveX, vWB w640 h480, about:%html%
+Gui, Show
+
+while WB.ReadyState != 4
+    Sleep, 50
+
+Loop, 10
+{
+    Sleep, 100
+    WB.document.parentWindow.testVar := A_Index
+    WB.document.parentWindow.updateText()
+}
+
+;MsgBox, % WB.document.parentWindow.testVar
+return
+
+
+GuiEscape:
+GuiClose:
+    ExitApp

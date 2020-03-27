@@ -1,5 +1,28 @@
 microcom /dev/modem_at0
 
+
+-----H5 (70000006L)--------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmi =>	Telit
+at+gmm =>	HE910-D
+at+gmr =>	12.00.026
+at#cfvr =>	#CFVR: 1
+at#sled=2
+at#sledsav
+at#tempcfg? =>	#TEMPCFG: -30,-10,55,80
+at+cpin? => 	+CPIN: READY
+at#rxdiv? =>	#RXDIV: 0,1
+AT+CSQ => 	+CSQ: ##,#
+at+csq => 	+CSQ: ##,# 
+at+creg? =>	+CREG: 0,1 / +CREG: 0,2**FOR NEXT COMMAND
+at#sgact=1,1 =>	#SGACT: 28.44.74.139  ***CHECK LIVE SIM
+at#sgact=1,0
+at+cgdcont=1
+at+cgdcont=1,"IP","fast.t-mobile.com"
+at+cgdcont? =>	OK ONLY
+
 -----LAT1 (70000037L)------------------------
 at
 ate1
