@@ -34,3 +34,102 @@ req.Send()
 MsgBox, % req.responseText
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+IE := ComObjCreate("InternetExplorer.Application")
+IE.Visible := 1
+IE.Navigate("about:blank")
+
+javascript =
+(
+var data = JSON.stringify({"name":"test","salary":"123","age":"23"});
+
+var xhr = new XMLHttpRequest();
+xhr.withCredentials = false;
+
+xhr.addEventListener("readystatechange", function() {
+  if(this.readyState === 4) {
+    var foo = this.responseText
+    alert(this.responseText);
+  }
+});
+
+xhr.open("POST", "http://dummy.restapiexample.com/api/v1/create");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.setRequestHeader("Cookie", "ezoadgid_133674=-1; ezoref_133674=; ezoab_133674=mod47; PHPSESSID=e6a2d3382295c9f148b54c2f6b1f04cf; active_template::133674=pub_site.1585262091");
+
+xhr.send(data);
+)
+sleep 1000
+
+myReturnVar := IE_InjectJS(WinExist("ahk_class IEFrame"), javascript, "foo")
+
+return
+
+IE_InjectJS(hWnd_MainWindow, JS_to_Inject="", VarNames_to_Return="", COM_to_Call1="", COM_to_Call2="") {
+
+   window := _win(hWnd_MainWindow)
+
+   wb := WBGet("ahk_id" hWnd_MainWindow)
+
+   if COM_to Call1 
+   {
+    Loop, Parse, COM_to_Call1, `, 
+    {
+        wb[A_LoopField]     
+    }    
+   }     
+
+   if JS_to_Inject
+      window.execScript(JS_to_Inject)
+
+   
+
+   if COM_to_Call2 
+   {             
+    Loop, Parse, COM_to_Call2, `, 
+    {
+    wb[A_LoopField]     
+    }               
+   }  
+
+   return SubStr(Ret,1,-1)
+}
+
+_win(hwnd, Svr#=1) {               ;// based on ComObjQuery docs
+
+   static msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+        , IID1 := "{0002DF05-0000-0000-C000-000000000046}"  ; IID_IWebBrowserApp
+        , IID2 := "{332C4427-26CB-11D0-B483-00C04FD90119}"  ; IID_IHTMLWindow2
+
+   SendMessage msg, 0, 0, Internet Explorer_Server1, ahk_id %hwnd%
+
+   if (ErrorLevel != "FAIL") {
+
+      lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
+
+      if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
+
+         DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
+
+            return  ComObj(9,ComObjQuery(pwb:=ComObjQuery(pdoc,IID1,IID1),IID2,IID2),1)
+                ,   ObjRelease(pdoc), ObjRelease(pwb)
+
+      }
+
+   }
+
+}
+
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) {               ;// based on ComObjQuery docs
+   static msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+        , IID := "{0002DF05-0000-0000-C000-000000000046}"   ;// IID_IWebBrowserApp
+   SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
+   if (ErrorLevel != "FAIL") {
+      lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
+      if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
+         DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
+         return ComObj(9,ComObjQuery(pdoc,IID,IID),1), ObjRelease(pdoc)
+      }
+   }
+}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
