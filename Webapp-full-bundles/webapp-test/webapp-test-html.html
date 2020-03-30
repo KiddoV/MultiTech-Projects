@@ -1,18 +1,6 @@
-﻿/*
-    Author: Viet Ho
-    
-    Notes: Use percent sigh (%) in html variable with backstick(`). Ex: 100% => 100`% . Or else it will throw ERROR
-*/
-
-#SingleInstance Force
-#NoEnv
-SetWorkingDir %A_ScriptDir%
-SetBatchLines -1
-
-html =
-(
 <!DOCTYPE html>
 <html>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
 <head>
 <style>
 .button {
@@ -96,28 +84,3 @@ html =
 
 </body>
 </html>
-)
-;MsgBox % html
-
-Gui -MinimizeBox -MaximizeBox ;-Caption
-Gui, Margin , 0, 0
-Gui, Add, ActiveX, vWB w640 h480, about:%html%
-Gui, Show
-
-while WB.ReadyState != 4
-    Sleep, 50
-
-;Loop, 100
-;{
-    ;Sleep, 1
-    ;WB.document.parentWindow.testVar := A_Index
-    ;WB.document.parentWindow.updateText()
-;}
-
-;MsgBox, % WB.document.parentWindow.testVar
-return
-
-
-GuiEscape:
-GuiClose:
-    ExitApp
