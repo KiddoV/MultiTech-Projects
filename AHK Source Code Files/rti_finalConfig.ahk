@@ -24,7 +24,7 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui Add, GroupBox, x8 y10 w138 h117, Step by Step
-Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn +Disabled, &LOGIN
+Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn, &LOGIN
 Gui Add, Text, x16 y52 w124 h2 +0x10
 Gui Add, Button, x37 y60 w70 h17 grunStep1 vstep1Bttn, STEP &1
 Gui Add, Text, x112 y61 w15 h15 +0x200, ┐
@@ -98,15 +98,26 @@ loginStep() {
     }
     SB_SetText("Typing username and password")
     if WinExist("Commissioning.*") {
-        WinActivate Commissioning.*
-        WinWaitActive Commissioning.*
-        Sleep 2000
-        ControlSend, ,admin{Enter}, Commissioning.*
-        Sleep 3000
-        Send admin2205{!}{Enter}
-        Sleep 1500
-        Send admin2205{!}{Enter}
-        WinWait Sign In.*
+        WinActivate Commissioning
+        SendInput, ^+i
+        javascript =
+        (
+var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); var raw = JSON.stringify({{}"username":"admin","aasID":"","aasAnswer":""{}}); var requestOptions = {{} method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' {}}; fetch("https://192.168.2.1:443/api/commissioning", requestOptions).then(response => response.text()).then(result => {{} var dummy = document.createElement("textarea"); document.body.appendChild(dummy); dummy.value = result; dummy.select(); document.execCommand("copy"); document.body.removeChild(dummy); {}}).catch(error => console.log('error', error));
+        )
+        Sleep 1000
+        SendInput, %javascript%{Enter}
+        
+        ;; Resume processing.
+        
+        ;WinActivate Commissioning.*
+        ;WinWaitActive Commissioning.*
+        ;Sleep 2000
+        ;ControlSend, ,admin{Enter}, Commissioning.*
+        ;Sleep 3000
+        ;Send admin2205{!}{Enter}
+        ;Sleep 1500
+        ;Send admin2205{!}{Enter}
+        ;WinWait Sign In.*
     }
     ;https://192.168.2.1/sign-in
     if WinExist("Sign In.*") {

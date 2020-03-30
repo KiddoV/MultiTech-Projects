@@ -1,0 +1,32 @@
+SetTitleMatchMode, RegEx
+
+wb := ComObjCreate("InternetExplorer.Application") ;create a IE instance
+wb.Visible := True
+wb.Navigate("https://192.168.2.1/commissioning")
+IELoad(wb)
+;wb.Document.All.overridelink.Click()
+;WinWait Security Warning
+;ControlClick, Button2, Security Warning, , Left, 4
+;IELoad(wb)
+wb.Document.All.answer.Value := "admin"
+btn := wb.Document.getElementsByTagName("button")
+Sleep 1000
+btn[0].Click()
+
+
+
+IELoad(wb)    ;You need to send the IE handle to the function unless you define it as global.
+{
+    If !wb    ;If wb is not a valid pointer then quit
+        Return False
+    Loop    ;Otherwise sleep for .1 seconds untill the page starts loading
+        Sleep,100
+    Until (wb.busy)
+    Loop    ;Once it starts loading wait until completes
+        Sleep,100
+    Until (!wb.busy)
+    Loop    ;optional check to wait for the page to completely load
+        Sleep,100
+    Until (wb.Document.Readystate = "Complete")
+Return True
+}
