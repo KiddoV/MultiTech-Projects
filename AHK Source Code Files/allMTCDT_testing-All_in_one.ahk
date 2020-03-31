@@ -24,7 +24,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 240_ItemNums := ["70000037L", "70000041L", ""]
-Global 246_ItemNums := ["70000005L", "70000006L", "70000043L", "70000049L", "70000054L"]
+Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000043L", "70000049L", "70000054L"]
 Global 247_ItemNums := ["70000044L", "70000053L", "70001174L"]
 
 ;;;Paths and Links
@@ -496,14 +496,15 @@ disableGuis(option) {
 getRadioType(itemN) {
     NONE := ["70000005L", "70001174L"]
     H5 := ["70000006L"]
-    LAT1 := ["70000037L"]
+    LAT1 := ["70000037L", "70000007L"]
     LAT3 := ["70000041L"]
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", "70000044L"]
     LAP3 := ["70000045L"]
     L4N1 := ["70000049L", "70000054L", "70000053L"]
+    LVW2 := ["70000009L"]
     
-   allRadioType := "NONE,H5,LAT1,LAT3,LEU1,L4E1,LAP3,L4N1"
+   allRadioType := "NONE,H5,LAT1,LAT3,LEU1,L4E1,LAP3,L4N1,LVW2"
     
     getRadioLoop:
     Loop Parse, allRadioType, `,

@@ -37,6 +37,7 @@ isType1 = -1
 isType2 = -1
 isType3 = -1
 isType4 = -1
+isType5 = -1
 
 inputbox '' 'LABEL TYPE'
 labelType = inputstr
@@ -49,6 +50,8 @@ strcompare labelType 'LABELTYPE3'
 isType3 = result
 strcompare labelType 'LABELTYPE4'
 isType4 = result
+strcompare labelType 'LABELTYPE5'
+isType5 = result
 
 inputbox '' 'SKU NUMBER'
 skuNum = inputstr
@@ -72,6 +75,7 @@ messagebox msg 'Information'
 */
 
 if isType1 = 0 goto START_EEPROM
+if isType5 = 0 goto check_lora
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_DATA
 :check_imei
@@ -197,10 +201,14 @@ strconcat eepromstr ' '
 strconcat eepromstr imeiNum
 strconcat eepromstr ' '
 strconcat eepromstr uuidNum
-messagebox eepromstr 'eeprom'
 wait '#'
 sendln eepromstr
 wait '#'
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:CONFIRM_EEPROM_WRITE
+timeout = 3
+flushrecv
+
 
 :DONE
 sendln 'halt'

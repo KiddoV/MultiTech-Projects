@@ -3,18 +3,22 @@
 */
 
 SetTitleMatchMode, RegEx
-
+;;;;;;;;;;Installs files for app to run;;;;;;;;;;
+IfNotExist C:\V-Projects\AMAuto-Scanner\TTL-Files
+    FileCreateDir C:\V-Projects\AMAuto-Scanner\TTL-Files
+    
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-Scanner\TTL-Files\all_scan.ttl, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["", ""]
-Global 246_SKUNums := ["94557574LF", "94557576LF"]
-Global 247_SKUNums := ["", ""]
+Global 246_SKUNums := ["94557252LF", "94557574LF", "94557576LF"]
+Global 247_SKUNums := ["94557550LF", ""]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
 Global localTime := TimeString
 
 ;;;Paths and Links
 ;240L
-Global allScanPath := "C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_scan.ttl"
+Global allScanPath := "C:\V-Projects\AMAuto-Scanner\TTL-Files\all_scan.ttl"
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -220,8 +224,9 @@ getLabelType() {
     LABELTYPE2 := ["94557574LF"]
     LABELTYPE3 := ["94557576LF"]
     LABELTYPE4 := []
+    LABELTYPE5 := ["94557550LF"]
     
-    allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4"
+    allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4,LABELTYPE5"
     
     GuiControlGet, skuNum1 ;Get value from DropDownList
     GuiControlGet, skuNum2 ;Get value from DropDownList
@@ -269,7 +274,10 @@ changeDisplayWithSKUNum() {
         GuiControl Disable, wifiLabel
         GuiControl Disable, wifiN
     } else if (labelType = "LABELTYPE4") {
-        
+    
+    } else if (labelType = "LABELTYPE5") {
+        GuiControl Disable, imeiLabel
+        GuiControl Disable, imeiN
     } else {
         Loop Parse, allValueScan, `,
             GuiControl Disable, %A_LoopField%

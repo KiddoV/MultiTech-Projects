@@ -82,74 +82,159 @@ step1and2() {
     GuiControl Enable, step2Bttn
     GuiControl Enable, step1and2Bttn
 }
-
 loginStep() {
     GuiControl Disable, loginBttn
     addTipMsg("BEGIN LOGIN STEP", 3000)
     SB_SetText("Begin login step...")
-    Run, %A_DesktopCommon%\Google Chrome.lnk
-    ;Run, %ComSpec% /c start chrome.exe --ignore-certificate-errors --test-type https://192.168.2.1 , ,Hide
-    WinWait Commissioning.*|Privacy.*|Sign In.*
-    if WinExist("Privacy.*") {
-        searchAdvancedButton(2, 1000)
-        Sleep 300
-        searchToUnsafeLink(2, 1000)
-        WinWait Commissioning.*
-    }
-    SB_SetText("Typing username and password")
-    if WinExist("Commissioning.*") {
-        WinActivate Commissioning
-        SendInput, ^+i
-        javascript =
-        (
-var myHeaders = new Headers(); myHeaders.append("Content-Type", "application/json"); var raw = JSON.stringify({{}"username":"admin","aasID":"","aasAnswer":""{}}); var requestOptions = {{} method: 'POST', headers: myHeaders, body: raw, redirect: 'follow' {}}; fetch("https://192.168.2.1:443/api/commissioning", requestOptions).then(response => response.text()).then(result => {{} var dummy = document.createElement("textarea"); document.body.appendChild(dummy); dummy.value = result; dummy.select(); document.execCommand("copy"); document.body.removeChild(dummy); {}}).catch(error => console.log('error', error));
-        )
-        Sleep 1000
-        SendInput, %javascript%{Enter}
-        
-        ;; Resume processing.
-        
-        ;WinActivate Commissioning.*
-        ;WinWaitActive Commissioning.*
-        ;Sleep 2000
-        ;ControlSend, ,admin{Enter}, Commissioning.*
-        ;Sleep 3000
-        ;Send admin2205{!}{Enter}
-        ;Sleep 1500
-        ;Send admin2205{!}{Enter}
-        ;WinWait Sign In.*
-    }
-    ;https://192.168.2.1/sign-in
-    if WinExist("Sign In.*") {
-        WinActivate Sign In.*
-        Sleep 3000
-        Send admin{Tab}
-        Send admin2205{!}{Enter}
-        WinWait mPower.*
-    }
     
-    WinWait mPower.*
-    WinActivate mPower.*
-    searchFirstSetup(10, 500)
-    
-    SB_SetText("Getting the source file")
-    Run, %ComSpec% /c start chrome.exe https://192.168.2.1/administration/save-restore, ,Hide
-    WinWait Save.*
-    WinActivate Save.*
-    searchFirstSetup(4, 500)
-    WinActivate Save.*
-    searchBrowseButton(6, 1000)
-    WinWait Open.*
-    ControlSetText, Edit1, C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, Open.*
-    ControlSend, Edit1, {Enter}, Open.*
-    ControlClick Button1, Open.*, , Left, 2
-    SB_SetText("Resetting...")
-    searchRestoreButton(6, 1000)
-    searchOkButton(6, 1000)
-    SB_SetText("Waiting for conduit to reset")
-    WinWaitClose Save.*
-    SB_SetText("Finished reseting conduit!")
+    IE := ComObjCreate("InternetExplorer.Application")
+IE.Visible := 1
+IE.Navigate("https://192.168.2.1/commissioning")
+
+javascript =
+(
+var data = JSON.stringify({"username":"admin","aasID":"","aasAnswer":""});
+
+var xhr = new XMLHttpRequest();
+
+xhr.addEventListener("readystatechange", function() {
+  if(this.readyState == 4 && this.status == 200) {
+    var resJson = JSON.parse(this.responseText);
+    var aasID = resJson.result.aasID;
+    alert(aasID);
+    setPassword(aasID)
+    confirmPassword(aasID)
+    login(aasID)
+  }
+});
+xhr.open("POST", "https://192.168.2.1:443/api/commissioning");
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.send(data);
+
+function setPassword(aasID) {
+    var data = JSON.stringify({"username":"admin","aasID":"" + aasID + "","aasAnswer":"admin2205!"});
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+        var resJson = JSON.parse(this.responseText);
+        var aasMsg = resJson.result.aasMsg;
+        alert(aasMsg)
+    }
+    });
+
+    xhr.open("POST", "https://192.168.2.1:443/api/commissioning");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
 }
+
+function confirmPassword(aasID) {
+    var data = JSON.stringify({"username":"admin","aasID":"" + aasID + "","aasAnswer":"admin2205!"});
+
+    var xhr = new XMLHttpRequest();
+
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+        var resJson = JSON.parse(this.responseText);
+        var aasMsg = resJson.result.aasMsg;
+        alert(this.responseText)
+    }
+    });
+
+    xhr.open("POST", "https://192.168.2.1:443/api/commissioning");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+}
+
+function login(aasID) {
+    var data = JSON.stringify({"username":"admin","password":"admin2205!"});
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+        if(this.readyState === 4) {
+            var resJson = JSON.parse(this.responseText);
+            var token = resJson.result.token;
+            alert(token);
+            console.log(token);
+        }
+    });
+
+    xhr.open("POST", "https://192.168.2.1/api/login");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Cookie", "token=" + aasID + "");
+
+    xhr.send(data);
+    }
+
+)
+sleep 1000
+
+IE_InjectJS(WinExist("ahk_class IEFrame"), javascript)
+
+IE.Navigate("https://192.168.2.1/administration/save-restore")
+return
+}
+;loginStep() {
+    ;GuiControl Disable, loginBttn
+    ;addTipMsg("BEGIN LOGIN STEP", 3000)
+    ;SB_SetText("Begin login step...")
+    ;Run, %A_DesktopCommon%\Google Chrome.lnk
+    ;;Run, %ComSpec% /c start chrome.exe --ignore-certificate-errors --test-type https://192.168.2.1 , ,Hide
+    ;WinWait Commissioning.*|Privacy.*|Sign In.*
+    ;if WinExist("Privacy.*") {
+        ;searchAdvancedButton(2, 1000)
+        ;Sleep 300
+        ;searchToUnsafeLink(2, 1000)
+        ;WinWait Commissioning.*
+    ;}
+    ;SB_SetText("Typing username and password")
+    ;if WinExist("Commissioning.*") {
+        ; Resume processing.
+        ;
+        ;;WinActivate Commissioning.*
+        ;;WinWaitActive Commissioning.*
+        ;;Sleep 2000
+        ;;ControlSend, ,admin{Enter}, Commissioning.*
+        ;;Sleep 3000
+        ;;Send admin2205{!}{Enter}
+        ;;Sleep 1500
+        ;;Send admin2205{!}{Enter}
+        ;;WinWait Sign In.*
+    ;}
+    ;;https://192.168.2.1/sign-in
+    ;if WinExist("Sign In.*") {
+        ;WinActivate Sign In.*
+        ;Sleep 3000
+        ;Send admin{Tab}
+        ;Send admin2205{!}{Enter}
+        ;WinWait mPower.*
+    ;}
+    ;
+    ;WinWait mPower.*
+    ;WinActivate mPower.*
+    ;searchFirstSetup(10, 500)
+    ;
+    ;SB_SetText("Getting the source file")
+    ;Run, %ComSpec% /c start chrome.exe https://192.168.2.1/administration/save-restore, ,Hide
+    ;WinWait Save.*
+    ;WinActivate Save.*
+    ;searchFirstSetup(4, 500)
+    ;WinActivate Save.*
+    ;searchBrowseButton(6, 1000)
+    ;WinWait Open.*
+    ;ControlSetText, Edit1, C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, Open.*
+    ;ControlSend, Edit1, {Enter}, Open.*
+    ;ControlClick Button1, Open.*, , Left, 2
+    ;SB_SetText("Resetting...")
+    ;searchRestoreButton(6, 1000)
+    ;searchOkButton(6, 1000)
+    ;SB_SetText("Waiting for conduit to reset")
+    ;WinWaitClose Save.*
+    ;SB_SetText("Finished reseting conduit!")
+;}
 
 runStep1() {
     SB_SetText("Waiting for conduit to reset")
@@ -389,4 +474,73 @@ PlayInCircleIcon() {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
+}
+
+;;;;;;;;;;;;;;;;;FUNCTIONS SUPPORT COM OBJECT IE;;;;;;;;;;;;;;;;;;;;
+IE_InjectJS(hWnd_MainWindow, JS_to_Inject="", VarNames_to_Return="", COM_to_Call1="", COM_to_Call2="") {
+
+   window := _win(hWnd_MainWindow)
+
+   wb := WBGet("ahk_id" hWnd_MainWindow)
+
+   if COM_to Call1 
+   {
+    Loop, Parse, COM_to_Call1, `, 
+    {
+        wb[A_LoopField]     
+    }    
+   }     
+
+   if JS_to_Inject
+      window.execScript(JS_to_Inject)
+
+   
+
+   if COM_to_Call2 
+   {             
+    Loop, Parse, COM_to_Call2, `, 
+    {
+    wb[A_LoopField]     
+    }               
+   }  
+
+   return SubStr(Ret,1,-1)
+}
+
+_win(hwnd, Svr#=1) {               ;// based on ComObjQuery docs
+
+   static msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+        , IID1 := "{0002DF05-0000-0000-C000-000000000046}"  ; IID_IWebBrowserApp
+        , IID2 := "{332C4427-26CB-11D0-B483-00C04FD90119}"  ; IID_IHTMLWindow2
+
+   SendMessage msg, 0, 0, Internet Explorer_Server1, ahk_id %hwnd%
+
+   if (ErrorLevel != "FAIL") {
+
+      lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
+
+      if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
+
+         DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
+
+            return  ComObj(9,ComObjQuery(pwb:=ComObjQuery(pdoc,IID1,IID1),IID2,IID2),1)
+                ,   ObjRelease(pdoc), ObjRelease(pwb)
+
+      }
+
+   }
+
+}
+
+WBGet(WinTitle="ahk_class IEFrame", Svr#=1) {               ;// based on ComObjQuery docs
+   static msg := DllCall("RegisterWindowMessage", "str", "WM_HTML_GETOBJECT")
+        , IID := "{0002DF05-0000-0000-C000-000000000046}"   ;// IID_IWebBrowserApp
+   SendMessage msg, 0, 0, Internet Explorer_Server%Svr#%, %WinTitle%
+   if (ErrorLevel != "FAIL") {
+      lResult:=ErrorLevel, VarSetCapacity(GUID,16,0)
+      if DllCall("ole32\CLSIDFromString", "wstr","{332C4425-26CB-11D0-B483-00C04FD90119}", "ptr",&GUID) >= 0 {
+         DllCall("oleacc\ObjectFromLresult", "ptr",lResult, "ptr",&GUID, "ptr",0, "ptr*",pdoc)
+         return ComObj(9,ComObjQuery(pdoc,IID,IID),1), ObjRelease(pdoc)
+      }
+   }
 }

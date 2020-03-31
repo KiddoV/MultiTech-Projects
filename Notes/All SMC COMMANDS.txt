@@ -103,3 +103,25 @@ at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0,0,0
 		+CGDCONT: 2,"IPV4V6","ims","",0,0,0,0
 		+CGDCONT: 3,"IPV4V6","sos","",0,0,0,1
 
+-----LVW2 (70000009L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmm =>	LE910-SVG
+at+gmr =>	17.01.571
+at#cfvr =>	#CFVR: 3
+at#gpio=1,0,2
+at#sled=2
+at#sledsav
+at+cpin? =>	+CPIN: READY
+at#rxdiv? =>	#rxdiv: 1,1
+AT+CSQ => 	+CSQ: ##,#
+at+csq => 	+CSQ: ##,#
+at#tempcfg? =>	#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3
+at#servinfo =>	#SERVINFO: 2050,-78,"Verizon","311480",000010F,BF35,128,0,-109
+at#moni =>	#MONI: Verizon RSRP:-109 RSRQ:-12 TAC:BF35 Id:2ED1B0C EARFCN:2050 PWR:-78dbm DRX:128
+at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","vzwims","",0,0
+		+CGDCONT: 2,"IPV4V6","vzwadmin","",0,0
+		+CGDCONT: 3,"IPV4V6","vzwinternet","",0,0
+		+CGDCONT: 4,"IPV4V6","vzwapp","",0,0
+		+CGDCONT: 5,"IPV4V6","","",0,0

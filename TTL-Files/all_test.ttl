@@ -16,6 +16,7 @@ isLAT3 = -1
 isLEU1 = -1
 isL4E1 = -1
 isL4N1 = -1
+isLVW2 = -1
 
 :CHECK_MTCDT_TYPE
 strcompare param2 '240L'
@@ -50,6 +51,9 @@ if isL4E1=0 goto START
 strcompare param3 'L4N1'
 isL4N1 = result
 if isL4N1=0 goto START
+strcompare param3 'LVW2'
+isLVW2 = result
+if isLVW2=0 goto START
 
 
 :START
@@ -63,6 +67,8 @@ elseif isL4E1=0 then
 	radioVersion = '25.20.673'
 elseif isL4N1=0 then
 	radioVersion = '25.20.666'
+elseif isLVW2=0 then
+	radioVersion = '17.01.571'
 endif
 
 wait '$'
@@ -357,6 +363,8 @@ elseif isLAT3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
 elseif isLAT1=0 then
 	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+elseif isLVW2=0 then
+	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3'
 endif
 if result=0 goto temp_setting
 mpause 500
@@ -365,6 +373,8 @@ if isLat3=0 then
     wait '#RXDIV: 1,3'
 elseif isH5=0 then
  	wait '#RXDIV: 0,1'
+elseif isLVW2=0 then
+ 	wait '#rxdiv: 1,1'
 else
  	wait '#RXDIV: 1,1'
 endif
@@ -375,10 +385,33 @@ endif
 :apn1_check
 flushrecv
 mpause 500
+if isLVW2=0 then
+    sendln 'at+cgdcont?'
+	waitln '+CGDCONT: 1,"IPV4V6","vzwims"'
+	if result =0 then
+	sendln 'at+cgdcont=1,"IPV4V6","vzwims"'
+	wait 'OK'
+	endif
+	mpause 1000
+	sendln 'at+cgdcont?'
+	waitln '+CGDCONT: 2,"IPV4V6","vzwadmin"'
+	if result =0 then
+	sendln 'at+cgdcont=2,"IPV4V6","vzwadmin"'
+	wait 'OK'
+	endif
+	mpause 1000
+	sendln 'at+cgdcont?'
+	waitln '+CGDCONT: 3,"IPV4V6","vzwinternet"'
+	if result =0 then
+	sendln 'at+cgdcont=3,"IPV4V6","vzwinternet"'
+	wait 'OK'
+	endif
+	goto LVW2_TEST
+endif
 sendln 'at+cgdcont?'
 if isH5=0 then
     wait 'OK'
-     mpause 500
+    mpause 500
     sendln 'at+cgdcont=1'
     wait 'OK'
     goto H5_TEST
@@ -598,7 +631,47 @@ mpause 500
 send 24 ;Exit 'at' command promt
 closesbox
 goto SHORTING_MTCDT
-
+;;;;;;;;;;;;;;
+:LVW2_TEST
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-SVG'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-SVG' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '17.01.571'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 17.01.571' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '3'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 3' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+goto csq_check
 ;;;;;;;;;;;;;;
 :L4N1_TEST
 mpause 500

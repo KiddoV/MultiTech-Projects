@@ -37,31 +37,30 @@ MsgBox, % req.responseText
 
 IE := ComObjCreate("InternetExplorer.Application")
 IE.Visible := 1
-IE.Navigate("about:blank")
+IE.Navigate("https://192.168.2.1/commissioning")
 
 javascript =
 (
-var data = JSON.stringify({"name":"test","salary":"123","age":"23"});
+var data = JSON.stringify({"username":"admin","aasID":"","aasAnswer":""});
 
 var xhr = new XMLHttpRequest();
-xhr.withCredentials = false;
 
 xhr.addEventListener("readystatechange", function() {
-  if(this.readyState === 4) {
-    var foo = this.responseText;
-    alert(this.responseText);
+  if(this.readyState == 4 && this.status == 200) {
+    var resJson = JSON.parse(this.responseText);
+    var aasID = resJson.result.aasID;
+    alert(aasID);
+    
   }
 });
 
-xhr.open("POST", "http://dummy.restapiexample.com/api/v1/create");
+xhr.open("POST", "https://192.168.2.1:443/api/commissioning");
 xhr.setRequestHeader("Content-Type", "application/json");
-xhr.setRequestHeader("Cookie", "ezoadgid_133674=-1; ezoref_133674=; ezoab_133674=mod47; PHPSESSID=e6a2d3382295c9f148b54c2f6b1f04cf; active_template::133674=pub_site.1585262091");
-
 xhr.send(data);
 )
 sleep 1000
 
-myReturnVar := IE_InjectJS(WinExist("ahk_class IEFrame"), javascript, "foo")
+myReturnVar := IE_InjectJS(WinExist("ahk_class IEFrame"), javascript)
 
 return
 
