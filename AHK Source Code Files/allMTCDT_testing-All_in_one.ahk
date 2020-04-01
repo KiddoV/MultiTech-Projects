@@ -10,6 +10,8 @@ IfNotExist C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
     FileCreateDir C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func
 IfNotExist C:\V-Projects\AMAuto-Tester\TTL-Files
     FileCreateDir C:\V-Projects\AMAuto-Tester\TTL-Files
+IfNotExist C:\DEVICE_TEST_RECORDS
+    FileCreateDir C:\DEVICE_TEST_RECORDS
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
@@ -23,8 +25,8 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
-Global 240_ItemNums := ["70000037L", "70000041L", ""]
-Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000043L", "70000049L", "70000054L"]
+Global 240_ItemNums := ["70000037L", "70000041L", "70000049L"]
+Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000043L", "70000054L"]
 Global 247_ItemNums := ["70000044L", "70000053L", "70001174L"]
 
 ;;;Paths and Links
@@ -56,7 +58,9 @@ Menu HelpMenu, Add, About, aboutHandler
 Menu MenuBar, Add, &Help, :HelpMenu
 Gui Menu, MenuBar
 
-Gui Add, Text, x17 y5 w136 h21 +0x200 vtopLabel, Select Item Number
+Gui Add, Button, x155 y5 w55 h20 vhistoryBttn gshowTestHist, HISTORY
+
+Gui Add, Text, x17 y5 w100 h21 +0x200 vtopLabel, Select Item Number
 
 Gui Add, Tab3, x9 y27 w202 h65 vwhichTab gchangeTab +0x8, 240L|246L|247L
 Gui Tab, 1
@@ -131,6 +135,7 @@ Return
 GuiEscape:
 GuiClose:
     ExitApp
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
@@ -306,7 +311,7 @@ functionalTestStep(itemN, mtcType, radType) {
     
     ;Connect to E-Net
     GuiControl , , process4, %arrowImg%
-    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\V-Projects\AMAuto-Tester\TTL-Files\all_test.ttl %mtcType% %radType%, ,Hide
+    Run, %ComSpec% /c cd C:\teraterm && TTPMACRO C:\V-Projects\AMAuto-Tester\TTL-Files\all_test.ttl %mtcType% %radType% %itemN%, ,Hide
     WinWait SSH.*, , 4
     If !WinExist("SSH.*") {
         GuiControl , , process4, %timeImg%
@@ -359,7 +364,12 @@ functionalTestStep(itemN, mtcType, radType) {
         GuiControl , , process8, %timeImg%
         return 0
     }
-    WinWait PASSED2
+    WinWaitClose PASSED1
+    WinWait .*FAILURE|PASSED2
+    if WinExist(".*FAILURE") {
+        GuiControl , , process8, %timeImg%
+        return 0
+    }
     WinWaitClose PASSED2
     GuiControl , , process8, %checkImg%
     
@@ -420,6 +430,30 @@ functionalTestStep(itemN, mtcType, radType) {
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+showTestHist() {
+    Gui, 2: Default
+    Gui -MinimizeBox -MaximizeBox
+    Gui, 2: Add, Listview, w640 h500 +Grid -Multi, Date|Time|Item Number|Product ID|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Addr|Bluetooth Addr
+    Loop Read, C:\Device_Test_Records\all-mtcdt-test-records.txt
+    {
+        If A_LoopReadLine =
+            Continue
+        StringReplace, itemList, A_LoopReadLine, `,`,, `,,All
+        StringSplit, item, itemList, `,
+        LV_Add("",item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11)
+    }
+    LV_ModifyCol()
+    LV_ModifyCol(1, "SortDesc")
+    LV_ModifyCol(2, "SortDesc")
+    Gui, 2: Show, , ALL MTCDT PASSED-TEST RECORDS (LOCAL COMPUTER)
+    Return
+    
+    2GuiEscape:
+    2GuiClose:
+        Gui, 2: Cancel
+        Gui, 2: Destroy
+    Return
+}
 checkBox() {
     GuiControlGet, check ;Get value from CheckBox
     clearAllProcessImgs()

@@ -1,0 +1,76 @@
+mylist =
+(
+John,Lennon,1940,rythm guitar
+Paul,McCartney,1942,bass guitar
+George,Harrison,1943,solo guitar
+Ringo,Star,1940,drums
+)
+
+Gui, Color, EEAA99
+gui, font, , Verdana  
+Gui, Add, ListView, Grid -ReadOnly, Name|Last Name|Year of birth|Instrument
+Gui, Add, button, gexit,  Exit
+
+
+loop, parse, mylist, `n
+   {
+   row := A_LoopField
+   gosub, thinner
+   }
+gosub, show   
+return
+
+thinner:
+loop, parse, row, `,
+   {
+   ;msgbox % A_LoopField
+   box%A_Index% := A_LoopField
+   }
+;msgbox % "boxes are:`n" . box1 . box2 . box3 . box4
+LV_Add("", box1, box2, box3, box4)
+return
+
+show:
+LV_ModifyCol()
+LV_ModifyCol(2, "AutoHdr") 
+LV_ModifyCol(3, "AutoHdr Center")
+Gui, Show,
+return
+
+esc::
+exitapp
+
+GuiClose:
+ExitApp
+
+exit:
+exitapp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#SingleInstance force
+SetWorkingDir %A_ScriptDir%
+
+Gui, Add, Listview, w700 h500 ggetListBox vmylistview, #|Date|Time|Item Number|Product ID|Tested Temp|IMEI|Radio Version|Module Version|Firmware Build
+
+Loop Read, C:\Device_Test_Records\all-mtcdt-test-records.txt
+{
+    If A_LoopReadLine =
+        Continue
+    StringReplace, itemList, A_LoopReadLine, `,`,, `,,All
+	StringSplit, item, itemList, `,
+	LV_Add("",A_Index,item1,item2,item3,item4,item5,item6,item7,item8,item9)
+}
+LV_ModifyCol()
+Gui, Show, , ALL MTCDT TEST RECORDS
+Return
+
+getListBox() {
+    GuiControlGet, mylistview  ; Retrieve the ListBox's current data
+    return
+}
+
+GuiEscape:
+GuiClose:
+	Gui, Cancel
+	Gui, Destroy
+ExitApp
+Return

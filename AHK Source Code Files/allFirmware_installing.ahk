@@ -196,6 +196,7 @@ install_firmware(fw, chk) {
         WinActivate Select Script File.*
         
         addToProgressBar(10)
+        Input_Script_File_Path:
         If (fw = "mLinux 4.0.1")
             ControlSetText, Edit1, %mli401Path%, Select Script File.*
         If (fw = "mLinux 4.0.1 - NO WiFi")

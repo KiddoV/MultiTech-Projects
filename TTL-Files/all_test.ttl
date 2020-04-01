@@ -8,7 +8,12 @@ show 0
 is240L = -1
 is246L = -1
 is247L = -1
-radioVersion = '00.00.000'
+radioVersion = 'N/A'
+imei = 'N/A'
+telModuleVer = 'N/A'
+fwBuild = 'N/A'
+wifiAddr = 'N/A'
+bluetoothAddr = 'N/A'
 isNONE = -1
 isH5 = -1
 isLAT1 = -1
@@ -59,16 +64,32 @@ if isLVW2=0 goto START
 :START
 if isLAT1=0 then 
     radioVersion = '17.00.503'
+    telModuleVer = 'LE910-NAG'
+    fwBuild = '#CFVR: 10'
 elseif isH5=0 then
     radioVersion = '12.00.026'
+    telModuleVer = 'HE910-D'
+    fwBuild = '#CFVR: 1'
+elseif isLAT3=0 then
+    radioVersion = '20.00.526'
+    telModuleVer = 'LE910-NA1'
+    fwBuild = '#CFVR: 0'
 elseif isLEU1=0 then
     radioVersion = '17.00.523'
+    telModuleVer = 'N/A'
+    fwBuild = 'N/A'
 elseif isL4E1=0 then
 	radioVersion = '25.20.673'
+	telModuleVer = 'LE910C4-EU'
+	fwBuild = '#CFVR: 2'
 elseif isL4N1=0 then
 	radioVersion = '25.20.666'
+	telModuleVer = 'LE910C4-NF'
+	fwBuild = '#CFVR: 2'
 elseif isLVW2=0 then
 	radioVersion = '17.01.571'
+	telModuleVer = 'LE910-SVG'
+	fwBuild = '#CFVR: 3'
 endif
 
 wait '$'
@@ -124,12 +145,13 @@ timeout = 5
 :TEMPERATURE_TEST
 flushrecv
 sendln 'cat /sys/class/hwmon/hwmon0/device/temp1_input'
-waitln '4' '3'
-str2int strvar inputstr
-statusbox strvar 'temp'
+waitln '5' '4' '3' '2'
+tempstr = inputstr
+str2int temp inputstr
+statusbox temp 'temp'
 pause 2 
 closesbox
-if strvar > 46000 then
+if temp > 46000 then
 	messagebox 'TEMP VALUE HIGH LIMIT FAILURE!' 'TEMP FAILURE'
 	disconnect
 	closett
@@ -263,7 +285,6 @@ else
 endif
 mpause 1000
 
-imei = ''
 if isNONE=0 goto SHORTING_MTCDT
 
 :SIM_TEST
@@ -309,8 +330,8 @@ endif
 mpause 1000
 send 24 ;Exit 'at' command promt
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :SMC_TEST
 imei = ''
 timeout = 3
@@ -771,10 +792,10 @@ send 24 ;Exit 'at' command promt
 closesbox
 goto SHORTING_MTCDT
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDT
-if is240L=0 goto TEST_DONE
+if is240L=0 goto RESULT_LOGGING
 if is246L=0 goto GPS_TEST
 if is247L=0 goto GPS_TEST
 
@@ -798,7 +819,7 @@ mpause 500
 closesbox
 pause 1
 
-if is247L != 0 goto TEST_DONE
+if is247L != 0 goto RESULT_LOGGING
 
 :WIFI_BT_TEST
 timeout = 15
@@ -897,6 +918,48 @@ mpause 500
 messagebox 'PLEASE VERIFY IF WIFI AND BLUETOOTH ADDRESS WERE RECORDED CORRECTLY!' 'WIFI/BT MAC ADDRESS VERIFICATION'
 exec 'notepad c:\temp\wifimacinfo.txt'
 
+:RESULT_LOGGING
+itemNum = param4
+productId = 'MTCDT'
+
+strconcat productId '-'
+strcompare param3 'NONE'
+if result <> 0 then
+   strconcat productId param3
+   strconcat productId '-'
+endif
+strconcat productId param2
+strconcat productId ' '
+
+getdate date "%Y/%m/%d"
+getdate time "%H:%M:%S"
+fileopen fhandle 'C:\DEVICE_TEST_RECORDS\all-mtcdt-test-records.txt' 1
+
+filewrite fhandle #13#10
+filewrite fhandle date
+filewrite fhandle ",,"
+filewrite fhandle time
+filewrite fhandle ",,"
+filewrite fhandle itemNum
+filewrite fhandle ",,"
+filewrite fhandle productId
+filewrite fhandle ",,"
+filewrite fhandle tempstr
+filewrite fhandle ",,"
+filewrite fhandle imei
+filewrite fhandle ",,"
+filewrite fhandle radioVersion
+filewrite fhandle ",,"
+filewrite fhandle telModuleVer
+filewrite fhandle ",,"
+filewrite fhandle fwBuild
+filewrite fhandle ",,"
+filewrite fhandle wifiAddr
+filewrite fhandle ",,"
+filewrite fhandle bluetoothAddr
+
+fileclose fhandle 
+
 :TEST_DONE
 beep
 messagebox 'MTCDT TEST COMPLETE' 'TEST DONE'
@@ -904,7 +967,8 @@ disconnect
 closett
 end
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :LED_FAILURE
 messagebox 'FIX FAILING LEDs. RETEST!' 'LED FAILURE'
 disconnect

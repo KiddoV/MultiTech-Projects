@@ -206,8 +206,60 @@ sendln eepromstr
 wait '#'
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_EEPROM_WRITE
+promProductID = ''
+promSerialNum = ''
+promNodeID = ''
+promImeiNum = ''
+promNodeBT = ''
+promNodeWiFi = ''
+promUuid = ''
+promNodeLora = ''
+
 timeout = 3
 flushrecv
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^product.*'
+strmatch inputstr 'MTCDT.*.[AL067]'
+strconcat promProductID matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^device-id.*'
+strmatch inputstr '[\d+]{8}'
+strconcat promSerialNum matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^mac-addr.*'
+strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+strconcat promNodeID matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^imei.*'
+strmatch inputstr '[\d+]{15}'
+strconcat promImeiNum matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^mac-bluetooth.*'
+strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+strconcat promNodeBT matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^mac-wifi.*'
+strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+strconcat promNodeWiFi matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^uuid.*'
+strmatch inputstr '[0-9A-F+]{32}'
+strconcat promUuid matchstr
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^lora-eui.*'
+strmatch inputstr '([0-9A-F]{2}[:-]){7}([0-9A-F]{2})'
+strconcat promNodeLora matchstr
+
+sprintf2 msg 'PRODUCT ID: %s \nSERIAL: %s \nNODE ID: %s \nIMEI: %s \nNODE BLUETOOTH: %s \nNODE WIFI: %s \nUUID: %s \nNODE LORA: %s' promProductID promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
+strspecial msg
+messagebox msg 'Information'
 
 
 :DONE
