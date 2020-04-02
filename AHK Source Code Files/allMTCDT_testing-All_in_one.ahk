@@ -427,26 +427,98 @@ functionalTestStep(itemN, mtcType, radType) {
     }
     
 }
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;Additional GUIs;;;;;;;;;;;;;;;;;;
 showTestHist() {
+    Global
+    FormatTime, localToday,, yyyy/MM/dd
+    itemList := {}
+    totalToday := 0
+    
     Gui, 2: Default
     Gui -MinimizeBox -MaximizeBox
-    Gui, 2: Add, Listview, w640 h500 +Grid -Multi, Date|Time|Item Number|Product ID|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Addr|Bluetooth Addr
-    Loop Read, C:\Device_Test_Records\all-mtcdt-test-records.txt
+    Gui, 2: Add, Text, x8 y11, Search:
+    Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
+    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|Item Number|Product ID|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Addr|Bluetooth Addr
+    Gui, 2: Add, StatusBar
+    Loop Read, C:\DEVICE_TEST_RECORDS\all-mtcdt-test-records.txt
     {
-        If A_LoopReadLine =
+        If A_LoopReadLine =     ;Skip the blank lines
             Continue
-        StringReplace, itemList, A_LoopReadLine, `,`,, `,,All
-        StringSplit, item, itemList, `,
+        StringReplace, itemLine, A_LoopReadLine, `,`,, `,, All  ;Replace 2 commas to 1
+        StringReplace, itemLine, itemLine, %localToday%, Today, All ;Replace today format to "Today"
+        foundToday := InStr(itemLine, "Today")
+        if (foundToday > 0)
+            totalToday++
+        StringSplit, item, itemLine, `,
         LV_Add("",item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11)
+        itemList.Push({1:item1, 2:item2, 3:item3, 4:item4, 5:item5, 6:item6, 7:item7, 8:item8, 9:item9, 10:item10, 11:item11})
     }
+    totalLine := LV_GetCount()
     LV_ModifyCol()
-    LV_ModifyCol(1, "SortDesc")
     LV_ModifyCol(2, "SortDesc")
+    LV_ModifyCol(1, "SortDesc")
+    
+    SB_SetText("Total Today Passed-Tests: " totalToday "             | Total Passed-Tests: " totalLine)
     Gui, 2: Show, , ALL MTCDT PASSED-TEST RECORDS (LOCAL COMPUTER)
     Return
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Search:
+    GuiControlGet, searchTerm
+    GuiControl, -Redraw, listView
+    LV_Delete()
+    For each, item in itemList
+    {
+        If (searchTerm != "") {
+            If (Instr(item.1, searchTerm) > 0 || Instr(item.2, searchTerm) > 0 || Instr(item.3, searchTerm) > 0 || Instr(item.4, searchTerm) > 0 || Instr(item.5, searchTerm) > 0 || Instr(item.6, searchTerm) > 0 || Instr(item.7, searchTerm) > 0 || Instr(item.8, searchTerm) > 0 || Instr(item.9, searchTerm) > 0 || Instr(item.10, searchTerm) > 0 || Instr(item.11, searchTerm) > 0) {
+                LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+            }
+        } Else {
+            LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+        }
+    }
+    totalFound := LV_GetCount()
+    SB_SetText("Total Found: " totalFound "/" totalLine)
+    GuiControl, +Redraw, listView
+    LV_ModifyCol()
+    LV_ModifyCol(2, "SortDesc")
+    LV_ModifyCol(1, "SortDesc")
+    Return ;Search label returned
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    MoreDetail:
+    rowNum := LV_GetNext("C")
+    
+    LV_GetText(c1, rowNum, 1)
+    LV_GetText(c2, rowNum, 2)
+    LV_GetText(c3, rowNum, 3)
+    LV_GetText(c4, rowNum, 4)
+    LV_GetText(c5, rowNum, 5)
+    LV_GetText(c6, rowNum, 6)
+    LV_GetText(c7, rowNum, 7)
+    LV_GetText(c8, rowNum, 8)
+    LV_GetText(c9, rowNum, 9)
+    LV_GetText(c10, rowNum, 10)
+    LV_GetText(c11, rowNum, 11)
+    
+    infoStr =
+    (
+Test Date:`t`t    %c1% (YYYY/MM/DD)
+Test Time:`t`t    %c2%
+Item Number:`t    %c3%
+Product ID:`t    %c4%
+Tested Temperature:`t    %c5% (mCelsius)
+IMEI Number:`t    %c6%
+SMC Radio Version:`t    %c7%
+Telit Module Version:    %c8%
+SMC Firmware Version: %c9%
+Wifi Adress:`t    %c10%
+Bluetooth Address:`t    %c11%
+    )
+    If (rowNum != 0) {
+        MsgBox, 64, More Details, %infoStr%
+    }
+    Return ;MoreDetail label returned
     
     2GuiEscape:
     2GuiClose:
@@ -454,6 +526,8 @@ showTestHist() {
         Gui, 2: Destroy
     Return
 }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 checkBox() {
     GuiControlGet, check ;Get value from CheckBox
     clearAllProcessImgs()

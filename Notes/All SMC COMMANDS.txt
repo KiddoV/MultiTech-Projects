@@ -23,7 +23,7 @@ at+cgdcont=1
 at+cgdcont=1,"IP","fast.t-mobile.com"
 at+cgdcont? =>	OK ONLY
 
------LAT1 (70000037L)------------------------
+-----LAT1 (70000037L, 70000007L)------------------------
 at
 ate1
 at+cgsn (print imei)
