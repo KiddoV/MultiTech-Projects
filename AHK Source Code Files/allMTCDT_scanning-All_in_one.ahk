@@ -6,6 +6,8 @@ SetTitleMatchMode, RegEx
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\AMAuto-Scanner\TTL-Files
     FileCreateDir C:\V-Projects\AMAuto-Scanner\TTL-Files
+IfNotExist C:\DEVICE_EEPROM_RECORDS
+    FileCreateDir C:\DEVICE_EEPROM_RECORDS
     
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-Scanner\TTL-Files\all_scan.ttl, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
@@ -14,7 +16,6 @@ Global 246_SKUNums := ["94557252LF", "94557574LF", "94557576LF"]
 Global 247_SKUNums := ["94557550LF", ""]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
-Global localTime := TimeString
 
 ;;;Paths and Links
 ;240L
@@ -26,7 +27,8 @@ SetWorkingDir %A_ScriptDir%
 Global WorkingDir
 StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
-    
+
+Gui Add, Button, x175 y5 w55 h20 vhistoryBttn gshowScanHist, HISTORY
 Gui Add, Text, x17 y5 w136 h21 +0x200 vtopLabel, Select SKU Number
 
 Gui Add, Tab3, x10 y27 w222 h65 vwhichTab gchangeTab +0x8, 240L|246L|247L
@@ -50,34 +52,40 @@ Gui Add, Text, x17 y125 w55 h21 vserialLabel, Serial #:
 Gui Add, Text, x17 y150 w60 h21 vnodeidLabel, NodeID #:
 Gui Add, Text, x17 y175 w55 h21 vimeiLabel, IMEI #:
 Gui Add, Text, x17 y200 w55 h21 vuuidLabel, UUID #:
-Gui Add, Text, x17 y235 w55 h21 vloraLabel, LORA #:
+Gui Add, Text, x17 y235 w55 h21 vloraLabel, Lora #:
 Gui Add, Text, x17 y261 w55 h21 vwifiLabel, WiFi #:
 Gui Font
 
 Gui Add, Text, x22 y227 w198 h2 +0x10 ;;--------------------------
 
-Gui Add, Edit, x79 y123 w145 h21 vserialN Limit8 Number
-Gui Add, Edit, x79 y148 w145 h21 vnodeIdN Limit17
-Gui Add, Edit, x79 y173 w145 h21 vimeiN Limit15
-Gui Add, Edit, x79 y198 w145 h21 vuuidN Limit32
-Gui Add, Edit, x79 y233 w145 h21 vloraN Limit23
-Gui Add, Edit, x79 y259 w145 h21 vwifiN 
+Gui Add, Edit, x79 y123 w145 h21 vserialN hwndHED1 Limit8 Number
+;SetEditCueBanner(HED1, "Ex: 12345678")
+Gui Add, Edit, x79 y148 w145 h21 vnodeIdN hwndHED2 Limit17
+;SetEditCueBanner(HED2, "Ex: 00:00:00:00:00:00")
+Gui Add, Edit, x79 y173 w145 h21 vimeiN hwndHED3 Limit15
+;SetEditCueBanner(HED3, "Ex: 123456789012345")
+Gui Add, Edit, x79 y198 w145 h21 vuuidN hwndHED4 Limit32
+;SetEditCueBanner(HED4, "Ex: 123456789ABCDEF123456789ABCDEF12")
+Gui Add, Edit, x79 y233 w145 h21 vloraN hwndHED5 Limit23
+;SetEditCueBanner(HED5, "Ex: 00:00:00:00:00:00:00:00")
+Gui Add, Edit, x79 y259 w145 h21 vwifiN hwndHED6 Limit23
+;SetEditCueBanner(HED6, "Ex: 00:00:00:00:00:00:00:00")
 
 Gui Add, Button, x80 y300 w80 h23 gmainStart, &START
-
+Gui Add, StatusBar, ,...
 ;Functions must run when app first open
 changeDisplayWithSKUNum()
 
 Gui Show, , All MTCDT Auto-Scanner
 Return
 
-GuiEscape:
 GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
-~Enter:: Send {Tab}
+~Enter::    Send {Tab}
+^q::    ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainStart() {
@@ -104,11 +112,18 @@ mainStart() {
     Global labelType := getLabelType()
     
     If !WinExist("COM.*") {
+        SB_SetText("Connect to PORT before scanning!")
         MsgBox, 8240, Alert, Please connect to PORT first! ;Uses 48 + 8192
         return
     }
+    OnMessage(0x44, "PlayInCircleIcon")
+    MsgBox 0x81, Question, Begin Auto-Scanning for %skuNum%?
+    OnMessage(0x44, "")
+    IfMsgBox Cancel
+        return
     
     If (checkInput() = 0) {
+        SB_SetText("Correct the values before scanning!")
         return
     }
     
@@ -116,62 +131,140 @@ mainStart() {
     Send ^c
     Sleep 100
     If (searchForFirmwareVersion() = 0) {
+        SB_SetText("Your device need to reboot first!")
         MsgBox  Please reboot device first!
         return
     }
     
-    WinClose MACRO.*
+    ;Begin scan
+    If WinExist("MACRO")
+        WinKill MACRO
     WinActivate COM.*
     Send !om
+    SB_SetText("Opening Teraterm Macro")
     WinWait MACRO.*
     ControlSetText, Edit1, %allScanPath%, MACRO.*
     ControlSend, Edit1, {Enter}, MACRO.*
     ControlClick, Button1, MACRO.*, , Left, 3
     
     ;Input datas
-    WinWait LABEL.*
-    ControlSetText, Edit1, %labelType%, LABEL.*
-    ControlSend, Edit1, {Enter}, LABEL.*
-    ControlClick, Button1, LABEL.*, , Left, 3
+    SB_SetText("Sending datas to Teraterm Macro")
+    WinWait ALL DATAS
+    ControlSetText, Edit1, %labelType%`,%skuNum%`,%serialN%`,%nodeIdN%`,%imeiN%`,%uuidN%`,%loraN%`,%wifiN%, ALL DATAS
+    ControlSend, Edit1, {Enter}, ALL DATAS
+    ControlClick, Button1, ALL DATAS, , Left, 3 ;Do this if ControlSend not working
     
-    WinWait SKU.*
-    ControlSetText, Edit1, %skuNum%, SKU.*
-    ControlSend, Edit1, {Enter}, SKU.*
-    ControlClick, Button1, SKU.*, , Left, 3
-    
-    WinWait SERIAL.*
-    ControlSetText, Edit1, %serialN%, SERIAL.*
-    ControlSend, Edit1, {Enter}, SERIAL.*
-    ControlClick, Button1, SERIAL.*, , Left, 3
-    
-    WinWait NODE.*
-    ControlSetText, Edit1, %nodeIdN%, NODE.*
-    ControlSend, Edit1, {Enter}, NODE.*
-    ControlClick, Button1, NODE.*, , Left, 3
-        
-    WinWait IMEI.*
-    ControlSetText, Edit1, %imeiN%, IMEI.*
-    ControlSend, Edit1, {Enter}, IMEI.*
-    ControlClick, Button1, IMEI.*, , Left, 3
-        
-    WinWait UUID.*
-    ControlSetText, Edit1, %uuidN%, UUID.*
-    ControlSend, Edit1, {Enter}, UUID.*
-    ControlClick, Button1, UUID.*, , Left, 3
-        
-    WinWait NODE LORA.*
-    ControlSetText, Edit1, %loraN%, NODE LORA.*
-    ControlSend, Edit1, {Enter}, NODE LORA.*
-    ControlClick, Button1, NODE LORA.*, , Left, 3
-        
-    WinWait NODE WIFI.*
-    ControlSetText, Edit1, %wifiN%, NODE WIFI.*
-    ControlSend, Edit1, {Enter}, NODE WIFI.*
-    ControlClick, Button1, NODE WIFI.*, , Left, 3
-    
-    
+    ;Wait for Teraterm
+    SB_SetText("Waiting for processes")
+    WinWait SCAN COMPLETE|INVALID|FAILURE|ERROR
+    If WinExist("SCAN COMPLETE") {
+        FormatTime, localTime, %A_Now%, hh:mm:ss tt
+        SB_SetText("You just finished a scan at " localTime)
+    } Else {
+        SB_SetText("Failed to scan!")
+        Return
+    }
 }
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;Additional GUIs;;;;;;;;;;;;;;;;;;
+showScanHist() {
+    Global
+    FormatTime, localToday,, yyyy/MM/dd
+    itemList := {}
+    totalToday := 0
+    
+    Gui, 2: Default
+    Gui -MinimizeBox -MaximizeBox
+    Gui, 2: Add, Text, x8 y11, Search:
+    Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
+    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|SKU Number|Product ID|Serial Number|Node ID|IMEI|Node Lora ID|UUID|Wifi Addr|Bluetooth Addr
+    Gui, 2: Add, StatusBar
+    SB_SetParts(200, 200)
+    Loop Read, C:\DEVICE_EEPROM_RECORDS\all-scan-records.txt
+    {
+        If A_LoopReadLine =     ;Skip the blank lines
+            Continue
+        StringReplace, itemLine, A_LoopReadLine, `,`,, `,, All  ;Replace 2 commas to 1
+        StringReplace, itemLine, itemLine, %localToday%, Today, All ;Replace today format to "Today"
+        foundToday := InStr(itemLine, "Today")
+        if (foundToday > 0)
+            totalToday++
+        StringSplit, item, itemLine, `,
+        LV_Add("",item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11)
+        itemList.Push({1:item1, 2:item2, 3:item3, 4:item4, 5:item5, 6:item6, 7:item7, 8:item8, 9:item9, 10:item10, 11:item11})
+    }
+    totalLine := LV_GetCount()
+    LV_ModifyCol()
+    LV_ModifyCol(2, "SortDesc")
+    LV_ModifyCol(1, "SortDesc")
+    
+    SB_SetText("Total Today Passed-Scans: " totalToday, 1)
+    SB_SetText("Total Passed-Scans: " totalLine, 2)
+    Gui, 2: Show, , ALL MTCDT PASSED-SCAN RECORDS (LOCAL COMPUTER)
+    Return
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Search:
+    GuiControlGet, searchTerm
+    GuiControl, -Redraw, listView
+    LV_Delete()
+    For each, item in itemList
+    {
+        If (searchTerm != "") {
+            If (Instr(item.1, searchTerm) > 0 || Instr(item.2, searchTerm) > 0 || Instr(item.3, searchTerm) > 0 || Instr(item.4, searchTerm) > 0 || Instr(item.5, searchTerm) > 0 || Instr(item.6, searchTerm) > 0 || Instr(item.7, searchTerm) > 0 || Instr(item.8, searchTerm) > 0 || Instr(item.9, searchTerm) > 0 || Instr(item.10, searchTerm) > 0 || Instr(item.11, searchTerm) > 0) {
+                LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+            }
+        } Else {
+            LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+        }
+    }
+    totalFound := LV_GetCount()
+    SB_SetText("Total Found: " totalFound " of " totalLine, 3)
+    GuiControl, +Redraw, listView
+    LV_ModifyCol()
+    LV_ModifyCol(2, "SortDesc")
+    LV_ModifyCol(1, "SortDesc")
+    Return ;Search label returned
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    MoreDetail:
+    rowNum := LV_GetNext("C")
+    
+    LV_GetText(c1, rowNum, 1)
+    LV_GetText(c2, rowNum, 2)
+    LV_GetText(c3, rowNum, 3)
+    LV_GetText(c4, rowNum, 4)
+    LV_GetText(c5, rowNum, 5)
+    LV_GetText(c6, rowNum, 6)
+    LV_GetText(c7, rowNum, 7)
+    LV_GetText(c8, rowNum, 8)
+    LV_GetText(c9, rowNum, 9)
+    LV_GetText(c10, rowNum, 10)
+    LV_GetText(c11, rowNum, 11)
+    
+    If (rowNum != 0) {
+        MsgBox 4160, More Details, 
+        (LTrim
+            Scan Date:`t`t%c1%
+            Scan Time:`t%c2%
+            SKU Number:`t%c3%
+            Product ID:`t%c4%
+            Serial Number:`t%c5%
+            Node ID (MAC ID):`t%c6%
+            IMEI Number:`t%c7%
+            Node Lora ID:`t%c8%
+            UUID:`t`t%c9%
+            Wifi Address:`t%c10%
+            Bluetooth Address:`t%c11%
+        )
+    }
+    Return ;MoreDetail label returned
+    
+    2GuiEscape:
+    2GuiClose:
+        Gui, 2: Cancel
+        Gui, 2: Destroy
+    Return
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 checkInput() {
@@ -284,6 +377,11 @@ changeDisplayWithSKUNum() {
     }
 }
 
+SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
+   Static EM_SETCUEBANNER := (0x1500 + 1)
+   Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
+}
+
 ;;;;Search Images Functions;;;;
 searchForFirmwareVersion() {
         WinActivate COM.*
@@ -293,4 +391,27 @@ searchForFirmwareVersion() {
             return 1 ;Return true if found
         If ErrorLevel
             return 0 ;Return false if NOT found
+}
+
+;;;Icon for MsgBox
+/*Usage Sample
+OnMessage(0x44, "CheckIcon") ;Add icon
+MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
+OnMessage(0x44, "") ;Clear icon
+*/
+CheckIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
+PlayInCircleIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
 }

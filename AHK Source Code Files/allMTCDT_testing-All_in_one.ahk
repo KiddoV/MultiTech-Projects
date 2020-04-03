@@ -1,4 +1,4 @@
-﻿/*
+﻿ /*
     Author: Viet Ho
 */
 SetTitleMatchMode, RegEx
@@ -132,7 +132,6 @@ aboutHandler:
 MsgBox 0, Message, Created and Tested by Viet Ho
 Return
 
-GuiEscape:
 GuiClose:
     ExitApp
     
@@ -441,6 +440,7 @@ showTestHist() {
     Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
     Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|Item Number|Product ID|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Addr|Bluetooth Addr
     Gui, 2: Add, StatusBar
+    SB_SetParts(200, 200)
     Loop Read, C:\DEVICE_TEST_RECORDS\all-mtcdt-test-records.txt
     {
         If A_LoopReadLine =     ;Skip the blank lines
@@ -459,7 +459,8 @@ showTestHist() {
     LV_ModifyCol(2, "SortDesc")
     LV_ModifyCol(1, "SortDesc")
     
-    SB_SetText("Total Today Passed-Tests: " totalToday "             | Total Passed-Tests: " totalLine)
+    SB_SetText("Total Today Passed-Tests: " totalToday, 1)
+    SB_SetText("Total Passed-Tests: " totalLine, 2)
     Gui, 2: Show, , ALL MTCDT PASSED-TEST RECORDS (LOCAL COMPUTER)
     Return
     
@@ -479,7 +480,7 @@ showTestHist() {
         }
     }
     totalFound := LV_GetCount()
-    SB_SetText("Total Found: " totalFound "/" totalLine)
+    SB_SetText("Total Found: " totalFound " of " totalLine, 3)
     GuiControl, +Redraw, listView
     LV_ModifyCol()
     LV_ModifyCol(2, "SortDesc")
@@ -501,22 +502,21 @@ showTestHist() {
     LV_GetText(c10, rowNum, 10)
     LV_GetText(c11, rowNum, 11)
     
-    infoStr =
-    (
-Test Date:`t`t    %c1% (YYYY/MM/DD)
-Test Time:`t`t    %c2%
-Item Number:`t    %c3%
-Product ID:`t    %c4%
-Tested Temperature:`t    %c5% (mCelsius)
-IMEI Number:`t    %c6%
-SMC Radio Version:`t    %c7%
-Telit Module Version:    %c8%
-SMC Firmware Version: %c9%
-Wifi Adress:`t    %c10%
-Bluetooth Address:`t    %c11%
-    )
     If (rowNum != 0) {
-        MsgBox, 64, More Details, %infoStr%
+        MsgBox 4160, More Details, 
+        (LTrim
+            Test Date:`t`t%c1%
+            Test Time:`t`t%c2%
+            Item Number:`t%c3%
+            Product ID:`t%c4%
+            Tested Temperature:`t%c5% (mCelsius)
+            IMEI Number:`t%c6%
+            SMC Radio Vers:`t%c7%
+            Telit Module Vers:`t%c8%
+            Firmware Build:`t%c9%
+            Wifi Address:`t%c10%
+            Bluetooth Address:`t%c11%
+        )
     }
     Return ;MoreDetail label returned
     

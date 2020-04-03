@@ -39,8 +39,17 @@ isType3 = -1
 isType4 = -1
 isType5 = -1
 
-inputbox '' 'LABEL TYPE'
-labelType = inputstr
+inputbox '' 'ALL DATAS'
+strsplit inputstr ','
+
+labelType = groupmatchstr1
+skuNum = groupmatchstr2
+serialNum = groupmatchstr3
+nodeIDNum = groupmatchstr4
+imeiNum = groupmatchstr5
+uuidNum = groupmatchstr6
+nodeLoraNum = groupmatchstr7
+nodeWifiNum = groupmatchstr8
 
 strcompare labelType 'LABELTYPE1'
 isType1 = result
@@ -52,27 +61,6 @@ strcompare labelType 'LABELTYPE4'
 isType4 = result
 strcompare labelType 'LABELTYPE5'
 isType5 = result
-
-inputbox '' 'SKU NUMBER'
-skuNum = inputstr
-
-inputbox '' 'SERIAL NUMBER'
-serialNum = inputstr
-inputbox '' 'NODE ID NUMBER'
-nodeIDNum = inputstr
-inputbox '' 'IMEI NUMBER'
-imeiNum = inputstr
-inputbox '' 'UUID NUMBER'
-uuidNum = inputstr
-inputbox '' 'NODE LORA NUMBER'
-nodeLoraNum = inputstr
-inputbox '' 'NODE WIFI NUMBER'
-nodeWifiNum = inputstr
-/*		
-sprintf2 msg 'SKU NUMBER: %s \nSERIAL NUMBER: %s \nNODE ID NUMBER: %s \nIMEI NUMBER: %s \nUUID NUMBER: %s \nNODE LORA NUMBER: %s \nNODE WIFI NUMBER: %s \n' skuNum serialNum nodeIDNum imeiNum uuidNum nodeLoraNum nodeWifiNum
-strspecial msg
-messagebox msg 'Information'
-*/
 
 if isType1 = 0 goto START_EEPROM
 if isType5 = 0 goto check_lora
@@ -87,7 +75,7 @@ sendln 'at+cgsn'
 waitln '2' '3' '4' '5'
 strcompare inputstr imeiNum
 if result <> 0 then
-    yesnobox 'IMEI MISMATCH!! DO YOU WANT TO RESCAN?' 'IMEI MISMATCH'
+    yesnobox 'IMEI MISMATCH!! CHECK LABEL AND RESCAN?' 'IMEI MISMATCH'
     if result = 1 then
         inputbox 'NEW SERIAL #:' 'SERIAL NUMBER'
 		imeiNum = inputstr
@@ -113,7 +101,7 @@ if result = 1 then
 endif
 strcompare inputstr nodeLoraNum
 if result <> 0 then
-    yesnobox 'NODE LORA MISMATCH!! DO YOU WANT TO RESCAN?' 'LORA MISMATCH'
+    yesnobox 'NODE LORA MISMATCH!! CHECK LABEL AND RESCAN?' 'LORA MISMATCH'
     if result = 1 then
         inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
 		nodeLoraNum = inputstr
@@ -203,68 +191,112 @@ strconcat eepromstr ' '
 strconcat eepromstr uuidNum
 wait '#'
 sendln eepromstr
-wait '#'
+wait '#' 'invalid mac-addr' 'ERROR'
+if result = 2 then
+    messagebox 'NODE ID/MAC ADDRESS IS INVALID. PLEASE CHECK YOUR SCAN!' 'NODE ID/MAC ADDRESS INVALID'
+	end
+elseif result = 3 then
+	messagebox 'SOMETHING WENT WRONG. CHECK YOUR SCANS!' 'ERROR'
+	end
+endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_EEPROM_WRITE
-promProductID = ''
-promSerialNum = ''
-promNodeID = ''
-promImeiNum = ''
-promNodeBT = ''
-promNodeWiFi = ''
-promUuid = ''
-promNodeLora = ''
+promProductID = 'N/A'
+promSerialNum = 'N/A'
+promNodeID = 'N/A'
+promImeiNum = 'N/A'
+promNodeBT = 'N/A'
+promNodeWiFi = 'N/A'
+promUuid = 'N/A'
+promNodeLora = 'N/A'
 
 timeout = 3
 flushrecv
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^product.*'
 strmatch inputstr 'MTCDT.*.[AL067]'
-strconcat promProductID matchstr
+promProductID = matchstr
 wait '#'
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^device-id.*'
 strmatch inputstr '[\d+]{8}'
-strconcat promSerialNum matchstr
+promSerialNum = matchstr
 wait '#'
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^mac-addr.*'
 strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
-strconcat promNodeID matchstr
-wait '#'
-sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
-waitregex '^imei.*'
-strmatch inputstr '[\d+]{15}'
-strconcat promImeiNum matchstr
-wait '#'
-sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
-waitregex '^mac-bluetooth.*'
-strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
-strconcat promNodeBT matchstr
-wait '#'
-sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
-waitregex '^mac-wifi.*'
-strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
-strconcat promNodeWiFi matchstr
+promNodeID = matchstr
+if isType1 != 0 && isType5 != 0 then
+    wait '#'
+	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+	waitregex '^imei.*'
+	strmatch inputstr '[\d+]{15}'
+    promImeiNum = matchstr
+endif
+if isType4 = 0 || isType5 = 0 then
+    wait '#'
+	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+	waitregex '^mac-bluetooth.*'
+	strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+	promNodeBT = matchstr
+	wait '#'
+	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+	waitregex '^mac-wifi.*'
+	strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+	promNodeWiFi = matchstr
+endif
 wait '#'
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^uuid.*'
 strmatch inputstr '[0-9A-F+]{32}'
-strconcat promUuid matchstr
-wait '#'
-sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
-waitregex '^lora-eui.*'
-strmatch inputstr '([0-9A-F]{2}[:-]){7}([0-9A-F]{2})'
-strconcat promNodeLora matchstr
+promUuid = matchstr
+if isType1 != 0 && isType2 != 0 then
+    ;wait '#'
+	;sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+	;waitregex '^lora-eui.*'
+	;strmatch inputstr '([0-9A-F]{2}[:-]){7}([0-9A-F]{2})'
+    promNodeLora = nodeLoraNum
+endif
 
-sprintf2 msg 'PRODUCT ID: %s \nSERIAL: %s \nNODE ID: %s \nIMEI: %s \nNODE BLUETOOTH: %s \nNODE WIFI: %s \nUUID: %s \nNODE LORA: %s' promProductID promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
+sprintf2 msg '----INFORMATION----\nProduct ID: %s \nSerial Number: %s \nNode ID: %s \nIMEI: %s \nNode Bluetooth: %s \nNode WiFi: %s \nUUID: %s \nNode Lora: %s\n----------0o0----------\n\nMTCDT EEPROM CONFIGURATION COMPLETE\nPLEASE CONFIRM EEPROM CONFIGURATION ABOVE!' promProductID promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
 strspecial msg
-messagebox msg 'Information'
 
+:RESULT_LOGGING
+getdate date "%Y/%m/%d"
+getdate time "%H:%M:%S"
+fileopen fhandle 'C:\DEVICE_EEPROM_RECORDS\all-scan-records.txt' 1
+
+filewrite fhandle #13#10
+filewrite fhandle date
+filewrite fhandle ",,"
+filewrite fhandle time
+filewrite fhandle ",,"
+filewrite fhandle skuNum
+filewrite fhandle ",,"
+filewrite fhandle promProductID
+filewrite fhandle ",,"
+filewrite fhandle promSerialNum
+filewrite fhandle ",,"
+filewrite fhandle promNodeID
+filewrite fhandle ",,"
+filewrite fhandle promImeiNum
+filewrite fhandle ",,"
+filewrite fhandle promNodeLora
+filewrite fhandle ",,"
+filewrite fhandle promUuid
+filewrite fhandle ",,"
+filewrite fhandle promNodeWiFi
+filewrite fhandle ",,"
+filewrite fhandle promNodeBT
+
+fileclose fhandle 
 
 :DONE
-sendln 'halt'
-wait "Power down"
-messagebox 'MTCDT EEPROM CONFIGURATION COMPLETE' 'DONE'
+statusbox 'REMEMBER TO REPROGRAM THIS DEVICE IF NEEDED!' 'REMINDER'
+mpause 1000
+;sendln 'halt'
+;wait "Power down"
+closesbox
+messagebox msg 'SCAN COMPLETE'
 disconnect
 end
