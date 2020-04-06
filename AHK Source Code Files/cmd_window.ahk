@@ -13,7 +13,7 @@ Gui Add, Edit, x8 y243 w295 vcommandIn,
 
 ;Run cmd in background
 DetectHiddenWindows, On
-Run %ComSpec%,, Hide, pid
+Run, PowerShell.exe -ExecutionPolicy Bypass,, Hide, pid
 WinWait ahk_pid %pid%
 DllCall("AttachConsole", "UInt", pid)
 Global objShell := ComObjCreate("WScript.Shell")
@@ -43,7 +43,7 @@ displayOutput() {
 }
 pushCommand() {
     ;GuiControlGet, command, ,commandIn
-    command = ping 8.8.8.8
+    command = ls
     objExec := objShell.Exec(command)
     ;ControlSetText, Edit2, ,CMD WINDOWs
     return objExec 

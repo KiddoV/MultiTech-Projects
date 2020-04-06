@@ -125,3 +125,20 @@ at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","vzwims","",0,0
 		+CGDCONT: 3,"IPV4V6","vzwinternet","",0,0
 		+CGDCONT: 4,"IPV4V6","vzwapp","",0,0
 		+CGDCONT: 5,"IPV4V6","","",0,0
+
+-----LSB3 (70000026L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmi =>	Telit
+at+gmm =>	LE866A1-JS
+at+gmr =>	23.00.204 (M0A.20040)
+at#cfvr =>	#CFVR: 8
+at#gpio=1,0,2
+at#sled=2
+at#sledsav
+at+cpin? =>	+CPIN: READY *Sometime fail with T-Mobile*
+at#rxdiv? =>	#RXDIV: 1,0
+at#tempcfg=-40,-15,55,85
+at#tempcfg? =>	#TEMPCFG: -40,-15,55,85
+at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0

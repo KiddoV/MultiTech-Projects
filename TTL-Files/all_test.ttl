@@ -22,6 +22,7 @@ isLEU1 = -1
 isL4E1 = -1
 isL4N1 = -1
 isLVW2 = -1
+isLSB3 = -1
 
 :CHECK_MTCDT_TYPE
 strcompare param2 '240L'
@@ -59,6 +60,9 @@ if isL4N1=0 goto START
 strcompare param3 'LVW2'
 isLVW2 = result
 if isLVW2=0 goto START
+strcompare param3 'LSB3'
+isLSB3 = result
+if isLSB3=0 goto START
 
 
 :START
@@ -90,6 +94,10 @@ elseif isLVW2=0 then
 	radioVersion = '17.01.571'
 	telModuleVer = 'LE910-SVG'
 	fwBuild = '#CFVR: 3'
+elseif isLSB3=0 then
+	radioVersion = '23.00.204'
+	telModuleVer = 'LE866A1-JS'
+	fwBuild = '#CFVR: 8'
 endif
 
 wait '$'
@@ -123,13 +131,12 @@ for i 1 2
 	mpause 500
 next
 closesbox
-timeout = 3
-mpause 500
-wait "No such file"
-if result=1 then
-   goto LED_FAILURE
-endif
-mpause 500
+;timeout = 3
+;mpause 500
+;wait "No such file"
+;if result=1 then
+;   goto LED_FAILURE
+;endif
 :all_led_on
 send 13
 wait '#'
@@ -386,6 +393,12 @@ elseif isLAT1=0 then
 	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
 elseif isLVW2=0 then
 	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3'
+elseif isLSB3=0 then
+	waitln '#TEMPCFG: -40,-15,55,85'
+	if result = 0 then
+	    sendln '#TEMPCFG: -40,-15,55,85'
+		goto temp_setting
+	endif
 endif
 if result=0 goto temp_setting
 mpause 500
@@ -396,6 +409,8 @@ elseif isH5=0 then
  	wait '#RXDIV: 0,1'
 elseif isLVW2=0 then
  	wait '#rxdiv: 1,1'
+elseif isLSB3=0 then
+ 	wait '#RXDIV: 1,0'
 else
  	wait '#RXDIV: 1,1'
 endif
@@ -462,6 +477,11 @@ if isLAT1 = 0 goto LAT1_TEST
 if isLAT3 = 0 goto LAT3_TEST
 if isL4E1 = 0 goto L4E1_TEST
 if isL4N1 = 0 goto L4N1_TEST
+if isLSB3 = 0 goto LSB3_TEST
+
+;;;;;;;;;;;;;;
+:ALL_VERSION
+
 
 ;;;;;;;;;;;;;;
 :H5_TEST
@@ -728,6 +748,46 @@ mpause 500
 sendln 'at#fwswitch?'
 wait '#FWSWITCH: 0,0'
 goto csq_check
+;;;;;;;;;;;
+:LSB3_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'Telit'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE866A1-JS'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE866A1-JS' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '23.00.204'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 23.00.204' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '8'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 8' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
 
 ;;;;;;;;;;;
 :csq_check
