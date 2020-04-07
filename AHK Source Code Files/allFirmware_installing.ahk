@@ -81,7 +81,6 @@ aboutHandler:
 MsgBox 0, Message, Created and Tested by Viet Ho
 Return
 
-GuiEscape:
 GuiClose:
     ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

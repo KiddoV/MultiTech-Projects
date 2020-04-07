@@ -438,7 +438,7 @@ showTestHist() {
     Gui -MinimizeBox -MaximizeBox
     Gui, 2: Add, Text, x8 y11, Search:
     Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
-    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|Item Number|Product ID|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Addr|Bluetooth Addr
+    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|Item Number|Product ID|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Address|Bluetooth Address
     Gui, 2: Add, StatusBar
     SB_SetParts(200, 200)
     Loop Read, C:\DEVICE_TEST_RECORDS\all-mtcdt-test-records.txt

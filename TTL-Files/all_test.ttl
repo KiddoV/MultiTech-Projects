@@ -418,6 +418,7 @@ if result = 0 then
     mpause 500
     sendln 'at#rxdiv=1,1'
 endif
+
 :apn1_check
 flushrecv
 mpause 500
@@ -444,6 +445,7 @@ if isLVW2=0 then
 	endif
 	goto LVW2_TEST
 endif
+
 sendln 'at+cgdcont?'
 if isH5=0 then
     wait 'OK'
@@ -457,6 +459,10 @@ if result =0 then
     sendln 'at+cgdcont=1,"IPV4V6","",""'
     goto apn1_check
 endif
+
+if isLAT3=0 goto SHORTING_SMC
+if isLSB3=0 goto SHORTING_SMC
+
 mpause 500
 sendln 'at+cgdcont?'
 waitln '+CGDCONT: 2,"IPV4V6","ims"'
@@ -472,6 +478,8 @@ if result =0 then
     goto apn1_check
 endif
 
+
+:SHORTING_SMC
 if isH5 = 0 goto H5_TEST
 if isLAT1 = 0 goto LAT1_TEST
 if isLAT3 = 0 goto LAT3_TEST

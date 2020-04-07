@@ -11,42 +11,45 @@ Gui Font, Bold q5, Consolas
 Gui, Add, Edit, xs+45 ys+22 r24 hwndEdit w270 +HScroll veditNode
 Gui Font
 
-Gui Add, GroupBox, xm+300 ym+3 w230 h50 Section, Auto Generate NodeIDs
-Gui, Add, Edit, xs+10 ys+22 w110 hwndHED1 vfirstNodeID Limit16
+Gui Add, GroupBox, xm+305 ym+3 w225 h50 Section, Auto Generate NodeIDs
+Gui, Add, Edit, xs+7 ys+22 w110 hwndHED1 vfirstNodeID Limit16
 SetEditCueBanner(HED1, "First nodeIDs")
-Gui, Add, Edit, xs+124 ys+22 w42 Limit4 +Number hwndHED2 vnodeAmout
+Gui, Add, Edit, xs+122 ys+22 w42 Limit4 +Number hwndHED2 vnodeAmout
 SetEditCueBanner(HED2, "Amount")
-Gui, Add, Button, xs+170 ys+22 w50 h21 ggenerateNode, Generate
+Gui, Add, Button, xs+169 ys+21 w50 h22 ggenerateNode, Generate
+
+Gui Add, GroupBox, xm+205 ym+3 w95 h50 Section, Browse NodeIDs
+Gui, Add, Button, xs+13 ys+20 w70 gbrowseNode, Browse...
 
 Gui Add, GroupBox, xm+1 ym+3 w200 h160 Section, xDot Pannel
 Gui Font, Bold, Ms Shell Dlg 2
-Gui Add, Button, xs+5 ys+15 w30 h30, P01
-Gui Add, Button, xs+37 ys+15 w30 h30, P02
-Gui Add, Button, xs+69 ys+15 w30 h30, P03
-Gui Add, Button, xs+101 ys+15 w30 h30, P04
-Gui Add, Button, xs+133 ys+15 w30 h30, P05
-Gui Add, Button, xs+165 ys+15 w30 h30, P06
+Gui Add, Button, xs+5 ys+15 w30 h30 vXDot01 gGetXDot, P01
+Gui Add, Button, xs+37 ys+15 w30 h30 vXDot02 gGetXDot, P02
+Gui Add, Button, xs+69 ys+15 w30 h30 vXDot03 gGetXDot, P03
+Gui Add, Button, xs+101 ys+15 w30 h30 vXDot04 gGetXDot, P04
+Gui Add, Button, xs+133 ys+15 w30 h30 vXDot05 gGetXDot, P05
+Gui Add, Button, xs+165 ys+15 w30 h30 vXDot06 gGetXDot, P06
 
-Gui Add, Button, xs+5 ys+50 w30 h30, P07
-Gui Add, Button, xs+37 ys+50 w30 h30, P08
-Gui Add, Button, xs+69 ys+50 w30 h30, P09
-Gui Add, Button, xs+101 ys+50 w30 h30, P10
-Gui Add, Button, xs+133 ys+50 w30 h30, P11
-Gui Add, Button, xs+165 ys+50 w30 h30, P12
+Gui Add, Button, xs+5 ys+50 w30 h30 vXDot07 gGetXDot, P07
+Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot, P08
+Gui Add, Button, xs+69 ys+50 w30 h30 vXDot09 gGetXDot, P09
+Gui Add, Button, xs+101 ys+50 w30 h30 vXDot10 gGetXDot, P10
+Gui Add, Button, xs+133 ys+50 w30 h30 vXDot11 gGetXDot, P11
+Gui Add, Button, xs+165 ys+50 w30 h30 vXDot12 gGetXDot, P12
 
-Gui Add, Button, xs+5 ys+85 w30 h30, P13
-Gui Add, Button, xs+37 ys+85 w30 h30, P14
-Gui Add, Button, xs+69 ys+85 w30 h30, P15
-Gui Add, Button, xs+101 ys+85 w30 h30, P16
-Gui Add, Button, xs+133 ys+85 w30 h30, P17
-Gui Add, Button, xs+165 ys+85 w30 h30, P18
+Gui Add, Button, xs+5 ys+85 w30 h30 vXDot13 gGetXDot, P13
+Gui Add, Button, xs+37 ys+85 w30 h30 vXDot14 gGetXDot, P14
+Gui Add, Button, xs+69 ys+85 w30 h30 vXDot15 gGetXDot, P15
+Gui Add, Button, xs+101 ys+85 w30 h30 vXDot16 gGetXDot, P16
+Gui Add, Button, xs+133 ys+85 w30 h30 vXDot17 gGetXDot, P17
+Gui Add, Button, xs+165 ys+85 w30 h30 vXDot18 gGetXDot, P18
 
-Gui Add, Button, xs+5 ys+120 w30 h30, P19
-Gui Add, Button, xs+37 ys+120 w30 h30, P20
-Gui Add, Button, xs+69 ys+120 w30 h30, P21
-Gui Add, Button, xs+101 ys+120 w30 h30, P22
-Gui Add, Button, xs+133 ys+120 w30 h30, P23
-Gui Add, Button, xs+165 ys+120 w30 h30, P24
+Gui Add, Button, xs+5 ys+120 w30 h30 vXDot19 gGetXDot, P19
+Gui Add, Button, xs+37 ys+120 w30 h30 vXDot20 gGetXDot, P20
+Gui Add, Button, xs+69 ys+120 w30 h30 vXDot21 gGetXDot, P21
+Gui Add, Button, xs+101 ys+120 w30 h30 vXDot22 gGetXDot, P22
+Gui Add, Button, xs+133 ys+120 w30 h30 vXDot23 gGetXDot, P23
+Gui Add, Button, xs+165 ys+120 w30 h30 vXDot24 gGetXDot, P24
 Gui Font
 
 
@@ -77,9 +80,15 @@ loop, 24
 GuiControl,, lineNo, % lines
 }
 
-GuiEscape:
 GuiClose:
-    ExitApp
+    MsgBox 36, xDot Controller, Are you sure you want to quit?
+    IfMsgBox Yes
+        ExitApp
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;;;
+GetXDot:
+    MsgBox % StrReplace(A_GuiControl, "XDot", "")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 
@@ -139,6 +148,18 @@ autoGenerateNodeID(firstNode, amount) {
     return listNodeStr
 }
 
+browseNode() {
+    FileSelectFile, selectedFile, 3, , Select a NodeID text file..., Text Documents (*.txt; *.doc)
+    if (selectedFile = "")
+        return
+    FileRead, outStr, %selectedFile%
+    GuiControl Text, editNode, %outStr%
+    
+    ;xdotNodeArray := StrSplit(outStr, "`n", "`t", MaxParts := 25)
+    ;MsgBox % xdotNodeArray.Length()
+    ;MsgBox %  xdotNodeArray[24]
+}
+
 SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
    Static EM_SETCUEBANNER := (0x1500 + 1)
    Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
@@ -148,20 +169,3 @@ getCmdOut(command) {
     RunWait, PowerShell.exe -ExecutionPolicy Bypass -Command %command% | clip , , Hide
     return Clipboard
 }
-/*
-;Open file location
-Gui, Add, Button, gBrowse x316 y60 w90 h20 v1, Browse
-Gui, Add, Button,gBrowse x316 y80 w90 h20 v2, Browse
-Gui, Add, Button,gBrowse x316 y100 w90 h20 v3, Browse
-Gui, Add, Edit, x106 y80 w190 h20 vSelect1, Select1
-Gui, Add, Edit, x106 y100 w190 h20 vSelect2, Select2
-; Generated using SmartGUI Creator 4.0
-Gui, Show, x171 y142 h458 w645, New GUI Window
-Return
-
-
-Browse:
-FileSelectFile, SelectedFile, 3, , Open a file
-GuiControl,,Select%A_GuiControl%,%SelectedFile%
-Return
-*/
