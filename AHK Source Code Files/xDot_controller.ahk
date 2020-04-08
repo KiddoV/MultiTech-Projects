@@ -81,14 +81,55 @@ GuiControl,, lineNo, % lines
 }
 
 GuiClose:
-    MsgBox 36, xDot Controller, Are you sure you want to quit?
+    MsgBox 36, , Are you sure you want to quit?
     IfMsgBox Yes
         ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;;;
+;;;;;;xdot GUIs
 GetXDot:
-    MsgBox % StrReplace(A_GuiControl, "XDot", "")
-
+    RegExMatch(A_GuiControl, "\d+$", num) ;Get button number based on button variable
+    bttnParam := [ 
+                + {mainPort: 101, breakPort: 11}    ;Variables on XDot01 and so on...
+                , {mainPort: 102, breakPort: 12}    ;XDot02
+                , {mainPort: 103, breakPort: 13}    ;XDot03
+                , {mainPort: 104, breakPort: 14}    ;XDot04
+                , {mainPort: 105, breakPort: 15}    ;XDot05
+                , {mainPort: 106, breakPort: 16}
+                , {mainPort: 107, breakPort: 17}
+                , {mainPort: 108, breakPort: 18}
+                , {mainPort: 109, breakPort: 19}
+                , {mainPort: 110, breakPort: 20}
+                , {mainPort: 111, breakPort: 21}
+                , {mainPort: 112, breakPort: 22}
+                , {mainPort: 113, breakPort: 23}
+                , {mainPort: 114, breakPort: 24}
+                , {mainPort: 115, breakPort: 25}
+                , {mainPort: 116, breakPort: 26}
+                , {mainPort: 117, breakPort: 27}
+                , {mainPort: 118, breakPort: 28}
+                , {mainPort: 119, breakPort: 29}
+                , {mainPort: 120, breakPort: 30}
+                , {mainPort: 121, breakPort: 31}
+                , {mainPort: 122, breakPort: 32}
+                , {mainPort: 123, breakPort: 33}
+                , {mainPort: 124, breakPort: 34} ]  ;XDot24 ...
+                
+                global mainPort := bttnParam[num].mainPort
+                
+    Gui, xdot: Default
+    Gui -MinimizeBox -MaximizeBox +AlwaysOnTop
+    Gui Font, Bold
+    Gui xdot: Add, Text, x8 y8, COM PORT: %mainPort%
+    Gui Font
+    Gui xdot: Show, w222 h160, XDot %num%
+    Return
+    
+    xdotGuiEscape:
+    xdotGuiClose:
+        Gui, xdot: Cancel
+        Gui, xdot: Destroy
+    
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 
