@@ -27,24 +27,25 @@ until result = 1
 	endif
 enduntil
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-:GET_MTCDT_TYPE
-inputbox 'ENTER MTCDT TYPE' 'MTCDT TYPE'
-mtcdtType = inputstr
-strcompare inputstr '240L'
+:GET_DATA
+inputbox '*MTCDT TYPE*,*RADIO TYPE*' 'ALL DATAS'
+strsplit inputstr ','
+
+mtcdtType = groupmatchstr1
+radioType = groupmatchstr2
+
+strcompare mtcdtType '240L'
 is240L = result
-if is240L = 0 goto GET_RADIO_TYPE
-strcompare inputstr '246L'
+if is240L = 0 goto SET_PRODUCT_ID
+strcompare mtcdtType '246L'
 is246L = result
-if is246L = 0 goto GET_RADIO_TYPE
-strcompare inputstr '247L'
+if is246L = 0 goto SET_PRODUCT_ID
+strcompare mtcdtType '247L'
 is247L = result
-if is247L = 0 goto GET_RADIO_TYPE
-goto GET_MTCDT_TYPE
+if is247L = 0 goto SET_PRODUCT_ID
+goto GET_DATA
 
-:GET_RADIO_TYPE
-inputbox 'ENTER RADIO TYPE' 'RADIO TYPE'
-radioType = inputstr
-
+:SET_PRODUCT_ID
 productId = 'MTCDT'
 strconcat productId '-'
 strcompare radioType 'NONE'
@@ -82,7 +83,7 @@ strconcat out '99999999 '
 strconcat out '--hw-version '
 strconcat out 'MTCDT-0.1 '
 strconcat out '--mac-addr '
-strconcat out '00:08:00:4A:1F:F1 '
+strconcat out 'FA:03:FA:FA:03:FA '
 strconcat out '--imei '
 strconcat out '900000010000009 '
 if is246L = 0 then
@@ -101,7 +102,7 @@ strconcat out '1a2b3c4d5e6f7a8b9a0b1c2d3e4f5a6b'
 sendln 'mts-id-eeprom ' out
 wait '#'
 pause 2
-messagebox 'MTCDT TEST CONFIGURATION COMPLETE' 'DONE CONFIGURATION'
+messagebox 'MTCDT TEST CONFIGURATION COMPLETE' 'FINISHED CONFIGURATION'
 sendln 'reboot'
 mpause 1000
 ;wait 'login:'

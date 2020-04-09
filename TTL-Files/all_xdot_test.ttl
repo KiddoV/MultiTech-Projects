@@ -1,0 +1,146 @@
+;
+;	Author: Viet Ho
+;	Only work with other program that passes PARAMETERS to this macro
+;	Description: Teraterm Script For Functional Test of XDOTs-ALL Freq
+;
+show 0
+timeout = 3
+
+:GET_SET_VARS
+firmwareVers = '3.0.2-debug-mbed144'
+xdotMainPort = param2	;101
+xdotBreakPort = param3	;11
+xdotPortName = param4 	;PORT1
+xdotDriveLoc = param5	;C:\DRIVES\XDRIVE-01
+testStatus = ''
+fail = 0
+pingLevel = ''
+rssiLevel = ''
+
+:CONNECT_TO_TERATERM
+sprintf2 cmd1 '/C=%s' xdotMainPort
+connect cmd1
+mpause 500
+
+:CHECK_CURRENT_PROGRAM
+sendln 'ati'
+wait firmwareVers
+if result=1 goto START
+if result=0 goto REPROGRAM
+
+:REPROGRAM
+sprintf2 cmd2 'cmd /c copy C:\XDOT\All-Firmwares\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
+exec cmd2
+mpause 18000
+disconnect
+mpause 1500
+sprintf2 cmd3 '/C=%s' xdotBreakPort
+connect cmd3
+flushrecv
+setbaud 9600
+mpause 3000
+sendbreak
+disconnect
+mpause 500
+connect cmd1
+flushrecv
+setbaud 115200
+mpause 1000
+sendln 'at'
+wait 'OK'
+if result=0 then
+    fail=fail+1
+    if fail < 3 then
+        goto REPROGRAM
+    endif
+    statusbox 'XDOT Failed to Program!' 'PROGRAM FAILURE'
+	testStatus = 'FAILED TO PROGRAM'
+	fail = 0
+	goto RESULT_LOGGING
+endif
+
+:START
+:join_test
+sprintf2 cmd4 'at+ni=1,XDOT-%s-NETWORK' xdotPortName
+sendln cmd4
+wait 'OK'
+sprintf2 cmd5 'at+nk=1,XDOT-%s-PASSPHRASE' xdotPortName
+sendln cmd5
+wait 'OK'
+mpause 500
+sendln 'at+fsb=8'
+wait 'OK'
+mpause 500
+sendln 'at+TXP=2'
+wait 'OK'
+mpause 500
+sendln 'at+TXDR=DR3'
+wait 'OK'
+
+mpause 1000
+sendln 'at+join'
+wait 'Successfully joined network'
+if result=0 then
+    fail=fail+1
+    if fail < 3 then
+        goto join_test
+    endif
+    statusbox 'XDOT JOIN TEST FAILURE' 'JOIN FAILURE'
+    fail = 0
+    goto RESULT_LOGGING
+endif
+
+:ping_test
+flushrecv
+for i 1 3
+	sendln 'at+ping'
+	waitrecv '-' 4 1
+	pingLevel = inputstr
+	str2int csq inputstr
+	if csq=0 then
+	    fail=fail+1
+		if fail < 3 then
+		    goto START
+		endif
+		statusbox 'PING TEST FAILURE' 'PING FAILURE'
+		status = 'PING RESPONSE FAILURE'
+		goto RESULT_LOGGING
+	elseif csq < -45 then	;should be -45
+		fail=fail+1
+		if fail < 3 then
+		    goto START
+		endif
+		statusbox 'PING LEVEL FAILURE' 'PING FAILURE'
+		status = 'PING LEVEL FAILURE'
+		fail = 0
+		goto RESULT_LOGGING
+	endif
+next
+
+:rssi_test
+flushrecv
+sendln 'at+rssi'
+waitrecv '-' 4 1
+rssiLevel = inputstr
+str2int csq inputstr
+if csq < -50 then
+    fail=fail+1
+    if fail < 3 then
+        goto START
+    endif
+    statusbox 'RSSI TEST FAILURE' 'RSSI FAILURE'
+    status = 'RSSI LEVEL FAILURE'
+    goto RESULT_LOGGING
+endif
+
+mpause 500
+sendln 'at+snr'
+wait 'OK'
+mpause 500
+sprintf2 cmd6 '%s-XDOT TEST COMPLETE' xdotPortName
+statusbox cmd6 'PASSED'
+status = 'PASS'
+
+:RESULT_LOGGING
+mpause 4000
+end

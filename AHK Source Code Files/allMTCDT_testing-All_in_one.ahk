@@ -251,23 +251,19 @@ configStep(mtcdtType, itemN, mtcType, radType) {
     ControlSend, Edit1, {Enter}, MACRO.*
     ControlClick Button1, MACRO.*, , Left, 3 ;Additional if Enter not working
     
-    WinWait MTCDT TYPE.*
-    ControlSetText, Edit1, %mtcdtType%, MTCDT TYPE.*
-    ControlSend, Edit1, {Enter}, MTCDT TYPE.*
-    ControlClick Button1, MTCDT TYPE.*, , Left, 2
+    WinWait ALL DATAS
+    ControlSetText, Edit1, %mtcdtType%`,%radType%, ALL DATAS
+    ControlSend, Edit1, {Enter}, ALL DATAS
+    ControlClick Button1, ALL DATAS, , Left, 2
     
-    WinWait RADIO TYPE.*
-    ControlSetText, Edit1, %radType%, RADIO TYPE.*
-    ControlSend, Edit1, {Enter}, RADIO TYPE.*
-    ControlClick Button1, RADIO TYPE.*, , Left, 2
-    WinWait DONE CONFIGURATION.*
-    Sleep 1000
-    ControlClick Button1, DONE CONFIGURATION.*, , Left, 2
+    WinWait FINISHED CONFIGURATION
+    Sleep 700
+    ControlClick Button1, FINISHED CONFIGURATION, , Left, 2
     GuiControl , , process1, %checkImg%
     
     ;Recheck Config
     GuiControl , , process2, %arrowImg%
-    Sleep 20000
+    Sleep 30000
     If (searchForFirmwareVersion(40, 2000) = 0) {
         GuiControl , , process2, %timeImg%
         MsgBox Could not Reboot device!
@@ -339,7 +335,7 @@ functionalTestStep(itemN, mtcType, radType) {
     ;Check Temparature
     GuiControl , , process6, %arrowImg%
     WinWait temp
-    WinWait FAILURE, , 8
+    WinWait FAILURE, , 7
     if WinExist("FAILURE") {
         GuiControl , , process6, %timeImg%
         return 0

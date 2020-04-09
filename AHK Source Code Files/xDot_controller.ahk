@@ -116,7 +116,9 @@ GetXDot:
                 , {mainPort: 124, breakPort: 34} ]  ;XDot24 ...
                 
                 global mainPort := bttnParam[num].mainPort
-                
+                global breakPort := bttnParam[num].breakPort
+    
+    ;;;GUI
     Gui, xdot: Default
     Gui -MinimizeBox -MaximizeBox +AlwaysOnTop
     Gui Font, Bold
