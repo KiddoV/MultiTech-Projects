@@ -52,7 +52,6 @@ Gui Add, Button, xs+133 ys+120 w30 h30 vXDot23 gGetXDot, P23
 Gui Add, Button, xs+165 ys+120 w30 h30 vXDot24 gGetXDot, P24
 Gui Font
 
-
 Gui, Show, w550 h500, xDot Controller
 
 GuiControlGet, editNode, Pos, editNode
@@ -88,48 +87,57 @@ GuiClose:
 ;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;;;
 ;;;;;;xdot GUIs
 GetXDot:
+    Gui, xdot: Cancel
     RegExMatch(A_GuiControl, "\d+$", num) ;Get button number based on button variable
-    bttnParam := [ 
-                + {mainPort: 101, breakPort: 11}    ;Variables on XDot01 and so on...
-                , {mainPort: 102, breakPort: 12}    ;XDot02
-                , {mainPort: 103, breakPort: 13}    ;XDot03
-                , {mainPort: 104, breakPort: 14}    ;XDot04
-                , {mainPort: 105, breakPort: 15}    ;XDot05
-                , {mainPort: 106, breakPort: 16}
-                , {mainPort: 107, breakPort: 17}
-                , {mainPort: 108, breakPort: 18}
-                , {mainPort: 109, breakPort: 19}
-                , {mainPort: 110, breakPort: 20}
-                , {mainPort: 111, breakPort: 21}
-                , {mainPort: 112, breakPort: 22}
-                , {mainPort: 113, breakPort: 23}
-                , {mainPort: 114, breakPort: 24}
-                , {mainPort: 115, breakPort: 25}
-                , {mainPort: 116, breakPort: 26}
-                , {mainPort: 117, breakPort: 27}
-                , {mainPort: 118, breakPort: 28}
-                , {mainPort: 119, breakPort: 29}
-                , {mainPort: 120, breakPort: 30}
-                , {mainPort: 121, breakPort: 31}
-                , {mainPort: 122, breakPort: 32}
-                , {mainPort: 123, breakPort: 33}
-                , {mainPort: 124, breakPort: 34} ]  ;XDot24 ...
+    global bttnParams := [ 
+                + {mainPort: 100, breakPort: 10, portName: "PORT1", driveName: "XDRIVE-01"}    ;Variables on XDot01
+                , {mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02"}    ;XDot02
+                , {mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "XDRIVE-03"}    ;XDot03
+                , {mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "XDRIVE-04"}    ;XDot04
+                , {mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "XDRIVE-05"}    ;XDot05
+                , {mainPort: 106, breakPort: 16, portName: "PORT6", driveName: "XDRIVE-06"}
+                , {mainPort: 107, breakPort: 17, portName: "PORT7", driveName: "XDRIVE-07"}
+                , {mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "XDRIVE-08"}
+                , {mainPort: 109, breakPort: 19, portName: "PORT9", driveName: "XDRIVE-09"}
+                , {mainPort: 110, breakPort: 20, portName: "PORT10", driveName: "XDRIVE-10"}
+                , {mainPort: 111, breakPort: 21, portName: "PORT11", driveName: "XDRIVE-11"}
+                , {mainPort: 112, breakPort: 22, portName: "PORT12", driveName: "XDRIVE-12"}
+                , {mainPort: 113, breakPort: 23, portName: "PORT13", driveName: "XDRIVE-13"}
+                , {mainPort: 114, breakPort: 24, portName: "PORT14", driveName: "XDRIVE-14"}
+                , {mainPort: 115, breakPort: 25, portName: "PORT15", driveName: "XDRIVE-15"}
+                , {mainPort: 116, breakPort: 26, portName: "PORT16", driveName: "XDRIVE-16"}
+                , {mainPort: 117, breakPort: 27, portName: "PORT17", driveName: "XDRIVE-17"}
+                , {mainPort: 118, breakPort: 28, portName: "PORT18", driveName: "XDRIVE-18"}
+                , {mainPort: 119, breakPort: 29, portName: "PORT19", driveName: "XDRIVE-19"}
+                , {mainPort: 120, breakPort: 30, portName: "PORT20", driveName: "XDRIVE-20"}
+                , {mainPort: 121, breakPort: 31, portName: "PORT21", driveName: "XDRIVE-21"}
+                , {mainPort: 122, breakPort: 32, portName: "PORT22", driveName: "XDRIVE-22"}
+                , {mainPort: 123, breakPort: 33, portName: "PORT23", driveName: "XDRIVE-23"}
+                , {mainPort: 124, breakPort: 34, portName: "PORT24", driveName: "XDRIVE-24"} ]  ;XDot24 ...
                 
-                global mainPort := bttnParam[num].mainPort
-                global breakPort := bttnParam[num].breakPort
+                mainPort := bttnParams[num].mainPort
+                breakPort := bttnParams[num].breakPort
+                portName := bttnParams[num].portName
+                driveName := bttnParams[num].driveName
     
     ;;;GUI
     Gui, xdot: Default
     Gui -MinimizeBox -MaximizeBox +AlwaysOnTop
     Gui Font, Bold
     Gui xdot: Add, Text, x8 y8, COM PORT: %mainPort%
+    Gui xdot: Add, Text, x120 y8, BREAK PORT: %breakPort%
     Gui Font
-    Gui xdot: Show, w222 h160, XDot %num%
+    Gui xdot: Add, Button, x8 y30 gFunctionalTestEach, Functional Test
+    Gui xdot: Show, , XDot %num%
+    Return
+    
+    FunctionalTestEach:
+    WinKill COM%mainPort%
+        Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\Users\Administrator\Desktop\initest.INI /X=20 /Y=20 /C=%mainPort% /M="C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", ,Hide
     Return
     
     xdotGuiEscape:
     xdotGuiClose:
-        Gui, xdot: Cancel
         Gui, xdot: Destroy
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -138,6 +146,7 @@ GetXDot:
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+
 generateNode() {
     GuiControlGet, firstNodeID
     GuiControlGet, nodeAmout
