@@ -62,7 +62,8 @@ Gui Font,, Times New Roman
 Gui Add, StatusBar,, Click button to start!
 Gui Font
 
-Gui Show, x856 y322 w200 h195, All Firmware Auto-Installer
+posX := A_ScreenWidth - 300
+Gui Show, w200 h195 x%posX% y300, All Firmware Auto-Installer
 Return
 
 ;;;;;;;;;All menu handlers

@@ -27,6 +27,8 @@ if result>1 goto REPROGRAM
 if result=0 then
     disconnect
     closett
+    sprintf2 msg1 'COM PORT %s is not available!' xdotMainPort
+    messagebox msg1 'CONNECTION FAILURE'
     end
 endif
 

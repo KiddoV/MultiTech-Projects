@@ -113,7 +113,8 @@ Gui Add, Picture, x30 y395 w21 h21 +BackgroundTrans vprocess12
 
 Gui Add, Button, x70 y388 w80 h23 vstartBttn gmainStart, S&TART
 
-Gui Show, w220 h420, All MTCDT Auto-Tester
+posX := A_ScreenWidth - 320
+Gui Show, w220 h420 x%posX% y100, All MTCDT Auto-Tester
 Return
 
 ;;;;;;;;;All menu handlers
