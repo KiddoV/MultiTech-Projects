@@ -18,6 +18,7 @@ testStatus = ''
 fail = 0
 pingLevel = ''
 rssiLevel = ''
+sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 
 :CHECK_CURRENT_PROGRAM
 sendln 'ati'
@@ -27,8 +28,8 @@ if result>1 goto REPROGRAM
 if result=0 then
     disconnect
     closett
-    sprintf2 msg1 'COM PORT %s is not available!' xdotMainPort
-    messagebox msg1 'CONNECTION FAILURE'
+    sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
+    messagebox msg1 portNumberFailureMsg
     end
 endif
 
@@ -60,7 +61,7 @@ if result=0 then
     if fail < 3 then
         goto REPROGRAM
     endif
-    statusbox 'XDOT Failed to Program!' 'PROGRAM FAILURE'
+    statusbox 'XDOT Failed to Program!' portNumberFailureMsg
 	testStatus = 'FAILED TO PROGRAM'
 	fail = 0
 	goto RESULT_LOGGING
@@ -93,7 +94,8 @@ if result=0 then
     if fail < 3 then
         goto join_test
     endif
-    statusbox 'XDOT JOIN TEST FAILURE' 'JOIN FAILURE'
+    statusbox 'XDOT JOIN TEST FAILURE' portNumberFailureMsg
+	testStatus = 'FAILED TO JOIN'
     fail = 0
     goto RESULT_LOGGING
 endif
@@ -110,16 +112,16 @@ for i 1 3
 		if fail < 3 then
 		    goto START
 		endif
-		statusbox 'PING TEST FAILURE' 'PING FAILURE'
-		status = 'PING RESPONSE FAILURE'
+		statusbox 'PING TEST FAILURE' portNumberFailureMsg
+		testStatus = 'PING RESPONSE FAILURE'
 		goto RESULT_LOGGING
 	elseif csq < -45 then	;should be -45
 		fail=fail+1
 		if fail < 3 then
 		    goto START
 		endif
-		statusbox 'PING LEVEL FAILURE' 'PING FAILURE'
-		status = 'PING LEVEL FAILURE'
+		statusbox 'PING LEVEL FAILURE' portNumberFailureMsg
+		testStatus = 'PING LEVEL FAILURE'
 		fail = 0
 		goto RESULT_LOGGING
 	endif
@@ -136,8 +138,8 @@ if csq < -50 then
     if fail < 3 then
         goto START
     endif
-    statusbox 'RSSI TEST FAILURE' 'RSSI FAILURE'
-    status = 'RSSI LEVEL FAILURE'
+    statusbox 'RSSI TEST FAILURE' portNumberFailureMsg
+    testStatus = 'RSSI LEVEL FAILURE'
     goto RESULT_LOGGING
 endif
 
@@ -145,9 +147,10 @@ mpause 500
 sendln 'at+snr'
 wait 'OK'
 mpause 500
-sprintf2 cmd6 '%s-XDOT TEST COMPLETE' xdotPortName
-statusbox cmd6 'PASSED'
-status = 'PASS'
+sprintf2 msg1 '%s-XDOT TEST COMPLETE' xdotPortName
+sprintf2 msg2 'PORT %s PASSED' xdotMainPort
+statusbox msg1 msg2
+testStatus = 'PASSED'
 
 :RESULT_LOGGING
 mpause 4000
