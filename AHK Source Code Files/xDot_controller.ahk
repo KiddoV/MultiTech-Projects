@@ -15,7 +15,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-t
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global xdotProperties := [{}]  ; Creates an array containing an object.
-xdotProperties[1] := {status: "G", mainPort: 100, breakPort: 10, portName: "PORT1", driveName: "XDRIVE-01", ttXPos: 5, ttYPos: 5}
+xdotProperties[1] := {status: "G", mainPort: 100, breakPort: 10, portName: "PORT1", driveName: "XDRIVE-01", ttXPos: 5, ttYPos: 5, controlVar: "XDot01"}
 xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02", ttXPos: 105, ttYPos: 5}
 xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "XDRIVE-03", ttXPos: 205, ttYPos: 5}
 xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "XDRIVE-04", ttXPos: 305, ttYPos: 5}
@@ -196,23 +196,27 @@ testAll() {
     MsgBox 0x81, Question, Begin funtional tests on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
-    Loop, 24
-    {
-        xStatus := xdotProperties[A_Index].status
-        mainPort := xdotProperties[A_Index].mainPort
-        breakPort := xdotProperties[A_Index].breakPort
-        portName := xdotProperties[A_Index].portName
-        driveName := xdotProperties[A_Index].driveName
-        ttXPos := xdotProperties[A_Index].ttXPos    ;Position X for teraterm window
-        ttYPos := xdotProperties[A_Index].ttYPos    ;Position Y for teraterm window
-        
-        if (xStatus = "G") {
-            WinKill COM%mainPort%
-            Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", ,Hide
-        
-        Sleep 1000
+        Loop, 24
+        {
+            controlVar := xdotProperties[A_Index].controlVar
+            xStatus := xdotProperties[A_Index].status
+            mainPort := xdotProperties[A_Index].mainPort
+            breakPort := xdotProperties[A_Index].breakPort
+            portName := xdotProperties[A_Index].portName
+            driveName := xdotProperties[A_Index].driveName
+            ttXPos := xdotProperties[A_Index].ttXPos    ;Position X for teraterm window
+            ttYPos := xdotProperties[A_Index].ttYPos    ;Position Y for teraterm window
+            
+            if (xStatus = "G") {
+                WinKill COM%mainPort%
+                Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", ,Hide
+                GuiControl, Text, %controlVar%,
+                GuiControlGet, hwndVar, Hwnd , %controlVar%
+                GuiButtonIcon(hwndVar, "C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png", 1, "s24")
+
+                Sleep 1000
+            }
         }
-    }
     IfMsgBox Cancel
         return
 }
@@ -244,6 +248,10 @@ GuiContextMenu:
         GuiControl, Text, %A_GuiControl%, P%num%
     }
 Return
+
+changeButtonIcon() {
+    
+}
 
 generateNode() {
     GuiControlGet, firstNodeID

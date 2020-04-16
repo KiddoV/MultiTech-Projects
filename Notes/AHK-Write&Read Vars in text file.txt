@@ -1,0 +1,41 @@
+#SingleInstance forcce
+SetWorkingDir, %a_scrpitdir%
+
+
+; Frist create a test file (test.txt)
+fileContent =
+(
+FirstName := Bob
+Surname := Jones
+Street := Jones Street
+Zip := 55103
+)
+replaceFile("test.txt", fileContent)
+
+replaceFile(File, Content)
+{
+	FileDelete, %File%
+	FileAppend, %Content%, %File%
+}
+
+
+; Parse the test file and declare variables
+fileread, vars, test.txt
+
+loop, parse, vars, "`n" 
+{
+	CurrentVar:=strsplit(a_loopfield, "=", ":")
+	for k, v in CurrentVar {
+		var:=CurrentVar[k]
+		mod(k,2) ? var:=strReplace(var,a_space)
+		mod(k,2) ? %var%:=CurrentVar[k+1]
+	}
+	var:=v:=CurrentVar:=""
+}
+	
+;msgbox, %		FirstName "`n"
+			;.	Surname "`n"
+			;.	Street
+            ;.   Zip
+
+MsgBox %FirstName%
