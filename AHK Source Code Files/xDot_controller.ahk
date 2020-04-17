@@ -16,7 +16,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-t
 
 Global xdotProperties := [{}]  ; Creates an array containing an object.
 xdotProperties[1] := {status: "G", mainPort: 100, breakPort: 10, portName: "PORT1", driveName: "XDRIVE-01", ttXPos: 5, ttYPos: 5, controlVar: "XDot01"}
-xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02", ttXPos: 105, ttYPos: 5}
+xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02", ttXPos: 105, ttYPos: 5, controlVar: "XDot02"}
 xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "XDRIVE-03", ttXPos: 205, ttYPos: 5}
 xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "XDRIVE-04", ttXPos: 305, ttYPos: 5}
 xdotProperties[5] := {status: "G", mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "XDRIVE-05", ttXPos: 405, ttYPos: 5}
@@ -175,6 +175,7 @@ if (RegExMatch(A_GuiControl, "^XDot[0-9]{2}$") = 1) {
 
     xdotGuiEscape:
     xdotGuiClose:
+        WinKill COM%mainPort%
         Gui, xdot: Destroy
     Return
     
@@ -210,10 +211,9 @@ testAll() {
             if (xStatus = "G") {
                 WinKill COM%mainPort%
                 Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", ,Hide
-                GuiControl, Text, %controlVar%,
+                ;GuiControl, Text, %controlVar%,
                 GuiControlGet, hwndVar, Hwnd , %controlVar%
-                GuiButtonIcon(hwndVar, "C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png", 1, "s24")
-
+                GuiButtonSysIcon(hwndVar, "wmploc.dll", 107, 24, 0)
                 Sleep 1000
             }
         }
@@ -236,16 +236,18 @@ GuiContextMenu:
         GuiControl, Text, totalGPortLabel, • Run tests on %totalGoodPort% ports
         xdotProperties[num].status := "D"
         GuiControl, +vBad%A_GuiControl%, %A_GuiControl%     ;Change var of control
-        GuiControl, Text, %A_GuiControl%,
-        GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")
+        ;GuiControl, Text, %A_GuiControl%,
+        GuiButtonSysIcon(hwndVar, "imageres.dll", 207, 24, 0)
+        ;GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")
     } else if (RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$") = 1) {
         totalGoodPort++
         GuiControl, Text, totalGPortLabel, • Run tests on %totalGoodPort% ports
         xdotProperties[num].status := "G"
         newVar := SubStr(A_GuiControl, 4)
         GuiControl, +v%newVar%, %A_GuiControl%
-        GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
-        GuiControl, Text, %A_GuiControl%, P%num%
+        ;GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
+        GuiButtonSysIcon(hwndVar, "imageres.dll", 207, 24, 25) ;Add 25 to make icon invisible
+        ;GuiControl, Text, %A_GuiControl%, P%num%
     }
 Return
 
@@ -328,6 +330,7 @@ getCmdOut(command) {
     return Clipboard
 }
 
+;;Add an icon to a button with external image file
 GuiButtonIcon(Handle, File, Index := 1, Options := "")
 {
 	RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
@@ -348,6 +351,30 @@ GuiButtonIcon(Handle, File, Index := 1, Options := "")
 	NumPut( A, button_il, 16 + Psz, DW )	; Alignment
 	SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
 	return IL_Add( normal_il, File, Index )
+}
+
+;;Add an icon to a button with system icon
+;netshell.dll --- 94 => X-mark
+;urlmon.dll --- 1 => Check-mark
+;wmploc.dll --- 107 => Play icon
+;Gui, Add, Button, hWndhButton3 x255 y8 w23 h23 gCloseGUI,
+;GuiButtonSysIcon(hButton3, "imageres.dll", 207, 16, 0)
+GuiButtonSysIcon(Handle, File, Index := 0, Size := 12, Margin := 1, Align := 5)
+{
+    Size -= Margin
+    Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
+    VarSetCapacity( button_il, 20 + Psz, 0 )
+    NumPut( normal_il := DllCall( "ImageList_Create", DW, Size, DW, Size, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )
+    NumPut( Align, button_il, 16 + Psz, DW )
+    SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
+    return IL_Add( normal_il, File, Index )
+}
+
+;Gui, Add, Button, hWndhButton2 x130 y8 w100 h23 gButton02, %A_Space%Button02
+;SetButtonSysIcon(hButton2, "shell32.dll", 22)
+SetButtonSysIcon(hButton, File, Index, Size := 16) {
+    hIcon := LoadPicture(File, "h" . Size . " Icon" . Index, _)
+    SendMessage 0xF7, 1, %hIcon%,, ahk_id %hButton% ; BM_SETIMAGE
 }
 
 ;;;Icon for MsgBox
