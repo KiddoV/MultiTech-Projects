@@ -14,35 +14,36 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xd
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
+Global nodesToWritePath := "C:\XDOT\nodesToWrite.txt"
+
 Global xdotProperties := [{}]  ; Creates an array containing an object.
-xdotProperties[1] := {status: "G", mainPort: 101, breakPort: 11, portName: "PORT1", driveName: "XDRIVE-01", ttXPos: 5, ttYPos: 5, controlVar: "XDot01"}
-xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02", ttXPos: 105, ttYPos: 5, controlVar: "XDot02"}
-xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "XDRIVE-03", ttXPos: 205, ttYPos: 5, controlVar: "XDot03"}
-xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "XDRIVE-04", ttXPos: 305, ttYPos: 5}
-xdotProperties[5] := {status: "G", mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "XDRIVE-05", ttXPos: 405, ttYPos: 5}
-xdotProperties[6] := {status: "G", mainPort: 106, breakPort: 16, portName: "PORT6", driveName: "XDRIVE-06", ttXPos: 505, ttYPos: 5}
-xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT7", driveName: "XDRIVE-07", ttXPos: 5, ttYPos: 105}
-xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "XDRIVE-08", ttXPos: 105, ttYPos: 105}
-xdotProperties[9] := {status: "G", mainPort: 109, breakPort: 19, portName: "PORT9", driveName: "XDRIVE-09", ttXPos: 205, ttYPos: 105}
-xdotProperties[10] := {status: "G", mainPort: 110, breakPort: 20, portName: "PORT10", driveName: "XDRIVE-10", ttXPos: 305, ttYPos: 105}
-xdotProperties[11] := {status: "G", mainPort: 111, breakPort: 21, portName: "PORT11", driveName: "XDRIVE-11", ttXPos: 405, ttYPos: 105}
-xdotProperties[12] := {status: "G", mainPort: 112, breakPort: 22, portName: "PORT12", driveName: "XDRIVE-12", ttXPos: 505, ttYPos: 105}
-xdotProperties[13] := {status: "G", mainPort: 113, breakPort: 23, portName: "PORT13", driveName: "XDRIVE-13", ttXPos: 5, ttYPos: 205}
-xdotProperties[14] := {status: "G", mainPort: 114, breakPort: 24, portName: "PORT14", driveName: "XDRIVE-14", ttXPos: 105, ttYPos: 205}
-xdotProperties[15] := {status: "G", mainPort: 115, breakPort: 25, portName: "PORT15", driveName: "XDRIVE-15", ttXPos: 205, ttYPos: 205}
-xdotProperties[16] := {status: "G", mainPort: 116, breakPort: 26, portName: "PORT16", driveName: "XDRIVE-16", ttXPos: 305, ttYPos: 205}
-xdotProperties[17] := {status: "G", mainPort: 117, breakPort: 27, portName: "PORT17", driveName: "XDRIVE-17", ttXPos: 405, ttYPos: 205}
-xdotProperties[18] := {status: "G", mainPort: 118, breakPort: 28, portName: "PORT18", driveName: "XDRIVE-18", ttXPos: 505, ttYPos: 205}
-xdotProperties[19] := {status: "G", mainPort: 119, breakPort: 29, portName: "PORT19", driveName: "XDRIVE-19", ttXPos: 5, ttYPos: 305}
-xdotProperties[20] := {status: "G", mainPort: 120, breakPort: 30, portName: "PORT20", driveName: "XDRIVE-20", ttXPos: 105, ttYPos: 305}
-xdotProperties[21] := {status: "G", mainPort: 121, breakPort: 31, portName: "PORT21", driveName: "XDRIVE-21", ttXPos: 205, ttYPos: 305}
-xdotProperties[22] := {status: "G", mainPort: 122, breakPort: 32, portName: "PORT22", driveName: "XDRIVE-22", ttXPos: 305, ttYPos: 305}
-xdotProperties[23] := {status: "G", mainPort: 123, breakPort: 33, portName: "PORT23", driveName: "XDRIVE-23", ttXPos: 405, ttYPos: 305}
-xdotProperties[24] := {status: "G", mainPort: 124, breakPort: 34, portName: "PORT24", driveName: "XDRIVE-24", ttXPos: 505, ttYPos: 305}
+xdotProperties[1] := {status: "G", mainPort: 101, breakPort: 11, portName: "PORT1", driveName: "XDRIVE-01", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot01"}
+xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02", ttXPos: 105, ttYPos: 5, ctrlVar: "XDot02"}
+xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "XDRIVE-03", ttXPos: 205, ttYPos: 5, ctrlVar: "XDot03"}
+xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "XDRIVE-04", ttXPos: 305, ttYPos: 5, ctrlVar: "XDot04"}
+xdotProperties[5] := {status: "G", mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "XDRIVE-05", ttXPos: 405, ttYPos: 5, ctrlVar: "XDot05"}
+xdotProperties[6] := {status: "G", mainPort: 106, breakPort: 16, portName: "PORT6", driveName: "XDRIVE-06", ttXPos: 505, ttYPos: 5, ctrlVar: "XDot06"}
+xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT7", driveName: "XDRIVE-07", ttXPos: 5, ttYPos: 105, ctrlVar: "XDot07"}
+xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "XDRIVE-08", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot08"}
+xdotProperties[9] := {status: "G", mainPort: 109, breakPort: 19, portName: "PORT9", driveName: "XDRIVE-09", ttXPos: 205, ttYPos: 105, ctrlVar: "XDot09"}
+xdotProperties[10] := {status: "G", mainPort: 110, breakPort: 20, portName: "PORT10", driveName: "XDRIVE-10", ttXPos: 305, ttYPos: 105, ctrlVar: "XDot10"}
+xdotProperties[11] := {status: "G", mainPort: 111, breakPort: 21, portName: "PORT11", driveName: "XDRIVE-11", ttXPos: 405, ttYPos: 105, ctrlVar: "XDot11"}
+xdotProperties[12] := {status: "G", mainPort: 112, breakPort: 22, portName: "PORT12", driveName: "XDRIVE-12", ttXPos: 505, ttYPos: 105, ctrlVar: "XDot12"}
+xdotProperties[13] := {status: "G", mainPort: 113, breakPort: 23, portName: "PORT13", driveName: "XDRIVE-13", ttXPos: 5, ttYPos: 205, ctrlVar: "XDot13"}
+xdotProperties[14] := {status: "G", mainPort: 114, breakPort: 24, portName: "PORT14", driveName: "XDRIVE-14", ttXPos: 105, ttYPos: 205, ctrlVar: "XDot14"}
+xdotProperties[15] := {status: "G", mainPort: 115, breakPort: 25, portName: "PORT15", driveName: "XDRIVE-15", ttXPos: 205, ttYPos: 205, ctrlVar: "XDot15"}
+xdotProperties[16] := {status: "G", mainPort: 116, breakPort: 26, portName: "PORT16", driveName: "XDRIVE-16", ttXPos: 305, ttYPos: 205, ctrlVar: "XDot16"}
+xdotProperties[17] := {status: "G", mainPort: 117, breakPort: 27, portName: "PORT17", driveName: "XDRIVE-17", ttXPos: 405, ttYPos: 205, ctrlVar: "XDot17"}
+xdotProperties[18] := {status: "G", mainPort: 118, breakPort: 28, portName: "PORT18", driveName: "XDRIVE-18", ttXPos: 505, ttYPos: 205, ctrlVar: "XDot18"}
+xdotProperties[19] := {status: "G", mainPort: 119, breakPort: 29, portName: "PORT19", driveName: "XDRIVE-19", ttXPos: 5, ttYPos: 305, ctrlVar: "XDot19"}
+xdotProperties[20] := {status: "G", mainPort: 120, breakPort: 30, portName: "PORT20", driveName: "XDRIVE-20", ttXPos: 105, ttYPos: 305, ctrlVar: "XDot20"}
+xdotProperties[21] := {status: "G", mainPort: 121, breakPort: 31, portName: "PORT21", driveName: "XDRIVE-21", ttXPos: 205, ttYPos: 305, ctrlVar: "XDot21"}
+xdotProperties[22] := {status: "G", mainPort: 122, breakPort: 32, portName: "PORT22", driveName: "XDRIVE-22", ttXPos: 305, ttYPos: 305, ctrlVar: "XDot22"}
+xdotProperties[23] := {status: "G", mainPort: 123, breakPort: 33, portName: "PORT23", driveName: "XDRIVE-23", ttXPos: 405, ttYPos: 305, ctrlVar: "XDot23"}
+xdotProperties[24] := {status: "G", mainPort: 124, breakPort: 34, portName: "PORT24", driveName: "XDRIVE-24", ttXPos: 505, ttYPos: 305, ctrlVar: "XDot24"}
 
-Global totalGoodPort := 24
-
-;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
+Global totalGoodPort := 8
+;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
 SetWorkingDir %A_ScriptDir%
@@ -78,24 +79,24 @@ Gui Add, Button, xs+165 ys+15 w30 h30 vXDot06 gGetXDot, P06
 
 Gui Add, Button, xs+5 ys+50 w30 h30 vXDot07 gGetXDot, P07
 Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot, P08
-Gui Add, Button, xs+69 ys+50 w30 h30 vXDot09 gGetXDot, P09
-Gui Add, Button, xs+101 ys+50 w30 h30 vXDot10 gGetXDot, P10
-Gui Add, Button, xs+133 ys+50 w30 h30 vXDot11 gGetXDot, P11
-Gui Add, Button, xs+165 ys+50 w30 h30 vXDot12 gGetXDot, P12
+;Gui Add, Button, xs+69 ys+50 w30 h30 vXDot09 gGetXDot, P09
+;Gui Add, Button, xs+101 ys+50 w30 h30 vXDot10 gGetXDot, P10
+;Gui Add, Button, xs+133 ys+50 w30 h30 vXDot11 gGetXDot, P11
+;Gui Add, Button, xs+165 ys+50 w30 h30 vXDot12 gGetXDot, P12
 
-Gui Add, Button, xs+5 ys+85 w30 h30 vXDot13 gGetXDot, P13
-Gui Add, Button, xs+37 ys+85 w30 h30 vXDot14 gGetXDot, P14
-Gui Add, Button, xs+69 ys+85 w30 h30 vXDot15 gGetXDot, P15
-Gui Add, Button, xs+101 ys+85 w30 h30 vXDot16 gGetXDot, P16
-Gui Add, Button, xs+133 ys+85 w30 h30 vXDot17 gGetXDot, P17
-Gui Add, Button, xs+165 ys+85 w30 h30 vXDot18 gGetXDot, P18
+;Gui Add, Button, xs+5 ys+85 w30 h30 vXDot13 gGetXDot, P13
+;Gui Add, Button, xs+37 ys+85 w30 h30 vXDot14 gGetXDot, P14
+;Gui Add, Button, xs+69 ys+85 w30 h30 vXDot15 gGetXDot, P15
+;Gui Add, Button, xs+101 ys+85 w30 h30 vXDot16 gGetXDot, P16
+;Gui Add, Button, xs+133 ys+85 w30 h30 vXDot17 gGetXDot, P17
+;Gui Add, Button, xs+165 ys+85 w30 h30 vXDot18 gGetXDot, P18
 
-Gui Add, Button, xs+5 ys+120 w30 h30 vXDot19 gGetXDot, P19
-Gui Add, Button, xs+37 ys+120 w30 h30 vXDot20 gGetXDot, P20
-Gui Add, Button, xs+69 ys+120 w30 h30 vXDot21 gGetXDot, P21
-Gui Add, Button, xs+101 ys+120 w30 h30 vXDot22 gGetXDot, P22
-Gui Add, Button, xs+133 ys+120 w30 h30 vXDot23 gGetXDot, P23
-Gui Add, Button, xs+165 ys+120 w30 h30 vXDot24 gGetXDot, P24
+;Gui Add, Button, xs+5 ys+120 w30 h30 vXDot19 gGetXDot, P19
+;Gui Add, Button, xs+37 ys+120 w30 h30 vXDot20 gGetXDot, P20
+;Gui Add, Button, xs+69 ys+120 w30 h30 vXDot21 gGetXDot, P21
+;Gui Add, Button, xs+101 ys+120 w30 h30 vXDot22 gGetXDot, P22
+;Gui Add, Button, xs+133 ys+120 w30 h30 vXDot23 gGetXDot, P23
+;Gui Add, Button, xs+165 ys+120 w30 h30 vXDot24 gGetXDot, P24
 Gui Font
 
 ;;Bad Xdot buttons
@@ -113,9 +114,14 @@ Gui Add, GroupBox, xm+205 ym+430 w325 h55 Section, All Records
 Gui Add, Button, xs+18 ys+20 w140 h25 ggetRecords, Functional Test History
 Gui Add, Button, xs+169 ys+20 w140 h25 ggetRecords, EUID Write History
 
-posX := A_ScreenWidth - 600
-Gui, Show, w550 h500 x%posX% y150, xDot Controller
+;;;Functions to run before main gui is started;;;
+;getNodesToWrite()
 
+posX := A_ScreenWidth - 600
+Gui, Show, w550 h500 x%posX% y150, xDot Controller (PC1)
+
+;;;Functions to run after main gui is started;;;
+getNodesToWrite()
 GuiControlGet, editNode, Pos, editNode
 
 SetTimer, timer, 1
@@ -197,14 +203,15 @@ if (RegExMatch(A_GuiControl, "^XDot[0-9]{2}$") = 1) {
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 testAll() {
+    resetXdotBttns()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, Question, Begin funtional tests on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
+    index := 1
     IfMsgBox OK
-        index := 1
-        Loop, 24
+        Loop, 8
         {
-            controlVar := xdotProperties[index].controlVar
+            ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
             mainPort := xdotProperties[index].mainPort
             breakPort := xdotProperties[index].breakPort
@@ -218,15 +225,14 @@ testAll() {
             if (xStatus = "G") {
                 WinKill COM%mainPort%
                 Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", ,Hide
-                ;GuiControl, Text, %controlVar%,
-                GuiControlGet, hwndVar, Hwnd , %controlVar%
+                ;GuiControl, Text, %ctrlVar%,
+                GuiControlGet, hwndVar, Hwnd , %ctrlVar%
                 GuiButtonSysIcon(hwndVar, "wmploc.dll", 107, 24, 0)
                 Sleep 1000
             }
         }
     IfMsgBox Cancel
         return
-    return
 }
 
 getRecords() {
@@ -261,6 +267,20 @@ Return
 
 changeButtonIcon() {
     
+}
+
+resetXdotBttns() {
+    Loop, 24
+    {
+        ctrlVar := xdotProperties[A_Index].ctrlVar
+        GuiControlGet, hwndVar, Hwnd , %ctrlVar%
+        GuiButtonSysIcon(hwndVar, "imageres.dll", 207, 24, 25) ;Add 25 to make icon invisible
+    }
+}
+
+getNodesToWrite() {
+    FileRead, outVar, %nodesToWritePath%
+    GuiControl Text, editNode, %outVar%
 }
 
 generateNode() {
