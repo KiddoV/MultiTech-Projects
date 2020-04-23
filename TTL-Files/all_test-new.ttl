@@ -1,0 +1,1068 @@
+;
+;
+connect '192.168.2.1 /ssh /auth=password /user=mtadm /passwd=root /nosecuritywarning'
+
+timeout = 10
+clearscreen 1
+show 0
+is240L = -1
+is246L = -1
+is247L = -1
+radioVersion = 'N/A'
+imei = 'N/A'
+telModuleVer = 'N/A'
+fwBuild = 'N/A'
+wifiAddr = 'N/A'
+bluetoothAddr = 'N/A'
+isNONE = -1
+isH5 = -1
+isLAT1 = -1
+isLAT3 = -1
+isLEU1 = -1
+isL4E1 = -1
+isL4N1 = -1
+isLVW2 = -1
+isLSB3 = -1
+
+:CHECK_MTCDT_TYPE
+strcompare param2 '240L'
+is240L = result
+if is240L=0 goto CHECK_RADIO_TYPE
+strcompare param2 '246L'
+is246L = result
+if is246L=0 goto CHECK_RADIO_TYPE
+strcompare param2 '247L'
+is247L = result
+if is247L=0 goto CHECK_RADIO_TYPE
+
+:CHECK_RADIO_TYPE
+strcompare param3 'NONE'
+isNONE = result
+if isNONE=0 goto START
+strcompare param3 'H5'
+isH5 = result
+if isH5=0 goto START
+strcompare param3 'LAT1'
+isLAT1 = result
+if isLAT1=0 goto START
+strcompare param3 'LAT3'
+isLAT3 = result
+if isLAT3=0 goto START
+strcompare param3 'LEU1'
+isLEU1 = result
+if isLEU1=0 goto START
+strcompare param3 'L4E1'
+isL4E1 = result
+if isL4E1=0 goto START
+strcompare param3 'L4N1'
+isL4N1 = result
+if isL4N1=0 goto START
+strcompare param3 'LVW2'
+isLVW2 = result
+if isLVW2=0 goto START
+strcompare param3 'LSB3'
+isLSB3 = result
+if isLSB3=0 goto START
+
+
+:START
+if isLAT1=0 then 
+    radioVersion = '17.00.503'
+    telModuleVer = 'LE910-NAG'
+    fwBuild = '#CFVR: 10'
+elseif isH5=0 then
+    radioVersion = '12.00.026'
+    telModuleVer = 'HE910-D'
+    fwBuild = '#CFVR: 1'
+elseif isLAT3=0 then
+    radioVersion = '20.00.526'
+    telModuleVer = 'LE910-NA1'
+    fwBuild = '#CFVR: 0'
+elseif isLEU1=0 then
+    radioVersion = '17.00.523'
+    telModuleVer = 'N/A'
+    fwBuild = 'N/A'
+elseif isL4E1=0 then
+	radioVersion = '25.20.673'
+	telModuleVer = 'LE910C4-EU'
+	fwBuild = '#CFVR: 2'
+elseif isL4N1=0 then
+	radioVersion = '25.20.666'
+	telModuleVer = 'LE910C4-NF'
+	fwBuild = '#CFVR: 2'
+elseif isLVW2=0 then
+	radioVersion = '17.01.571'
+	telModuleVer = 'LE910-SVG'
+	fwBuild = '#CFVR: 3'
+elseif isLSB3=0 then
+	radioVersion = '23.00.204'
+	telModuleVer = 'LE866A1-JS'
+	fwBuild = '#CFVR: 8'
+endif
+
+wait '$'
+sendln 'sudo -s'
+wait 'word:'
+sendln 'root'
+wait '#'
+mpause 500
+
+:LED_TEST
+statusbox 'Please do a visual check on LED!' 'CHECK LED'
+bringupbox
+for i 1 2
+	mpause 300
+	sendln 'mts-io-sysfs store led-a 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-b 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-c 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-d 1'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-a 0'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-b 0'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-c 0'
+	wait "mtcdt:/home/mtadm#"
+	sendln 'mts-io-sysfs store led-d 0'
+	wait "mtcdt:/home/mtadm#"
+	mpause 500
+next
+closesbox
+;timeout = 3
+;mpause 500
+;wait "No such file"
+;if result=1 then
+;   goto LED_FAILURE
+;endif
+:all_led_on
+send 13
+wait '#'
+sendln 'mts-io-sysfs store led-a 1'
+wait "#"
+sendln 'mts-io-sysfs store led-b 1'
+wait "#"
+sendln 'mts-io-sysfs store led-c 1'
+wait "#"
+sendln 'mts-io-sysfs store led-d 1'
+
+timeout = 5
+:TEMPERATURE_TEST
+flushrecv
+sendln 'cat /sys/class/hwmon/hwmon0/temp1_input'
+waitln '5' '4' '3' '2'
+tempstr = inputstr
+str2int temp inputstr
+statusbox temp 'temp'
+pause 2 
+closesbox
+if temp > 46000 then
+	messagebox 'TEMP VALUE HIGH LIMIT FAILURE!' 'TEMP FAILURE'
+	disconnect
+	closett
+	end
+endif
+wait "mtcdt:/home/mtadm#"
+mpause 1000
+
+:DRIVE_TEST
+timeout = 2
+flushrecv
+wait '#'
+sendln 'df'
+wait '/dev/sda1' '/dev/sdb1'
+if result=0 then
+  beep
+  messagebox 'THUMB DRIVE NOT DETECTED' 'THUMB DRIVE FAILURE'
+  disconnect
+  closett
+  end
+endif
+mpause 500
+wait '#'
+sendln 'ls /media/card'
+wait 'No such file' 'mmcblk0p1'
+if result>1 then
+   beep
+   messagebox 'SD CARD NOT DETECTED' 'SD CARD FAILURE'
+   disconnect
+   closett
+   end
+endif
+
+:read_write_sd_test
+flushrecv
+sendln 'cp /bin/bash /media/card/'
+wait "#"
+sendln 'ls /media/card'
+waitln 'bash'
+if result=0 then
+    beep
+    messagebox 'SD CARD READ-WRITE FAILED' 'SD CARD FAILURE'
+    disconnect
+    closett
+    end
+endif
+mpause 500
+wait '#'
+sendln "md5sum /bin/bash |awk '{print $1}'"
+strconcat cksum1 inputstr
+pause 1
+sendln "md5sum /media/card/bash |awk '{print $1}'"
+strconcat cksum2 inputstr
+pause 1
+strcompare cksum1 cksum2
+if result<>0 then
+    messagebox 'SD READ-WRITE TEST FAILURE' 'SD CARD FAILURE'
+    disconnect
+    closett
+    end
+endif
+mpause 1000
+sendln 'rm /media/card/bash'
+wait "#"
+
+:read_write_thumbdrive_test
+flushrecv
+usbdrive=''
+pause 1
+sendln "df |grep sd |awk '{print $1}'"
+waitln '/dev'
+strconcat usbdrive inputstr
+strremove usbdrive 1 5
+mpause 1
+sendln 'cp /bin/bash /media/'usbdrive
+wait "#"
+flushrecv
+sendln 'ls /media/'usbdrive'
+mpause 500
+sendln "md5sum /bin/bash |awk '{print $1}'"
+strconcat cksum3 inputstr
+wait '#'
+sendln "md5sum /media/"usbdrive"/bash |awk '{print $1}'"
+strconcat cksum4 inputstr
+pause 1
+strcompare cksum3 cksum4
+if result<>0 then
+    messagebox 'THUMB DRIVE READ-WRITE TEST FAILURE' 'THUMB DRIVE FAILURE'
+	disconnect
+    closett
+    end
+endif
+flushrecv
+mpause 500
+sendln 'rm /media/'usbdrive'/bash'
+statusbox 'THUMB DRIVE AND SD CARD PASSED' 'PASSED'
+mpause 500
+closesbox
+mpause 1000
+
+:LORA_TEST
+timeout = 5
+flushrecv
+sendln 'mts-io-sysfs show ap1/*'
+wait 'MTAC' 'No such file'
+if result=1 then
+    statusbox 'MTAC1 PASSED' 'PASSED1'
+	mpause 1000
+	closesbox
+else
+	beep
+	messagebox 'MTCDT LORA AP1 READ FAILURE!' 'LORA AP1 FAILURE'
+	disconnect
+  	closett
+  	end
+endif
+mpause 2000
+flushrecv
+sendln 'mts-io-sysfs show ap2/*'
+wait 'MTAC' 'No such file'
+if result=1 then
+	statusbox 'MTAC2 PASSED' 'PASSED2'
+	mpause 1000
+	closesbox
+else
+	beep
+	messagebox 'MTCDT LORA AP2 READ FAILURE!' 'LORA AP2 FAILURE'
+	disconnect
+  	closett
+  	end
+endif
+mpause 1000
+
+if isNONE=0 goto SHORTING_MTCDT
+
+:SIM_TEST
+sendln 'microcom /dev/modem_at0'
+mpause 500
+sendln 'at+cpin?'
+wait 'OK' 'not found' 'ERROR'
+simResult = result
+:check_live_sim
+if isH5 = 0 then
+    :registration
+	mpause 500
+    sendln 'at+cgdcont=1,"IP","fast.t-mobile.com"'
+    wait 'OK'
+    mpause 500
+    sendln 'at+creg?'
+	waitln '+CREG: 0,1' '+CREG: 0,2'
+	:connection
+    mpause 500
+    sendln 'at#sgact=1,1'
+    wait '#SGACT:' 'ERROR'
+    if result = 2 then
+        messagebox 'THIS SMC NEED A LIVE SIM. PLEASE ADD!' 'LIVE SIM FAILURE'
+        disconnect
+  		closett
+  		end
+	endif
+	sendln 'at#sgact=1,0'
+	wait 'OK'
+endif
+
+if simResult=1 then
+    statusbox 'SIM CHECK PASSED' 'PASSED'
+	mpause 1000
+	closesbox
+else
+  beep
+  messagebox 'SIM TEST FAILURE!' 'SIM FAILURE'
+  disconnect
+  closett
+  end
+endif
+mpause 1000
+send 24 ;Exit 'at' command promt
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;SMC;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:SMC_TEST
+imei = ''
+timeout = 3
+
+mpause 500
+wait '#'
+sendln 'microcom /dev/modem_at0'
+:init
+mpause 500
+sendln 'at'
+waitln 'OK'
+if result=0 goto init
+mpause 500
+sendln 'ate1'
+wait 'OK'
+mpause 500
+sendln 'at+cgsn'
+waitln 'ERROR' '35' '0'
+if result = 1 then
+    messagebox 'COULD NOT FIND IMEI. PLEASE REPORT!' 'IMEI CHECK FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+strconcat imei inputstr
+mpause 500
+sendln 'at+cgsn'
+wait 'OK'
+mpause 500
+sendln 'at#gpio=1,0,2'
+waitln'OK'
+mpause 500
+sendln 'at#sled=2'
+waitln 'OK'
+mpause 500
+sendln 'at#sledsav'
+wait 'OK'
+
+:temp_setting
+flushrecv
+mpause 500
+sendln 'at#tempcfg?'
+if isL4E1=0 then
+    waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+elseif isH5=0 then
+	waitln '#TEMPCFG: -30,-10,55,80'
+elseif isL4N1=0 then
+	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
+elseif isLAT3=0 then
+	waitln '#TEMPCFG: -40,-15,55,85'
+elseif isLAT1=0 then
+	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+elseif isLVW2=0 then
+	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3'
+elseif isLSB3=0 then
+	waitln '#TEMPCFG: -40,-15,55,85'
+	if result = 0 then
+	    sendln '#TEMPCFG: -40,-15,55,85'
+		goto temp_setting
+	endif
+endif
+if result=0 goto temp_setting
+mpause 500
+sendln 'at#rxdiv?'
+if isLat3=0 then
+    wait '#RXDIV: 1,3'
+elseif isH5=0 then
+ 	wait '#RXDIV: 0,1'
+elseif isLVW2=0 then
+ 	wait '#rxdiv: 1,1'
+elseif isLSB3=0 then
+ 	wait '#RXDIV: 1,0'
+else
+ 	wait '#RXDIV: 1,1'
+endif
+if result = 0 then
+    mpause 500
+    sendln 'at#rxdiv=1,1'
+endif
+
+:apn1_check
+flushrecv
+mpause 500
+if isLVW2=0 then
+    sendln 'at+cgdcont?'
+	waitln '+CGDCONT: 1,"IPV4V6","vzwims"'
+	if result =0 then
+	sendln 'at+cgdcont=1,"IPV4V6","vzwims"'
+	wait 'OK'
+	endif
+	mpause 1000
+	sendln 'at+cgdcont?'
+	waitln '+CGDCONT: 2,"IPV4V6","vzwadmin"'
+	if result =0 then
+	sendln 'at+cgdcont=2,"IPV4V6","vzwadmin"'
+	wait 'OK'
+	endif
+	mpause 1000
+	sendln 'at+cgdcont?'
+	waitln '+CGDCONT: 3,"IPV4V6","vzwinternet"'
+	if result =0 then
+	sendln 'at+cgdcont=3,"IPV4V6","vzwinternet"'
+	wait 'OK'
+	endif
+	goto LVW2_TEST
+endif
+
+sendln 'at+cgdcont?'
+if isH5=0 then
+    wait 'OK'
+    mpause 500
+    sendln 'at+cgdcont=1'
+    wait 'OK'
+    goto H5_TEST
+endif
+waitln '+CGDCONT: 1,"IPV4V6",""'
+if result =0 then
+    sendln 'at+cgdcont=1,"IPV4V6","",""'
+    goto apn1_check
+endif
+
+if isLAT3=0 goto SHORTING_SMC
+if isLSB3=0 goto SHORTING_SMC
+
+mpause 500
+sendln 'at+cgdcont?'
+waitln '+CGDCONT: 2,"IPV4V6","ims"'
+if result =0 then
+    sendln 'at+cgdcont=2,"IPV4V6","ims"'
+    goto apn1_check
+endif
+mpause 500
+sendln 'at+cgdcont?'
+waitln '+CGDCONT: 3,"IPV4V6","sos"'
+if result =0 then
+    sendln 'at+cgdcont=3,"IPV4V6","sos"'
+    goto apn1_check
+endif
+
+
+:SHORTING_SMC
+if isH5 = 0 goto H5_TEST
+if isLAT1 = 0 goto LAT1_TEST
+if isLAT3 = 0 goto LAT3_TEST
+if isL4E1 = 0 goto L4E1_TEST
+if isL4N1 = 0 goto L4N1_TEST
+if isLSB3 = 0 goto LSB3_TEST
+
+;;;;;;;;;;;;;;
+:ALL_VERSION
+
+
+;;;;;;;;;;;;;;
+:H5_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'HE910-D'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: HE910-D' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '12.00.026'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 12.00.026' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '1'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 1' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+
+goto csq_check
+
+;;;;;;;;;;;;;;
+:LAT1_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-NAG'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-NAG' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '17.00.503'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 17.00.503' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '10'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 10' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'AT+CSQ'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+chup'
+wait 'OK'
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+
+;;;;;;;;;;;;;;
+:LAT3_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-NA1'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-NA1' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '20.00.526'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 20.00.526' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '0'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 0' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+
+goto csq_check
+
+;;;;;;;;;;;;;;
+:L4E1_TEST
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C4-EU'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C4-EU' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '25.20.673'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.673' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '2'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+;;;;;;;;;;;;;;
+:LVW2_TEST
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-SVG'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-SVG' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '17.01.571'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 17.01.571' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '3'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 3' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#servinfo'
+waitln '#SERVINFO:'
+if result=0 then
+    messagebox 'UNABLE TO FIND WIRELESS NETWORK' 'NETWORK CONNECTION FAILURE'
+    disconnect
+   	closett
+   	end
+endif
+goto csq_check
+;;;;;;;;;;;;;;
+:L4N1_TEST
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C4-NF'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C4-NF' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at#swpkgv'
+waitln '25.20.666'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.666' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '2'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at#fwswitch?'
+wait '#FWSWITCH: 0,0'
+goto csq_check
+;;;;;;;;;;;
+:LSB3_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'Telit'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE866A1-JS'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE866A1-JS' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '23.00.204'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 23.00.204' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '8'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 8' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+
+;;;;;;;;;;;
+:csq_check
+mpause 500
+sendln 'AT+CSQ'
+wait '99'
+if result =1 goto csq_check
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+timeout = 30
+mpause 500
+sendln 'at+csq'
+waitrecv '+CSQ: ' 10 1
+strconcat rssi3 inputstr
+strremove rssi3 1 6
+strremove rssi3 3 2
+str2int strvar rssi3
+strtrim rssi3 ','
+statusbox rssi3 'RSSI'
+if strvar >= 7 then
+    mpause 1000
+else
+    beep
+    messagebox 'LOW RSSI. CSQ SIGNAL STRENGTH FAILURE!' 'CSQ CHECK FAILURE'
+    disconnect
+    closett
+    end
+endif
+
+flushrecv
+mpause 500
+sendln 'at#moni'
+waitln '#MONI:'
+	   if result=0 goto NETWORK_CONNECTION_FAILURE
+strscan inputstr  'PWR:'
+result= result+4
+strcopy inputstr result 4 sig_level
+strtrim sig_level 'd'
+statusbox  sig_level 'Signal Level'
+str2int rssi2 sig_level
+if rssi2 < -99 goto LOW_RSSI
+mpause 1000
+closesbox
+mpause 500
+flushrecv
+sendln 'at#servinfo'
+waitln 'T-Mobile' 'AT&T' 'Verizon'
+	if result=0 goto NETWORK_CONNECTION_FAILURE
+pause 1
+sendln 'at#moni'
+waitln 'T-Mobile' 'AT&T' 'Verizon'
+	if result=0 goto NETWORK_CONNECTION_FAILURE
+pause 1
+
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+:SHORTING_MTCDT
+if is240L=0 goto RESULT_LOGGING
+if is246L=0 goto GPS_TEST
+if is247L=0 goto GPS_TEST
+
+:GPS_TEST
+timeout = 70
+mpause 500
+flushrecv
+sendln 'gpspipe -r'
+wait '4505.' '4506.' 'could not connect'
+if result=0 || result=3 then
+   messagebox 'UNABLE TO GET GPS LOCATION' 'GPS TEST FAILURE'
+   disconnect
+   closett
+   end
+endif
+send 3
+wait '#'
+pause 1
+statusbox 'GPS TEST PASSED' 'PASSED'
+mpause 500
+closesbox
+pause 1
+
+if is247L != 0 goto RESULT_LOGGING
+
+:WIFI_BT_TEST
+timeout = 15
+if isNONE = 0 then
+    imei = 'NO'
+endif
+wifiAddr = ''
+bluetoothAddr = ''
+
+mpause 500
+sendln '/etc/init.d/rs9113 stop >/dev/null 2>&1'
+wait '#'
+mpause 500
+sendln 'export COEX_MODE=5'
+wait '#'
+mpause 500
+sendln 'cd /opt/rs9113;bash /opt/rs9113/wlan_enable.sh >/dev/null 2>&1'
+wait '#' 'No such file or directory'
+if result=2 goto WIFI_FAILURE
+mpause 500
+sendln '/opt/rs9113/onebox_util rpine0 create_vap wifi1 sta sw_bmiss'
+wait '#' 'No such file or directory'
+if result=2 goto WIFI_FAILURE
+mpause 500
+sendln 'ip link set dev wifi1 up'
+wait '#'
+:wifi_addr_check
+flushrecv
+mpause 500
+sendln "ifconfig |grep -i wifi1 |awk '{print $5}'"
+waitln '00:' '88:'
+strlen inputstr
+if result <>17 goto wifi_addr_check
+strconcat wifiAddr inputstr
+
+timeout=30
+:wifi_scan
+mpause 500
+sendln 'iw dev wifi1 scan |grep -i SSID'
+waitln  'Dummy' 'MTS-MOBILE' 'MTS-PRINTERS' 'MTS-MFG' 'MTS-IT'
+if result > 0 then
+    statusbox 'WIFI PASSED' 'PASSED1'
+elseif result = 0 then
+	goto WIFI_FAILURE
+endif
+mpause 1000
+closesbox
+send 13
+wait '#'
+mpause 500
+sendln '/etc/init.d/rs9113 start >/dev/null 2>&1'
+wait '#'
+mpause 500
+sendln 'hciconfig hci0 up'
+wait '#'
+
+:bt_addr_check
+flushrecv
+mpause 500
+sendln "hcitool dev |grep -i hci0 |awk '{print $2}'"
+waitln '00:' '88:'
+strlen inputstr
+if result <>17 goto bt_addr_check
+strconcat bluetoothAddr inputstr
+
+timeout=50
+:bt_scan
+mpause 500
+sendln "hcitool scan"
+waitln 'Windows CE' 'MUSKYS_blue' 'slave' 'G5' 'WindowsCE' 'OPERATOR-PC' 'ADMIN-PC' 'MTHS' 'TESTROOM'
+if result > 0 then
+    statusbox 'BLUETOOTH PASS' 'PASSED2'
+elseif result = 0 then
+	goto BT_FAILURE
+endif
+mpause 1000
+closesbox
+send 13
+
+:write_data_to_file
+mpause 1000
+fileopen fhandle 'C:\temp\wifimacinfo.txt' 1
+filewrite fhandle #13#10
+filewrite fhandle imei
+filewrite fhandle ","
+filewrite fhandle ","
+filewrite fhandle wifiAddr
+filewrite fhandle ","
+filewrite fhandle ","
+filewrite fhandle bluetoothAddr
+fileclose fhandle
+pause 1
+
+:VERIFY_WIFI_BT_RECORD
+mpause 500
+messagebox 'VERIFY WIFI AND BLUETOOTH ADDRESS WERE RECORDED CORRECTLY!' 'WIFI/BT MAC ADDRESS VERIFICATION'
+exec 'notepad c:\temp\wifimacinfo.txt'
+
+:RESULT_LOGGING
+itemNum = param4
+productId = 'MTCDT'
+
+strconcat productId '-'
+strcompare param3 'NONE'
+if result <> 0 then
+   strconcat productId param3
+   strconcat productId '-'
+endif
+strconcat productId param2
+strconcat productId ' '
+
+getdate date "%Y/%m/%d"
+getdate time "%H:%M:%S"
+fileopen fhandle 'C:\DEVICE_TEST_RECORDS\all-mtcdt-test-records.txt' 1
+
+filewrite fhandle #13#10
+filewrite fhandle date
+filewrite fhandle ",,"
+filewrite fhandle time
+filewrite fhandle ",,"
+filewrite fhandle itemNum
+filewrite fhandle ",,"
+filewrite fhandle productId
+filewrite fhandle ",,"
+filewrite fhandle tempstr
+filewrite fhandle ",,"
+filewrite fhandle imei
+filewrite fhandle ",,"
+filewrite fhandle radioVersion
+filewrite fhandle ",,"
+filewrite fhandle telModuleVer
+filewrite fhandle ",,"
+filewrite fhandle fwBuild
+filewrite fhandle ",,"
+filewrite fhandle wifiAddr
+filewrite fhandle ",,"
+filewrite fhandle bluetoothAddr
+
+fileclose fhandle 
+
+:TEST_DONE
+beep
+messagebox 'MTCDT TEST COMPLETE' 'TEST DONE'
+disconnect
+closett
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:LED_FAILURE
+messagebox 'FIX FAILING LEDs. RETEST!' 'LED FAILURE'
+disconnect
+closett
+end
+
+:NETWORK_CONNECTION_FAILURE
+messagebox 'UNABLE TO FIND WIRELESS NETWORK. RETEST!' 'NETWORK CONNECTION FAILURE'
+disconnect
+closett
+end
+
+:LOW_RSSI
+messagebox 'CSQ SIGNAL TOO LOW. RETEST!' 'WIRELESS SIGNAL MEASUREMENT FAILURE'
+disconnect
+closett
+end
+
+:WIFI_FAILURE
+messagebox 'UNABLE TO START WIFI SERVICE. REBOOT!' "WIFI TEST FAILURE'
+disconnect
+closett
+end
+
+:BT_FAILURE
+messagebox 'UNABLE TO GET BLUETOOTH SERVICE. REBOOT!' "BLUETOOTH TEST FAILURE'
+disconnect
+closett
+end

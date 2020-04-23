@@ -4,16 +4,26 @@
 ;					Cannot Stand-alone run!
 ;					Only work with other program that passes PARAMETERS to this macro.
 ;
+
 show 0
 timeout = 3
 mpause 1000
+
+strcompare param8 'newTTVersion'
+isTTNewVersion = result
+if isTTNewVersion = 0 then
+    sprintf2 cmdStr '/C=%s' param3
+    connect cmdStr
+endif
+
 
 :GET_SET_VARS
 firmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
 xdotPortName = param5 	;PORT1
-sprintf2 xdotDriveLoc 'C:\DRIVES\%s' param6
+;sprintf2 xdotDriveLoc 'C:\DRIVES\%s' param6
+sprintf2 xdotDriveLoc '%s:\' param6
 strcompare param7 'singleTest'
 isSingleTest = result
 testStatus = ''
@@ -28,7 +38,7 @@ waitln firmwareVers 'OK'
 if result=1 then
     if isSingleTest = 0 then
         statusbox 'PROGRAM PASSED' 'PASSED1'
-    	mpause 200
+    	mpause 300
 		closesbox
 	endif 
     goto START
@@ -39,12 +49,12 @@ if result=0 then
     sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
     statusbox msg1 portNumberFailureMsg
     testStatus = 'CONNECTION FAILED'
-    goto RESULT_LOGGING
+    goto WRITE_RESULT_DATA
     end
 endif
 
 :REPROGRAM
-sprintf2 cmd2 'cmd /c copy C:\XDOT\All-Firmwares\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
+sprintf2 cmd2 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
 exec cmd2
 statusbox 'Transfering bin file...' 'PROGRAMMING'
 mpause 18000
@@ -74,7 +84,7 @@ if result=0 then
     statusbox 'XDOT Failed to Program!' portNumberFailureMsg
 	testStatus = 'FAILED TO PROGRAM'
 	fail = 0
-	goto RESULT_LOGGING
+	goto WRITE_RESULT_DATA
 endif
 goto CHECK_CURRENT_PROGRAM
 
@@ -102,16 +112,22 @@ wait 'Successfully joined network'
 if result=0 then
     fail=fail+1
     if fail < 3 then
+        sendln 'at&f'
+        wait 'OK'
+        sendln 'at&w'
+        wait 'OK'
+        sendln 'atz'
+        wait 'OK'
         goto join_test
     endif
     statusbox 'XDOT JOIN TEST FAILURE' portNumberFailureMsg
 	testStatus = 'FAILED TO JOIN'
     fail = 0
-    goto RESULT_LOGGING
+    goto WRITE_RESULT_DATA
 endif
 if fail = 0 && isSingleTest = 0 then
     statusbox 'JOIN PASSED' 'PASSED2'
-	mpause 200
+	mpause 300
 	closesbox
 endif 
 
@@ -129,7 +145,7 @@ for i 1 3
 		endif
 		statusbox 'PING TEST FAILURE' portNumberFailureMsg
 		testStatus = 'PING RESPONSE FAILURE'
-		goto RESULT_LOGGING
+		goto WRITE_RESULT_DATA
 	elseif csq < -45 then	;should be -45
 		fail=fail+1
 		if fail < 3 then
@@ -138,12 +154,12 @@ for i 1 3
 		statusbox 'PING LEVEL FAILURE' portNumberFailureMsg
 		testStatus = 'PING LEVEL FAILURE'
 		fail = 0
-		goto RESULT_LOGGING
+		goto WRITE_RESULT_DATA
 	endif
 next
 if fail = 0 && isSingleTest = 0 then
     statusbox 'PING PASSED' 'PASSED3'
-	mpause 200
+	mpause 300
 	closesbox
 endif 
 
@@ -161,11 +177,11 @@ if csq < -50 then	;should be -50
     statusbox 'RSSI TEST FAILURE' portNumberFailureMsg
     testStatus = 'RSSI LEVEL FAILURE'
     fail = 0
-    goto RESULT_LOGGING
+    goto WRITE_RESULT_DATA
 endif
 if fail = 0 && isSingleTest = 0 then
     statusbox 'RSSI PASSED' 'PASSED4'
-	mpause 200
+	mpause 300
 	closesbox
 endif 
 
@@ -176,8 +192,20 @@ mpause 500
 sprintf2 msg1 '%s-XDOT TEST COMPLETE' xdotPortName
 sprintf2 msg2 'PORT %s PASSED' xdotMainPort
 statusbox msg1 msg2
-testStatus = 'PASSED'
+testStatus = 'ALL PASSED'
 
-:RESULT_LOGGING
+:WRITE_RESULT_DATA
 mpause 500
+
+foldersearch 'C:\V-Projects\XDot-Controller\TEMP-DATA'
+if result=0 foldercreate 'C:\V-Projects\XDot-Controller\TEMP-DATA'
+sprintf2 cacheFileLoc 'C:\V-Projects\XDot-Controller\TEMP-DATA\%s.dat' xdotMainPort
+filesearch 'cacheFileLoc'
+if result = 0 filecreate fhandle cacheFileLoc
+
+fileopen fhandle cacheFileLoc 0	;0 for overwrite
+sprintf2 writeStr '%s,,%s' xdotMainPort testStatus
+filewrite fhandle writeStr
+fileclose fhandle
+
 end

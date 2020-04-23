@@ -3,41 +3,45 @@
 */
 SetTitleMatchMode, RegEx
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
-IfNotExist C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI
-    FileCreateDir C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI
-IfNotExist C:\V-Projects\XDot-Controller-PC1\TTL-Files
-    FileCreateDir C:\V-Projects\XDot-Controller-PC1\TTL-Files
-IfNotExist C:\V-Projects\XDot-Controller-PC1\INI-Files
-    FileCreateDir C:\V-Projects\XDot-Controller-PC1\INI-Files
-IfNotExist C:\V-Projects\XDot-Controller-PC1\EXE-Files
-    FileCreateDir C:\V-Projects\XDot-Controller-PC1\EXE-Files
+IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
+    FileCreateDir C:\V-Projects\XDot-Controller\Imgs-for-GUI
+IfNotExist C:\V-Projects\XDot-Controller\TTL-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\TTL-Files
+IfNotExist C:\V-Projects\XDot-Controller\INI-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\INI-Files
+IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\EXE-Files
+IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x-mark.png, C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\x-mark.png, 1FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check-mark.png, C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\check-mark.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png, C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\play.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\disable.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller-PC1\TTL-Files\all_xdot_test.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller-PC1\INI-Files\xdot-tt-settings.INI, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller-PC1\EXE-Files\xdot-winwaitEachPort.exe, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png, 1FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
+
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global nodesToWritePath := "C:\XDOT\nodesToWrite.txt"
 
 Global xdotProperties := [{}]  ; Creates an array containing an object.
-xdotProperties[1] := {status: "G", mainPort: 100, breakPort: 10, portName: "PORT1", driveName: "XDRIVE-00", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot01"}
-xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "XDRIVE-02", ttXPos: 105, ttYPos: 5, ctrlVar: "XDot02"}
-xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "XDRIVE-03", ttXPos: 205, ttYPos: 5, ctrlVar: "XDot03"}
-xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "XDRIVE-04", ttXPos: 305, ttYPos: 5, ctrlVar: "XDot04"}
-xdotProperties[5] := {status: "G", mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "XDRIVE-05", ttXPos: 405, ttYPos: 5, ctrlVar: "XDot05"}
-xdotProperties[6] := {status: "G", mainPort: 106, breakPort: 16, portName: "PORT6", driveName: "XDRIVE-06", ttXPos: 505, ttYPos: 5, ctrlVar: "XDot06"}
-xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT7", driveName: "XDRIVE-07", ttXPos: 5, ttYPos: 105, ctrlVar: "XDot07"}
-xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "XDRIVE-08", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot08"}
+xdotProperties[1] := {status: "G", mainPort: 101, breakPort: 11, portName: "PORT1", driveName: "D", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot01"}
+xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "E", ttXPos: 105, ttYPos: 5, ctrlVar: "XDot02"}
+xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "F", ttXPos: 205, ttYPos: 5, ctrlVar: "XDot03"}
+xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "G", ttXPos: 305, ttYPos: 5, ctrlVar: "XDot04"}
+xdotProperties[5] := {status: "G", mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "H", ttXPos: 405, ttYPos: 5, ctrlVar: "XDot05"}
+xdotProperties[6] := {status: "G", mainPort: 106, breakPort: 16, portName: "PORT6", driveName: "I", ttXPos: 505, ttYPos: 5, ctrlVar: "XDot06"}
+xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT7", driveName: "J", ttXPos: 5, ttYPos: 105, ctrlVar: "XDot07"}
+xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "K", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot08"}
 
 Global totalGoodPort := 8
 
-Global xImg := "C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\x-mark.png"
-Global checkImg := "C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\check-mark.png"
-Global playImg := "C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\play.png"
+Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png"
+Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png"
+Global playImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png"
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -88,8 +92,7 @@ Gui Add, Button, xs+18 ys+20 w140 h25 ggetRecords, Functional Test History
 Gui Add, Button, xs+169 ys+20 w140 h25 ggetRecords, EUID Write History
 
 ;;;Functions to run before main gui is started;;;
-;getNodesToWrite()
-;OnMessage(0x207, "WM_MBUTTONDBLCLK")
+deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 
 posX := A_ScreenWidth - 600
 Gui, Show, w550 h500 x%posX% y150, xDot Controller (PC1)
@@ -143,7 +146,8 @@ if (isXdot = 1 || isBadXdot = 1) {
     Gui, xdot: Cancel
     Gui, xdot: Destroy
     RegExMatch(A_GuiControl, "\d+$", num) ;Get button number based on button variable
-                
+    
+    ctrlVar := xdotProperties[num].ctrlVar
     mainPort := xdotProperties[num].mainPort
     breakPort := xdotProperties[num].breakPort
     portName := xdotProperties[num].portName
@@ -176,6 +180,37 @@ if (isXdot = 1 || isBadXdot = 1) {
     buttonLabel := isBadXdot = 1 ? "Re-run" : "Run"
     Gui xdot: Add, Button, w40 h40 xs+10 ys+45 gFunctionalTestEach, %buttonLabel%
     
+    ;;Labels or Functions to run before gui start
+    FileRead, outStr, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
+    if (RegExMatch(outStr, "CONNECTION FAILED") > 0) {
+        GuiControl, , process1, %xImg%
+    } else if (RegExMatch(outStr, "FAILED TO PROGRAM") > 0) {
+        GuiControl, , process1, %checkImg%
+        GuiControl, , process2, %xImg%
+    } else if (RegExMatch(outStr, "FAILED TO JOIN") > 0) {
+        GuiControl, , process1, %checkImg%
+        GuiControl, , process2, %checkImg%
+        GuiControl, , process3, %xImg%
+    } else if (RegExMatch(outStr, "PING.*FAILURE") > 0) {
+        GuiControl, , process1, %checkImg%
+        GuiControl, , process2, %checkImg%
+        GuiControl, , process3, %checkImg%
+        GuiControl, , process4, %xImg%
+    } else if (RegExMatch(outStr, "RSSI LEVEL FAILURE") > 0) {
+        GuiControl, , process1, %checkImg%
+        GuiControl, , process2, %checkImg%
+        GuiControl, , process3, %checkImg%
+        GuiControl, , process4, %checkImg%
+        GuiControl, , process5, %xImg%
+    } else if (RegExMatch(outStr, "ALL PASSED") > 0) {
+        GuiControl, , process1, %checkImg%
+        GuiControl, , process2, %checkImg%
+        GuiControl, , process3, %checkImg%
+        GuiControl, , process4, %checkImg%
+        GuiControl, , process5, %checkImg%
+    }
+    
+    
     mainY := mainY + 130
     Gui xdot: Show, x%mainX% y%mainY%, XDot %num%
     Return
@@ -189,7 +224,8 @@ if (isXdot = 1 || isBadXdot = 1) {
     ;;;Functions and Labels for xdot GUI;;;
     FunctionalTestEach:
         WinKill COM%mainPort%
-        Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller-PC1\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller-PC1\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
+        ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
+        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
 
         ;;;Track processes
         ;Connecting
@@ -199,7 +235,7 @@ if (isXdot = 1 || isBadXdot = 1) {
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process1, %xImg%
-            return
+            goto FailedXDot
         }
         GuiControl, , process1, %checkImg%
         
@@ -210,7 +246,7 @@ if (isXdot = 1 || isBadXdot = 1) {
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process2, %xImg%
-            return
+            goto FailedXDot
         }
         GuiControl, , process2, %checkImg%
         
@@ -221,7 +257,7 @@ if (isXdot = 1 || isBadXdot = 1) {
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process3, %xImg%
-            return
+            goto FailedXDot
         }
         GuiControl, , process3, %checkImg%
         
@@ -232,7 +268,7 @@ if (isXdot = 1 || isBadXdot = 1) {
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process4, %xImg%
-            return
+            goto FailedXDot
         }
         GuiControl, , process4, %checkImg%
         ;RSSI Test
@@ -242,9 +278,25 @@ if (isXdot = 1 || isBadXdot = 1) {
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process5, %xImg%
-            return
+            goto FailedXDot
         }
         GuiControl, , process5, %checkImg%
+        
+        ;Give main button a check mark
+        WinWait %mainPort% PASSED
+        Gui 1: Default
+        GuiControlGet, hwndVar, Hwnd , Bad%ctrlVar%
+        GuiButtonIcon(hwndVar, checkImg, 1, "s24")   ;Display icon
+        GuiControl, +vGood%ctrlVar%, Bad%ctrlVar%     ;Change var of control
+        return
+        
+        FailedXDot:
+        Gui 1: Default
+        GuiControl, Text, %ctrlVar%,    ;Delete text
+        GuiControlGet, hwndVar, Hwnd , %ctrlVar%
+        GuiButtonIcon(hwndVar, xImg, 1, "s24")   ;Display icon
+        GuiControl, +vBad%ctrlVar%, %ctrlVar%     ;Change var of control
+        Return
         
     Return
 }
@@ -261,6 +313,7 @@ if (isXdot = 1 || isBadXdot = 1) {
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 testAll() {
     resetXdotBttns()
+    deleteOldCacheFiles()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, Run, Begin funtional tests on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
@@ -281,11 +334,12 @@ testAll() {
             
             if (xStatus = "G") {
                 WinKill COM%mainPort%
-                Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller-PC1\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller-PC1\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
-                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller-PC1\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                 GuiControl, Text, %ctrlVar%,
                 GuiControlGet, hwndVar, Hwnd , %ctrlVar%
-                GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\play.png", 1, "s24")   ;Display icon
+                GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png", 1, "s24")   ;Display icon
                 Sleep 1000
             }
         }
@@ -309,7 +363,7 @@ GuiContextMenu:
         xdotProperties[num].status := "D"
         GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
         GuiControl, Text, %A_GuiControl%,    ;Delete text
-        GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller-PC1\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
+        GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
     } else if (RegExMatch(A_GuiControl, "^DisXDot[0-9]{2}$") = 1) {
         totalGoodPort++
         GuiControl, Text, totalGPortLabel, • Run tests on %totalGoodPort% ports
@@ -332,6 +386,14 @@ resetXdotBttns() {
         GuiControl, Text, %ctrlVar%, P%num%   ;Return button text
         GuiControlGet, hwndVar, Hwnd , %ctrlVar%
         GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
+    }
+}
+
+deleteOldCacheFiles() {
+    Loop, 24
+    {
+        mainPort := xdotProperties[A_Index].mainPort
+        FileDelete, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
     }
 }
 

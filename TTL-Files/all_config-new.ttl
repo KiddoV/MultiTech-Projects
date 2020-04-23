@@ -1,0 +1,111 @@
+;
+; Author: Viet Ho
+;
+timeout = 10
+clearscreen 1
+show 0
+
+is240L = -1
+is246L = -1
+is247L = -1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:LOGIN
+timeout = 1
+send 03
+:waitLogin
+wait '#' 'login' 'word' '$'
+until result = 1
+	if result = 2 then
+	   	sendln 'mtadm'
+		goto waitLogin
+	elseif result = 3 then
+	    sendln 'root'
+		goto waitLogin
+	elseif result = 4 then
+	   	sendln 'sudo -s'
+		goto waitLogin
+	endif
+enduntil
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:GET_DATA
+inputbox '*MTCDT TYPE*,*RADIO TYPE*' 'ALL DATAS'
+strsplit inputstr ','
+
+mtcdtType = groupmatchstr1
+radioType = groupmatchstr2
+
+strcompare mtcdtType '240L'
+is240L = result
+if is240L = 0 goto SET_PRODUCT_ID
+strcompare mtcdtType '246L'
+is246L = result
+if is246L = 0 goto SET_PRODUCT_ID
+strcompare mtcdtType '247L'
+is247L = result
+if is247L = 0 goto SET_PRODUCT_ID
+goto GET_DATA
+
+:SET_PRODUCT_ID
+productId = 'MTCDT'
+strconcat productId '-'
+strcompare radioType 'NONE'
+if result <> 0 then
+   strconcat productId radioType
+   strconcat productId '-'
+endif
+strconcat productId mtcdtType
+strconcat productId ' '
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:START
+send 13
+wait "#"
+mpause 1000
+send 'date "'
+mpause 1000
+gettime pctime "%Y-%m-%d %H:%M"
+send pctime 
+mpause 1000
+sendln '"'
+mpause 1000
+sendln '/etc/init.d/hwclock.sh stop'
+wait "mtcdt:/home/mtadm#"
+mpause 500
+out =''
+strconcat out' --out-file '
+strconcat out '/sys/bus/i2c/devices/0-0056/eeprom '
+strconcat out '--out-format bin '
+strconcat out '--vendor-id '
+strconcat out '"Multi-Tech Systems" '
+strconcat out '--product-id '
+strconcat out productId
+strconcat out '--device-id '
+strconcat out '99999999 '
+strconcat out '--hw-version '
+strconcat out 'MTCDT-0.1 '
+strconcat out '--mac-addr '
+strconcat out 'FA:03:FA:FA:03:FA '
+strconcat out '--imei '
+strconcat out '900000010000009 '
+if is246L = 0 then
+   strconcat out '--capa-gps '
+endif
+if is247L = 0 then
+   strconcat out '--mac-bluetooth '
+   strconcat out '00:25:AB:33:99:C5 '
+   strconcat out '--mac-wifi '
+   strconcat out '00:25:A5:33:C6:98 '
+   strconcat out '--capa-gps --capa-wifi --capa-bluetooth '
+endif
+strconcat out '--uuid '
+strconcat out '1a2b3c4d5e6f7a8b9a0b1c2d3e4f5a6b'
+
+sendln 'mts-id-eeprom ' out
+wait '#'
+flushrecv
+sendln '/etc/init.d/./mts-io stop'
+wait '#'
+sendln '/etc/init.d/./mts-io start'
+pause 7
+messagebox 'MTCDT TEST CONFIGURATION COMPLETE' 'FINISHED CONFIGURATION'
+mpause 1000
+end
