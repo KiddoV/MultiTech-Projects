@@ -32,18 +32,17 @@ pingLevel = ''
 rssiLevel = ''
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 
-:CHECK_CURRENT_PROGRAM
-sendln 'ati'
-waitln firmwareVers 'OK'
+:CHECK_CONNECTION
+mpause 300
+sendln 'at'
+waitln 'OK'
 if result=1 then
     if isSingleTest = 0 then
-        statusbox 'PROGRAM PASSED' 'PASSED1'
+        statusbox 'CONNECTED SUCCESSFULLY' 'PASSED1'
     	mpause 300
 		closesbox
 	endif 
-    goto START
 endif
-if result>1 goto REPROGRAM
 if result=0 then
     closett
     sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
@@ -52,6 +51,21 @@ if result=0 then
     goto WRITE_RESULT_DATA
     end
 endif
+
+:CHECK_CURRENT_PROGRAM
+mpause 300
+sendln 'ati'
+waitln firmwareVers 'OK'
+if result=1 then
+    if isSingleTest = 0 then
+        statusbox 'PROGRAM PASSED' 'PASSED2'
+    	mpause 300
+		closesbox
+	endif 
+    goto START
+endif
+if result>1 goto REPROGRAM
+if result=0 goto program_failed
 
 :REPROGRAM
 sprintf2 cmd2 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
@@ -81,6 +95,7 @@ if result=0 then
     if fail < 3 then
         goto REPROGRAM
     endif
+    :program_failed
     statusbox 'XDOT Failed to Program!' portNumberFailureMsg
 	testStatus = 'FAILED TO PROGRAM'
 	fail = 0
@@ -126,7 +141,7 @@ if result=0 then
     goto WRITE_RESULT_DATA
 endif
 if fail = 0 && isSingleTest = 0 then
-    statusbox 'JOIN PASSED' 'PASSED2'
+    statusbox 'JOIN PASSED' 'PASSED3'
 	mpause 300
 	closesbox
 endif 
@@ -158,7 +173,7 @@ for i 1 3
 	endif
 next
 if fail = 0 && isSingleTest = 0 then
-    statusbox 'PING PASSED' 'PASSED3'
+    statusbox 'PING PASSED' 'PASSED4'
 	mpause 300
 	closesbox
 endif 
@@ -180,7 +195,7 @@ if csq < -50 then	;should be -50
     goto WRITE_RESULT_DATA
 endif
 if fail = 0 && isSingleTest = 0 then
-    statusbox 'RSSI PASSED' 'PASSED4'
+    statusbox 'RSSI PASSED' 'PASSED5'
 	mpause 300
 	closesbox
 endif 
@@ -200,7 +215,7 @@ mpause 500
 foldersearch 'C:\V-Projects\XDot-Controller\TEMP-DATA'
 if result=0 foldercreate 'C:\V-Projects\XDot-Controller\TEMP-DATA'
 sprintf2 cacheFileLoc 'C:\V-Projects\XDot-Controller\TEMP-DATA\%s.dat' xdotMainPort
-filesearch 'cacheFileLoc'
+filesearch cacheFileLoc
 if result = 0 filecreate fhandle cacheFileLoc
 
 fileopen fhandle cacheFileLoc 0	;0 for overwrite

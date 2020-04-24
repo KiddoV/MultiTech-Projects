@@ -18,6 +18,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x-m
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
 
@@ -80,10 +81,11 @@ Gui Add, Button, xs+5 ys+50 w30 h30 vXDot07 gGetXDot, P07
 Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot, P08
 Gui Font
 
-Gui Add, GroupBox, xm+1 ym+95 w200 h95 Section, Functional Test
-Gui Add, Text, xs+15 ys+20, • Test firmware version: 3.0.2-debug
-Gui Add, Text, xs+15 ys+35 vtotalGPortLabel, • Run tests on %totalGoodPort% ports
-Gui Add, Button, xs+73 ys+60 w55 h28 gtestAll, RUN
+Gui Add, GroupBox, xm+1 ym+95 w200 h110 Section, Functional Test
+Gui Add, Text, xs+10 ys+20, Test firmware version: 3.0.2-debug
+Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked, Run tests on %totalGoodPort% ports
+Gui Add, Radio, xs+15 ys+54 vreproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
 Gui Add, GroupBox, xm+1 ym+270 w200 h215 Section, EUID Write
 
@@ -100,6 +102,8 @@ Gui, Show, w550 h500 x%posX% y150, xDot Controller (PC1)
 ;;;Functions to run after main gui is started;;;
 getNodesToWrite()
 GuiControlGet, editNode, Pos, editNode
+IfNotExist C:\teraterm\ttermpro.exe
+    MsgBox, 16, WARNING, This program only work with a secondary program.`nPlease install Teraterm to this location: C:\teraterm\
 
 SetTimer, timer, 1
 return
@@ -180,6 +184,9 @@ if (isXdot = 1 || isBadXdot = 1) {
     buttonLabel := isBadXdot = 1 ? "Re-run" : "Run"
     Gui xdot: Add, Button, w40 h40 xs+10 ys+45 gFunctionalTestEach, %buttonLabel%
     
+    Gui xdot: Add, GroupBox, xm+1 ym+196 w200 h50 Section, Programming
+    Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
+    
     ;;Labels or Functions to run before gui start
     FileRead, outStr, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
     if (RegExMatch(outStr, "CONNECTION FAILED") > 0) {
@@ -237,12 +244,18 @@ if (isXdot = 1 || isBadXdot = 1) {
             GuiControl, , process1, %xImg%
             goto FailedXDot
         }
+        WinWait PASSED1|%mainPort% FAILURE
+        IfWinExist %mainPort% FAILURE
+        {
+            GuiControl, , process1, %xImg%
+            goto FailedXDot
+        }
         GuiControl, , process1, %checkImg%
         
         ;Programable
         GuiControl, , process2, %playImg%
-        WinWait PASSED1|%mainPort% FAILURE
-        IfWinNotExist PASSED1
+        WinWait PASSED2|%mainPort% FAILURE
+        IfWinNotExist PASSED2
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process2, %xImg%
@@ -252,8 +265,8 @@ if (isXdot = 1 || isBadXdot = 1) {
         
         ;Joinning
         GuiControl, , process3, %playImg%
-        WinWait PASSED2|%mainPort% FAILURE
-        IfWinNotExist PASSED2
+        WinWait PASSED3|%mainPort% FAILURE
+        IfWinNotExist PASSED3
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process3, %xImg%
@@ -263,8 +276,8 @@ if (isXdot = 1 || isBadXdot = 1) {
         
         ;Ping Test
         GuiControl, , process4, %playImg%
-        WinWait PASSED3|%mainPort% FAILURE
-        IfWinNotExist PASSED3
+        WinWait PASSED4|%mainPort% FAILURE
+        IfWinNotExist PASSED4
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process4, %xImg%
@@ -273,8 +286,8 @@ if (isXdot = 1 || isBadXdot = 1) {
         GuiControl, , process4, %checkImg%
         ;RSSI Test
         GuiControl, , process5, %playImg%
-        WinWait PASSED4|%mainPort% FAILURE
-        IfWinNotExist PASSED4
+        WinWait PASSED5|%mainPort% FAILURE
+        IfWinNotExist PASSED5
         {
             WinWait %mainPort% FAILURE
             GuiControl, , process5, %xImg%
@@ -285,9 +298,12 @@ if (isXdot = 1 || isBadXdot = 1) {
         ;Give main button a check mark
         WinWait %mainPort% PASSED
         Gui 1: Default
-        GuiControlGet, hwndVar, Hwnd , Bad%ctrlVar%
-        GuiButtonIcon(hwndVar, checkImg, 1, "s24")   ;Display icon
+        GuiControlGet, hwndVar1, Hwnd , Bad%ctrlVar%
+        GuiControlGet, hwndVar2, Hwnd , %ctrlVar%
+        GuiButtonIcon(hwndVar1, checkImg, 1, "s24")   ;Display icon
+        GuiButtonIcon(hwndVar2, checkImg, 1, "s24")   ;Display icon
         GuiControl, +vGood%ctrlVar%, Bad%ctrlVar%     ;Change var of control
+        GuiControl, +vGood%ctrlVar%, %ctrlVar%     ;Change var of control
         return
         
         FailedXDot:
@@ -296,6 +312,10 @@ if (isXdot = 1 || isBadXdot = 1) {
         GuiControlGet, hwndVar, Hwnd , %ctrlVar%
         GuiButtonIcon(hwndVar, xImg, 1, "s24")   ;Display icon
         GuiControl, +vBad%ctrlVar%, %ctrlVar%     ;Change var of control
+        Return
+        
+        ToDebugEach:
+            Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
         Return
         
     Return
@@ -311,40 +331,79 @@ if (isXdot = 1 || isBadXdot = 1) {
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
-testAll() {
+runAll() {
     resetXdotBttns()
     deleteOldCacheFiles()
-    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, Run, Begin funtional tests on all %totalGoodPort% ports?
-    OnMessage(0x44, "") ;Clear icon
-    index := 1
-    IfMsgBox OK
-        Loop, 8
-        {
-            ctrlVar := xdotProperties[index].ctrlVar
-            xStatus := xdotProperties[index].status
-            mainPort := xdotProperties[index].mainPort
-            breakPort := xdotProperties[index].breakPort
-            portName := xdotProperties[index].portName
-            driveName := xdotProperties[index].driveName
-            ttXPos := xdotProperties[index].ttXPos    ;Position X for teraterm window
-            ttYPos := xdotProperties[index].ttYPos    ;Position Y for teraterm window
-            
-            index++
-            
-            if (xStatus = "G") {
-                WinKill COM%mainPort%
-                ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
-                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
-                GuiControl, Text, %ctrlVar%,
-                GuiControlGet, hwndVar, Hwnd , %ctrlVar%
-                GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png", 1, "s24")   ;Display icon
-                Sleep 1000
+    GuiControlGet, isRunTestCheck, , totalGPortRadio
+    GuiControlGet, isRunReprogCheck, , reproGPortRadio
+    if (isRunTestCheck = 1) {
+        OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+        MsgBox 0x81, Run, Begin funtional tests on all %totalGoodPort% ports?
+        OnMessage(0x44, "") ;Clear icon
+        index := 1
+        IfMsgBox OK
+            Loop, 8
+            {
+                ctrlVar := xdotProperties[index].ctrlVar
+                xStatus := xdotProperties[index].status
+                mainPort := xdotProperties[index].mainPort
+                breakPort := xdotProperties[index].breakPort
+                portName := xdotProperties[index].portName
+                driveName := xdotProperties[index].driveName
+                ttXPos := xdotProperties[index].ttXPos    ;Position X for teraterm window
+                ttYPos := xdotProperties[index].ttYPos    ;Position Y for teraterm window
+                
+                index++
+                
+                if (xStatus = "G") {
+                    WinKill COM%mainPort%
+                    ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
+                    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                    GuiControl, Text, %ctrlVar%,
+                    GuiControlGet, hwndVar, Hwnd , %ctrlVar%
+                    GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png", 1, "s24")   ;Display icon
+                    Sleep 1000
+                }
             }
-        }
-    IfMsgBox Cancel
-        return
+        IfMsgBox Cancel
+            return
+    }
+    
+    if (isRunReprogCheck = 1) {
+        OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+        MsgBox 0x81, Run, Begin re-program to debug mode on all %totalGoodPort% ports?
+        OnMessage(0x44, "") ;Clear icon
+        index := 1
+        IfMsgBox OK
+            Loop, 8
+            {
+                StartReprogram:
+                ctrlVar := xdotProperties[index].ctrlVar
+                xStatus := xdotProperties[index].status
+                mainPort := xdotProperties[index].mainPort
+                breakPort := xdotProperties[index].breakPort
+                portName := xdotProperties[index].portName
+                driveName := xdotProperties[index].driveName
+                ttXPos := xdotProperties[index].ttXPos    ;Position X for teraterm window
+                ttYPos := xdotProperties[index].ttYPos    ;Position Y for teraterm window
+                
+                index++
+                
+                if (xStatus = "G") {
+                    WinKill COM%mainPort%
+                    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                    GuiControl, Text, %ctrlVar%,
+                    GuiControlGet, hwndVar, Hwnd , %ctrlVar%
+                    GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png", 1, "s24")   ;Display icon
+                    Sleep 1000
+                }
+            }
+        IfMsgBox Cancel
+            return
+    }
+    
 }
 
 getRecords() {
@@ -359,14 +418,16 @@ GuiContextMenu:
     RegExMatch(A_GuiControl, "\d+$", num)
     if (RegExMatch(A_GuiControl, "^XDot[0-9]{2}$") = 1) {   ;Make it only works on Xdot Buttons
         totalGoodPort--
-        GuiControl, Text, totalGPortLabel, • Run tests on %totalGoodPort% ports
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
         xdotProperties[num].status := "D"
         GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
         GuiControl, Text, %A_GuiControl%,    ;Delete text
         GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
     } else if (RegExMatch(A_GuiControl, "^DisXDot[0-9]{2}$") = 1) {
         totalGoodPort++
-        GuiControl, Text, totalGPortLabel, • Run tests on %totalGoodPort% ports
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
         xdotProperties[num].status := "G"
         newVar := SubStr(A_GuiControl, 4)
         GuiControl, +v%newVar%, %A_GuiControl%
