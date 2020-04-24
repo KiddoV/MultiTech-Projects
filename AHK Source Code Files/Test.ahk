@@ -1,0 +1,1 @@
+﻿WinMenuSelectItem, COM41:115200baud - MULTITECH VT, 4&, 12&
