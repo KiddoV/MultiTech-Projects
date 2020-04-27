@@ -14,15 +14,15 @@ IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
 IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
     FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
 
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\Imgs-for-GUI\x-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png, 1FileInstall C:\Users\vho\Documents\MultiTech-Projects\Imgs-for-GUI\check-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png, 1
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\Imgs-for-GUI\play.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png, 1
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png, 1FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
 
-FileInstall C:\Users\vho\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
@@ -52,21 +52,21 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui +hWndhMainWnd
-Gui Add, GroupBox, xm+205 ym+55 w325 h370 Section, xDot NodeIDs
+Gui Add, GroupBox, xm+205 ym+55 w290 h370 Section, xDot NodeIDs
 Gui, Add, Edit, xs+10 ys+22 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
 Gui Font, Bold q5, Consolas
-Gui, Add, Edit, xs+45 ys+22 r24 hwndEdit w270 +HScroll veditNode
+Gui, Add, Edit, xs+45 ys+22 r24 hwndEdit w235 +HScroll veditNode
 Gui Font
 
-Gui Add, GroupBox, xm+305 ym+3 w225 h50 Section, Auto Generate NodeIDs
-Gui, Add, Edit, xs+7 ys+22 w110 hwndHED1 vfirstNodeID Limit16
-SetEditCueBanner(HED1, "First nodeIDs")
-Gui, Add, Edit, xs+122 ys+22 w42 Limit4 +Number hwndHED2 vnodeAmout
-SetEditCueBanner(HED2, "Amount")
-Gui, Add, Button, xs+169 ys+21 w50 h22 ggenerateNode, Generate
+;Gui Add, GroupBox, xm+205 ym+3 w225 h50 Section, Auto Generate NodeIDs
+;Gui, Add, Edit, xs+7 ys+22 w110 hwndHED1 vfirstNodeID Limit16
+;SetEditCueBanner(HED1, "First nodeIDs")
+;Gui, Add, Edit, xs+122 ys+22 w42 Limit4 +Number hwndHED2 vnodeAmout
+;SetEditCueBanner(HED2, "Amount")
+;Gui, Add, Button, xs+169 ys+21 w50 h22 ggenerateNode, Generate
 
-Gui Add, GroupBox, xm+205 ym+3 w95 h50 Section, Browse NodeIDs
-Gui, Add, Button, xs+13 ys+20 w70 gbrowseNode, Browse...
+;Gui Add, GroupBox, xm+205 ym+3 w95 h50 Section, Browse NodeIDs
+;Gui, Add, Button, xs+13 ys+20 w70 gbrowseNode, Browse...
 
 Gui Add, GroupBox, xm+1 ym+3 w200 h87 vxdotPanel Section, xDot Panel Group 1
 Gui Font, Bold, Ms Shell Dlg 2
@@ -89,15 +89,14 @@ Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
 Gui Add, GroupBox, xm+1 ym+270 w200 h215 Section, EUID Write
 
-Gui Add, GroupBox, xm+205 ym+430 w325 h55 Section, All Records
-Gui Add, Button, xs+18 ys+20 w140 h25 ggetRecords, Functional Test History
-Gui Add, Button, xs+169 ys+20 w140 h25 ggetRecords, EUID Write History
+;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
+;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
 
 ;;;Functions to run before main gui is started;;;
 deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 
 posX := A_ScreenWidth - 600
-Gui, Show, w550 h500 x%posX% y150, xDot Controller (PC1)
+Gui, Show, h500 x%posX% y150, xDot Controller (PC1)
 
 ;;;Functions to run after main gui is started;;;
 getNodesToWrite()
@@ -159,6 +158,7 @@ if (isXdot = 1 || isBadXdot = 1) {
     ttXPos := xdotProperties[num].ttXPos    ;Position X for teraterm window
     ttYPos := xdotProperties[num].ttYPos    ;Position Y for teraterm window
     
+    WinActivate COM%mainPort%
     ;;;GUI
     Gui, xdot: Default
     Gui, xdot: +AlwaysOnTop +ToolWindow +Owner
