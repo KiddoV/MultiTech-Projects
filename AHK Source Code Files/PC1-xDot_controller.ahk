@@ -13,14 +13,23 @@ IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
     FileCreateDir C:\V-Projects\XDot-Controller\EXE-Files
 IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
     FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
+IfNotExist C:\V-Projects\XDot-Controller\AHK-Lib
+    FileCreateDir C:\V-Projects\XDot-Controller\AHK-Lib
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png, 1FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check-mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\folder-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
+
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk, C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
+, 1
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
 
@@ -39,10 +48,14 @@ xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT
 xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "K", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot08"}
 
 Global totalGoodPort := 8
+Global mainWndTitle := "XDot Controller (PC1)"
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png"
 Global playImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png"
+
+;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
+#Include C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -52,10 +65,10 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui +hWndhMainWnd
-Gui Add, GroupBox, xm+205 ym+55 w290 h370 Section, xDot NodeIDs
-Gui, Add, Edit, xs+10 ys+22 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
+Gui Add, GroupBox, xm+205 ym+0 w300 h385 Section, xDot NodeID Editor
+Gui, Add, Edit, xs+5 ys+40 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
 Gui Font, Bold q5, Consolas
-Gui, Add, Edit, xs+45 ys+22 r24 hwndEdit w235 +HScroll veditNode
+Gui, Add, Edit, xs+40 ys+40 r24 hwndEdit w255 +HScroll veditNode
 Gui Font
 
 ;Gui Add, GroupBox, xm+205 ym+3 w225 h50 Section, Auto Generate NodeIDs
@@ -68,7 +81,7 @@ Gui Font
 ;Gui Add, GroupBox, xm+205 ym+3 w95 h50 Section, Browse NodeIDs
 ;Gui, Add, Button, xs+13 ys+20 w70 gbrowseNode, Browse...
 
-Gui Add, GroupBox, xm+1 ym+3 w200 h87 vxdotPanel Section, xDot Panel Group 1
+Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 1
 Gui Font, Bold, Ms Shell Dlg 2
 Gui Add, Button, xs+5 ys+15 w30 h30 vXDot01 gGetXDot, P01
 Gui Add, Button, xs+37 ys+15 w30 h30 vXDot02 gGetXDot, P02
@@ -81,13 +94,13 @@ Gui Add, Button, xs+5 ys+50 w30 h30 vXDot07 gGetXDot, P07
 Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot, P08
 Gui Font
 
-Gui Add, GroupBox, xm+1 ym+95 w200 h110 Section, Functional Test
+Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
 Gui Add, Text, xs+10 ys+20, Test firmware version: 3.0.2-debug
 Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run tests on %totalGoodPort% ports
 Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
-Gui Add, GroupBox, xm+1 ym+270 w200 h215 Section, EUID Write
+Gui Add, GroupBox, xm+0 ym+205 w200 h215 Section, EUID Write
 
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
@@ -96,9 +109,10 @@ Gui Add, GroupBox, xm+1 ym+270 w200 h215 Section, EUID Write
 deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 
 posX := A_ScreenWidth - 600
-Gui, Show, h500 x%posX% y150, xDot Controller (PC1)
+Gui, Show, x%posX% y150, %mainWndTitle%
 
 ;;;Functions to run after main gui is started;;;
+editnodeToolbar := CreateEditNodeToolbar()
 getNodesToWrite()
 GuiControlGet, editNode, Pos, editNode
 IfNotExist C:\teraterm\ttermpro.exe
@@ -139,7 +153,7 @@ GuiClose:
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;;;
-;;;;;;xdot GUI
+;;;;;;XDot GUI
 GetXDot:
 isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
 isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
@@ -161,14 +175,14 @@ if (isXdot = 1 || isBadXdot = 1) {
     WinActivate COM%mainPort%
     ;;;GUI
     Gui, xdot: Default
-    Gui, xdot: +AlwaysOnTop +ToolWindow +Owner
-    Gui xdot: Add, GroupBox, xm+1 ym+3 w200 h70 Section, XDot-%num% Connecting Infomation
+    Gui, xdot: +ToolWindow +AlwaysOnTop +hWndhXdotWnd
+    Gui xdot: Add, GroupBox, xm+0 ym+0 w200 h70 Section, XDot-%num% Connecting Infomation
     Gui Font, Bold
     Gui xdot: Add, Text, xs+8 ys+20, • COM PORT: %mainPort%
     Gui xdot: Add, Text, xs+8 ys+35, • BREAK PORT: %breakPort%
     Gui xdot: Add, Text, xs+8 ys+50, • DRIVE NAME: %driveName%
     Gui Font
-    Gui xdot: Add, GroupBox, xm+1 ym+75 w200 h120 Section, Functional Test
+    Gui xdot: Add, GroupBox, xm+0 ym+70 w200 h120 Section, Functional Test
     Gui xdot: Add, Text, xs+110 ys+20, Connecting
     Gui xdot: Add, Text, xs+110 ys+40, Programmable
     Gui xdot: Add, Text, xs+110 ys+60, Joinning
@@ -184,7 +198,7 @@ if (isXdot = 1 || isBadXdot = 1) {
     buttonLabel := isBadXdot = 1 ? "Re-run" : "Run"
     Gui xdot: Add, Button, w40 h40 xs+10 ys+45 gFunctionalTestEach, %buttonLabel%
     
-    Gui xdot: Add, GroupBox, xm+1 ym+196 w200 h50 Section, Programming
+    Gui xdot: Add, GroupBox, xm+0 ym+190 w200 h50 Section, Programming
     Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
     
     ;;Labels or Functions to run before gui start
@@ -320,6 +334,84 @@ if (isXdot = 1 || isBadXdot = 1) {
         
     Return
 }
+;;;;;;User Prompt GUI
+;;;auGen GUI
+GetAutoGenerate:
+    Gui, auGen: Cancel
+    Gui, auGen: Destroy
+    WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
+
+    Gui, auGen: Default
+    Gui, auGen: +ToolWindow +AlwaysOnTop +hWndhauGenWnd
+    Gui, auGen: Add, Edit, x10 y5 w110 h20 hwndHED1 vfirstNodeID Limit16
+    SetEditCueBanner(HED1, "First nodeIDs")
+    Gui, auGen: Add, Edit, x130 y5 w42 h20 Limit4 +Number hwndHED2 vnodeAmout
+    SetEditCueBanner(HED2, "Amount")
+    Gui, auGen: Add, Button, x180 y5 w50 h20 ggenerateNode, Generate
+    
+    mainY := mainY + 30
+    Gui, auGen: Show, x%mainX% y%mainY%, Auto Generate Node IDs
+    Return
+    
+    auGenGuiEscape:
+    auGenGuiClose:
+        Gui, auGen: Destroy
+    Return
+    ;;;Functions and Labels for auGen GUI;;;
+    generateNode() {
+    GuiControlGet, firstNodeID
+    GuiControlGet, nodeAmout
+    
+    if (StrLen(firstNodeID) < 16) {
+        MsgBox, 16, ,NodeID should have 16 digits!
+        return
+    } else if (RegExMatch(firstNodeID, "^[0-9A-Fa-f]+$") = 0) {
+        MsgBox, 16, , Please enter only Hexadecimal for NodeID!
+        return
+    } else if (StrLen(nodeAmout) < 1) {
+        MsgBox, 16, , Please enter an amount for NodeID!
+        return
+    }
+    
+    firstNodeID = 0x%firstNodeID%   ;convert value to Hex
+    
+    Gui, 1: Default
+    GuiControl Text, editNode, % autoGenerateNodeID(firstNodeID, nodeAmout)
+}
+
+    /*
+        Return a list of node in String
+    */
+    autoGenerateNodeID(firstNode, amount) {
+        listNode := []
+        listNodeStr := ""
+        SetFormat Integer, Hex      ;convert value to Hex
+        index := 0
+        Loop, %amount%
+        {
+            firstNode += index
+            listNode.Push(firstNode)
+            index++
+        }
+        ;00800FAFAFAFAFAF
+        For index, value In listNode
+        {
+            listNodeStr .= "`n" . value
+        }
+        listNodeStr := LTrim(listNodeStr, "`n")     ;remove first while space
+        
+        SetFormat Integer, D
+        nodelength := StrLen(firstNode)
+        if (nodelength = 16)
+            StringReplace, listNodeStr, listNodeStr, 0x, 00, All
+        else if (nodelength = 17)
+            StringReplace, listNodeStr, listNodeStr, 0x, 0, All
+        else if (nodelength = 18)
+            StringReplace, listNodeStr, listNodeStr, 0x, , All
+            
+        return listNodeStr
+    }
+Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
@@ -334,9 +426,9 @@ if (isXdot = 1 || isBadXdot = 1) {
 runAll() {
     resetXdotBttns()
     deleteOldCacheFiles()
-    GuiControlGet, isRunTestCheck, , totalGPortRadio
-    GuiControlGet, isRunReprogCheck, , reproGPortRadio
-    if (isRunTestCheck = 1) {
+    GuiControlGet, isRunTestChecked, , totalGPortRadio
+    GuiControlGet, isRunReprogChecked, , reproGPortRadio
+    if (isRunTestChecked = 1) {
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
         MsgBox 0x81, Run, Begin funtional tests on all %totalGoodPort% ports?
         OnMessage(0x44, "") ;Clear icon
@@ -370,7 +462,7 @@ runAll() {
             return
     }
     
-    if (isRunReprogCheck = 1) {
+    if (isRunReprogChecked = 1) {
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
         MsgBox 0x81, Run, Begin re-program to debug mode on all %totalGoodPort% ports?
         OnMessage(0x44, "") ;Clear icon
@@ -467,61 +559,8 @@ radioToggle() {
     resetXdotBttns()
 }
 
-generateNode() {
-    GuiControlGet, firstNodeID
-    GuiControlGet, nodeAmout
-    
-    if (StrLen(firstNodeID) < 16) {
-        MsgBox NodeID should have 16 digits!
-        return
-    } else if (RegExMatch(firstNodeID, "^[0-9A-Fa-f]+$") = 0) {
-        MsgBox Please enter only Hexadecimal for NodeID!
-        return
-    } else if (StrLen(nodeAmout) < 1) {
-        MsgBox Please enter an amount for NodeID!
-        return
-    }
-    
-    firstNodeID = 0x%firstNodeID%   ;convert value to Hex
-    
-    GuiControl Text, editNode, % autoGenerateNodeID(firstNodeID, nodeAmout)
-}
-
-/*
-    Return a list of node in String
-*/
-autoGenerateNodeID(firstNode, amount) {
-    listNode := []
-    listNodeStr := ""
-    SetFormat Integer, Hex      ;convert value to Hex
-    index := 0
-    Loop, %amount%
-    {
-        firstNode += index
-        listNode.Push(firstNode)
-        index++
-    }
-    ;00800FAFAFAFAFAF
-    For index, value In listNode
-    {
-        listNodeStr .= "`n" . value
-    }
-    listNodeStr := LTrim(listNodeStr, "`n")     ;remove first while space
-    
-    SetFormat Integer, D
-    nodelength := StrLen(firstNode)
-    if (nodelength = 16)
-        StringReplace, listNodeStr, listNodeStr, 0x, 00, All
-    else if (nodelength = 17)
-        StringReplace, listNodeStr, listNodeStr, 0x, 0, All
-    else if (nodelength = 18)
-        StringReplace, listNodeStr, listNodeStr, 0x, , All
-        
-    return listNodeStr
-}
-
 browseNode() {
-    FileSelectFile, selectedFile, 3, , Select a NodeID text file..., Text Documents (*.txt; *.doc)
+    FileSelectFile, selectedFile, , , Select a NodeID text file..., Text Documents (*.txt; *.doc)
     if (selectedFile = "")
         return
     FileRead, outStr, %selectedFile%
@@ -612,6 +651,42 @@ PlayInCircleIcon() {
     If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
+
+;;;;;;;;;;;;;;;;TOOLBAR CREATE AND FUNCTIONS;;;;;;;;;;;;;;;;
+CreateEditNodeToolbar() {
+    ImageList1 := IL_Create(3)
+    IL_Add(ImageList1, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico")
+    IL_Add(ImageList1, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico")
+    IL_Add(ImageList1, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico")
+    IL_Add(ImageList1, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico")
+
+    Buttons = 
+    (LTrim
+        -
+        Browse File
+        Add New
+        -
+        Save Current Session
+        Auto Generate Node ID
+    )
+    
+    ToolbarCreate("OnEditNodeToolbar", Buttons, ImageList1, "Flat List Tooltips Border", , "x219 y20 w200 h25")
+}
+
+OnEditNodeToolbar(hWnd, Event, Text, Pos, Id) {
+    If (Event != "Click") {
+        Return
+    } Else If (RegExMatch(Text, "Browse")) {
+        IfWinNotExist, Select a NodeID text file...
+            browseNode()
+    } Else If (RegExMatch(Text, "Add")) {
+        MsgBox % Text
+    } Else If (RegExMatch(Text, "Save")) {
+        
+    } Else If (RegExMatch(Text, "Generate")) {
+        Gosub GetAutoGenerate
     }
 }
 
