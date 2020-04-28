@@ -25,6 +25,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
 
@@ -35,7 +36,9 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-f
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
-Global nodesToWritePath := "C:\XDOT\nodesToWrite.txt"
+;Global nodesToWritePath := "C:\XDOT\nodesToWrite.txt"
+Global remotePath := "C:\XDOT"
+Global lotCodeList := []
 
 Global xdotProperties := [{}]  ; Creates an array containing an object.
 xdotProperties[1] := {status: "G", mainPort: 101, breakPort: 11, portName: "PORT1", driveName: "D", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot01"}
@@ -65,24 +68,23 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui +hWndhMainWnd
-Gui Add, GroupBox, xm+205 ym+0 w300 h385 Section, xDot NodeID Editor
-Gui, Add, Edit, xs+5 ys+40 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
+Gui Add, GroupBox, xm+205 ym+0 w300 h420 Section, xDot NodeID Editor
+Gui Add, Text, xs+10 ys+38 w285 h2 +0x10 ;;-----------------------------
+Gui, Add, Edit, xs+5 ys+75 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
 Gui Font, Bold q5, Consolas
-Gui, Add, Edit, xs+40 ys+40 r24 hwndEdit w255 +HScroll veditNode
+Gui, Add, Edit, xs+40 ys+75 r24 hwndEdit w255 +HScroll veditNode
 Gui Font
-
-;Gui Add, GroupBox, xm+205 ym+3 w225 h50 Section, Auto Generate NodeIDs
-;Gui, Add, Edit, xs+7 ys+22 w110 hwndHED1 vfirstNodeID Limit16
-;SetEditCueBanner(HED1, "First nodeIDs")
-;Gui, Add, Edit, xs+122 ys+22 w42 Limit4 +Number hwndHED2 vnodeAmout
-;SetEditCueBanner(HED2, "Amount")
-;Gui, Add, Button, xs+169 ys+21 w50 h22 ggenerateNode, Generate
-
-;Gui Add, GroupBox, xm+205 ym+3 w95 h50 Section, Browse NodeIDs
-;Gui, Add, Button, xs+13 ys+20 w70 gbrowseNode, Browse...
-
+Gui Font, Bold
+Gui Add, Text, xs+10 ys+50 , Select LOT Code:
+Gui Font
+getLotCodeList()
+For each, item in lotCodeList
+    lotCode .= (each == 1 ? "" : "|") . item
+Gui Add, ComboBox, xs+120 ys+45 vlotCodeSelected gCbAutoComplete, %lotCode%
+Gui Add, Button, xs+250 ys+45 h21 gonLotCodeSelected, Load
 Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 1
 Gui Font, Bold, Ms Shell Dlg 2
+
 Gui Add, Button, xs+5 ys+15 w30 h30 vXDot01 gGetXDot, P01
 Gui Add, Button, xs+37 ys+15 w30 h30 vXDot02 gGetXDot, P02
 Gui Add, Button, xs+69 ys+15 w30 h30 vXDot03 gGetXDot, P03
@@ -106,6 +108,7 @@ Gui Add, GroupBox, xm+0 ym+205 w200 h215 Section, EUID Write
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
 
 ;;;Functions to run before main gui is started;;;
+OnMessage(0x100, "lotCodeSelected_enter")
 deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 
 posX := A_ScreenWidth - 600
@@ -157,8 +160,9 @@ Return
 GetXDot:
 isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
 isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
+isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
 
-if (isXdot = 1 || isBadXdot = 1) {
+if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
     Gui, xdot: Cancel
     Gui, xdot: Destroy
@@ -238,7 +242,6 @@ if (isXdot = 1 || isBadXdot = 1) {
 
     xdotGuiEscape:
     xdotGuiClose:
-        WinKill COM%mainPort%
         Gui, xdot: Destroy
     Return
     
@@ -312,6 +315,7 @@ if (isXdot = 1 || isBadXdot = 1) {
         ;Give main button a check mark
         WinWait %mainPort% PASSED
         Gui 1: Default
+        GuiControl, Text, %ctrlVar%,    ;Delete text
         GuiControlGet, hwndVar1, Hwnd , Bad%ctrlVar%
         GuiControlGet, hwndVar2, Hwnd , %ctrlVar%
         GuiButtonIcon(hwndVar1, checkImg, 1, "s24")   ;Display icon
@@ -329,11 +333,22 @@ if (isXdot = 1 || isBadXdot = 1) {
         Return
         
         ToDebugEach:
+            IfNotExist %driveName%:\
+            {
+                msg = Drive (%driveName%:\) does not exist!
+                addTipMsg(msg, "ERROR", 2000)
+                Return
+            }
+            WinKill COM%mainPort%
             Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+            ;msg = Reprogramming on PORT %mainPort%...Please wait!
+            ;title = PORT %mainPort% PROGRAMMING
+            ;addTipMsg(msg, title, 17000)
+            ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
+            ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
         Return
-        
-    Return
 }
+Return
 ;;;;;;User Prompt GUI
 ;;;auGen GUI
 GetAutoGenerate:
@@ -412,6 +427,36 @@ GetAutoGenerate:
         return listNodeStr
     }
 Return
+
+;;;adNew Gui
+GetAddNew:
+    Gui, adNew: Cancel
+    Gui, adNew: Destroy
+    WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
+    
+    Gui, adNew: Default
+    Gui, adNew: +ToolWindow +AlwaysOnTop +hWndhadNewWnd
+    Gui Font, Bold
+    Gui, adNew: Add, Text, x10 y10, Add New From Current Editor
+    Gui, adNew: Add, Text, x10 y50, Add New From A File
+    Gui, Font
+    
+    Gui, adNew: Add, Text, x15 y30, Enter LOT CODE:
+    Gui, adNew: Add, Edit, x105 y27 w75 h20 +Number
+    Gui, adNew: Add, Button, x190 y27 h20, Save
+    
+    Gui, adNew: Add, Button, x15 y70 h20, Browse...
+    Gui, adNew: Add, Text, x75 y73, ...
+    
+    mainY := mainY + 30
+    Gui, adNew: Show, x%mainX% y%mainY%, Add New Node List
+    Return
+    
+    adNewGuiEscape:
+    adNewGuiClose:
+        Gui, adNew: Destroy
+    Return
+Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
@@ -484,11 +529,20 @@ runAll() {
                 
                 if (xStatus = "G") {
                     WinKill COM%mainPort%
+                    ;IfWinExist PROGRAMMING
+                    ;{
+                        ;Loop
+                        ;{
+                            ;Sleep 2000
+                            ;IfWinNotExist PROGRAMMING
+                                ;Break
+                        ;}
+                    ;}
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                     GuiControl, Text, %ctrlVar%,
                     GuiControlGet, hwndVar, Hwnd , %ctrlVar%
-                    GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play.png", 1, "s24")   ;Display icon
+                    GuiButtonIcon(hwndVar, playImg, 1, "s24")   ;Display icon
                     Sleep 1000
                 }
             }
@@ -551,7 +605,9 @@ deleteOldCacheFiles() {
 }
 
 getNodesToWrite() {
-    FileRead, outVar, %nodesToWritePath%
+    FileRead, outVar, %remotePath%\nodesToWrite.txt
+    StringReplace, outVar, outVar, %A_Space%, , All
+    StringReplace, outVar, outVar, %A_Tab%, , All
     GuiControl Text, editNode, %outVar%
 }
 
@@ -579,6 +635,20 @@ SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
 getCmdOut(command) {
     RunWait, PowerShell.exe -ExecutionPolicy Bypass -Command %command% | clip , , Hide
     return Clipboard
+}
+
+onLotCodeSelected() {
+    GuiControlGet outVar, , lotCodeSelected
+    MsgBox % outVar
+}
+
+getLotCodeList() {
+    Loop Files, %remotePath%\Saved-Nodes\*.txt, R ; Recurse into subfolders.
+    {
+        str := A_LoopFileName
+        StringReplace, str, str, .txt, , All
+        lotCodeList[A_Index] := str
+    }
 }
 
 ;;Add an icon to a button with external image file
@@ -654,7 +724,25 @@ PlayInCircleIcon() {
     }
 }
 
-;;;;;;;;;;;;;;;;TOOLBAR CREATE AND FUNCTIONS;;;;;;;;;;;;;;;;
+addTipMsg(text, title, time) {
+    SplashImage, C:\tempImg.gif, FS11, %text%, ,%title%
+    
+    SetTimer, RemoveTipMsg, %time%
+    return
+    
+    RemoveTipMsg:
+    SplashImage, Off
+    return
+}
+
+;;OnMessage Functions
+lotCodeSelected_enter(lparam) {
+    if (lparam = 13 && A_GuiControl = "lotCodeSelected") {
+        MsgBox % "You Enter " A_GuiControl
+    }
+}
+
+;;;;;;;;;;;;;;;;TOOLBAR CREATIVITY AND FUNCTIONS;;;;;;;;;;;;;;;;
 CreateEditNodeToolbar() {
     ImageList1 := IL_Create(3)
     IL_Add(ImageList1, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico")
@@ -682,12 +770,40 @@ OnEditNodeToolbar(hWnd, Event, Text, Pos, Id) {
         IfWinNotExist, Select a NodeID text file...
             browseNode()
     } Else If (RegExMatch(Text, "Add")) {
-        MsgBox % Text
+        Gosub GetAddNew
     } Else If (RegExMatch(Text, "Save")) {
         
     } Else If (RegExMatch(Text, "Generate")) {
         Gosub GetAutoGenerate
     }
+}
+
+CbAutoComplete() {
+	; CB_GETEDITSEL = 0x0140, CB_SETEDITSEL = 0x0142
+	If ((GetKeyState("Delete", "P")) || (GetKeyState("Backspace", "P")))
+		Return
+	GuiControlGet, lHwnd, Hwnd, %A_GuiControl%
+	SendMessage, 0x0140, 0, 0,, ahk_id %lHwnd%
+	MakeShort(ErrorLevel, Start, End)
+	GuiControlGet, CurContent,, %lHwnd%
+	GuiControl, ChooseString, %A_GuiControl%, %CurContent%
+	If (ErrorLevel) {
+		ControlSetText,, %CurContent%, ahk_id %lHwnd%
+		PostMessage, 0x0142, 0, MakeLong(Start, End),, ahk_id %lHwnd%
+		Return
+	}
+	GuiControlGet, CurContent,, %lHwnd%
+	PostMessage, 0x0142, 0, MakeLong(Start, StrLen(CurContent)),, ahk_id %lHwnd%
+}
+
+; Required for: CbAutoComplete()
+MakeLong(LoWord, HiWord) {
+	Return, (HiWord << 16) | (LoWord & 0xffff)
+}
+
+; Required for: CbAutoComplete()
+MakeShort(Long, ByRef LoWord, ByRef HiWord) {
+	LoWord := Long & 0xffff, HiWord := Long >> 16
 }
 
 ;;;;;;;;;;;;;;;;NOT-FOR-USER HOT KEYS;;;;;;;;;;;;;;;;

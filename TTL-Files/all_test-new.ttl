@@ -23,6 +23,7 @@ isL4E1 = -1
 isL4N1 = -1
 isLVW2 = -1
 isLSB3 = -1
+isLDC3 = -1
 
 :CHECK_MTCDT_TYPE
 strcompare param2 '240L'
@@ -63,7 +64,9 @@ if isLVW2=0 goto START
 strcompare param3 'LSB3'
 isLSB3 = result
 if isLSB3=0 goto START
-
+strcompare param3 'LDC3'
+isLDC3 = result
+if isLDC3=0 goto START
 
 :START
 if isLAT1=0 then 
@@ -98,6 +101,10 @@ elseif isLSB3=0 then
 	radioVersion = '23.00.204'
 	telModuleVer = 'LE866A1-JS'
 	fwBuild = '#CFVR: 8'
+elseif isLDC3=0 then
+	radioVersion = '20.00.203'
+	telModuleVer = 'LE910-JN1'
+	fwBuild = '#CFVR: 4'
 endif
 
 wait '$'
@@ -393,14 +400,15 @@ elseif isLAT1=0 then
 	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
 elseif isLVW2=0 then
 	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3'
-elseif isLSB3=0 then
+elseif isLSB3=0 || isLDC3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
-	if result = 0 then
+	if result = 0 && isLSB3=0 then
 	    sendln '#TEMPCFG: -40,-15,55,85'
 		goto temp_setting
 	endif
 endif
 if result=0 goto temp_setting
+:rxdiv_check
 mpause 500
 sendln 'at#rxdiv?'
 if isLat3=0 then
@@ -411,6 +419,12 @@ elseif isLVW2=0 then
  	wait '#rxdiv: 1,1'
 elseif isLSB3=0 then
  	wait '#RXDIV: 1,0'
+elseif isLDC3=0 then
+ 	wait '#RXDIV: 0,1'
+ 	if result=0 then
+ 	    sendln 'at#rxdiv=0'
+ 		goto rxdiv_check
+ 	endif
 else
  	wait '#RXDIV: 1,1'
 endif
@@ -447,12 +461,13 @@ if isLVW2=0 then
 endif
 
 sendln 'at+cgdcont?'
-if isH5=0 then
+if isH5=0 || isLDC3=0 then
     wait 'OK'
     mpause 500
     sendln 'at+cgdcont=1'
     wait 'OK'
-    goto H5_TEST
+    if isH5=0 goto H5_TEST
+    if isLDC3=0 goto LDC3_TEST
 endif
 waitln '+CGDCONT: 1,"IPV4V6",""'
 if result =0 then
@@ -486,12 +501,58 @@ if isLAT3 = 0 goto LAT3_TEST
 if isL4E1 = 0 goto L4E1_TEST
 if isL4N1 = 0 goto L4N1_TEST
 if isLSB3 = 0 goto LSB3_TEST
+if isLDC3 = 0 goto LDC3_TEST
 
 ;;;;;;;;;;;;;;
 :ALL_VERSION
 
 
 ;;;;;;;;;;;;;;
+:LDC3_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910-JN1'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910-JN1' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '20.00.203'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 20.00.203' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '4'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 4' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500
+sendln 'at+cgatt?'
+waitln '+CGATT: 0'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+statusbox 'SMC TEST PASSED' 'PASSED'
+mpause 500
+send 24 ;Exit 'at' command promt
+closesbox
+goto SHORTING_MTCDT
+
 :H5_TEST
 mpause 500
 sendln 'at+gmi'

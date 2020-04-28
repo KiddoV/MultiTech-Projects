@@ -76,7 +76,7 @@ if result=1 then
 	endif
 	sprintf2 msg1 'PORT %s PASSED' xdotMainPort
     statusbox 'XDot already in debug mode!' msg1
-    mpause 300
+    mpause 500
     closesbox
     closett
     end
@@ -118,12 +118,13 @@ if result=0 then
     statusbox 'XDOT Failed to Program!' portNumberFailureMsg
 	testStatus = 'FAILED TO PROGRAM'
 	fail = 0
-	goto WRITE_RESULT_DATA
+	closett
+	end
 endif
 goto CHECK_CURRENT_PROGRAM
 
 :WRITE_RESULT_DATA
-mpause 300
+mpause 500
 sprintf2 msg1 '%s-XDOT RE-PROGRAM COMPLETE' xdotPortName
 sprintf2 msg2 'PORT %s PASSED' xdotMainPort
 statusbox msg1 msg2

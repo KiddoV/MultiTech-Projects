@@ -1,0 +1,71 @@
+;
+;	Author: 		Viet Ho
+;	Description: 	Teraterm Script For Functional Test of XDOTs-ALL Freq.
+;					Cannot Stand-alone run!
+;					Only work with other program that passes PARAMETERS to this macro.
+;
+
+show 0
+timeout = 3
+mpause 1000
+
+strcompare param8 'newTTVersion'
+isTTNewVersion = result
+if isTTNewVersion = 0 then
+    sprintf2 cmdStr '/C=%s' param3
+    connect cmdStr
+endif
+
+:GET_SET_VARS
+firmwareVers = '3.0.2-debug-mbed144'
+xdotMainPort = param3	;101
+xdotBreakPort = param4	;11
+xdotPortName = param5 	;PORT1
+;sprintf2 xdotDriveLoc 'C:\DRIVES\%s' param6
+sprintf2 xdotDriveLoc '%s:\' param6
+strcompare param7 'singleTest'
+isSingleTest = result
+testStatus = ''
+fail = 0
+pingLevel = ''
+rssiLevel = ''
+sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
+
+:RESET
+disconnect
+mpause 1500
+sprintf2 cmd3 '/C=%s' xdotBreakPort
+connect cmd3
+flushrecv
+setbaud 9600
+mpause 1000
+sendbreak
+disconnect
+mpause 500
+sprintf2 cmd1 '/C=%s' xdotMainPort
+connect cmd1
+flushrecv
+setbaud 115200
+mpause 1000
+sendln 'ati'
+wait 'OK'
+if result=0 then
+    fail=fail+1
+    if fail < 3 then
+        goto RESET
+    endif
+    :reset_failed
+    statusbox 'XDOT Failed to Reset!' portNumberFailureMsg
+    mpause 300
+	testStatus = 'FAILED TO RESET'
+	fail = 0
+	closett
+	end
+endif
+
+:DONE
+sprintf2 msg1 '%s-XDOT RESET COMPLETE' xdotPortName
+sprintf2 msg2 'PORT %s PASSED' xdotMainPort
+statusbox msg1 msg2
+mpause 1000
+end

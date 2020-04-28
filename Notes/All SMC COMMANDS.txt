@@ -142,3 +142,21 @@ at#rxdiv? =>	#RXDIV: 1,0
 at#tempcfg=-40,-15,55,85
 at#tempcfg? =>	#TEMPCFG: -40,-15,55,85
 at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","","",0,0
+
+-----LDC3 (70000025L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmi =>	Telit
+at+gmm =>	LE910-JN1
+at+gmr =>	20.00.203
+at#cfvr =>	#CFVR: 4
+at#gpio=1,0,2
+at#sled=2
+at#sledsav
+at+cpin? =>	+CPIN: READY
+at#rxdiv=0	<== Must set to 0
+at#rxdiv? =>	#RXDIV: 0,1
+at+csq =>	OK Only
+at+cgatt? =>	+CGATT: 0
+at#tempcfg? =>	#TEMPCFG: -40,-15,55,85
