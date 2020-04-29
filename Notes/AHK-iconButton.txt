@@ -47,3 +47,28 @@ GuiButtonIcon(Handle, File, Index := 1, Options := "")
 	SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
 	return IL_Add( normal_il, File, Index )
 }
+
+;;Add an icon to a button with system icon
+;netshell.dll --- 94 => X-mark
+;urlmon.dll --- 1 => Check-mark
+;wmploc.dll --- 107 => Play icon
+;Gui, Add, Button, hWndhButton3 x255 y8 w23 h23 gCloseGUI,
+;GuiButtonSysIcon(hButton3, "imageres.dll", 207, 16, 0)
+;GuiButtonSysIcon(hwndVar, "imageres.dll", 207, 24, 25) ;Add 25 to make icon invisible
+GuiButtonSysIcon(Handle, File, Index := 0, Size := 12, Margin := 1, Align := 5)
+{
+    Size -= Margin
+    Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
+    VarSetCapacity( button_il, 20 + Psz, 0 )
+    NumPut( normal_il := DllCall( "ImageList_Create", DW, Size, DW, Size, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )
+    NumPut( Align, button_il, 16 + Psz, DW )
+    SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
+    return IL_Add( normal_il, File, Index )
+}
+
+;Gui, Add, Button, hWndhButton2 x130 y8 w100 h23 gButton02, %A_Space%Button02
+;SetButtonSysIcon(hButton2, "shell32.dll", 22)
+SetButtonSysIcon(hButton, File, Index, Size := 16) {
+    hIcon := LoadPicture(File, "h" . Size . " Icon" . Index, _)
+    SendMessage 0xF7, 1, %hIcon%,, ahk_id %hButton% ; BM_SETIMAGE
+}

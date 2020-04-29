@@ -41,18 +41,18 @@ Global remotePath := "C:\XDOT"
 Global lotCodeList := []
 
 Global xdotProperties := [{}]  ; Creates an array containing an object.
-xdotProperties[1] := {status: "G", mainPort: 101, breakPort: 11, portName: "PORT1", driveName: "D", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot01"}
-xdotProperties[2] := {status: "G", mainPort: 102, breakPort: 12, portName: "PORT2", driveName: "E", ttXPos: 105, ttYPos: 5, ctrlVar: "XDot02"}
-xdotProperties[3] := {status: "G", mainPort: 103, breakPort: 13, portName: "PORT3", driveName: "F", ttXPos: 205, ttYPos: 5, ctrlVar: "XDot03"}
-xdotProperties[4] := {status: "G", mainPort: 104, breakPort: 14, portName: "PORT4", driveName: "G", ttXPos: 305, ttYPos: 5, ctrlVar: "XDot04"}
-xdotProperties[5] := {status: "G", mainPort: 105, breakPort: 15, portName: "PORT5", driveName: "H", ttXPos: 405, ttYPos: 5, ctrlVar: "XDot05"}
-xdotProperties[6] := {status: "G", mainPort: 106, breakPort: 16, portName: "PORT6", driveName: "I", ttXPos: 505, ttYPos: 5, ctrlVar: "XDot06"}
-xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT7", driveName: "J", ttXPos: 5, ttYPos: 105, ctrlVar: "XDot07"}
-xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "K", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot08"}
+xdotProperties[17] := {status: "G", mainPort: 117, breakPort: 17, portName: "PORT17", driveName: "D", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot17"}
+xdotProperties[18] := {status: "G", mainPort: 118, breakPort: 18, portName: "PORT18", driveName: "E", ttXPos: 105, ttYPos: 5, ctrlVar: "XDot18"}
+xdotProperties[19] := {status: "G", mainPort: 119, breakPort: 19, portName: "PORT19", driveName: "F", ttXPos: 205, ttYPos: 5, ctrlVar: "XDot19"}
+xdotProperties[20] := {status: "G", mainPort: 120, breakPort: 20, portName: "PORT20", driveName: "G", ttXPos: 305, ttYPos: 5, ctrlVar: "XDot20"}
+xdotProperties[21] := {status: "G", mainPort: 121, breakPort: 21, portName: "PORT21", driveName: "H", ttXPos: 405, ttYPos: 5, ctrlVar: "XDot21"}
+xdotProperties[22] := {status: "G", mainPort: 122, breakPort: 22, portName: "PORT22", driveName: "I", ttXPos: 505, ttYPos: 5, ctrlVar: "XDot22"}
+xdotProperties[23] := {status: "G", mainPort: 123, breakPort: 23, portName: "PORT23", driveName: "J", ttXPos: 5, ttYPos: 105, ctrlVar: "XDot23"}
+xdotProperties[24] := {status: "G", mainPort: 124, breakPort: 24, portName: "PORT24", driveName: "K", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot24"}
 
 Global totalGoodPort := 8
-Global mainWndTitle := "XDot Controller (PC1)"
-Global startedIndex := 1
+Global mainWndTitle := "XDot Controller (PC3)"
+Global startedIndex := 17
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x-mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check-mark.png"
@@ -83,18 +83,18 @@ For each, item in lotCodeList
     lotCode .= (each == 1 ? "" : "|") . item
 Gui Add, ComboBox, xs+120 ys+45 vlotCodeSelected gCbAutoComplete, %lotCode%
 Gui Add, Button, xs+250 ys+45 h21 gloadNodeFromLot, Load
-Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 1
+Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 3
 Gui Font, Bold, Ms Shell Dlg 2
 
-Gui Add, Button, xs+5 ys+15 w30 h30 vXDot01 gGetXDot, P01
-Gui Add, Button, xs+37 ys+15 w30 h30 vXDot02 gGetXDot, P02
-Gui Add, Button, xs+69 ys+15 w30 h30 vXDot03 gGetXDot, P03
-Gui Add, Button, xs+101 ys+15 w30 h30 vXDot04 gGetXDot, P04
-Gui Add, Button, xs+133 ys+15 w30 h30 vXDot05 gGetXDot, P05
-Gui Add, Button, xs+165 ys+15 w30 h30 vXDot06 gGetXDot, P06
+Gui Add, Button, xs+133 ys+15 w30 h30 vXDot17 gGetXDot, P17
+Gui Add, Button, xs+165 ys+15 w30 h30 vXDot18 gGetXDot, P18
 
-Gui Add, Button, xs+5 ys+50 w30 h30 vXDot07 gGetXDot, P07
-Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot, P08
+Gui Add, Button, xs+5 ys+50 w30 h30 vXDot19 gGetXDot, P19
+Gui Add, Button, xs+37 ys+50 w30 h30 vXDot20 gGetXDot, P20
+Gui Add, Button, xs+69 ys+50 w30 h30 vXDot21 gGetXDot, P21
+Gui Add, Button, xs+101 ys+50 w30 h30 vXDot22 gGetXDot, P22
+Gui Add, Button, xs+133 ys+50 w30 h30 vXDot23 gGetXDot, P23
+Gui Add, Button, xs+165 ys+50 w30 h30 vXDot24 gGetXDot, P24
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
@@ -247,7 +247,8 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     Return
     
     ;;;Functions and Labels for xdot GUI;;;
-    FunctionalTestEach:        Gui 1: Default
+    FunctionalTestEach:
+        Gui 1: Default
         GuiControl, Text, %ctrlVar%,    ;Delete text
         GuiControlGet, hwndVar1, Hwnd , Good%ctrlVar%
         GuiControlGet, hwndVar2, Hwnd , Bad%ctrlVar%
@@ -338,21 +339,21 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         GuiControl, +vBad%ctrlVar%, %ctrlVar%     ;Change var of control
     Return
         
-    ToDebugEach:
-        IfNotExist %driveName%:\
-        {
-            msg = Drive (%driveName%:\) does not exist!
-            addTipMsg(msg, "ERROR", 2000)
-            Return
-        }
-        WinKill COM%mainPort%
-        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-        ;msg = Reprogramming on PORT %mainPort%...Please wait!
-        ;title = PORT %mainPort% PROGRAMMING
-        ;addTipMsg(msg, title, 17000)
-        ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
-        ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-    Return
+        ToDebugEach:
+            IfNotExist %driveName%:\
+            {
+                msg = Drive (%driveName%:\) does not exist!
+                addTipMsg(msg, "ERROR", 2000)
+                Return
+            }
+            WinKill COM%mainPort%
+            Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+            ;msg = Reprogramming on PORT %mainPort%...Please wait!
+            ;title = PORT %mainPort% PROGRAMMING
+            ;addTipMsg(msg, title, 17000)
+            ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
+            ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+        Return
 }
 Return
 ;;;;;;User Prompt GUI
@@ -703,12 +704,6 @@ loadNodeFromLot() {
         StringReplace, outVar, outVar, %A_Space%, , All
         StringReplace, outVar, outVar, %A_Tab%, , All
         GuiControl Text, editNode, %outVar%
-    }
-}
-
-changeXdotBttnIcon(guiControlVar, option) {
-    if (option = "NORMAL") {
-        
     }
 }
 

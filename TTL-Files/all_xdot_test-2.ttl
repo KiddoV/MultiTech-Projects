@@ -1,0 +1,234 @@
+;
+;	Author: 		Viet Ho
+;	Description: 	Teraterm Script For Functional Test of XDOTs-ALL Freq.
+;					Cannot Stand-alone run!
+;					Only work with other program that passes PARAMETERS to this macro.
+;
+
+show 0
+timeout = 3
+mpause 1000
+
+:GET_SET_VARS
+firmwareVers = '3.0.2-debug-mbed144'
+xdotMainPort = param3	;101
+xdotBreakPort = param4	;11
+xdotPortName = param5 	;PORT1
+;sprintf2 xdotDriveLoc 'C:\DRIVES\%s' param6
+sprintf2 xdotDriveLoc '%s:\' param6
+strcompare param7 'singleTest'
+isSingleTest = result
+testStatus = ''
+fail = 0
+connFail = 0
+pingLevel = ''
+rssiLevel = ''
+sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
+
+:CONNECT
+strcompare param8 'newTTVersion'
+isTTNewVersion = result
+if isTTNewVersion = 0 then
+    sprintf2 cmdStr '/C=%s' param3
+    connect cmdStr
+    if result=1 goto connection_failed
+endif
+
+:CHECK_CONNECTION
+mpause 300
+sendln 'at'
+waitln 'OK'
+if result=1 then
+    if isSingleTest = 0 then
+        statusbox 'CONNECTED SUCCESSFULLY' 'PASSED1'
+    	mpause 300
+		closesbox
+	endif 
+endif
+if result=0 then
+    connFail=connFail+1
+    if connFail < 2 then
+        goto REPROGRAM
+    endif
+    :connection_failed
+    closett
+    sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
+    mpause 300
+    statusbox msg1 portNumberFailureMsg
+    testStatus = 'CONNECTION FAILED'
+    connFail=0
+    goto WRITE_RESULT_DATA
+endif
+
+:CHECK_CURRENT_PROGRAM
+mpause 300
+sendln 'ati'
+waitln firmwareVers 'OK'
+if result=1 then
+    if isSingleTest = 0 then
+        statusbox 'PROGRAM PASSED' 'PASSED2'
+    	mpause 300
+		closesbox
+	endif 
+    goto START
+endif
+if result>1 goto REPROGRAM
+if result=0 goto program_failed
+
+:REPROGRAM
+sprintf2 cmd2 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
+exec cmd2
+statusbox 'Transfering bin file...' 'PROGRAMMING'
+mpause 18000
+closesbox
+disconnect
+mpause 1500
+sprintf2 cmd3 '/C=%s' xdotBreakPort
+connect cmd3
+flushrecv
+setbaud 9600
+mpause 3000
+sendbreak
+disconnect
+mpause 500
+sprintf2 cmd1 '/C=%s' xdotMainPort
+connect cmd1
+flushrecv
+setbaud 115200
+mpause 1000
+sendln 'at'
+wait 'OK'
+if result=0 then
+    fail=fail+1
+    if fail < 2 then
+        goto REPROGRAM
+    endif
+    :program_failed
+    statusbox 'XDOT Failed to Program!' portNumberFailureMsg
+	testStatus = 'FAILED TO PROGRAM'
+	fail = 0
+	goto WRITE_RESULT_DATA
+endif
+goto CHECK_CONNECTION
+
+:START
+:join_test
+sprintf2 cmd4 'at+ni=1,XDOT2-%s-NETWORK' xdotPortName
+sendln cmd4
+wait 'OK'
+sprintf2 cmd5 'at+nk=1,XDOT2-%s-PASSPHRASE' xdotPortName
+sendln cmd5
+wait 'OK'
+mpause 500
+sendln 'at+fsb=8'
+wait 'OK'
+mpause 500
+sendln 'at+TXP=2'
+wait 'OK'
+mpause 500
+sendln 'at+TXDR=DR3'
+wait 'OK'
+
+mpause 1000
+sendln 'at+join'
+wait 'Successfully joined network'
+if result=0 then
+    fail=fail+1
+    if fail < 3 then
+        sendln 'at&f'
+        wait 'OK'
+        sendln 'at&w'
+        wait 'OK'
+        sendln 'atz'
+        wait 'OK'
+        goto join_test
+    endif
+    statusbox 'XDOT JOIN TEST FAILURE' portNumberFailureMsg
+	testStatus = 'FAILED TO JOIN'
+    fail = 0
+    goto WRITE_RESULT_DATA
+endif
+if fail = 0 && isSingleTest = 0 then
+    statusbox 'JOIN PASSED' 'PASSED3'
+	mpause 300
+	closesbox
+endif 
+
+:ping_test
+flushrecv
+for i 1 3
+	sendln 'at+ping'
+	waitrecv '-' 4 1
+	pingLevel = inputstr
+	str2int csq inputstr
+	if csq=0 then
+	    fail=fail+1
+		if fail < 3 then
+		    goto join_test
+		endif
+		statusbox 'PING TEST FAILURE' portNumberFailureMsg
+		testStatus = 'PING RESPONSE FAILURE'
+		goto WRITE_RESULT_DATA
+	elseif csq < -45 then	;should be -45
+		fail=fail+1
+		if fail < 3 then
+		    goto join_test
+		endif
+		statusbox 'PING LEVEL FAILURE' portNumberFailureMsg
+		testStatus = 'PING LEVEL FAILURE'
+		fail = 0
+		goto WRITE_RESULT_DATA
+	endif
+next
+if fail = 0 && isSingleTest = 0 then
+    statusbox 'PING PASSED' 'PASSED4'
+	mpause 300
+	closesbox
+endif 
+
+:rssi_test
+flushrecv
+sendln 'at+rssi'
+waitrecv '-' 4 1
+rssiLevel = inputstr
+str2int csq inputstr
+if csq < -50 then	;should be -50
+    fail=fail+1
+    if fail < 3 then
+        goto START
+    endif
+    statusbox 'RSSI TEST FAILURE' portNumberFailureMsg
+    testStatus = 'RSSI LEVEL FAILURE'
+    fail = 0
+    goto WRITE_RESULT_DATA
+endif
+if fail = 0 && isSingleTest = 0 then
+    statusbox 'RSSI PASSED' 'PASSED5'
+	mpause 300
+	closesbox
+endif 
+
+mpause 500
+sendln 'at+snr'
+wait 'OK'
+mpause 500
+sprintf2 msg1 '%s-XDOT TEST COMPLETE' xdotPortName
+sprintf2 msg2 'PORT %s PASSED' xdotMainPort
+statusbox msg1 msg2
+testStatus = 'ALL PASSED'
+
+:WRITE_RESULT_DATA
+mpause 500
+
+foldersearch 'C:\V-Projects\XDot-Controller\TEMP-DATA'
+if result=0 foldercreate 'C:\V-Projects\XDot-Controller\TEMP-DATA'
+sprintf2 cacheFileLoc 'C:\V-Projects\XDot-Controller\TEMP-DATA\%s.dat' xdotMainPort
+filesearch cacheFileLoc
+if result = 0 filecreate fhandle cacheFileLoc
+
+fileopen fhandle cacheFileLoc 0	;0 for overwrite
+sprintf2 writeStr '%s,,%s' xdotMainPort testStatus
+filewrite fhandle writeStr
+fileclose fhandle
+
+end

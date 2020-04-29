@@ -9,14 +9,6 @@ show 0
 timeout = 3
 mpause 1000
 
-strcompare param8 'newTTVersion'
-isTTNewVersion = result
-if isTTNewVersion = 0 then
-    sprintf2 cmdStr '/C=%s' param3
-    connect cmdStr
-endif
-
-
 :GET_SET_VARS
 firmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
@@ -28,9 +20,19 @@ strcompare param7 'singleTest'
 isSingleTest = result
 testStatus = ''
 fail = 0
+connFail = 0
 pingLevel = ''
 rssiLevel = ''
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
+
+:CONNECT
+strcompare param8 'newTTVersion'
+isTTNewVersion = result
+if isTTNewVersion = 0 then
+    sprintf2 cmdStr '/C=%s' param3
+    connect cmdStr
+    if result=1 goto connection_failed
+endif
 
 :CHECK_CONNECTION
 mpause 300
@@ -44,10 +46,16 @@ if result=1 then
 	endif 
 endif
 if result=0 then
+    connFail=connFail+1
+    if connFail < 2 then
+        goto REPROGRAM
+    endif
+	:connection_failed
     closett
     sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
     statusbox msg1 portNumberFailureMsg
     testStatus = 'CONNECTION FAILED'
+    connFail=0
     goto WRITE_RESULT_DATA
     end
 endif
@@ -92,7 +100,7 @@ sendln 'at'
 wait 'OK'
 if result=0 then
     fail=fail+1
-    if fail < 3 then
+    if fail < 2 then
         goto REPROGRAM
     endif
     :program_failed
@@ -101,7 +109,7 @@ if result=0 then
 	fail = 0
 	goto WRITE_RESULT_DATA
 endif
-goto CHECK_CURRENT_PROGRAM
+goto CHECK_CONNECTION
 
 :START
 :join_test
