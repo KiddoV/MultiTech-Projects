@@ -54,6 +54,7 @@ xdotProperties[7] := {status: "G", mainPort: 107, breakPort: 17, portName: "PORT
 xdotProperties[8] := {status: "G", mainPort: 108, breakPort: 18, portName: "PORT8", driveName: "K", ttXPos: 105, ttYPos: 105, ctrlVar: "XDot08"}
 
 Global totalGoodPort := 8
+Global totalPort := 8
 Global mainWndTitle := "XDot Controller (PC1)"
 Global startedIndex := 1
 
@@ -75,6 +76,7 @@ SetBatchLines -1
 
 Gui +hWndhMainWnd
 Gui Add, GroupBox, xm+205 ym+0 w300 h420 Section, xDot NodeID Editor
+;;;;;;Toolbar here
 Gui Add, Text, xs+10 ys+38 w285 h2 +0x10 ;;-----------------------------
 Gui, Add, Edit, xs+5 ys+75 w35 r25.3 -VScroll -HScroll -Border Disabled Right vlineNo
 Gui Font, Bold q5, Consolas
@@ -110,6 +112,22 @@ Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
 Gui Add, GroupBox, xm+0 ym+205 w200 h215 Section, EUID Write
 
+index := startedIndex
+xVarStarted := 5
+yVarStarted := 20
+Loop, 8
+{
+    mainPort := xdotProperties[index].mainPort
+    Gui Font, Bold,
+    Gui Add, Text, xs+5 ys+%yVarStarted%, P%mainPort%:
+    Gui Font
+    Gui Add, Edit, xs+45 ys+%yVarStarted% w150 h16 +ReadOnly vnodeToWrite%index%,
+    
+    index++
+    yVarStarted += 20
+}
+Gui Add, Button, xs+73 ys+181 w55 h28 gwriteAll, START
+
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
 
@@ -122,15 +140,17 @@ Gui, Show, x%posX% y150, %mainWndTitle%
 
 ;;;Functions to run after main gui is started;;;
 editnodeToolbar := CreateEditNodeToolbar()
-getNodesToWrite()
+;getNodesToWrite()
+
 GuiControlGet, editNode, Pos, editNode
 IfNotExist C:\teraterm\ttermpro.exe
     MsgBox, 16, WARNING, This program only work with a secondary program.`nPlease install Teraterm to this location: C:\teraterm\
-
-SetTimer, timer, 1
+#Persistent
+SetTimer, DrawLineNum, 1
+SetTimer, CheckFileChange, 20
 return
 
-timer:
+DrawLineNum:
 pos := DllCall("GetScrollPos", "UInt", Edit, "Int", 1)
 ifEqual, pos, % posPrev, return                       ;if nothing new
 posPrev := pos
@@ -149,6 +169,14 @@ loop, 24
 
 GuiControl,, lineNo, % lines
 }
+
+CheckFileChange:
+Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
+if(newFileContent != lastFileContent) {
+    lastFileContent := newFileContent
+    getNodesToWrite()
+}
+return
 
 GuiClose:
     MsgBox 36, , Are you sure you want to quit?
@@ -455,9 +483,10 @@ Return
     ExitApp
 ^t::
     runAll()
+#IfWinActive, PC1
 ^s::
     saveNodesToWrite()
-;;;;;;;;;;;;;;;;;;;;;;;;
+;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 runAll() {
@@ -465,7 +494,7 @@ runAll() {
     GuiControlGet, isRunReprogChecked, , reproGPortRadio
     if (isRunTestChecked = 1) {
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-        MsgBox 0x81, Run, Begin funtional tests on all %totalGoodPort% ports?
+        MsgBox 0x81, RUN FUNCTIONAL TEST, Begin FUNCTIONAL TESTS on all %totalGoodPort% ports?
         OnMessage(0x44, "") ;Clear icon
         index := startedIndex
         IfMsgBox OK
@@ -548,8 +577,30 @@ runAll() {
     
 }
 
-getRecords() {
-    MsgBox Not yet implemented!
+writeAll() {
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, Start Writing, Begin EUID WRITE on all %totalGoodPort% ports?
+    OnMessage(0x44, "") ;Clear icon
+    index := startedIndex
+    IfMsgBox OK
+    {
+        Loop, %totalPort%
+        {
+            xStatus := xdotProperties[index].status
+            node := readNodeLine(index)
+            GuiControl Text, nodeToWrite%index%,    ;Empty texts
+            
+            if (xStatus = "G") {
+                GuiControl Text, nodeToWrite%index%, %node%
+                writeNodeLine(index)
+            }
+            
+            index++
+            Sleep 2000
+        }
+    }
+    IfMsgBox Cancel
+        return
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -634,15 +685,33 @@ getNodesToWrite() {
 }
 
 saveNodesToWrite() {
+    GuiControlGet outVar, , editNode    ;get new text
+    fileLoc = %remotePath%\nodesToWrite.txt
+    file := FileOpen(fileLoc, "w")      ;delete all text
+    file.close()
+    FileAppend, %outVar%, %fileLoc%     ;write new text to file
+}
+
+readNodeLine(lineNum) {
     GuiControlGet outVar, , editNode
-    fileLoc = %remotePath%\nodesToWrite.txt 
-    file := FileOpen(fileLoc, "w")
-    file.Write(outVar)
-    file.Close()
+    Loop, Parse, outVar, `n
+    {
+        if (A_Index = lineNum)
+            return A_LoopField
+    }
+}
+
+writeNodeLine(lineNum, text := "") {
+    GuiControlGet outVar, , editNode
+    textToReplace := readNodeLine(lineNum)
+    outVar := StrReplace(outVar, textToReplace, text)
+    
+    GuiControl Text, editNode, %outVar%
 }
 
 radioToggle() {
     resetXdotBttns()
+    deleteOldCacheFiles()
 }
 
 browseNode() {
@@ -655,16 +724,6 @@ browseNode() {
     ;xdotNodeArray := StrSplit(outStr, "`n", "`t", MaxParts := 25)
     ;MsgBox % xdotNodeArray.Length()
     ;MsgBox %  xdotNodeArray[24]
-}
-
-SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
-   Static EM_SETCUEBANNER := (0x1500 + 1)
-   Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
-}
-
-getCmdOut(command) {
-    RunWait, PowerShell.exe -ExecutionPolicy Bypass -Command %command% | clip , , Hide
-    return Clipboard
 }
 
 getLotCodeList() {
@@ -728,7 +787,7 @@ changeXdotBttnIcon(guiControlVar, option, mode := "") {
         GuiControl, +vPlay%origCtrlVar%, %guiControlVar%            ;Change var of control
     }
 }
-
+;=======================================================================================;
 ;;Add an icon to a button with external image file
 ;;;GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
 ;;;GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
@@ -786,6 +845,16 @@ addTipMsg(text, title, time) {
     RemoveTipMsg:
     SplashImage, Off
     return
+}
+
+SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
+   Static EM_SETCUEBANNER := (0x1500 + 1)
+   Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
+}
+
+getCmdOut(command) {
+    RunWait, PowerShell.exe -ExecutionPolicy Bypass -Command %command% | clip , , Hide
+    return Clipboard
 }
 
 ;;OnMessage Functions
@@ -861,6 +930,7 @@ MakeShort(Long, ByRef LoWord, ByRef HiWord) {
 
 ;;;;;;;;;;;;;;;;NOT-FOR-USER HOT KEYS;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#IfWinActive
 #^!+0::
     index := startedIndex
     Loop, 8
