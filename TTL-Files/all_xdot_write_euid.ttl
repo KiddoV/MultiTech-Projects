@@ -1,0 +1,35 @@
+;
+;	Author: 		Viet Ho
+;	Description: 	Teraterm Script For EUID Write of XDOTs-ALL Freq.
+;					Cannot Stand-alone run!
+;					Only work with other program that passes PARAMETERS to this macro.
+;
+
+show 0
+timeout = 3
+mpause 1000
+
+:GET_SET_VARS
+firmwareVers = '3.0.2-debug-mbed144'
+xdotMainPort = param3	;101
+xdotBreakPort = param4	;11
+xdotPortName = param5 	;PORT1
+;sprintf2 xdotDriveLoc 'C:\DRIVES\%s' param6
+sprintf2 xdotDriveLoc '%s:\' param6
+strcompare param7 'singleTest'
+isSingleTest = result
+testStatus = ''
+fail = 0
+connFail = 0
+pingLevel = ''
+rssiLevel = ''
+sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
+
+:CONNECT
+strcompare param8 'newTTVersion'
+isTTNewVersion = result
+if isTTNewVersion = 0 then
+    sprintf2 cmdStr '/C=%s' param3
+    connect cmdStr
+    if result=1 goto connection_failed
+endif

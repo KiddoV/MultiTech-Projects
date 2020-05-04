@@ -27,7 +27,8 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\fol
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test-2.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test-2.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid-2.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
@@ -57,6 +58,7 @@ Global totalGoodPort := 8
 Global totalPort := 8
 Global mainWndTitle := "XDot Controller (PC2)"
 Global startedIndex := 9
+Global allFregs := ["AS923", "AU915", "EU868", "US915"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
@@ -110,11 +112,14 @@ Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run te
 Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
-Gui Add, GroupBox, xm+0 ym+205 w200 h215 Section, EUID Write
-
+Gui Add, GroupBox, xm+0 ym+205 w200 h245 Section, EUID Write
+Gui Add, Text, xs+10 ys+20, Select Frequency:
+For each, item in allFregs
+    freq .= (each == 1 ? "" : "|") . item
+Gui Add, DropDownList, xs+110 ys+17 w80 vchosenFreq, %freq%
 index := startedIndex
 xVarStarted := 5
-yVarStarted := 20
+yVarStarted := 50
 Loop, 8
 {
     mainPort := xdotProperties[index].mainPort
@@ -126,7 +131,7 @@ Loop, 8
     index++
     yVarStarted += 20
 }
-Gui Add, Button, xs+73 ys+181 w55 h28 gwriteAll, START
+Gui Add, Button, xs+73 ys+211 w55 h28 gwriteAll, START
 
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
@@ -217,6 +222,7 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     Gui xdot: Add, GroupBox, xm+0 ym+0 w200 h70 Section, XDot-%num% Connecting Infomation
     Gui Font, Bold
     Gui xdot: Add, Text, xs+8 ys+20, • COM PORT: %mainPort%
+    Gui xdot: Add, Link, xs+145 ys+20 gConnectMainPort, <a href="#">Connect</a>
     Gui xdot: Add, Text, xs+8 ys+35, • BREAK PORT: %breakPort%
     Gui xdot: Add, Text, xs+8 ys+50, • DRIVE NAME: %driveName%
     Gui Font
@@ -284,8 +290,8 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
         
         WinKill COM%mainPort%
-        ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test-2.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
-        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test-2.ttl dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
+        ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
+        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
 
         ;;;Track processes
         Gui xdot: Default
@@ -363,6 +369,12 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         ;addTipMsg(msg, title, 17000)
         ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
         ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+    Return
+    
+    ConnectMainPort:
+        IfWinNotExist COM%mainPort%
+            Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /C=%mainPort%, , Hide
+        WinActivate COM%mainPort%
     Return
 }
 Return
@@ -517,11 +529,11 @@ runAll() {
                 
                 if (xStatus = "G") {
                     WinKill COM%mainPort%
-                    ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test-2.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
+                    ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
                     IfWinExist PROGRAMMING
                         Sleep 8000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
-                    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test-2.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+                    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                     Sleep 3000
                 }
@@ -555,17 +567,11 @@ runAll() {
                 index++
                 
                 if (xStatus = "G") {
+                    
                     WinKill COM%mainPort%
-                    ;IfWinExist PROGRAMMING
-                    ;{
-                        ;Loop
-                        ;{
-                            ;Sleep 2000
-                            ;IfWinNotExist PROGRAMMING
-                                ;Break
-                        ;}
-                    ;}
                     changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
+                    IfWinExist PROGRAMMING
+                        Sleep 8000
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                     Sleep 1000
@@ -579,33 +585,42 @@ runAll() {
 }
 
 writeAll() {
+    GuiControlGet, chosenFreq   ;Get value from DropDownList
+    if (chosenFreq = "") {
+        MsgBox 16, ,Please select a FREQUENCY!
+        return
+    }
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, Start Writing, Begin EUID WRITE on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
     index := startedIndex
     IfMsgBox OK
     {
+        resetXdotBttns()
+        deleteOldCacheFiles()
+        resetNodesToWrite()
         Loop, %totalPort%
         {
+            ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
+            mainPort := xdotProperties[index].mainPort
+            
             node := readNodeLine(index)
             GuiControl Text, nodeToWrite%index%,    ;Empty texts
             
             if (xStatus = "G") {
+                WinKill COM%mainPort%
+                changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
                 GuiControl Text, nodeToWrite%index%, %node%
-                writeNodeLine(index)
+                replaceNodeLine(index)
             }
-            
+            saveNodesToWrite()
             index++
-            ;Sleep 2000
+            Sleep 2000
         }
     }
     IfMsgBox Cancel
         return
-}
-
-getRecords() {
-    MsgBox Not yet implemented!
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -674,6 +689,16 @@ resetXdotBttns() {
     }
 }
 
+resetNodesToWrite() {
+    Gui, 1: Default
+    index := startedIndex
+    Loop, %totalPort%
+    {
+        GuiControl Text, nodeToWrite%index%,    ;Delete text
+        index++
+    }
+}
+
 deleteOldCacheFiles() {
     Loop, 24
     {
@@ -706,7 +731,7 @@ readNodeLine(lineNum) {
     }
 }
 
-writeNodeLine(lineNum, text := "") {
+replaceNodeLine(lineNum, text := "") {
     GuiControlGet outVar, , editNode
     textToReplace := readNodeLine(lineNum)
     outVar := StrReplace(outVar, textToReplace, text)
@@ -935,6 +960,7 @@ MakeShort(Long, ByRef LoWord, ByRef HiWord) {
 
 ;;;;;;;;;;;;;;;;NOT-FOR-USER HOT KEYS;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+#IfWinActive
 #^!+0::
     index := startedIndex
     Loop, 8
