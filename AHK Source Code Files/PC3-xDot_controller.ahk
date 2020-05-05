@@ -124,7 +124,7 @@ Loop, 8
 {
     mainPort := xdotProperties[index].mainPort
     Gui Font, Bold,
-    Gui Add, Text, xs+5 ys+%yVarStarted%, P%mainPort%:
+    Gui Add, Text, xs+5 ys+%yVarStarted% vportLabel%index%, P%mainPort%:
     Gui Font
     Gui Add, Edit, xs+45 ys+%yVarStarted% w150 h16 +ReadOnly vnodeToWrite%index%,
     
@@ -586,6 +586,7 @@ runAll() {
 
 writeAll() {
     GuiControlGet, chosenFreq   ;Get value from DropDownList
+    saveNodesToWrite()
     if (chosenFreq = "") {
         MsgBox 16, ,Please select a FREQUENCY!
         return
@@ -593,30 +594,40 @@ writeAll() {
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, Start Writing, Begin EUID WRITE on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
-    index := startedIndex
     IfMsgBox OK
     {
         resetXdotBttns()
         deleteOldCacheFiles()
         resetNodesToWrite()
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            node := readNodeLine(index)
+            GuiControl Text, nodeToWrite%index%, %node%
+            replaceNodeLine(index, "----")
+            index++
+        }
+        saveNodesToWrite()
+        
+        ;Start writing
+        Sleep 500
+        index := startedIndex
         Loop, %totalPort%
         {
             ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
             mainPort := xdotProperties[index].mainPort
             
-            node := readNodeLine(index)
-            GuiControl Text, nodeToWrite%index%,    ;Empty texts
-            
             if (xStatus = "G") {
                 WinKill COM%mainPort%
                 changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
-                GuiControl Text, nodeToWrite%index%, %node%
-                replaceNodeLine(index)
+                Gui, Font, c0c63ed Bold
+                GuiControl, Font, portLabel%index%
+                GuiControl, Font, nodeToWrite%index%
+                GuiControlGet, node, , nodeToWrite%index%
+                Sleep 2500
             }
-            saveNodesToWrite()
             index++
-            Sleep 2000
         }
     }
     IfMsgBox Cancel
@@ -695,6 +706,10 @@ resetNodesToWrite() {
     Loop, %totalPort%
     {
         GuiControl Text, nodeToWrite%index%,    ;Delete text
+        Gui, Font, Bold
+        GuiControl, Font, portLabel%index%
+        Gui, Font,
+        GuiControl, Font, nodeToWrite%index%
         index++
     }
 }
@@ -716,9 +731,12 @@ getNodesToWrite() {
 
 saveNodesToWrite() {
     GuiControlGet outVar, , editNode    ;get new text
+    if (outVar = "") {
+        MsgBox Node is Empty. Can't Save!
+    }
     fileLoc = %remotePath%\nodesToWrite.txt
     file := FileOpen(fileLoc, "w")      ;delete all text
-    file.close()
+    file.Close()
     FileAppend, %outVar%, %fileLoc%     ;write new text to file
 }
 
@@ -734,9 +752,9 @@ readNodeLine(lineNum) {
 replaceNodeLine(lineNum, text := "") {
     GuiControlGet outVar, , editNode
     textToReplace := readNodeLine(lineNum)
-    outVar := StrReplace(outVar, textToReplace, text)
+    newVar := StrReplace(outVar, textToReplace, text, , 1)
     
-    GuiControl Text, editNode, %outVar%
+    GuiControl Text, editNode, %newVar%
 }
 
 radioToggle() {
