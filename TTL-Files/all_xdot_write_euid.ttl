@@ -6,30 +6,260 @@
 ;
 
 show 0
-timeout = 3
+timeout = 5
 mpause 1000
 
 :GET_SET_VARS
-firmwareVers = '3.0.2-debug-mbed144'
+firmwareVers = 'Firmware : 3.2.1-mbed51101'
+debugFirmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
-xdotPortName = param5 	;PORT1
-;sprintf2 xdotDriveLoc 'C:\DRIVES\%s' param6
-sprintf2 xdotDriveLoc '%s:\' param6
-strcompare param7 'singleTest'
-isSingleTest = result
-testStatus = ''
+sprintf2 xdotDriveLoc '%s:\' param5
+strcompare param6 'singleWrite'
+isSingleWrite = result
+freq = param7
+deadNode = param8
+writeStatus = ''
 fail = 0
 connFail = 0
-pingLevel = ''
-rssiLevel = ''
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
+sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
+binFileLoc = ''
+
+strcompare freq 'AS923'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin'
+strcompare freq 'AS923-JAPAN'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin'
+strcompare freq 'AU915'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin'
+strcompare freq 'EU868'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin'
+strcompare freq 'IN865'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin'
+strcompare freq 'KR920'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin'
+strcompare freq 'RU864'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin'
+strcompare freq 'US915'
+if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin'
 
 :CONNECT
-strcompare param8 'newTTVersion'
+strcompare param9 'newTTVersion'
 isTTNewVersion = result
 if isTTNewVersion = 0 then
     sprintf2 cmdStr '/C=%s' param3
     connect cmdStr
     if result=1 goto connection_failed
 endif
+
+:CHECK_CONNECTION
+mpause 500
+sendln 'at'
+waitln 'OK'
+if result=1 then
+    if isSingleWrite = 0 then
+        statusbox 'CONNECTED SUCCESSFULLY' 'PASSED1'
+    	mpause 300
+		closesbox
+	endif 
+endif
+if result=0 then
+	:connection_failed
+    closett
+    sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
+    statusbox msg1 portNumberFailureMsg
+    writeStatus = 'CONNECTION FAILED'
+    connFail=0
+    goto RESULT_LOGGING
+    end
+endif
+
+:CHECK_CURRENT_PROGRAM
+sendln 'ati'
+wait debugFirmwareVers 'OK'
+if result>1 then
+    yesnobox 'NOT IN DEBUG MODE!\nDO YOU WANT TO RE-PROGRAM TO DEBUG?' portNumberTitleMsg 1
+    if result=0 end
+    if result=1 goto REPROGRAM_TO_DEBUG
+elseif result=1 then
+	goto BEGIN_WRITE_NODE
+endif
+
+:REPROGRAM_TO_DEBUG
+sprintf2 cmd 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
+exec cmd
+statusbox 'Transfering bin file...' 'PROGRAMMING'
+mpause 16500
+closesbox
+:send_break_debug
+disconnect
+mpause 500
+sprintf2 cmd1 '/C=%s' xdotBreakPort
+connect cmd1
+flushrecv
+setbaud 9600
+mpause 3000
+sendbreak
+disconnect
+mpause 500
+sprintf2 cmd2 '/C=%s' xdotMainPort
+connect cmd2
+flushrecv
+setbaud 115200
+mpause 1000
+sendln 'at'
+wait 'OK'
+mpause 500
+sendln 'at&f'
+wait 'OK'
+mpause 500
+sendln 'at&w'
+wait 'OK'
+goto CHECK_CURRENT_PROGRAM
+
+:BEGIN_WRITE_NODE
+statusbox deadNode portNumberTitleMsg
+mpause 500
+sprintf2 cmd 'at+di=%s' deadNode
+sendln cmd
+wait 'OK'
+mpause 500
+sprintf2 cmd 'at+dfreq=%s' freq
+sendln cmd
+wait 'OK'
+mpause 500
+sendln 'at&wp'
+wait "OK"
+mpause 500
+sendln 'atz'
+wait "OK"
+if isSingleWrite = 0 then
+     statusbox 'WRITE NODE SUCCESSFULLY' 'PASSED2'
+     mpause 300
+	 closesbox
+endif 
+
+:REPROGRAM
+sprintf2 cmd 'cmd /c copy %s %s' binFileLoc xdotDriveLoc
+exec cmd
+statusbox 'Transfering bin file...' 'PROGRAMMING'
+mpause 16500
+closesbox
+:send_break
+disconnect
+mpause 500
+sprintf2 cmd1 '/C=%s' xdotBreakPort
+connect cmd1
+flushrecv
+setbaud 9600
+mpause 3000
+sendbreak
+disconnect
+mpause 500
+sprintf2 cmd2 '/C=%s' xdotMainPort
+connect cmd2
+flushrecv
+setbaud 115200
+mpause 1000
+sendln 'at'
+wait 'OK'
+mpause 500
+sendln 'at&f'
+wait 'OK'
+mpause 500
+sendln 'at&w'
+wait 'OK'
+flushrecv
+:recheck_program
+timeout = 3
+mpause 500
+sendln 'ati'
+wait firmwareVers
+if result=1 then
+    if isSingleWrite = 0 then
+        statusbox 'RE-PROGRAM PASSED' 'PASSED3'
+    	mpause 300
+		closesbox
+	endif 
+endif
+if result=0 then
+    fail=fail+1
+    if fail < 2 then
+      goto REPROGRAM
+    endif
+	:reprogram_failed
+    statusbox 'XDOT Failed to Program!' portNumberFailureMsg
+	writeStatus = 'FAILED TO RE-PROGRAM'
+	fail = 0
+	mpause 300
+	goto RESULT_LOGGING
+endif
+
+:recheck_write_input
+flushrecv
+mpause 500
+sendln 'at+freq'
+waitregex '[A-Z]+([0-9]{3})'
+outFreq = inputstr
+mpause 500
+sendln 'at+freq'
+wait freq
+if result=0 then
+    statusbox 'XDOT WRONG FREQUENCY' portNumberFailureMsg
+    writeStatus = 'WRONG FREQUENCY'
+    mpause 300
+	goto RESULT_LOGGING
+endif
+mpause 500
+sendln 'at+dfreq'
+waitregex '[A-Z]+([0-9]{3})'
+outDFreq = inputstr
+mpause 500
+sendln 'at+dfreq'
+wait freq
+if result=0 then
+    statusbox 'XDOT WRONG DEFAULT FREQUENCY' portNumberFailureMsg
+    writeStatus = 'WRONG DEFAULT FREQUENCY'
+    mpause 300
+	goto RESULT_LOGGING
+endif
+mpause 500
+sendln 'at+di?'
+waitregex '([0-9A-F]{2}[:-]){7}([0-9A-F]{2})' '00-00-00-00-00-00-00-00'
+outDeadNode = inputstr
+if result=1 then
+    strcompare outDeadNode deadNode
+    if result <> 0 then
+        statusbox 'INVALID EUI -- DOES NOT MATCH INPUT EUID' portNumberFailureMsg
+		writeStatus = 'EUID INVALID - NOT MATCH'
+		mpause 300
+		goto RESULT_LOGGING
+	endif
+endif
+if result=2 then
+    statusbox 'INVALID EUI -- ALL ZERO' portNumberFailureMsg
+	writeStatus = 'EUID INVALID - ALL ZERO'
+	mpause 300
+	goto RESULT_LOGGING
+endif
+
+:DONE
+mpause 500
+sprintf2 msg1 '%s EUID WRITE COMPLETE' portNumberTitleMsg
+sprintf2 msg2 'PORT %s PASSED' xdotMainPort
+statusbox msg1 msg2
+writeStatus = 'PASSED'
+
+:RESULT_LOGGING
+date = ''
+time = ''
+mpause 500
+getdate date "%Y\%m\%d"
+getdate time "%H:%M:%S"
+sprintf2 logStr 'Date: %s, Time: %s, Dead Node: %s, EUID Read: %s, Frequency: %s, Default-Frequency: %s, COM PORT: %s, Break PORT: %s, STATUS: %s' date time deadNode outDeadNode freq outDFreq xdotMainPort xdotBreakPort writeStatus
+sprintf2 logStr 'Date: %s, Time: %s, COM PORT: %s, STATUS: %s, Dead Node: %s, EUID Read: %s, Frequency: %s, Default-Frequency: %s, Break PORT: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
+fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
+filewrite fhandle #13#10
+filewrite fhandle logStr
+fileclose fhandle
+end

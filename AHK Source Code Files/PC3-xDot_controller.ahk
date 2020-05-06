@@ -28,7 +28,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\sav
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid-2.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
@@ -38,6 +38,14 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code 
 , 1
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 ;Global nodesToWritePath := "Z:\XDOT\nodesToWrite.txt"
@@ -58,7 +66,7 @@ Global totalGoodPort := 8
 Global totalPort := 8
 Global mainWndTitle := "XDot Controller (PC3)"
 Global startedIndex := 17
-Global allFregs := ["AS923", "AU915", "EU868", "US915"]
+Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
@@ -507,14 +515,14 @@ runAll() {
     GuiControlGet, isRunReprogChecked, , reproGPortRadio
     if (isRunTestChecked = 1) {
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-        MsgBox 0x81, RUN FUNCTIONAL TEST, Begin funtional tests on all %totalGoodPort% ports?
+        MsgBox 0x81, RUN FUNCTIONAL TEST, Begin FUNCTIONAL TESTS on all %totalGoodPort% ports?
         OnMessage(0x44, "") ;Clear icon
         index := startedIndex
         IfMsgBox OK
         {
             resetXdotBttns()
             deleteOldCacheFiles()
-            Loop, 8
+            Loop, %totalPort%
             {
                 ctrlVar := xdotProperties[index].ctrlVar
                 xStatus := xdotProperties[index].status
@@ -552,7 +560,7 @@ runAll() {
         {
             resetXdotBttns()
             deleteOldCacheFiles()
-            Loop, 8
+            Loop, %totalPort%
             {
                 StartReprogram:
                 ctrlVar := xdotProperties[index].ctrlVar
@@ -569,9 +577,9 @@ runAll() {
                 if (xStatus = "G") {
                     
                     WinKill COM%mainPort%
-                    changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     IfWinExist PROGRAMMING
                         Sleep 8000
+                    changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                     Sleep 1000
@@ -602,9 +610,13 @@ writeAll() {
         index := startedIndex
         Loop, %totalPort%
         {
-            node := readNodeLine(index)
-            GuiControl Text, nodeToWrite%index%, %node%
-            replaceNodeLine(index, "----")
+            xStatus := xdotProperties[index].status
+            
+            if (xStatus = "G") {
+                node := readNodeLine(index)
+                GuiControl Text, nodeToWrite%index%, %node%
+                replaceNodeLine(index, "----")
+            }
             index++
         }
         saveNodesToWrite()
@@ -617,14 +629,22 @@ writeAll() {
             ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
             mainPort := xdotProperties[index].mainPort
-            
+            breakPort := xdotProperties[index].breakPort
+            driveName := xdotProperties[index].driveName
             if (xStatus = "G") {
                 WinKill COM%mainPort%
+                IfWinExist PROGRAMMING
+                        Sleep 8000
                 changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
                 Gui, Font, c0c63ed Bold
                 GuiControl, Font, portLabel%index%
+                Gui, Font
+                Gui, Font, c0c63ed
                 GuiControl, Font, nodeToWrite%index%
                 GuiControlGet, node, , nodeToWrite%index%
+                
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, ,Hide
+                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                 Sleep 2500
             }
             index++
@@ -638,8 +658,10 @@ writeAll() {
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 ;Launched whenever the user right-clicks on gui controls
 GuiContextMenu:
+    Gui, 1: Default    
     GuiControlGet, hwndVar, Hwnd , %A_GuiControl%
     RegExMatch(A_GuiControl, "\d+$", num)
+    numNo0 := StrReplace(num, 0, "")
     isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
     isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
     isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
@@ -650,6 +672,8 @@ GuiContextMenu:
         totalGoodPort--
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Disable, portLabel%numNo0%
+        GuiControl, Disable, nodeToWrite%numNo0%
         xdotProperties[num].status := "D"
         GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
         GuiControl, Text, %A_GuiControl%,    ;Delete text
@@ -658,6 +682,8 @@ GuiContextMenu:
         totalGoodPort++
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Enable, portLabel%numNo0%
+        GuiControl, Enable, nodeToWrite%numNo0%
         xdotProperties[num].status := "G"
         if (isDisXdot = 1) {
             newVar := SubStr(A_GuiControl, 4)

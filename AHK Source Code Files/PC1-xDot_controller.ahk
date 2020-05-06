@@ -28,7 +28,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\sav
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid-2.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
@@ -38,6 +38,14 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code 
 , 1
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 ;Global nodesToWritePath := "Z:\XDOT\nodesToWrite.txt"
@@ -58,7 +66,7 @@ Global totalGoodPort := 8
 Global totalPort := 8
 Global mainWndTitle := "XDot Controller (PC1)"
 Global startedIndex := 1
-Global allFregs := ["AS923", "AU915", "EU868", "US915"]
+Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
@@ -513,7 +521,7 @@ runAll() {
         {
             resetXdotBttns()
             deleteOldCacheFiles()
-            Loop, 8
+            Loop, %totalPort%
             {
                 ctrlVar := xdotProperties[index].ctrlVar
                 xStatus := xdotProperties[index].status
@@ -551,7 +559,7 @@ runAll() {
         {
             resetXdotBttns()
             deleteOldCacheFiles()
-            Loop, 8
+            Loop, %totalPort%
             {
                 StartReprogram:
                 ctrlVar := xdotProperties[index].ctrlVar
@@ -568,9 +576,9 @@ runAll() {
                 if (xStatus = "G") {
                     
                     WinKill COM%mainPort%
-                    changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     IfWinExist PROGRAMMING
                         Sleep 8000
+                    changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                     Sleep 1000
@@ -601,9 +609,13 @@ writeAll() {
         index := startedIndex
         Loop, %totalPort%
         {
-            node := readNodeLine(index)
-            GuiControl Text, nodeToWrite%index%, %node%
-            replaceNodeLine(index, "----")
+            xStatus := xdotProperties[index].status
+            
+            if (xStatus = "G") {
+                node := readNodeLine(index)
+                GuiControl Text, nodeToWrite%index%, %node%
+                replaceNodeLine(index, "----")
+            }
             index++
         }
         saveNodesToWrite()
@@ -616,14 +628,22 @@ writeAll() {
             ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
             mainPort := xdotProperties[index].mainPort
-            
+            breakPort := xdotProperties[index].breakPort
+            driveName := xdotProperties[index].driveName
             if (xStatus = "G") {
                 WinKill COM%mainPort%
+                IfWinExist PROGRAMMING
+                        Sleep 8000
                 changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
                 Gui, Font, c0c63ed Bold
                 GuiControl, Font, portLabel%index%
+                Gui, Font
+                Gui, Font, c0c63ed
                 GuiControl, Font, nodeToWrite%index%
                 GuiControlGet, node, , nodeToWrite%index%
+                
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, ,Hide
+                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                 Sleep 2500
             }
             index++
@@ -637,6 +657,7 @@ writeAll() {
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 ;Launched whenever the user right-clicks on gui controls
 GuiContextMenu:
+    Gui, 1: Default    
     GuiControlGet, hwndVar, Hwnd , %A_GuiControl%
     RegExMatch(A_GuiControl, "\d+$", num)
     numNo0 := StrReplace(num, 0, "")
