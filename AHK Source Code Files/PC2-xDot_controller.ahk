@@ -73,6 +73,7 @@ Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
 Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
 Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
+Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
@@ -490,6 +491,10 @@ GetAddNew:
     Gui, adNew: Show, x%mainX% y%mainY%, Add New Node List
     Return
     
+    SaveLot:
+        
+    Return
+    
     adNewGuiEscape:
     adNewGuiClose:
         Gui, adNew: Destroy
@@ -594,7 +599,6 @@ runAll() {
 
 writeAll() {
     GuiControlGet, chosenFreq   ;Get value from DropDownList
-    saveNodesToWrite()
     if (chosenFreq = "") {
         MsgBox 16, ,Please select a FREQUENCY!
         return
@@ -610,10 +614,15 @@ writeAll() {
         index := startedIndex
         Loop, %totalPort%
         {
+            ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
+            node := readNodeLine(index)
+            if (RegExMatch(node, "[0-9a-fA-F]") = 0) && if (xStatus = "G"){
+                changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
+            }
             
+            xStatus := xdotProperties[index].status
             if (xStatus = "G") {
-                node := readNodeLine(index)
                 GuiControl Text, nodeToWrite%index%, %node%
                 replaceNodeLine(index, "----")
             }
@@ -749,21 +758,25 @@ deleteOldCacheFiles() {
 }
 
 getNodesToWrite() {
-    FileRead, outVar, %remotePath%\nodesToWrite.txt
-    StringReplace, outVar, outVar, %A_Space%, , All
-    StringReplace, outVar, outVar, %A_Tab%, , All
-    GuiControl Text, editNode, %outVar%
+    FileRead, fileContent, %remotePath%\nodesToWrite.txt
+    GuiControlGet editContent, , editNode    ;get new text
+    if (fileContent != editContent) {
+        StringReplace, fileContent, fileContent, %A_Space%, , All
+        StringReplace, fileContent, fileContent, %A_Tab%, , All
+        GuiControl Text, editNode, %fileContent%
+    }
 }
 
 saveNodesToWrite() {
-    GuiControlGet outVar, , editNode    ;get new text
-    if (outVar = "") {
-        MsgBox Node is Empty. Can't Save!
-    }
+    GuiControlGet readEditContent, , editNode    ;get new text
     fileLoc = %remotePath%\nodesToWrite.txt
-    file := FileOpen(fileLoc, "w")      ;delete all text
-    file.Close()
-    FileAppend, %outVar%, %fileLoc%     ;write new text to file
+    Fileread readFileContent, %fileLoc%
+    
+    if(readEditContent != readFileContent) {
+        file := FileOpen(fileLoc, "w")      ;delete all text
+        file.Close()
+        FileAppend, %readEditContent%, %fileLoc%     ;write new text to file
+    }
 }
 
 readNodeLine(lineNum) {
@@ -820,7 +833,7 @@ loadNodeFromLot() {
     }
 }
 
-changeXdotBttnIcon(guiControlVar, option, mode := "") {
+changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
     Global                                                  ;Must set all var to global to use GuiControl
     Gui 1: Default
     RegExMatch(guiControlVar, "\d+$", num)                  ;Get the number from control var
@@ -833,7 +846,16 @@ changeXdotBttnIcon(guiControlVar, option, mode := "") {
     if (option = "NORMAL") {
         
     } else if (option = "DISABLE") {
-        
+        GuiControl, Text, %guiControlVar%,                          ;Delete text
+        Loop, 4
+            GuiButtonIcon(hwndVar%A_Index%, disImg, 1, "s24")         ;Display icon
+        xdotProperties[xIndex].status := "D"
+        GuiControl, +vDis%origCtrlVar%,  %origCtrlVar%          ;Change var of control
+        totalGoodPort--
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Disable, portLabel%xIndex%
+        GuiControl, Disable, nodeToWrite%xIndex%
     } else if (option = "BAD") {
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         Loop, 4

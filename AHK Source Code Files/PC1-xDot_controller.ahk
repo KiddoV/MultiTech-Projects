@@ -73,6 +73,7 @@ Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
 Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
 Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
+Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
@@ -222,6 +223,7 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     driveName := xdotProperties[num].driveName
     ttXPos := xdotProperties[num].ttXPos    ;Position X for teraterm window
     ttYPos := xdotProperties[num].ttYPos    ;Position Y for teraterm window
+    FileRead, data, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
     
     WinActivate COM%mainPort%
     ;;;GUI
@@ -247,35 +249,44 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     Gui xdot: Add, Picture, xs+80 ys+58 w17 h17 +BackgroundTrans vprocess3, 
     Gui xdot: Add, Picture, xs+80 ys+78 w17 h17 +BackgroundTrans vprocess4, 
     Gui xdot: Add, Picture, xs+80 ys+98 w17 h17 +BackgroundTrans vprocess5, 
-    buttonLabel := isBadXdot = 1 ? "Re-run" : "Run"
-    Gui xdot: Add, Button, w40 h40 xs+10 ys+45 gFunctionalTestEach, %buttonLabel%
+    buttonLabel1 := (isBadXdot = 1 && RegExMatch(data, "TEST") > 0) ? "RE-RUN" : "RUN"
+    Gui xdot: Add, Button, w50 h45 xs+10 ys+45 gFunctionalTestEach, %buttonLabel1%
     
     Gui xdot: Add, GroupBox, xm+0 ym+190 w200 h50 Section, Programming
     Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
     
+    Gui xdot: Add, GroupBox, xm+0 ym+240 w200 h130 Section, EUID Write
+    Gui xdot: Add, Text, xs+5 ys+25, STAT:
+    Gui xdot: Add, Text, xs+5 ys+45, FREQ:
+    Gui xdot: Add, Text, xs+5 ys+65, EUID:
+    Gui xdot: Add, Edit, xs+45 ys+23 w150 h16 vxStatus +ReadOnly, READY
+    Gui xdot: Add, Edit, xs+45 ys+43 w150 h16 vxFreq,
+    Gui xdot: Add, Edit, xs+45 ys+63 w150 h16 vxEUID,
+    buttonLabel2 := (isBadXdot = 1 && RegExMatch(data, "WRITE") > 0) ? "RE-RUN" : "RUN"
+    Gui xdot: Add, Button, xs+75 ys+90 w50 h30 gWriteIDEach, %buttonLabel2%
+    
     ;;Labels or Functions to run before gui start
-    FileRead, outStr, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
-    if (RegExMatch(outStr, "CONNECTION FAILED") > 0) {
+    if (RegExMatch(data, "CONNECTION FAILED") > 0) {
         GuiControl, , process1, %xImg%
-    } else if (RegExMatch(outStr, "FAILED TO PROGRAM") > 0) {
+    } else if (RegExMatch(data, "FAILED TO PROGRAM") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %xImg%
-    } else if (RegExMatch(outStr, "FAILED TO JOIN") > 0) {
+    } else if (RegExMatch(data, "FAILED TO JOIN") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %xImg%
-    } else if (RegExMatch(outStr, "PING.*FAILURE") > 0) {
+    } else if (RegExMatch(data, "PING.*FAILURE") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %checkImg%
         GuiControl, , process4, %xImg%
-    } else if (RegExMatch(outStr, "RSSI LEVEL FAILURE") > 0) {
+    } else if (RegExMatch(data, "RSSI LEVEL FAILURE") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %checkImg%
         GuiControl, , process4, %checkImg%
         GuiControl, , process5, %xImg%
-    } else if (RegExMatch(outStr, "ALL PASSED") > 0) {
+    } else if (RegExMatch(data, "ALL PASSED") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %checkImg%
@@ -283,8 +294,22 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         GuiControl, , process5, %checkImg%
     }
     
+    if (isBadXdot = 1 || isGoodXdot = 1) && if (RegExMatch(data, "WRITE") > 0) {
+        Loop, Parse, data, `,
+        {
+            if (A_Index = 3)
+                GuiControl, Text, xEUID, %A_LoopField%   ;Change text
+            if (A_Index = 4)
+                Gui, Font, cf24b3f
+                GuiControl, Font, xStatus
+                GuiControl, Text, xStatus, %A_LoopField%   ;Change text
+            if (A_Index = 5)
+                GuiControl, Text, xFreq, %A_LoopField%   ;Change text
+                
+        }
+    }
     
-    mainY := mainY + 130
+    mainY := mainY + 120
     Gui xdot: Show, x%mainX% y%mainY%, XDot %num%
     Return
 
@@ -376,6 +401,18 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         ;addTipMsg(msg, title, 17000)
         ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
         ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+    Return
+    
+    WriteIDEach:
+        WinKill COM%mainPort%
+        GuiControlGet, inFreq, , xFreq
+        GuiControlGet, inId, , xEUID
+        
+        if (inFreq = "" || inId = "") {
+            MsgBox 16 , ,Please enter all requires fields!
+        }
+        
+        
     Return
     
     ConnectMainPort:
@@ -480,13 +517,17 @@ GetAddNew:
     
     Gui, adNew: Add, Text, x15 y30, Enter LOT CODE:
     Gui, adNew: Add, Edit, x105 y27 w75 h20 +Number Limit10
-    Gui, adNew: Add, Button, x190 y27 h20, Save
+    Gui, adNew: Add, Button, x190 y27 h20 gSaveLot, Save
     
     Gui, adNew: Add, Button, x15 y70 h20, Browse...
     Gui, adNew: Add, Text, x75 y73, ...
     
     mainY := mainY + 30
     Gui, adNew: Show, x%mainX% y%mainY%, Add New Node List
+    Return
+    
+    SaveLot:
+        
     Return
     
     adNewGuiEscape:
@@ -593,7 +634,6 @@ runAll() {
 
 writeAll() {
     GuiControlGet, chosenFreq   ;Get value from DropDownList
-    saveNodesToWrite()
     if (chosenFreq = "") {
         MsgBox 16, ,Please select a FREQUENCY!
         return
@@ -609,10 +649,15 @@ writeAll() {
         index := startedIndex
         Loop, %totalPort%
         {
+            ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
+            node := readNodeLine(index)
+            if (RegExMatch(node, "[0-9a-fA-F]") = 0) && if (xStatus = "G"){
+                changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
+            }
             
+            xStatus := xdotProperties[index].status
             if (xStatus = "G") {
-                node := readNodeLine(index)
                 GuiControl Text, nodeToWrite%index%, %node%
                 replaceNodeLine(index, "----")
             }
@@ -748,21 +793,25 @@ deleteOldCacheFiles() {
 }
 
 getNodesToWrite() {
-    FileRead, outVar, %remotePath%\nodesToWrite.txt
-    StringReplace, outVar, outVar, %A_Space%, , All
-    StringReplace, outVar, outVar, %A_Tab%, , All
-    GuiControl Text, editNode, %outVar%
+    FileRead, fileContent, %remotePath%\nodesToWrite.txt
+    GuiControlGet editContent, , editNode    ;get new text
+    if (fileContent != editContent) {
+        StringReplace, fileContent, fileContent, %A_Space%, , All
+        StringReplace, fileContent, fileContent, %A_Tab%, , All
+        GuiControl Text, editNode, %fileContent%
+    }
 }
 
 saveNodesToWrite() {
-    GuiControlGet outVar, , editNode    ;get new text
-    if (outVar = "") {
-        MsgBox Node is Empty. Can't Save!
-    }
+    GuiControlGet readEditContent, , editNode    ;get new text
     fileLoc = %remotePath%\nodesToWrite.txt
-    file := FileOpen(fileLoc, "w")      ;delete all text
-    file.Close()
-    FileAppend, %outVar%, %fileLoc%     ;write new text to file
+    Fileread readFileContent, %fileLoc%
+    
+    if(readEditContent != readFileContent) {
+        file := FileOpen(fileLoc, "w")      ;delete all text
+        file.Close()
+        FileAppend, %readEditContent%, %fileLoc%     ;write new text to file
+    }
 }
 
 readNodeLine(lineNum) {
@@ -819,7 +868,7 @@ loadNodeFromLot() {
     }
 }
 
-changeXdotBttnIcon(guiControlVar, option, mode := "") {
+changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
     Global                                                  ;Must set all var to global to use GuiControl
     Gui 1: Default
     RegExMatch(guiControlVar, "\d+$", num)                  ;Get the number from control var
@@ -832,7 +881,16 @@ changeXdotBttnIcon(guiControlVar, option, mode := "") {
     if (option = "NORMAL") {
         
     } else if (option = "DISABLE") {
-        
+        GuiControl, Text, %guiControlVar%,                          ;Delete text
+        Loop, 4
+            GuiButtonIcon(hwndVar%A_Index%, disImg, 1, "s24")         ;Display icon
+        xdotProperties[xIndex].status := "D"
+        GuiControl, +vDis%origCtrlVar%,  %origCtrlVar%          ;Change var of control
+        totalGoodPort--
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Disable, portLabel%xIndex%
+        GuiControl, Disable, nodeToWrite%xIndex%
     } else if (option = "BAD") {
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         Loop, 4

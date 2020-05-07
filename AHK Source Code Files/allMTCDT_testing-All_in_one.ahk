@@ -27,7 +27,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 Global 240_ItemNums := ["70000035L", "70000037L", "70000039L", "70000041L", "70000049L"]
 Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000026L", "70000043L", "70000054L"]
-Global 247_ItemNums := ["70000044L", "70000053L", "70001174L"]
+Global 247_ItemNums := ["70000029L" ,"70000044L", "70000053L", "70001174L"]
 
 ;;;Paths and Links
 ;GUI images
@@ -601,7 +601,7 @@ disableGuis(option) {
 getRadioType(itemN) {
     NONE := ["70000005L", "70000035L", "70001174L"]
     H5 := ["70000006L"]
-    LAT1 := ["70000037L", "70000007L"]
+    LAT1 := ["70000029L", "70000037L", "70000007L"]
     LAT3 := ["70000041L"]
     LEU1 := ["70000033L", ""]
     L4E1 := ["70000043L", "70000044L"]

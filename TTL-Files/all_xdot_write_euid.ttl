@@ -18,7 +18,9 @@ sprintf2 xdotDriveLoc '%s:\' param5
 strcompare param6 'singleWrite'
 isSingleWrite = result
 freq = param7
+outDFreq = ''
 deadNode = param8
+outDeadNode = ''
 writeStatus = ''
 fail = 0
 connFail = 0
@@ -68,9 +70,9 @@ if result=0 then
     closett
     sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
     statusbox msg1 portNumberFailureMsg
-    writeStatus = 'CONNECTION FAILED'
+    writeStatus = 'FAILED CONNECTING TO PORT'
     connFail=0
-    goto RESULT_LOGGING
+    goto WRITE_RESULT_DATA
     end
 endif
 
@@ -78,8 +80,12 @@ endif
 sendln 'ati'
 wait debugFirmwareVers 'OK'
 if result>1 then
-    yesnobox 'NOT IN DEBUG MODE!\nDO YOU WANT TO RE-PROGRAM TO DEBUG?' portNumberTitleMsg 1
-    if result=0 end
+    yesnobox 'CURRENT PROGRAM IS NOT IN DEBUG MODE!\nDO YOU WANT TO RE-PROGRAM TO DEBUG?\nNOTE: THIS ACTION WILL ERASE ALL SETTINGS ON XDOT' portNumberTitleMsg 1
+    if result=0 then
+        statusbox 'PROGRAM WAS NOT IN DEBUG' portNumberFailureMsg
+        writeStatus = 'PROGRAM FAILED - NOT IN DEBUG'
+        goto WRITE_RESULT_DATA
+    endif
     if result=1 goto REPROGRAM_TO_DEBUG
 elseif result=1 then
 	goto BEGIN_WRITE_NODE
@@ -88,7 +94,8 @@ endif
 :REPROGRAM_TO_DEBUG
 sprintf2 cmd 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
 exec cmd
-statusbox 'Transfering bin file...' 'PROGRAMMING'
+sprintf2 title 'PORT %s IS PROGRAMMING' xdotMainPort
+statusbox 'Transfering bin file........' title
 mpause 16500
 closesbox
 :send_break_debug
@@ -142,7 +149,8 @@ endif
 :REPROGRAM
 sprintf2 cmd 'cmd /c copy %s %s' binFileLoc xdotDriveLoc
 exec cmd
-statusbox 'Transfering bin file...' 'PROGRAMMING'
+sprintf2 title 'PORT %s IS PROGRAMMING' xdotMainPort
+statusbox 'Transfering bin file........' title
 mpause 16500
 closesbox
 :send_break
@@ -225,8 +233,11 @@ if result=0 then
 endif
 mpause 500
 sendln 'at+di?'
-waitregex '([0-9A-F]{2}[:-]){7}([0-9A-F]{2})' '00-00-00-00-00-00-00-00'
+waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
 outDeadNode = inputstr
+for i 1 17
+	strreplace outDeadNode 1 '-' ''
+next
 if result=1 then
     strcompare outDeadNode deadNode
     if result <> 0 then
@@ -251,15 +262,30 @@ statusbox msg1 msg2
 writeStatus = 'PASSED'
 
 :RESULT_LOGGING
+mpause 500
 date = ''
 time = ''
-mpause 500
+logStr = ''
 getdate date "%Y\%m\%d"
 getdate time "%H:%M:%S"
-sprintf2 logStr 'Date: %s, Time: %s, Dead Node: %s, EUID Read: %s, Frequency: %s, Default-Frequency: %s, COM PORT: %s, Break PORT: %s, STATUS: %s' date time deadNode outDeadNode freq outDFreq xdotMainPort xdotBreakPort writeStatus
-sprintf2 logStr 'Date: %s, Time: %s, COM PORT: %s, STATUS: %s, Dead Node: %s, EUID Read: %s, Frequency: %s, Default-Frequency: %s, Break PORT: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
+sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
 fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
 filewrite fhandle #13#10
 filewrite fhandle logStr
 fileclose fhandle
+
+:WRITE_RESULT_DATA
+mpause 500
+
+foldersearch 'C:\V-Projects\XDot-Controller\TEMP-DATA'
+if result=0 foldercreate 'C:\V-Projects\XDot-Controller\TEMP-DATA'
+sprintf2 cacheFileLoc 'C:\V-Projects\XDot-Controller\TEMP-DATA\%s.dat' xdotMainPort
+filesearch cacheFileLoc
+if result = 0 filecreate fhandle cacheFileLoc
+
+fileopen fhandle cacheFileLoc 0	;0 for overwrite
+sprintf2 writeStr 'WRITE,%s,%s,%s,%s' xdotMainPort deadNode writeStatus freq
+filewrite fhandle writeStr
+fileclose fhandle
+
 end
