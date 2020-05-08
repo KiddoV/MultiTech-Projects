@@ -154,7 +154,7 @@ Gui, Show, x%posX% y150, %mainWndTitle%
 
 ;;;Functions to run after main gui is started;;;
 editnodeToolbar := CreateEditNodeToolbar()
-;getNodesToWrite()
+;loadNodesToWrite()
 
 GuiControlGet, editNode, Pos, editNode
 IfNotExist C:\teraterm\ttermpro.exe
@@ -188,7 +188,7 @@ CheckFileChange:
 Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
 if(newFileContent != lastFileContent) {
     lastFileContent := newFileContent
-    getNodesToWrite()
+    loadNodesToWrite()
 }
 return
 
@@ -223,6 +223,7 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     driveName := xdotProperties[num].driveName
     ttXPos := xdotProperties[num].ttXPos    ;Position X for teraterm window
     ttYPos := xdotProperties[num].ttYPos    ;Position Y for teraterm window
+    FileRead, data, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
     
     WinActivate COM%mainPort%
     ;;;GUI
@@ -248,44 +249,81 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     Gui xdot: Add, Picture, xs+80 ys+58 w17 h17 +BackgroundTrans vprocess3, 
     Gui xdot: Add, Picture, xs+80 ys+78 w17 h17 +BackgroundTrans vprocess4, 
     Gui xdot: Add, Picture, xs+80 ys+98 w17 h17 +BackgroundTrans vprocess5, 
-    buttonLabel := isBadXdot = 1 ? "Re-run" : "Run"
-    Gui xdot: Add, Button, w40 h40 xs+10 ys+45 gFunctionalTestEach, %buttonLabel%
+    buttonLabel1 := (isBadXdot = 1 && RegExMatch(data, "TEST") > 0) ? "RE-RUN" : "RUN"
+    Gui xdot: Add, Button, w50 h45 xs+10 ys+45 gFunctionalTestEach, %buttonLabel1%
     
     Gui xdot: Add, GroupBox, xm+0 ym+190 w200 h50 Section, Programming
     Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
     
+    Gui xdot: Add, GroupBox, xm+0 ym+240 w200 h130 Section, EUID Write
+    Gui xdot: Add, Text, xs+5 ys+25, STAT:
+    Gui xdot: Add, Text, xs+5 ys+45, FREQ:
+    Gui xdot: Add, Text, xs+5 ys+65, EUID:
+    Gui xdot: Add, Edit, xs+45 ys+23 w150 h16 vxStatus +ReadOnly, READY
+    Gui xdot: Add, Edit, xs+45 ys+43 w150 h16 vxFreq,
+    Gui xdot: Add, Edit, xs+45 ys+63 w150 h16 vxEUID,
+    buttonLabel2 := (isBadXdot = 1 && RegExMatch(data, "WRITE") > 0) ? "RE-RUN" : "RUN"
+    Gui xdot: Add, Button, xs+75 ys+90 w50 h30 vwriteBttnEach gWriteIDEach, %buttonLabel2%
+    
     ;;Labels or Functions to run before gui start
-    FileRead, outStr, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
-    if (RegExMatch(outStr, "CONNECTION FAILED") > 0) {
+    if (RegExMatch(data, "CONNECTION FAILED") > 0) {
         GuiControl, , process1, %xImg%
-    } else if (RegExMatch(outStr, "FAILED TO PROGRAM") > 0) {
+    } else if (RegExMatch(data, "FAILED TO PROGRAM") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %xImg%
-    } else if (RegExMatch(outStr, "FAILED TO JOIN") > 0) {
+    } else if (RegExMatch(data, "FAILED TO JOIN") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %xImg%
-    } else if (RegExMatch(outStr, "PING.*FAILURE") > 0) {
+    } else if (RegExMatch(data, "PING.*FAILURE") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %checkImg%
         GuiControl, , process4, %xImg%
-    } else if (RegExMatch(outStr, "RSSI LEVEL FAILURE") > 0) {
+    } else if (RegExMatch(data, "RSSI LEVEL FAILURE") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %checkImg%
         GuiControl, , process4, %checkImg%
         GuiControl, , process5, %xImg%
-    } else if (RegExMatch(outStr, "ALL PASSED") > 0) {
+    } else if (RegExMatch(data, "ALL PASSED") > 0) {
         GuiControl, , process1, %checkImg%
         GuiControl, , process2, %checkImg%
         GuiControl, , process3, %checkImg%
         GuiControl, , process4, %checkImg%
         GuiControl, , process5, %checkImg%
     }
+    IfNotExist C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
+    {
+        Gui 1: Default
+        GuiControlGet, chosenFreq   ;Get value from DropDownList
+        RegExMatch(A_GuiControl, "\d+$", num)
+        node := readNodeLine(num)
+        
+        Gui xdot: Default
+        GuiControl, Text, xFreq, %chosenFreq%   ;Change text
+        GuiControl, Text, xEUID, %node%   ;Change text
+    }
     
+    if (isBadXdot = 1 || isGoodXdot = 1) && if (RegExMatch(data, "WRITE") > 0) {
+        Loop, Parse, data, `,
+        {
+            if (A_Index = 3)
+                GuiControl, Text, xEUID, %A_LoopField%   ;Change text
+            if (A_Index = 4) {
+                if (RegExMatch(A_LoopField, "FAIL|WRONG|INVALID"))
+                    Gui, Font, cf24b3f
+                else if (RegExMatch(A_LoopField, "PASS"))
+                    Gui, Font, c41e81c
+                GuiControl, Font, xStatus
+                GuiControl, Text, xStatus, %A_LoopField%   ;Change text
+            }
+            if (A_Index = 5)
+                GuiControl, Text, xFreq, %A_LoopField%   ;Change text
+        }
+    }
     
-    mainY := mainY + 130
+    mainY := mainY + 120
     Gui xdot: Show, x%mainX% y%mainY%, XDot %num%
     Return
 
@@ -378,6 +416,53 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         ;addTipMsg(msg, title, 17000)
         ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
         ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+    Return
+    
+    WriteIDEach:
+        WinKill COM%mainPort%
+        GuiControlGet, inFreq, , xFreq
+        GuiControlGet, inId, , xEUID
+        GuiControlGet, writeBttnLabel, , writeBttnEach
+        if (inFreq = "" || inId = "") {
+            MsgBox 16 , ,Please enter all requires fields!
+            return
+        }
+        
+        if (RegExMatch(inFreq, "[A-Z]+([0-9]{3})") = 0) {
+            MsgBox 16 , ERROR ,INPUT INVALID FREQUENCY. RETRY!
+            return
+        }
+        
+        if (RegExMatch(inId, "[g-zG-Z]") > 0) {
+            MsgBox 16 , ERROR ,INPUT INVALID UUID. RETRY!
+            return
+        }
+        
+        if (writeBttnLabel = "RUN") {
+            OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+            MsgBox 0x81, RUN WRITE EUID, Begin EUID WRITE on PORT %mainPort%?
+            OnMessage(0x44, "") ;Clear icon
+            IfMsgBox Cancel
+                return
+        }
+        changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
+        Gui xdot: Default
+        Gui, Font, c0c63ed
+        GuiControl, Font, xStatus
+        GuiControl, Text, xStatus, RUNNING   ;Change text
+        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% newTTVersion, ,Hide
+        
+        WinWait %mainPort% FAILURE|%mainPort% PASSED
+        ifWinExist, %mainPort% FAILURE
+        {
+            WinGetText textOnWin, %mainPort% FAILURE
+            Gui, Font, cf24b3f
+            GuiControl, Font, xStatus
+            GuiControl, Text, xStatus, %textOnWin%   ;Change text
+            changeXdotBttnIcon(ctrlVar, "BAD")
+        }
+        ifWinExist, %mainPort% PASSED
+            changeXdotBttnIcon(ctrlVar, "GOOD")
     Return
     
     ConnectMainPort:
@@ -651,11 +736,26 @@ writeAll() {
                 Gui, Font, c0c63ed
                 GuiControl, Font, nodeToWrite%index%
                 GuiControlGet, node, , nodeToWrite%index%
+                StringReplace node, node, %A_Space%, , All  ;Delete all white space in variable
                 
                 Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, ,Hide
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
                 Sleep 2500
             }
+            
+            if (index = 24) {
+                FileRead, fileContent, %remotePath%\nodesToWrite.txt
+                noNodeCount := 1
+                Loop, Parse, fileContent, `n
+                    if (A_Index < 24) 
+                        if (RegExMatch(A_LoopField, "[0-9a-fA-F]") = 0) {
+                            noNodeCount++
+                            if (noNodeCount = 24) {
+                                MsgBox NO MORE NODE PRESENTED!
+                            }
+                        }
+            }
+            
             index++
         }
     }
@@ -757,43 +857,46 @@ deleteOldCacheFiles() {
     }
 }
 
-getNodesToWrite() {
+loadNodesToWrite() {
     FileRead, fileContent, %remotePath%\nodesToWrite.txt
-    GuiControlGet editContent, , editNode    ;get new text
-    if (fileContent != editContent) {
-        StringReplace, fileContent, fileContent, %A_Space%, , All
-        StringReplace, fileContent, fileContent, %A_Tab%, , All
-        GuiControl Text, editNode, %fileContent%
-    }
+    StringReplace, fileContent, fileContent, %A_Space%, , All
+    StringReplace, fileContent, fileContent, %A_Tab%, , All
+    GuiControl Text, editNode, %fileContent%
 }
 
 saveNodesToWrite() {
-    GuiControlGet readEditContent, , editNode    ;get new text
     fileLoc = %remotePath%\nodesToWrite.txt
-    Fileread readFileContent, %fileLoc%
+    GuiControlGet readEditContent, , editNode    ;get new text
+    if (readEditContent != "")
+        FileCopy %remotePath%\nodesToWrite.txt, %remotePath%\nodesToWrite.bak, 1
+    FileRead bakContent, %remotePath%\nodesToWrite.bak
     
-    if(readEditContent != readFileContent) {
-        file := FileOpen(fileLoc, "w")      ;delete all text
-        file.Close()
-        FileAppend, %readEditContent%, %fileLoc%     ;write new text to file
-    }
+    file := FileOpen(fileLoc, "w")      ;delete all text
+    file.Close()
+    if (readEditContent = "")
+        FileAppend, %bakContent%, %fileLoc%     ;write backup text to file
+    FileAppend, %readEditContent%, %fileLoc%     ;write new text to file
 }
 
 readNodeLine(lineNum) {
-    GuiControlGet outVar, , editNode
-    Loop, Parse, outVar, `n
+    GuiControlGet listEditNodes, , editNode
+    Loop, Parse, listEditNodes, `n
     {
         if (A_Index = lineNum)
             return A_LoopField
     }
 }
 
-replaceNodeLine(lineNum, text := "") {
-    GuiControlGet outVar, , editNode
-    textToReplace := readNodeLine(lineNum)
-    newVar := StrReplace(outVar, textToReplace, text, , 1)
+replaceNodeLine(lineNum, replaceStr := "") {
+    GuiControlGet listEditNodes, , editNode
+    listEditNodeArray := StrSplit(listEditNodes, "`n", "`t")    ;Convert string to array
+    listEditNodeArray[lineNum] := replaceStr    ;Replace text by index
     
-    GuiControl Text, editNode, %newVar%
+    newListEditNodes := ""
+    For key, var in listEditNodeArray   ;Convert array back to string
+        newListEditNodes .= "`n" var
+    newListEditNodes := LTrim(newListEditNodes, "`n")     ;remove first while space
+    GuiControl Text, editNode, %newListEditNodes%
 }
 
 radioToggle() {
