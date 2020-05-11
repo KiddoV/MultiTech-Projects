@@ -96,7 +96,7 @@ Gui Font
 Gui Font, Bold
 Gui Add, Text, xs+10 ys+50 , Select LOT Code:
 Gui Font
-getLotCodeList()
+lotCodeList := getLotCodeList()
 For each, item in lotCodeList
     lotCode .= (each == 1 ? "" : "|") . item
 Gui Add, ComboBox, xs+120 ys+45 vlotCodeSelected gCbAutoComplete, %lotCode%
@@ -461,7 +461,12 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
             changeXdotBttnIcon(ctrlVar, "BAD")
         }
         ifWinExist, %mainPort% PASSED
+        {
+            Gui, Font, c41e81c
+            GuiControl, Font, xStatus
+            GuiControl, Text, xStatus, PASSED   ;Change text
             changeXdotBttnIcon(ctrlVar, "GOOD")
+        }
     Return
     
     ConnectMainPort:
@@ -561,22 +566,76 @@ GetAddNew:
     Gui, adNew: +ToolWindow +AlwaysOnTop +hWndhadNewWnd
     Gui Font, Bold
     Gui, adNew: Add, Text, x10 y10, Add New From Current Editor
-    Gui, adNew: Add, Text, x10 y50, Add New From A File
+    Gui, adNew: Add, Text, x10 y60, Add New From A File
     Gui, Font
     
     Gui, adNew: Add, Text, x15 y30, Enter LOT CODE:
-    Gui, adNew: Add, Edit, x105 y27 w75 h20 +Number Limit10
-    Gui, adNew: Add, Button, x190 y27 h20 gSaveLot, Save
-    
-    Gui, adNew: Add, Button, x15 y70 h20, Browse...
-    Gui, adNew: Add, Text, x75 y73, ...
+    Gui, adNew: Add, Edit, x105 y27 w75 h20 vinLotCode +Number Limit10
+    Gui, adNew: Add, Button, x190 y27 h20 gSaveLot1, Save
+    Gui Add, Text, x20 y55 w200 h2 +0x10
+    Gui, adNew: Add, Button, x15 y80 h20 gBrowseLot, Browse...
+    Gui, adNew: Add, Text, x75 y83 w110 vfilePathLabel,
+    Gui, adNew: Add, Button, x190 y80 h20 gSaveLot2, Save
     
     mainY := mainY + 30
     Gui, adNew: Show, x%mainX% y%mainY%, Add New Node List
     Return
     
-    SaveLot:
+    SaveLot1:
+        GuiControlGet newLotCode, , inLotCode
+        lotCodeArray := getLotCodeList()
         
+        if (newLotCode = "") {
+            MsgBox 16, ,Please enter lot code!
+            return
+        }
+        
+        Loop % lotCodeArray.Length()
+        {
+            if (lotCodeArray[A_Index] = newLotCode) {
+                MsgBox 16, , Duplicate Lot Code`nPlease Enter a different one!
+                return
+            }
+        }
+        
+        Gui, 1: Default
+        GuiControlGet editContent, , editNode    ;get new text in edit field
+        
+        FileAppend, %editContent%, %remotePath%\Saved-Nodes\%newLotCode%.txt
+        Gui, adNew: Destroy
+        updateLotCodeList()
+    Return
+    
+    BrowseLot:
+        FileSelectFile, selectedFile, , , Select a NodeID text file..., Text Documents (*.txt; *.doc)
+        if (selectedFile = "")
+            return
+        GuiControl, Text, filePathLabel, %selectedFile%
+    Return
+        
+    SaveLot2:
+        lotCodeArray := getLotCodeList()
+        
+        if (selectedFile = "") {
+            MsgBox 16, , Please select a text file!
+            return
+        }
+        
+        SplitPath selectedFile, fileName    ;Get the filename
+        Loop % lotCodeArray.Length()
+        {
+            if (RegExMatch(fileName, lotCodeArray[A_Index]) > 0) {
+                MsgBox 16, , Duplicate Lot Code`nPlease choose a different file!
+                return
+            }
+        }
+        
+        FileCopy, %selectedFile%, %remotePath%\Saved-Nodes\%fileName%
+        Gui, 1: Default
+        FileRead, fileContent, %selectedFile%
+        GuiControl Text, editNode, %fileContent%
+        Gui, adNew: Destroy
+        updateLotCodeList()
     Return
     
     adNewGuiEscape:
@@ -671,7 +730,7 @@ runAll() {
                     changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
-                    Sleep 1000
+                    Sleep 2500
                 }
             }
         }
@@ -742,7 +801,7 @@ writeAll() {
                 Sleep 2500
             }
             
-            if (index = 24) {
+             if (index = 24) {
                 FileRead, fileContent, %remotePath%\nodesToWrite.txt
                 noNodeCount := 1
                 Loop, Parse, fileContent, `n
@@ -750,11 +809,18 @@ writeAll() {
                         if (RegExMatch(A_LoopField, "[0-9a-fA-F]") = 0) {
                             noNodeCount++
                             if (noNodeCount = 24) {
-                                MsgBox NO MORE NODE PRESENTED!
+                                listNodeArray := StrSplit(fileContent, "`n", "`t")    ;Convert string to array
+                                Loop, 24
+                                    removedNode := listNodeArray.RemoveAt(1)  ;Remove the first 24 used nodes
+                                newListNodes := ""              ;Convert array back to string
+                                For key, var in listNodeArray
+                                    newListNodes .= var "`n"
+                                newListNodes := RTrim(newListNodes, "`n")       ;remove last while space
+                                GuiControl Text, editNode, %newListNodes%       ;Return nodes to edit field
+                                saveNodesToWrite()      ;Save new content
                             }
                         }
             }
-            
             index++
         }
     }
@@ -866,7 +932,9 @@ loadNodesToWrite() {
 saveNodesToWrite() {
     fileLoc = %remotePath%\nodesToWrite.txt
     GuiControlGet readEditContent, , editNode    ;get new text
-    if (readEditContent != "")
+    FileRead mainContent, %remotePath%\nodesToWrite.txt
+    
+    if (mainContent != "")
         FileCopy %remotePath%\nodesToWrite.txt, %remotePath%\nodesToWrite.bak, 1
     FileRead bakContent, %remotePath%\nodesToWrite.bak
     
@@ -891,10 +959,10 @@ replaceNodeLine(lineNum, replaceStr := "") {
     listEditNodeArray := StrSplit(listEditNodes, "`n", "`t")    ;Convert string to array
     listEditNodeArray[lineNum] := replaceStr    ;Replace text by index
     
-    newListEditNodes := ""
-    For key, var in listEditNodeArray   ;Convert array back to string
-        newListEditNodes .= "`n" var
-    newListEditNodes := LTrim(newListEditNodes, "`n")     ;remove first while space
+    newListEditNodes := ""              ;Convert array back to string
+    For key, var in listEditNodeArray
+        newListEditNodes .= var "`n"
+    newListEditNodes := RTrim(newListEditNodes, "`n")     ;remove last while space
     GuiControl Text, editNode, %newListEditNodes%
 }
 
@@ -916,12 +984,42 @@ browseNode() {
 }
 
 getLotCodeList() {
+    lotList := []
     Loop Files, %remotePath%\Saved-Nodes\*.txt, R ; Recurse into subfolders.
     {
         str := A_LoopFileName
-        StringReplace, str, str, .txt, , All
-        lotCodeList[A_Index] := str
+        StringReplace, str, str, .txt, , All    ;Remove .txt
+        lotList[A_Index] := str
     }
+    reverseArray(lotList)
+    
+    return lotList
+}
+
+reverseArray(array)
+{
+	arrayC := array.Clone()
+	tempObj := {}
+	for vKey in array
+		tempObj.Push(vKey)
+	vIndex := tempObj.Length()
+	for vKey in array
+		array[vKey] := arrayC[tempObj[vIndex--]]
+	arrayC := tempObj := ""
+}
+
+updateLotCodeList() {
+    Gui, 1: Default
+    newLotCodeList := getLotCodeList()     ;Reload lot code list var
+    newLotCodeDrop := ""
+    For each, item in newLotCodeList
+    {
+        if (each == 1)
+            newLotCode := item
+        newLotCodeDrop .= (each == 1 ? "" : "|") . item
+    }
+    GuiControl, , lotCodeSelected, |%newLotCodeDrop%
+    GuiControl, Text, lotCodeSelected, %newLotCode%
 }
 
 loadNodeFromLot() {
