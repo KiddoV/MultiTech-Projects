@@ -175,7 +175,7 @@ wait "mtcdt:/home/mtadm#"
 mpause 1000
 
 :DRIVE_TEST
-timeout = 2
+timeout = 7
 flushrecv
 wait '#'
 sendln 'df'
@@ -929,13 +929,27 @@ if is246L=0 goto GPS_TEST
 if is247L=0 goto GPS_TEST
 
 :GPS_TEST
+try = 0
 timeout = 70
 mpause 500
 flushrecv
 sendln 'gpspipe -r'
 wait '4505.' '4506.' 'could not connect'
 if result=0 || result=3 then
+   try = try + 1
+   if try < 2 then
+   	   send 3
+	   wait '#'
+	   sendln './gpsd stop'
+	   wait '#'
+	   sendln './gpsd start'
+	   wait 'pps pps1: source "/dev/ttyXRUSB2" added'
+	   send 3
+	   wait '#'
+	   goto GPS_TEST
+   endif
    messagebox 'UNABLE TO GET GPS LOCATION' 'GPS TEST FAILURE'
+   try = 0
    disconnect
    closett
    end

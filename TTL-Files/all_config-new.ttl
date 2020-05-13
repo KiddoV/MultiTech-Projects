@@ -1,7 +1,7 @@
 ;
 ; Author: Viet Ho
 ;
-timeout = 10
+timeout = 15
 clearscreen 1
 show 0
 
@@ -105,7 +105,7 @@ flushrecv
 sendln '/etc/init.d/./mts-io stop'
 wait '#'
 sendln '/etc/init.d/./mts-io start'
-pause 7
+pause 12
 messagebox 'MTCDT TEST CONFIGURATION COMPLETE' 'FINISHED CONFIGURATION'
 mpause 1000
 end

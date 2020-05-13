@@ -3,35 +3,39 @@
     Author:     Viet Ho
     
 */
-;=======================================================================================;
-;;;;;;;;;;Installs files for app to run;;;;;;;;;;
-IfNotExist C:\V-Projects\Web-Applications\Conduit-Controller\Assets
-    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets
-IfNotExist C:\V-Projects\Web-Applications\Conduit-Controller\Libs
-    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Libs
-;=======================================================================================;
 #SingleInstance Force
 #NoEnv
 SetWorkingDir C:\V-Projects\Web-Applications\Conduit-Controller
 SetBatchLines -1
 
-;;Create a JSON file
-JSON_CONTENT = 
-(LTrim
-{
-  "name":					"My App",
-  "width":					655,
-  "height":					480,
-  "protocol":				"app",
-  "protocol_call":			"app_call",
-  "html_url":				"index.html",
-  "NavComplete_call":		"app_page",
-  "Nav_sounds":				false,
-  "fullscreen":				false,
-  "DPI_Aware":				true,
-  "ZoomLevel":				100,
-  "AllowZoomLevelChange":	true
-}
-)
+;=======================================================================================;
+;;;Start HTML UI
+#Include C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Libs\Webapp.ahk
+#Include C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Libs\JSON_ToObj.ahk
+__Webapp_AppStart:
+;<< Header End >>
 
-FileAppend, %JSON_CONTENT%, C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\webapp.json
+webCtrl := getDOM()     ;get HTML DOM object
+
+Gui -MaximizeBox -Resize
+Return      ;cut auto run main thread.
+
+;Custom protocol's url event handler
+app_call(args) {
+	MsgBox %args%
+	if InStr(args,"msgbox/hello")
+		MsgBox Hello world!
+	else if InStr(args,"soundplay/ding")
+		SoundPlay, %A_WinDir%\Media\ding.wav
+}
+
+;Function to run when page is loaded
+app_page(NewURL) {
+	wb := getDOM()
+	
+	setZoomLevel(100)
+	
+	if InStr(NewURL,"index.html") {
+		;disp_info()
+	}
+}
