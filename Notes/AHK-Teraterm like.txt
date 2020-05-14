@@ -3,7 +3,7 @@
 setbatchlines -1
 
 inputHistory := ""
-header := "- - - - - - TERMINAL OUTPUT - - - - - -" . chr(10) . chr(10) . ">>"
+header := ""
 
 gui main:add,text,w200 x10 center,Terminal Input
 gui main:add,text,wp x+10 center,Terminal Output
@@ -18,7 +18,7 @@ RS232_Baud     	:= 115200
 RS232_Parity   	:= "N"
 RS232_Data     	:= 8
 RS232_Stop     	:= 1
-RS232_Delay    	:= 100 ;decrease this value for lower latency 
+RS232_Delay    	:= 0 ;decrease this value for lower latency 
 
 
 RS232_Settings   = %RS232_Port%:baud=%RS232_Baud% parity=%RS232_Parity% data=%RS232_Data% stop=%RS232_Stop% dtr=Off	
@@ -26,6 +26,9 @@ RS232_FileHandle:= RS232_Initialize(RS232_Settings)
 send_serial(header)
 setTimer, readData, -%RS232_Delay%
 return
+
+mainGuiClose:
+    ExitApp
 
 ~Backspace::
 	;clear the terminals
@@ -42,8 +45,12 @@ Send:
 	changes := ""
 	changes := strReplace(gSendField,inputHistory) ;allows for copy paste events
 	inputHistory := gSendField	
-	changes := strReplace(changes,"`n","`n>>") ;modify for output formatting	
-	send_serial(changes)
+	Loop Parse, changes
+{	Var := Asc(SubStr(A_LoopField,0)) ; Get the key that was pressed and convert it to its ASCII code
+	; msgbox %Var%
+	
+}
+RS232_Write(RS232_FileHandle,Var) ; Send it out the RS232 COM port
 return
 
 readData:
@@ -155,13 +162,33 @@ send_serial(data)
 
 ;###### Normal Key Presses ######
 f4::
-data := "m.f6000"
+data := "ati"
 Loop Parse, Data
 {	Var := Asc(SubStr(A_LoopField,0)) ; Get the key that was pressed and convert it to its ASCII code
 	; msgbox %Var%
 	RS232_Write(RS232_FileHandle,Var) ; Send it out the RS232 COM port
 }
 RS232_Write(RS232_FileHandle,13) ; Send it out the RS232 COM port
+Return
+
+f5::
+    RS232_Write(RS232_FileHandle,13) ; Send it out the RS232 COM port
+Return
+
+f6::
+    RS232_Write(RS232_FileHandle,24) ; Send it out the RS232 COM port
+Return
+
+f7::
+    RS232_Write(RS232_FileHandle,97) ; Send it out the RS232 COM port
+Return
+
+f8::
+    RS232_Write(RS232_FileHandle,116) ; Send it out the RS232 COM port
+Return
+
+f9::
+    RS232_Write(RS232_FileHandle,177) ; Send it out the RS232 COM port
 Return
 
 ;###### Shift Key Presses ######

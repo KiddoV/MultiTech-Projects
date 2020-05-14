@@ -177,7 +177,6 @@ mpause 1000
 :DRIVE_TEST
 timeout = 7
 flushrecv
-wait '#'
 sendln 'df'
 wait '/dev/sda1' '/dev/sdb1'
 if result=0 then
@@ -213,7 +212,6 @@ if result=0 then
     end
 endif
 mpause 500
-wait '#'
 sendln "md5sum /bin/bash |awk '{print $1}'"
 strconcat cksum1 inputstr
 pause 1
@@ -928,31 +926,36 @@ if is240L=0 goto RESULT_LOGGING
 if is246L=0 goto GPS_TEST
 if is247L=0 goto GPS_TEST
 
-:GPS_TEST
 try = 0
-timeout = 70
+:GPS_TEST
+timeout = 7
 mpause 500
 flushrecv
 sendln 'gpspipe -r'
-wait '4505.' '4506.' 'could not connect'
-if result=0 || result=3 then
-   try = try + 1
-   if try < 2 then
+wait '$GPGGA' '$GPZDA'
+if result = 0 then
+    try = try + 1
+    if try < 2 then
    	   send 3
 	   wait '#'
-	   sendln './gpsd stop'
+	   sendln '/etc/init.d/gpsd stop'
 	   wait '#'
-	   sendln './gpsd start'
+	   sendln '/etc/init.d/gpsd start'
 	   wait 'pps pps1: source "/dev/ttyXRUSB2" added'
 	   send 3
 	   wait '#'
 	   goto GPS_TEST
-   endif
-   messagebox 'UNABLE TO GET GPS LOCATION' 'GPS TEST FAILURE'
-   try = 0
-   disconnect
-   closett
-   end
+	endif
+try = 0
+elseif result > 0 then
+	 timeout = 70
+	 wait '4505.' '4506.' 'could not connect'
+	 if result=0 || result=3 then
+   	 	messagebox 'UNABLE TO GET GPS LOCATION' 'GPS TEST FAILURE'
+   		disconnect
+   		closett
+   		end
+	 endif
 endif
 send 3
 wait '#'
