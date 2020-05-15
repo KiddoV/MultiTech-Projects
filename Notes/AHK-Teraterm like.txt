@@ -6,9 +6,9 @@ inputHistory := ""
 header := ""
 
 gui main:add,text,w200 x10 center,Terminal Input
-gui main:add,text,wp x+10 center,Terminal Output
+gui main:add,text,w300 x+10 center,Terminal Output
 gui main:add,edit,wp h100 y+5 x10 vgSendField gSend,
-gui main:add,edit,wp h100 yp x+10 vgRecieveField readonly,
+gui main:add,edit,wp h100 yp x+10 hWndhTermOut vgRecieveField readonly,
 gui main:show,,SimpleTerm
 
 ;attempt to connect to serial port
@@ -80,6 +80,8 @@ readData:
 		gui,Main:Submit,Nohide
 		textRecieved := gRecieveField . textRecieved
 		guiControl,Main:,gRecieveField,%textRecieved%
+        
+        SendMessage, 0x115,7,,,ahk_id %hTermOut%  ;WM_VSCROLL
 	}
 	setTimer, readData, -%RS232_Delay%
 return
@@ -189,6 +191,17 @@ Return
 
 f9::
     RS232_Write(RS232_FileHandle,177) ; Send it out the RS232 COM port
+Return
+
+
+f10::
+data := "microcom /dev/modem_at0"
+Loop Parse, Data
+{	Var := Asc(SubStr(A_LoopField,0)) ; Get the key that was pressed and convert it to its ASCII code
+	; msgbox %Var%
+	RS232_Write(RS232_FileHandle,Var) ; Send it out the RS232 COM port
+}
+RS232_Write(RS232_FileHandle,13) ; Send it out the RS232 COM port
 Return
 
 ;###### Shift Key Presses ######
