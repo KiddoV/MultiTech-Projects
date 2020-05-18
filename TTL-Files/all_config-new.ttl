@@ -101,6 +101,13 @@ strconcat out '1a2b3c4d5e6f7a8b9a0b1c2d3e4f5a6b'
 
 sendln 'mts-id-eeprom ' out
 wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+wait 'FF:FF' 'FFFFFFFFFFF' 'xFF\xFF\xFF'
+if result > 0 then
+    messagebox 'MTCDT CONFIGURATION FAILED!!!' 'FAILED CONFIGURATION'
+    end
+endif
+mpause 500
 flushrecv
 sendln '/etc/init.d/./mts-io stop'
 wait '#'

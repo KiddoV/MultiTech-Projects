@@ -252,7 +252,12 @@ configStep(mtcdtType, itemN, mtcType, radType) {
     ControlSend, Edit1, {Enter}, ALL DATAS
     ControlClick Button1, ALL DATAS, , Left, 2
     
-    WinWait FINISHED CONFIGURATION
+    WinWait FINISHED CONFIGURATION|FAILED CONFIGURATION
+    IfWinExist FAILED CONFIGURATION
+    {
+        GuiControl , , process1, %timeImg%
+        return 0
+    }
     Sleep 700
     ControlClick Button1, FINISHED CONFIGURATION, , Left, 2
     GuiControl , , process1, %checkImg%

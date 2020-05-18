@@ -45,6 +45,20 @@ if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-
 strcompare freq 'US915'
 if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin'
 
+:WRITE_BLANK_LINE
+isFirstNode = -1
+strcompare xdotMainPort '101'
+if result=0 isFirstNode = result
+strcompare xdotMainPort '109'
+if result=0 isFirstNode = result
+strcompare xdotMainPort '117'
+if result=0 isFirstNode = result
+if isFirstNode = 0 then
+   fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
+   filewrite fhandle #13#10
+   fileclose fhandle
+endif
+
 :CONNECT
 strcompare param9 'newTTVersion'
 isTTNewVersion = result
