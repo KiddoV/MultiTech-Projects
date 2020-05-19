@@ -405,8 +405,7 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     ToDebugEach:
         IfNotExist %driveName%:\
         {
-            msg = Drive (%driveName%:\) does not exist!
-            addTipMsg(msg, "ERROR", 2000)
+            MsgBox 16, ERROR, Drive (%driveName%:\) does not exist!
             Return
         }
         WinKill COM%mainPort%
@@ -564,19 +563,24 @@ GetAddNew:
     WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
     
     Gui, adNew: Default
+    
     Gui, adNew: +ToolWindow +AlwaysOnTop +hWndhadNewWnd
+    Gui, adNew: Add, GroupBox, xm+0 ym+0 w230 h60 Section, Option 1
     Gui Font, Bold
-    Gui, adNew: Add, Text, x10 y10, Add New From Current Editor
-    Gui, adNew: Add, Text, x10 y60, Add New From A File
+    Gui, adNew: Add, Text, xs+10 ys+15, Add New From Current Editor
+    Gui, Font
+    Gui, adNew: Add, Text, xs+10 ys+35, Enter LOT CODE:
+    Gui, adNew: Add, Edit, xs+100 ys+32 w75 h20 vinLotCode +Number Limit10
+    Gui, adNew: Add, Button, xs+185 ys+32 h20 gSaveLot1, Save
+    
+    Gui, adNew: Add, GroupBox, xm+0 ym+65 w230 h60 Section, Option 2
+    Gui Font, Bold
+    Gui, adNew: Add, Text, xs+10 ys+15, Add New From A File
     Gui, Font
     
-    Gui, adNew: Add, Text, x15 y30, Enter LOT CODE:
-    Gui, adNew: Add, Edit, x105 y27 w75 h20 vinLotCode +Number Limit10
-    Gui, adNew: Add, Button, x190 y27 h20 gSaveLot1, Save
-    Gui Add, Text, x20 y55 w200 h2 +0x10
-    Gui, adNew: Add, Button, x15 y80 h20 gBrowseLot, Browse...
-    Gui, adNew: Add, Text, x75 y83 w110 vfilePathLabel,
-    Gui, adNew: Add, Button, x190 y80 h20 gSaveLot2, Save
+    Gui, adNew: Add, Button, xs+10 ys+35 h20 gBrowseLot, Browse...
+    Gui, adNew: Add, Text, xs+70 ys+40 w110 vfilePathLabel,
+    Gui, adNew: Add, Button, xs+185 ys+35 h20 gSaveLot2, Save
     
     mainY := mainY + 30
     Gui, adNew: Show, x%mainX% y%mainY%, Add New Node List
@@ -635,6 +639,7 @@ GetAddNew:
         Gui, 1: Default
         FileRead, fileContent, %selectedFile%
         GuiControl Text, editNode, %fileContent%
+        Gui, adNew: Destroy
         updateLotCodeList()
     Return
     
@@ -655,6 +660,7 @@ Return
 #IfWinActive, PC3
 ^s::
     saveNodesToWrite()
+#IfWinActive
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
@@ -835,7 +841,7 @@ GuiContextMenu:
     Gui, 1: Default    
     GuiControlGet, hwndVar, Hwnd , %A_GuiControl%
     RegExMatch(A_GuiControl, "\d+$", num)
-    numNo0 := StrReplace(num, 0, "")
+    numNo0 := LTrim(num, "0")
     isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
     isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
     isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
@@ -1226,10 +1232,9 @@ MakeShort(Long, ByRef LoWord, ByRef HiWord) {
 
 ;;;;;;;;;;;;;;;;NOT-FOR-USER HOT KEYS;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#IfWinActive
 #^!+0::
     index := startedIndex
-    Loop, 8
+    Loop, %totalPort%
     {
         mainPort := xdotProperties[index].mainPort
         ctrlVar := xdotProperties[index].ctrlVar
@@ -1243,7 +1248,7 @@ Return
 
 #^!+9::
     index := startedIndex
-    Loop, 8
+    Loop, %totalPort%
     {
         mainPort := xdotProperties[index].mainPort
         ctrlVar := xdotProperties[index].ctrlVar

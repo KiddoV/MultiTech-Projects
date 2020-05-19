@@ -23,6 +23,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pla
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_brown.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_blue.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\circle_green.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\circle_green.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\folder-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
@@ -74,7 +75,7 @@ Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
 Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
-
+Global circlImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\circle_green.png"
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -117,37 +118,23 @@ Gui Font
 
 Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
 Gui Add, Text, xs+10 ys+20, Test firmware version: 3.0.2-debug
-Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run tests on %totalGoodPort% ports
-Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
+Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioTestToggle, Run tests on %totalGoodPort% ports
+Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioTestToggle, Reprogram %totalGoodPort% ports to debug mode
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
-Gui Add, GroupBox, xm+0 ym+205 w200 h245 Section, EUID Write
-Gui Add, Text, xs+10 ys+20, Select Frequency:
+Gui Add, GroupBox, xm+0 ym+205 w200 h285 Section, EUID Write
+Gui Add, Radio, xs+10 ys+20 vnormalWRadio Group +Checked gradioWriteToggle, Normal
+Gui Add, Radio, xs+70 ys+20 vecoWRadio gradioWriteToggle, ECO
+Gui Add, Text, xs+10 ys+40, Select Frequency:
 For each, item in allFregs
     freq .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, xs+110 ys+17 w80 vchosenFreq, %freq%
-;index := startedIndex
-;xVarStarted := 5
-;yVarStarted := 50
-;Loop, 8
-;{
-    ;mainPort := xdotProperties[index].mainPort
-    ;Gui Font, Bold,
-    ;Gui Add, Text, xs+5 ys+%yVarStarted% vportLabel%index%, P%mainPort%:
-    ;Gui Font
-    ;Gui Add, Edit, xs+45 ys+%yVarStarted% w150 h16 +ReadOnly vnodeToWrite%index%,
-    ;
-    ;index++
-    ;yVarStarted += 20
-;}
+Gui Add, DropDownList, xs+110 ys+37 w80 vchosenFreq, %freq%
 Gui, Font, c0c63ed Bold
-Gui Add, ListView, xs+5 ys+43 w190 h164 vidListView +Grid +NoSortHdr, #|Node ID
+Gui Add, ListView, xs+5 ys+63 r9 w190 vidListView +Grid +NoSortHdr, #|Node ID|              |
 Loop, 8
-    LV_Add("", A_Index)
+    LV_Add("", A_Index, "008000000401C228")
 Gui, Font
-
-Gui Add, Button, xs+73 ys+211 w55 h28 gwriteAll, START
-
+Gui Add, Button, xs+73 ys+250 w55 h28 gwriteAll, START
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
 
@@ -972,9 +959,18 @@ replaceNodeLine(lineNum, replaceStr := "") {
     GuiControl Text, editNode, %newListEditNodes%
 }
 
-radioToggle() {
+radioTestToggle() {
     resetXdotBttns()
     deleteOldCacheFiles()
+}
+
+radioWriteToggle() {
+    GuiControlGet, isNormalWChecked, , normalWRadio
+    GuiControlGet, isEcoWChecked, , ecoWRadio
+    
+    if (isNormalWChecked) {
+       
+    }
 }
 
 browseNode() {

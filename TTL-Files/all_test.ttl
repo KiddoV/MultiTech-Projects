@@ -391,11 +391,15 @@ elseif isLAT3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
 elseif isLAT1=0 then
 	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+	if result = 0 then
+	    sendln 'at#tempcfg=-40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+		goto temp_setting
+	endif
 elseif isLVW2=0 then
 	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3'
-elseif isLSB3=0 then
+elseif isLSB3=0 || isLDC3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
-	if result = 0 then
+	if result = 0 && isLSB3=0 then
 	    sendln '#TEMPCFG: -40,-15,55,85'
 		goto temp_setting
 	endif

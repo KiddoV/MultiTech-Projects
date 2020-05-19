@@ -397,6 +397,10 @@ elseif isLAT3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
 elseif isLAT1=0 then
 	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+	if result = 0 then
+	    sendln 'at#tempcfg=-40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
+		goto temp_setting
+	endif
 elseif isLVW2=0 then
 	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,95,0,93,100,3,98,528,3'
 elseif isLSB3=0 || isLDC3=0 then
@@ -859,6 +863,8 @@ goto SHORTING_MTCDT
 
 ;;;;;;;;;;;
 :csq_check
+expectedRSSI = 7
+if isH5 = 0 expectedRSSI = 4
 mpause 500
 sendln 'AT+CSQ'
 wait '99'
@@ -879,7 +885,7 @@ strremove rssi3 3 2
 str2int strvar rssi3
 strtrim rssi3 ','
 statusbox rssi3 'RSSI'
-if strvar >= 7 then
+if strvar >= expectedRSSI then
     mpause 1000
 else
     beep
@@ -1048,16 +1054,11 @@ closesbox
 send 13
 
 :write_data_to_file
-mpause 1000
+mpause 500
 fileopen fhandle 'C:\temp\wifimacinfo.txt' 1
 filewrite fhandle #13#10
-filewrite fhandle imei
-filewrite fhandle ","
-filewrite fhandle ","
-filewrite fhandle wifiAddr
-filewrite fhandle ","
-filewrite fhandle ","
-filewrite fhandle bluetoothAddr
+sprintf2 dataStr '%s,,%s,,%s' imei wifiAddr bluetoothAddr
+filewrite fhandle dataStr
 fileclose fhandle
 pause 1
 
@@ -1078,34 +1079,13 @@ if result <> 0 then
 endif
 strconcat productId param2
 strconcat productId ' '
-
 getdate date "%Y/%m/%d"
 getdate time "%H:%M:%S"
+
 fileopen fhandle 'C:\DEVICE_TEST_RECORDS\all-mtcdt-test-records.txt' 1
-
 filewrite fhandle #13#10
-filewrite fhandle date
-filewrite fhandle ",,"
-filewrite fhandle time
-filewrite fhandle ",,"
-filewrite fhandle itemNum
-filewrite fhandle ",,"
-filewrite fhandle productId
-filewrite fhandle ",,"
-filewrite fhandle tempstr
-filewrite fhandle ",,"
-filewrite fhandle imei
-filewrite fhandle ",,"
-filewrite fhandle radioVersion
-filewrite fhandle ",,"
-filewrite fhandle telModuleVer
-filewrite fhandle ",,"
-filewrite fhandle fwBuild
-filewrite fhandle ",,"
-filewrite fhandle wifiAddr
-filewrite fhandle ",,"
-filewrite fhandle bluetoothAddr
-
+sprintf2 logStr '%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s' date time itemNum productId tempstr imei radioVersion telModuleVer fwBuild wifiAddr bluetoothAddr
+filewrite fhandle logStr
 fileclose fhandle 
 
 :TEST_DONE
