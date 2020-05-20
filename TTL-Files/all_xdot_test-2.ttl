@@ -32,32 +32,30 @@ if isTTNewVersion = 0 then
     sprintf2 cmdStr '/C=%s' param3
     connect cmdStr
     if result=1 goto connection_failed
+    if isSingleTest = 0 then
+        statusbox 'CONNECTED SUCCESSFULLY' 'PASSED1'
+    	mpause 300
+		closesbox
+	endif
 endif
 
 :CHECK_CONNECTION
 mpause 300
 sendln 'at'
 waitln 'OK'
-if result=1 then
-    if isSingleTest = 0 then
-        statusbox 'CONNECTED SUCCESSFULLY' 'PASSED1'
-    	mpause 300
-		closesbox
-	endif 
-endif
 if result=0 then
     connFail=connFail+1
     if connFail < 2 then
         goto REPROGRAM
     endif
-    :connection_failed
+	:connection_failed
     closett
     sprintf2 msg1 'COM PORT %s is not responding!' xdotMainPort
-    mpause 300
     statusbox msg1 portNumberFailureMsg
     testStatus = 'CONNECTION FAILED'
     connFail=0
     goto WRITE_RESULT_DATA
+    end
 endif
 
 :CHECK_CURRENT_PROGRAM

@@ -12,8 +12,6 @@ IfNotExist C:\V-Projects\XDot-Controller\INI-Files
 IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
     FileCreateDir C:\V-Projects\XDot-Controller\EXE-Files
 IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
-    FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
-IfNotExist C:\V-Projects\XDot-Controller\AHK-Lib
     FileCreateDir C:\V-Projects\XDot-Controller\AHK-Lib
 IfNotExist Z:\XDOT\Saved-Nodes
     FileCreateDir Z:\XDOT\Saved-Nodes
@@ -33,9 +31,6 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xd
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
-
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk, C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
-, 1
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, 1
@@ -76,7 +71,7 @@ Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
-#Include C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -141,6 +136,7 @@ Loop, 8
     yVarStarted += 20
 }
 Gui Add, Button, xs+73 ys+211 w55 h28 gwriteAll, START
+Gui Add, Button, xs+175 ys+211 w20 h28 ggiveBackToEdit, >
 
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
@@ -185,12 +181,15 @@ GuiControl,, lineNo, % lines
 }
 
 CheckFileChange:
-Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
-if(newFileContent != lastFileContent) {
-    lastFileContent := newFileContent
-    loadNodesToWrite()
+IfExist %remotePath%
+{
+    Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
+    if(newFileContent != lastFileContent) {
+        lastFileContent := newFileContent
+        loadNodesToWrite()
+    }
 }
-return
+Return
 
 GuiClose:
     MsgBox 36, , Are you sure you want to quit?
@@ -232,38 +231,46 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     Gui xdot: Add, GroupBox, xm+0 ym+0 w200 h70 Section, XDot-%num% Connecting Infomation
     Gui Font, Bold
     Gui xdot: Add, Text, xs+8 ys+20, • COM PORT: %mainPort%
-    Gui xdot: Add, Link, xs+145 ys+20 gConnectMainPort, <a href="#">Connect</a>
+    Gui xdot: Add, Link, xs+145 ys+19 gConnectMainPort, <a href="#">Connect</a>
     Gui xdot: Add, Text, xs+8 ys+35, • BREAK PORT: %breakPort%
     Gui xdot: Add, Text, xs+8 ys+50, • DRIVE NAME: %driveName%
+    Gui xdot: Add, Link, xs+145 ys+49 gOpenXdotFolder, <a href="#">Open</a>
     Gui Font
-    Gui xdot: Add, GroupBox, xm+0 ym+70 w200 h120 Section, Functional Test
-    Gui xdot: Add, Text, xs+110 ys+20, Connecting
-    Gui xdot: Add, Text, xs+110 ys+40, Programmable
-    Gui xdot: Add, Text, xs+110 ys+60, Joinning
-    Gui xdot: Add, Text, xs+110 ys+80, Ping
-    Gui xdot: Add, Text, xs+110 ys+100, RSSI
+    
+    ;Gui xdot: Add, GroupBox, xm+0 ym+70 w200 h120 Section, Functional Test
+    ;Gui xdot: Add, GroupBox, xm+0 ym+240 w200 h130 Section, EUID Write
+    
+    Gui xdot: Add, Tab3, xm+0 ym+75 w200 h130 +Theme -Background Section, Functional Test|EUID Write
+    Gui xdot: Tab, 1
+    Gui xdot: Add, Text, xs+110 ys+30, Connecting
+    Gui xdot: Add, Text, xs+110 ys+50, Programmable
+    Gui xdot: Add, Text, xs+110 ys+70, Joinning
+    Gui xdot: Add, Text, xs+110 ys+90, Ping
+    Gui xdot: Add, Text, xs+110 ys+110, RSSI
     
     ;Image indicators
-    Gui xdot: Add, Picture, xs+80 ys+18 w17 h17 +BackgroundTrans vprocess1, 
-    Gui xdot: Add, Picture, xs+80 ys+38 w17 h17 +BackgroundTrans vprocess2, 
-    Gui xdot: Add, Picture, xs+80 ys+58 w17 h17 +BackgroundTrans vprocess3, 
-    Gui xdot: Add, Picture, xs+80 ys+78 w17 h17 +BackgroundTrans vprocess4, 
-    Gui xdot: Add, Picture, xs+80 ys+98 w17 h17 +BackgroundTrans vprocess5, 
+    Gui xdot: Add, Picture, xs+80 ys+28 w17 h17 +BackgroundTrans vprocess1, 
+    Gui xdot: Add, Picture, xs+80 ys+48 w17 h17 +BackgroundTrans vprocess2, 
+    Gui xdot: Add, Picture, xs+80 ys+68 w17 h17 +BackgroundTrans vprocess3, 
+    Gui xdot: Add, Picture, xs+80 ys+88 w17 h17 +BackgroundTrans vprocess4, 
+    Gui xdot: Add, Picture, xs+80 ys+108 w17 h17 +BackgroundTrans vprocess5, 
     buttonLabel1 := (isBadXdot = 1 && RegExMatch(data, "TEST") > 0) ? "RE-RUN" : "RUN"
-    Gui xdot: Add, Button, w50 h45 xs+10 ys+45 gFunctionalTestEach, %buttonLabel1%
+    Gui xdot: Add, Button, w50 h45 xs+10 ys+50 gFunctionalTestEach, %buttonLabel1%
+    Gui xdot: Tab
     
-    Gui xdot: Add, GroupBox, xm+0 ym+190 w200 h50 Section, Programming
-    Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
-    
-    Gui xdot: Add, GroupBox, xm+0 ym+240 w200 h130 Section, EUID Write
-    Gui xdot: Add, Text, xs+5 ys+25, STAT:
-    Gui xdot: Add, Text, xs+5 ys+45, FREQ:
-    Gui xdot: Add, Text, xs+5 ys+65, EUID:
-    Gui xdot: Add, Edit, xs+45 ys+23 w150 h16 vxStatus +ReadOnly, READY
-    Gui xdot: Add, Edit, xs+45 ys+43 w150 h16 vxFreq,
-    Gui xdot: Add, Edit, xs+45 ys+63 w150 h16 vxEUID,
+    Gui xdot: Tab, 2
+    Gui xdot: Add, Text, xs+5 ys+35, STAT:
+    Gui xdot: Add, Text, xs+5 ys+55, FREQ:
+    Gui xdot: Add, Text, xs+5 ys+75, EUID:
+    Gui xdot: Add, Edit, xs+45 ys+33 w148 h16 vxStatus +ReadOnly, READY
+    Gui xdot: Add, Edit, xs+45 ys+53 w148 h16 vxFreq,
+    Gui xdot: Add, Edit, xs+45 ys+73 w148 h16 vxEUID,
     buttonLabel2 := (isBadXdot = 1 && RegExMatch(data, "WRITE") > 0) ? "RE-RUN" : "RUN"
-    Gui xdot: Add, Button, xs+75 ys+90 w50 h30 vwriteBttnEach gWriteIDEach, %buttonLabel2%
+    Gui xdot: Add, Button, xs+75 ys+95 w50 h30 vwriteBttnEach gWriteIDEach, %buttonLabel2%
+    Gui xdot: Tab
+    
+    Gui xdot: Add, GroupBox, xm+0 ym+205 w200 h55 Section, Programming
+    Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
     
     ;;Labels or Functions to run before gui start
     if (RegExMatch(data, "CONNECTION FAILED") > 0) {
@@ -408,6 +415,8 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
             MsgBox 16, ERROR, Drive (%driveName%:\) does not exist!
             Return
         }
+        
+        changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
         WinKill COM%mainPort%
         Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
         ;msg = Reprogramming on PORT %mainPort%...Please wait!
@@ -415,6 +424,11 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         ;addTipMsg(msg, title, 17000)
         ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
         ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+        WinWait %mainPort% FAILURE|%mainPort% PASSED
+        ifWinExist, %mainPort% FAILURE
+            changeXdotBttnIcon(ctrlVar, "BAD")
+        ifWinExist, %mainPort% PASSED
+            changeXdotBttnIcon(ctrlVar, "GOOD")
     Return
     
     WriteIDEach:
@@ -473,6 +487,15 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         IfWinNotExist COM%mainPort%
             Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /C=%mainPort%, , Hide
         WinActivate COM%mainPort%
+    Return
+    
+    OpenXdotFolder:
+        IfNotExist %driveName%:\
+        {
+            MsgBox 16, ERROR, Drive (%driveName%:\) does not exist!
+            Return
+        }
+        Run, %driveName%:\
     Return
 }
 Return
@@ -635,13 +658,19 @@ GetAddNew:
             }
         }
         
+        fileNameNoEx := StrReplace(fileName, ".txt", "")
+        if(RegExMatch(fileNameNoEx, "^(\d){10}$") = 0) {
+            MsgBox 16, ERROR, Wrong Node File!`nPlease pick a file with this format: ##########.txt! (EX: 1234567890.txt)
+            return
+        }
+        
         FileCopy, %selectedFile%, %remotePath%\Saved-Nodes\%fileName%
         Gui, 1: Default
         FileRead, fileContent, %selectedFile%
         GuiControl Text, editNode, %fileContent%
         Gui, adNew: Destroy
         updateLotCodeList()
-    Return
+    Return 
     
     adNewGuiEscape:
     adNewGuiClose:
@@ -749,9 +778,10 @@ runAll() {
 writeAll() {
     GuiControlGet, chosenFreq   ;Get value from DropDownList
     if (chosenFreq = "") {
-        MsgBox 16, ,Please select a FREQUENCY!
+        MsgBox 4144, WARNING, Please select a FREQUENCY!
         return
     }
+
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, Start Writing, Begin EUID WRITE on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
@@ -834,6 +864,23 @@ writeAll() {
         return
 }
 
+giveBackToEdit() {
+    MsgBox 0x24, Confirmation, Are you sure you want to import all nodes back to edit field? 
+    IfMsgBox Yes
+    {
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            GuiControlGet, nodeToWrite, , nodeToWrite%index%
+            if (nodeToWrite != "")
+                writeNodeLine(index, nodeToWrite)
+            index++
+        }
+        saveNodesToWrite()
+    }
+    IfMsgBox No
+        return
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 ;Launched whenever the user right-clicks on gui controls
@@ -965,7 +1012,22 @@ replaceNodeLine(lineNum, replaceStr := "") {
     listEditNodeArray := StrSplit(listEditNodes, "`n", "`t")    ;Convert string to array
     listEditNodeArray[lineNum] := replaceStr    ;Replace text by index
     
-    newListEditNodes := ""              ;Convert array back to string
+    ;Convert array back to string
+    newListEditNodes := ""
+    For key, var in listEditNodeArray
+        newListEditNodes .= var "`n"
+    newListEditNodes := RTrim(newListEditNodes, "`n")     ;remove last while space
+    GuiControl Text, editNode, %newListEditNodes%
+}
+
+writeNodeLine(lineNum, writeStr) {
+    GuiControlGet listEditNodes, , editNode
+    listEditNodeArray := StrSplit(listEditNodes, "`n", "`t")    ;Convert string to array
+    
+    listEditNodeArray.InsertAt(lineNum, writeStr)   ;Append text to a specific index
+    
+    ;Convert array back to string
+    newListEditNodes := ""
     For key, var in listEditNodeArray
         newListEditNodes .= var "`n"
     newListEditNodes := RTrim(newListEditNodes, "`n")     ;remove last while space
