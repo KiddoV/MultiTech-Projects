@@ -72,6 +72,7 @@ Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\LIB_xDot_controller.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -111,7 +112,7 @@ Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot, P08
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
-Gui Add, Text, xs+10 ys+20, Test firmware version: 3.0.2-debug
+Gui Add, Text, cgray xs+10 ys+20, Test firmware version: 3.0.2-debug
 Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run tests on %totalGoodPort% ports
 Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
@@ -120,7 +121,7 @@ Gui Add, GroupBox, xm+0 ym+205 w200 h245 Section, EUID Write
 Gui Add, Text, xs+10 ys+20, Select Frequency:
 For each, item in allFregs
     freq .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, xs+110 ys+17 w80 vchosenFreq, %freq%
+Gui Add, DropDownList, xs+105 ys+17 w85 vchosenFreq, %freq%
 index := startedIndex
 xVarStarted := 5
 yVarStarted := 50
@@ -128,15 +129,16 @@ Loop, 8
 {
     mainPort := xdotProperties[index].mainPort
     Gui Font, Bold,
-    Gui Add, Text, xs+5 ys+%yVarStarted% vportLabel%index%, P%mainPort%:
+    Gui Add, Text, xs+5 ys+%yVarStarted% vportLabel%index%, P%mainPort%
     Gui Font
-    Gui Add, Edit, xs+45 ys+%yVarStarted% w150 h16 +ReadOnly vnodeToWrite%index%,
+    Gui Add, Edit, xs+37 ys+%yVarStarted% w144 h16 +ReadOnly vnodeToWrite%index%,
     
     index++
     yVarStarted += 20
 }
+Gui Add, Button, xs+182 ys+50 w15 h155 ggiveBackToEdit, >
+Gui Add, Text, cgray xs+5 ys+225, FW: v3.2.1
 Gui Add, Button, xs+73 ys+211 w55 h28 gwriteAll, START
-Gui Add, Button, xs+175 ys+211 w20 h28 ggiveBackToEdit, >
 
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
@@ -272,6 +274,9 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
     Gui xdot: Add, GroupBox, xm+0 ym+205 w200 h55 Section, Programming
     Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
     
+    if (RegExMatch(data, "WRITE") > 0)
+        GuiControl, xdot: Choose, SysTabControl321, 2   ;Focus on tab 2
+        
     ;;Labels or Functions to run before gui start
     if (RegExMatch(data, "CONNECTION FAILED") > 0) {
         GuiControl, , process1, %xImg%
@@ -348,58 +353,17 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
 
         ;;;Track processes
         Gui xdot: Default
-        ;Connecting
-        GuiControl, , process1, %play1Img%
-        WinWait PASSED1|%mainPort% FAILURE
-        IfWinExist %mainPort% FAILURE
+        Loop, 5
         {
-            GuiControl, , process1, %xImg%
-            goto XdotFailed
+           GuiControl, , process%A_Index%, %play1Img%
+           WinWait PASSED%A_Index%|%mainPort% FAILURE
+           IfWinExist %mainPort% FAILURE
+           {
+               GuiControl, , process%A_Index%, %xImg%
+               goto XdotFailed
+           }
+           GuiControl, , process%A_Index%, %checkImg%
         }
-        GuiControl, , process1, %checkImg%
-        
-        ;Programable
-        GuiControl, , process2, %play1Img%
-        WinWait PASSED2|%mainPort% FAILURE
-        IfWinNotExist PASSED2
-        {
-            WinWait %mainPort% FAILURE
-            GuiControl, , process2, %xImg%
-            goto XdotFailed
-        }
-        GuiControl, , process2, %checkImg%
-        
-        ;Joinning
-        GuiControl, , process3, %play1Img%
-        WinWait PASSED3|%mainPort% FAILURE
-        IfWinNotExist PASSED3
-        {
-            WinWait %mainPort% FAILURE
-            GuiControl, , process3, %xImg%
-            goto XdotFailed
-        }
-        GuiControl, , process3, %checkImg%
-        
-        ;Ping Test
-        GuiControl, , process4, %play1Img%
-        WinWait PASSED4|%mainPort% FAILURE
-        IfWinNotExist PASSED4
-        {
-            WinWait %mainPort% FAILURE
-            GuiControl, , process4, %xImg%
-            goto XdotFailed
-        }
-        GuiControl, , process4, %checkImg%
-        ;RSSI Test
-        GuiControl, , process5, %play1Img%
-        WinWait PASSED5|%mainPort% FAILURE
-        IfWinNotExist PASSED5
-        {
-            WinWait %mainPort% FAILURE
-            GuiControl, , process5, %xImg%
-            goto XdotFailed
-        }
-        GuiControl, , process5, %checkImg%
         
         changeXdotBttnIcon(ctrlVar, "GOOD")
     Return
@@ -685,6 +649,8 @@ Return
     ExitApp
 ^t::
     runAll()
+^w::
+    writeAll()
 #IfWinActive, PC1
 ^s::
     saveNodesToWrite()
@@ -721,7 +687,7 @@ runAll() {
                     WinKill COM%mainPort%
                     ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
                     IfWinExist PROGRAMMING
-                        Sleep 8000
+                        Sleep 9000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
@@ -760,7 +726,7 @@ runAll() {
                     
                     WinKill COM%mainPort%
                     IfWinExist PROGRAMMING
-                        Sleep 8000
+                        Sleep 9000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
@@ -782,7 +748,7 @@ writeAll() {
     }
 
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, Start Writing, Begin EUID WRITE on all %totalGoodPort% ports?
+    MsgBox 0x81, RUN EUID WRITE, Begin EUID WRITE on all %totalGoodPort% ports?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
@@ -821,7 +787,7 @@ writeAll() {
             if (xStatus = "G") {
                 WinKill COM%mainPort%
                 IfWinExist PROGRAMMING
-                        Sleep 8000
+                    Sleep 9000
                 changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
                 Gui, Font, c0c63ed Bold
                 GuiControl, Font, portLabel%index%
@@ -833,7 +799,7 @@ writeAll() {
                 
                 Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, ,Hide
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
-                Sleep 2500
+                Sleep 3000
             }
             
              if (index = 24) {
@@ -876,12 +842,13 @@ giveBackToEdit() {
             index++
         }
         saveNodesToWrite()
+        resetNodesToWrite()
     }
     IfMsgBox No
         return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;Additional Labels;;;;;;;;;;;;;;;;;
 ;Launched whenever the user right-clicks on gui controls
 GuiContextMenu:
     Gui, 1: Default    
@@ -930,302 +897,14 @@ GuiContextMenu:
         totalGoodPort--
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Disable, portLabel%numNo0%
+        GuiControl, Disable, nodeToWrite%numNo0%
         xdotProperties[num].status := "D"
         GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
         GuiControl, Text, %A_GuiControl%,    ;Delete text
         GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
     }
 Return
-
-resetXdotBttns() {
-    Loop, 24
-    {
-        ctrlVar := xdotProperties[A_Index].ctrlVar
-        RegExMatch(ctrlVar, "\d+$", num)    ;Get button number based on button variable
-        GuiControl, +v%ctrlVar%, Bad%ctrlVar%
-        GuiControl, +v%ctrlVar%, Good%ctrlVar%
-        GuiControl, +v%ctrlVar%, Play%ctrlVar%
-        GuiControl, +gGetXDot, %ctrlVar%    ;Reset G-Label
-        GuiControl, Text, %ctrlVar%, P%num%   ;Return button text
-        GuiControlGet, hwndVar, Hwnd , %ctrlVar%
-        GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
-    }
-}
-
-resetNodesToWrite() {
-    Gui, 1: Default
-    index := startedIndex
-    Loop, %totalPort%
-    {
-        GuiControl Text, nodeToWrite%index%,    ;Delete text
-        Gui, Font, Bold
-        GuiControl, Font, portLabel%index%
-        Gui, Font,
-        GuiControl, Font, nodeToWrite%index%
-        index++
-    }
-}
-
-deleteOldCacheFiles() {
-    Loop, 24
-    {
-        mainPort := xdotProperties[A_Index].mainPort
-        FileDelete, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
-    }
-}
-
-loadNodesToWrite() {
-    FileRead, fileContent, %remotePath%\nodesToWrite.txt
-    StringReplace, fileContent, fileContent, %A_Space%, , All
-    StringReplace, fileContent, fileContent, %A_Tab%, , All
-    GuiControl Text, editNode, %fileContent%
-}
-
-saveNodesToWrite() {
-    fileLoc = %remotePath%\nodesToWrite.txt
-    GuiControlGet readEditContent, , editNode    ;get new text
-    FileRead mainContent, %remotePath%\nodesToWrite.txt
-    
-    if (mainContent != "")
-        FileCopy %remotePath%\nodesToWrite.txt, %remotePath%\nodesToWrite.bak, 1
-    FileRead bakContent, %remotePath%\nodesToWrite.bak
-    
-    file := FileOpen(fileLoc, "w")      ;delete all text
-    file.Close()
-    if (readEditContent = "")
-        FileAppend, %bakContent%, %fileLoc%     ;write backup text to file
-    FileAppend, %readEditContent%, %fileLoc%     ;write new text to file
-}
-
-readNodeLine(lineNum) {
-    GuiControlGet listEditNodes, , editNode
-    Loop, Parse, listEditNodes, `n
-    {
-        if (A_Index = lineNum)
-            return A_LoopField
-    }
-}
-
-replaceNodeLine(lineNum, replaceStr := "") {
-    GuiControlGet listEditNodes, , editNode
-    listEditNodeArray := StrSplit(listEditNodes, "`n", "`t")    ;Convert string to array
-    listEditNodeArray[lineNum] := replaceStr    ;Replace text by index
-    
-    ;Convert array back to string
-    newListEditNodes := ""
-    For key, var in listEditNodeArray
-        newListEditNodes .= var "`n"
-    newListEditNodes := RTrim(newListEditNodes, "`n")     ;remove last while space
-    GuiControl Text, editNode, %newListEditNodes%
-}
-
-writeNodeLine(lineNum, writeStr) {
-    GuiControlGet listEditNodes, , editNode
-    listEditNodeArray := StrSplit(listEditNodes, "`n", "`t")    ;Convert string to array
-    
-    listEditNodeArray.InsertAt(lineNum, writeStr)   ;Append text to a specific index
-    
-    ;Convert array back to string
-    newListEditNodes := ""
-    For key, var in listEditNodeArray
-        newListEditNodes .= var "`n"
-    newListEditNodes := RTrim(newListEditNodes, "`n")     ;remove last while space
-    GuiControl Text, editNode, %newListEditNodes%
-}
-
-radioToggle() {
-    resetXdotBttns()
-    deleteOldCacheFiles()
-}
-
-browseNode() {
-    FileSelectFile, selectedFile, , , Select a NodeID text file..., Text Documents (*.txt; *.doc)
-    if (selectedFile = "")
-        return
-    FileRead, outStr, %selectedFile%
-    GuiControl Text, editNode, %outStr%
-    
-    ;xdotNodeArray := StrSplit(outStr, "`n", "`t", MaxParts := 25)
-    ;MsgBox % xdotNodeArray.Length()
-    ;MsgBox %  xdotNodeArray[24]
-}
-
-getLotCodeList() {
-    lotList := []
-    Loop Files, %remotePath%\Saved-Nodes\*.txt, R ; Recurse into subfolders.
-    {
-        str := A_LoopFileName
-        StringReplace, str, str, .txt, , All    ;Remove .txt
-        lotList[A_Index] := str
-    }
-    reverseArray(lotList)
-    
-    return lotList
-}
-
-reverseArray(array)
-{
-	arrayC := array.Clone()
-	tempObj := {}
-	for vKey in array
-		tempObj.Push(vKey)
-	vIndex := tempObj.Length()
-	for vKey in array
-		array[vKey] := arrayC[tempObj[vIndex--]]
-	arrayC := tempObj := ""
-}
-
-updateLotCodeList() {
-    Gui, 1: Default
-    newLotCodeList := getLotCodeList()     ;Reload lot code list var
-    newLotCodeDrop := ""
-    For each, item in newLotCodeList
-    {
-        if (each == 1)
-            newLotCode := item
-        newLotCodeDrop .= (each == 1 ? "" : "|") . item
-    }
-    GuiControl, , lotCodeSelected, |%newLotCodeDrop%
-    GuiControl, Text, lotCodeSelected, %newLotCode%
-}
-
-loadNodeFromLot() {
-    GuiControlGet outStr, , lotCodeSelected
-    if (outStr != "") {
-        outStr = %outStr%.txt
-        FileRead outVar, %remotePath%\Saved-Nodes\%outStr%
-        StringReplace, outVar, outVar, %A_Space%, , All
-        StringReplace, outVar, outVar, %A_Tab%, , All
-        GuiControl Text, editNode, %outVar%
-    }
-}
-
-changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
-    Global                                                  ;Must set all var to global to use GuiControl
-    Gui 1: Default
-    RegExMatch(guiControlVar, "\d+$", num)                  ;Get the number from control var
-    RegExMatch(guiControlVar, "XDot\d.", origCtrlVar)       ;Get the original controlvar Ex: XDot01, XDot02
-    GuiControlGet, hwndVar1, Hwnd , %origCtrlVar%           ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar2, Hwnd , Play%origCtrlVar%       ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar3, Hwnd , Bad%origCtrlVar%        ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar4, Hwnd , Good%origCtrlVar%       ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar5, Hwnd , Dis%origCtrlVar%        ;Get the hwndVar from a control var
-    if (option = "NORMAL") {
-        
-    } else if (option = "DISABLE") {
-        GuiControl, Text, %guiControlVar%,                          ;Delete text
-        Loop, 4
-            GuiButtonIcon(hwndVar%A_Index%, disImg, 1, "s24")         ;Display icon
-        xdotProperties[xIndex].status := "D"
-        GuiControl, +vDis%origCtrlVar%,  %origCtrlVar%          ;Change var of control
-        totalGoodPort--
-        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
-        GuiControl, Disable, portLabel%xIndex%
-        GuiControl, Disable, nodeToWrite%xIndex%
-    } else if (option = "BAD") {
-        GuiControl, Text, %guiControlVar%,                          ;Delete text
-        Loop, 4
-            GuiButtonIcon(hwndVar%A_Index%, xImg, 1, "s24")         ;Display icon
-        GuiControl, +vBad%origCtrlVar%,  Play%origCtrlVar%          ;Change var of control
-    } else if (option = "GOOD") {
-        GuiControl, Text, %guiControlVar%,                          ;Delete text
-        Loop, 4
-            GuiButtonIcon(hwndVar%A_Index%, checkImg, 1, "s24")     ;Display icon
-        GuiControl, +vGood%origCtrlVar%,  Play%origCtrlVar%         ;Change var of control
-    } else if (option = "PLAY") {
-        GuiControl, Text, %guiControlVar%,                          ;Delete text
-        if (mode = "TESTING") {
-            Loop, 4
-                GuiButtonIcon(hwndVar%A_Index%, play1Img, 1, "s24") ;Display icon
-        }
-        else if (mode = "PROGRAMMING") {
-            Loop, 4
-                GuiButtonIcon(hwndVar%A_Index%, play2Img, 1, "s24") ;Display icon
-        }
-        else if (mode = "WRITING") {
-            Loop, 4
-                GuiButtonIcon(hwndVar%A_Index%, play3Img, 1, "s24") ;Display icon
-        }
-        GuiControl, +vPlay%origCtrlVar%, %guiControlVar%            ;Change var of control
-    }
-}
-;=======================================================================================;
-;;Add an icon to a button with external image file
-;;;GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
-;;;GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
-GuiButtonIcon(Handle, File, Index := 1, Options := "")
-{
-	RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
-	RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
-	RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
-	RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
-	RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
-	RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
-	RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
-	RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
-	Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
-	VarSetCapacity( button_il, 20 + Psz, 0 )
-	NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )	; Width & Height
-	NumPut( L, button_il, 0 + Psz, DW )		; Left Margin
-	NumPut( T, button_il, 4 + Psz, DW )		; Top Margin
-	NumPut( R, button_il, 8 + Psz, DW )		; Right Margin
-	NumPut( B, button_il, 12 + Psz, DW )	; Bottom Margin	
-	NumPut( A, button_il, 16 + Psz, DW )	; Alignment
-	SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
-	return IL_Add( normal_il, File, Index )
-}
-
-;;;Icon for MsgBox
-/*Usage Sample
-OnMessage(0x44, "CheckIcon") ;Add icon
-MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
-OnMessage(0x44, "") ;Clear icon
-*/
-CheckIcon() {
-    DetectHiddenWindows, On
-    Process, Exist
-    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
-        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
-        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
-    }
-}
-PlayInCircleIcon() {
-    DetectHiddenWindows, On
-    Process, Exist
-    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
-        hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
-        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
-    }
-}
-
-addTipMsg(text, title, time) {
-    SplashImage, C:\tempImg.gif, FS11, %text%, ,%title%
-    
-    SetTimer, RemoveTipMsg, %time%
-    return
-    
-    RemoveTipMsg:
-    SplashImage, Off
-    return
-}
-
-SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
-   Static EM_SETCUEBANNER := (0x1500 + 1)
-   Return DllCall("User32.dll\SendMessageW", "Ptr", HWND, "Uint", EM_SETCUEBANNER, "Ptr", True, "WStr", Cue)
-}
-
-getCmdOut(command) {
-    RunWait, PowerShell.exe -ExecutionPolicy Bypass -Command %command% | clip , , Hide
-    return Clipboard
-}
-
-;;OnMessage Functions
-WM_KEYDOWN(lparam) {
-    if (lparam = 13 && A_GuiControl = "lotCodeSelected") {  ;When press enter in Lot code select section
-        loadNodeFromLot()
-    }
-}
 
 ;;;;;;;;;;;;;;;;TOOLBAR CREATIVITY AND FUNCTIONS;;;;;;;;;;;;;;;;
 CreateEditNodeToolbar() {
