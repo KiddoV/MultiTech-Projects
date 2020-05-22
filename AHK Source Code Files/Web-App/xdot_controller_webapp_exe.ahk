@@ -6,20 +6,20 @@
 */
 #SingleInstance Force
 #NoEnv
-SetWorkingDir C:\V-Projects\Web-Applications\Conduit-Controller
+SetWorkingDir C:\V-Projects\Web-Applications\XDot-Controller
 SetBatchLines -1
 
 ;=======================================================================================;
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
-IfNotExist C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\css
-    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\css
-IfNotExist C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\js
-    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\js
+IfNotExist C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css
+    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css
+IfNotExist C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js
+    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js
 
-FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\AHK Source Code Files\Web-App\conduit_controller_webapp.ahk, C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\conduit_controller_webapp.ahk, 1
-FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\HTML-Files\conduit_controller_index.html, C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\index.html, 1
-FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\CSS-Files\material.min.css, C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\css\material.min.css, 1
-FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\JAVASCRIPT-Files\material.min.js, C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\js\material.min.js, 1
+FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\AHK Source Code Files\Web-App\conduit_controller_webapp.ahk, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\conduit_controller_webapp.ahk, 1
+FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\HTML-Files\xdot_controller_index.html, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\index.html, 1
+FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\CSS-Files\material.min.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\material.min.css, 1
+FileInstall C:\Users\Vieth\Documents\MultiTech-Projects\JAVASCRIPT-Files\material.min.js, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js\material.min.js, 1
 
 ;=======================================================================================;
 ;;;Create a JSON file
@@ -41,7 +41,7 @@ MAIN_JSON_CONTENT =
 }
 )
 
-file := FileOpen("C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\webapp.json", "w")      ;delete all text
+file := FileOpen("C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\webapp.json", "w")      ;delete all text
 file.Close()    ;close file object
 FileAppend, %MAIN_JSON_CONTENT%, webapp.json     ;rewrite text
 

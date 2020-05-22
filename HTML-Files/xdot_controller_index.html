@@ -1,7 +1,3 @@
-﻿#Singleinstance force
-
-html=
-(
 <!DOCTYPE html>
 <html>
 
@@ -13,14 +9,14 @@ html=
 	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 	<style>
 		.xdotBttn {
-			width: 30px;
-			height: 30px;
+			max-width: 30px !important;
 			font-weight: bold;
+			margin: 5px 5px;
 		}
 
 		.xdotPanel {
-			margin-top: 10px;
-			margin-left: 10px;
+			margin: 10px 10px;
+			max-width: 250px;
 		}
 	</style>
 </head>
@@ -37,30 +33,3 @@ html=
 </script>
 
 </html>
-)
-
-; Gui, +ToolWindow -Caption 
-Gui,Margin,0,0
-Gui, Add, ActiveX, w530 h490 x0 y0 vwebDoc, HTMLFile
-webDoc.write(html)
-Gui, Show, Center, Test
-; WinSet, Transcolor, FF00FF, Test
-add_ButtonHandler()
-return
-
-GuiClose:
-    ExitApp
-
-green_OnClick() {
-    MsgBox Foo!
-}
-
-bar_OnClick(){
-    MsgBox Bar!
-}
-
-add_ButtonHandler() {
-    global
-    Loop % webDoc.getElementsByTagName("Button").length
-        ComObjConnect(b_%A_Index%:=webDoc.getElementsByTagName("Button")[A_Index-1], b_%A_Index%.GetAttribute("Id") "_")
-}

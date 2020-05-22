@@ -5,7 +5,7 @@
 */
 #SingleInstance Force
 #NoEnv
-SetWorkingDir C:\V-Projects\Web-Applications\Conduit-Controller
+SetWorkingDir C:\V-Projects\Web-Applications\XDot-Controller
 SetBatchLines -1
 
 ;=======================================================================================;
