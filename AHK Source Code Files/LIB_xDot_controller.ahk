@@ -48,6 +48,13 @@ loadNodesToWrite() {
     StringReplace, fileContent, fileContent, %A_Space%, , All
     StringReplace, fileContent, fileContent, %A_Tab%, , All
     GuiControl Text, editNode, %fileContent%
+    
+    ;Recheck if load successfull
+    GuiControlGet readEditContent, , editNode    ;get text from edit field
+    if (readEditContent = "") {
+        FileRead, fileBakContent, %remotePath%\nodesToWrite.bak
+        GuiControl Text, editNode, %fileBakContent%
+    }
 }
 
 saveNodesToWrite() {
@@ -181,7 +188,7 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
     GuiControlGet, hwndVar5, Hwnd , Dis%origCtrlVar%        ;Get the hwndVar from a control var
     if (option = "NORMAL") {
         
-    } else if (option = "DISABLE") {
+    } else if (option = "DISABLE") {            ;;;;=====================DISABLE ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         Loop, 4
             GuiButtonIcon(hwndVar%A_Index%, disImg, 1, "s24")         ;Display icon
@@ -192,17 +199,17 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
         GuiControl, Disable, portLabel%xIndex%
         GuiControl, Disable, nodeToWrite%xIndex%
-    } else if (option = "BAD") {
+    } else if (option = "BAD") {                ;;;;=====================BAD ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         Loop, 4
             GuiButtonIcon(hwndVar%A_Index%, xImg, 1, "s24")         ;Display icon
         GuiControl, +vBad%origCtrlVar%,  Play%origCtrlVar%          ;Change var of control
-    } else if (option = "GOOD") {
+    } else if (option = "GOOD") {               ;;;;=====================GOOD ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         Loop, 4
             GuiButtonIcon(hwndVar%A_Index%, checkImg, 1, "s24")     ;Display icon
         GuiControl, +vGood%origCtrlVar%,  Play%origCtrlVar%         ;Change var of control
-    } else if (option = "PLAY") {
+    } else if (option = "PLAY") {               ;;;;=====================PLAY ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         if (mode = "TESTING") {
             Loop, 4

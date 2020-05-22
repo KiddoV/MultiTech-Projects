@@ -651,6 +651,7 @@ Return
 ^t::
     runAll()
 ^w::
+    Gui, xdot: Destroy
     writeAll()
 #IfWinActive, PC3
 ^s::
@@ -769,7 +770,12 @@ writeAll() {
             xStatus := xdotProperties[index].status
             if (xStatus = "G") {
                 GuiControl Text, nodeToWrite%index%, %node%
+                L_ReplaceNodeLine:
                 replaceNodeLine(index, "----")
+                ;Recheck if replace node successful
+                replaceNode := readNodeLine(index)
+                if (replaceNode != "----")
+                    goto L_ReplaceNodeLine
             }
             index++
         }

@@ -650,6 +650,7 @@ Return
 ^t::
     runAll()
 ^w::
+    Gui, xdot: Destroy
     writeAll()
 #IfWinActive, PC1
 ^s::
@@ -768,7 +769,12 @@ writeAll() {
             xStatus := xdotProperties[index].status
             if (xStatus = "G") {
                 GuiControl Text, nodeToWrite%index%, %node%
+                L_ReplaceNodeLine:
                 replaceNodeLine(index, "----")
+                ;Recheck if replace node successful
+                replaceNode := readNodeLine(index)
+                if (replaceNode != "----")
+                    goto L_ReplaceNodeLine
             }
             index++
         }
@@ -898,7 +904,7 @@ GuiContextMenu:
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
         GuiControl, Disable, portLabel%numNo0%
-        GuiControl, Disable, nodeToWrite%numNo0%
+        GuiControl, Disable, nodeToWrite%numNo0%        
         xdotProperties[num].status := "D"
         GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
         GuiControl, Text, %A_GuiControl%,    ;Delete text

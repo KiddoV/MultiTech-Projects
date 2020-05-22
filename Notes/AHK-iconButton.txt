@@ -72,3 +72,16 @@ SetButtonSysIcon(hButton, File, Index, Size := 16) {
     hIcon := LoadPicture(File, "h" . Size . " Icon" . Index, _)
     SendMessage 0xF7, 1, %hIcon%,, ahk_id %hButton% ; BM_SETIMAGE
 }
+
+;Gui, Add, Button, xm w22 h22 hwndIcon
+;GuiButtonIcon(Icon, "C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x_mark.png") 
+GuiButtonIcon(Handle, File, Index := 1, Size := 22, Margin := 6, Align := 4)
+{
+    Size -= Margin
+    Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
+    VarSetCapacity( button_il, 20 + Psz, 0 )
+    NumPut( normal_il := DllCall( "ImageList_Create", DW, Size, DW, Size, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )
+    NumPut( Align, button_il, 16 + Psz, DW )
+    SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
+    return IL_Add( normal_il, File, Index )
+}
