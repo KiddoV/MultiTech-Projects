@@ -1,0 +1,51 @@
+html body {
+    overflow-y: hidden;
+}
+
+.xdotBttn {
+    font-weight: bold;
+    font-size: 18px;
+    margin: 2px;
+    border-radius: 5%;
+}
+
+.xdotFailBttn {
+    background-color: rgba(247, 18, 18, 0.363);
+}
+
+.xdotPassBttn {
+    background-color: rgba(124, 230, 64, 0.363);
+}
+
+.xmarkImg {
+    
+}
+
+.xdotPanel {
+    margin: 10px 10px;
+    max-width: 290px;
+    padding: 2px 0px 2px 2px;
+    min-height: 0;
+    display: inline-block;
+}
+
+.cardTitle {
+    padding: 0;
+    margin-bottom: -2px;
+    margin-left: 5px;
+}
+
+
+/*** Material CSS Modifications ***/
+.mdl-layout__header{
+    margin: 0;
+    padding: 0;
+    height: 30px;
+    min-height: 30px;
+}
+
+.mdl-layout__header-row{
+    margin: 0;
+    padding: 0;
+    height: 30px;
+}

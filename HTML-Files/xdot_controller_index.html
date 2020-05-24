@@ -5,28 +5,46 @@
 	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="Assets/css/material.min.css">
+	<link rel="stylesheet" href="Assets/css/xdot_controller_main.css">
 	<script src="Assets/js/material.min.js"></script>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 	<style>
-		.xdotBttn {
-			max-width: 30px !important;
-			font-weight: bold;
-			margin: 5px 5px;
-		}
 
-		.xdotPanel {
-			margin: 10px 10px;
-			max-width: 250px;
-		}
 	</style>
 </head>
-
 <body class="">
+	<header class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+		<div class="mdl-layout__header">
+			<div class="mdl-layout__header-row">
+				<!-- Title -->
+				<span style="padding-left: 10px;"></span>
+				<span id="appTitle" class="mdl-layout-title"></span>
+			</div>
+		</div>
+	</header>
 	<!-------------------------------------------------------------------->
-	<div class="demo-card-square mdl-card mdl-shadow--6dp xdotPanel">
-		<button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect xdotBttn">P01</button>
-	</div>
-	<!-------------------------------------------------------------------->
+	<main class="mdl-layout__content" style="padding-top: 30px;">
+		<div class="mdl-card mdl-shadow--6dp xdotPanel">
+			<p class="cardTitle mdl-card__subtitle-text">XDot Panel Group 1</p>
+			<button id="xDot1" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn" onclick="AHK('testbutton')"><img id="xDot1Img" width="0" height="0"/>P01</button>
+			<button id="xDot2" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn"><img id="xDot2Img" width="0" height="0">P02</button>
+			<button id="xDot3" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn xdotPassBttn"><img src="C:\Users\Vieth\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png" width="30" height="30"></button>
+			<button id="xDot4" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P04</button>
+			<button id="xDot5" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P05</button>
+			<button id="xDot6" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P06</button>
+			<button id="xDot7" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P07</button>
+			<button id="xDot8" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P08</button>
+		</div>
+		<!-- Tooltip for XDot buttons -->
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot1">XDot 01</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot2">XDot 02</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot3">XDot 03</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot4">XDot 04</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot5">XDot 05</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot6">XDot 06</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot7">XDot 07</span>
+		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot8">XDot 08</span>
+		<!-------------------------------------------------------------------->
+	</main>
 </body>
 <script>
 

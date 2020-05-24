@@ -5,22 +5,30 @@
 */
 #SingleInstance Force
 #NoEnv
-SetWorkingDir C:\V-Projects\Web-Applications\XDot-Controller
 SetBatchLines -1
+SendMode Input
 
 ;=======================================================================================;
-;;;Start HTML UI
+;;;Libraries
 #Include C:\Users\Vieth\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\Webapp.ahk
 #Include C:\Users\Vieth\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\JSON_ToObj.ahk
+;;;Start HTML UI
 __Webapp_AppStart:
 ;<< Header End >>
+Global _webCtrl_ := getDOM()     ;get HTML DOM object
 
-webCtrl := getDOM()     ;get HTML DOM object
+Gui -MaximizeBox -Resize -Caption
+;Actions before page is load
+OnMessage(0x201, "GuiMove")
+_webCtrl_.Document.getElementById("appTitle").innerText := __Webapp_Name
 
-Gui -MaximizeBox -Resize
 Return      ;cut auto run main thread.
+;=======================================================================================;
+;This function runs after page is loaded
+app_page(NewURL) {
+}
 
-;Custom protocol's url event handler
+;Our custom protocol's url event handler
 app_call(args) {
 	MsgBox %args%
 	if InStr(args,"msgbox/hello")
@@ -29,13 +37,14 @@ app_call(args) {
 		SoundPlay, %A_WinDir%\Media\ding.wav
 }
 
-;Function to run when page is loaded
-app_page(NewURL) {
-	wb := getDOM()
-	
-	setZoomLevel(100)
-	
-	if InStr(NewURL,"index.html") {
-		;disp_info()
-	}
+
+testbutton() {
+    MsgBox % _webCtrl_.Document.getElementById("xDot1").innerText
 }
+
+
+GuiMove:
+    MsgBox % A_GuiControl
+    PostMessage, 0xA1, 2,,, A
+Return
+
