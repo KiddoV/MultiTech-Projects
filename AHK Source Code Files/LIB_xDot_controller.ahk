@@ -2,8 +2,62 @@
     XDot Controller Function Library
     Contain all functions used by XDot Controller Scripts
 */
+;;;;;;;;;;Installs files for app to run;;;;;;;;;;
+IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
+    FileCreateDir C:\V-Projects\XDot-Controller\Imgs-for-GUI
+IfNotExist C:\V-Projects\XDot-Controller\TTL-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\TTL-Files
+IfNotExist C:\V-Projects\XDot-Controller\INI-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\INI-Files
+IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\EXE-Files
+IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
+    FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
+IfNotExist Z:\XDOT\Saved-Nodes
+    FileCreateDir Z:\XDOT\Saved-Nodes
 
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark_brown.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark_brown.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_brown.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_blue.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\folder-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
+
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
+;;;Global vars that used the same on 3 Apps
+Global remotePath := "Z:\XDOT"
+Global lotCodeList := []
+
+Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
+
+Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
+Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
+Global check2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark_brown.png"
+Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
+Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
+Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
+Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 resetXdotBttns() {
     Loop, 24
@@ -50,10 +104,12 @@ loadNodesToWrite() {
     GuiControl Text, editNode, %fileContent%
     
     ;Recheck if load successfull
+    Lbl_RecheckLoad:
     GuiControlGet readEditContent, , editNode    ;get text from edit field
     if (readEditContent = "") {
         FileRead, fileBakContent, %remotePath%\nodesToWrite.bak
         GuiControl Text, editNode, %fileBakContent%
+        goto Lbl_RecheckLoad
     }
 }
 
@@ -181,17 +237,13 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
     Gui 1: Default
     RegExMatch(guiControlVar, "\d+$", num)                  ;Get the number from control var
     RegExMatch(guiControlVar, "XDot\d.", origCtrlVar)       ;Get the original controlvar Ex: XDot01, XDot02
-    GuiControlGet, hwndVar1, Hwnd , %origCtrlVar%           ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar2, Hwnd , Play%origCtrlVar%       ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar3, Hwnd , Bad%origCtrlVar%        ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar4, Hwnd , Good%origCtrlVar%       ;Get the hwndVar from a control var
-    GuiControlGet, hwndVar5, Hwnd , Dis%origCtrlVar%        ;Get the hwndVar from a control var
+    hwndVar = h%origCtrlVar%
+    
     if (option = "NORMAL") {
         
     } else if (option = "DISABLE") {            ;;;;=====================DISABLE ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
-        Loop, 4
-            GuiButtonIcon(hwndVar%A_Index%, disImg, 1, "s24")         ;Display icon
+        GuiButtonIcon(%hwndVar%, disImg, 1, "s24")         ;Display icon
         xdotProperties[xIndex].status := "D"
         GuiControl, +vDis%origCtrlVar%,  %origCtrlVar%          ;Change var of control
         totalGoodPort--
@@ -201,27 +253,24 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         GuiControl, Disable, nodeToWrite%xIndex%
     } else if (option = "BAD") {                ;;;;=====================BAD ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
-        Loop, 4
-            GuiButtonIcon(hwndVar%A_Index%, xImg, 1, "s24")         ;Display icon
+        GuiButtonIcon(%hwndVar%, xImg, 1, "s24")         ;Display icon
         GuiControl, +vBad%origCtrlVar%,  Play%origCtrlVar%          ;Change var of control
     } else if (option = "GOOD") {               ;;;;=====================GOOD ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
-        Loop, 4
-            GuiButtonIcon(hwndVar%A_Index%, checkImg, 1, "s24")     ;Display icon
+        GuiButtonIcon(%hwndVar%, checkImg, 1, "s24")     ;Display icon
+        if (mode = "PROGRAMMING")
+            GuiButtonIcon(%hwndVar%, check2Img, 1, "s24")     ;Display icon
         GuiControl, +vGood%origCtrlVar%,  Play%origCtrlVar%         ;Change var of control
     } else if (option = "PLAY") {               ;;;;=====================PLAY ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         if (mode = "TESTING") {
-            Loop, 4
-                GuiButtonIcon(hwndVar%A_Index%, play1Img, 1, "s24") ;Display icon
+            GuiButtonIcon(%hwndVar%, play1Img, 1, "s24") ;Display icon
         }
         else if (mode = "PROGRAMMING") {
-            Loop, 4
-                GuiButtonIcon(hwndVar%A_Index%, play2Img, 1, "s24") ;Display icon
+            GuiButtonIcon(%hwndVar%, play2Img, 1, "s24") ;Display icon
         }
         else if (mode = "WRITING") {
-            Loop, 4
-                GuiButtonIcon(hwndVar%A_Index%, play3Img, 1, "s24") ;Display icon
+            GuiButtonIcon(%hwndVar%, play3Img, 1, "s24") ;Display icon
         }
         GuiControl, +vPlay%origCtrlVar%, %guiControlVar%            ;Change var of control
     }

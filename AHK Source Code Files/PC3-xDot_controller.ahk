@@ -2,51 +2,8 @@
     Author: Viet Ho
 */
 SetTitleMatchMode, RegEx
-;;;;;;;;;;Installs files for app to run;;;;;;;;;;
-IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
-    FileCreateDir C:\V-Projects\XDot-Controller\Imgs-for-GUI
-IfNotExist C:\V-Projects\XDot-Controller\TTL-Files
-    FileCreateDir C:\V-Projects\XDot-Controller\TTL-Files
-IfNotExist C:\V-Projects\XDot-Controller\INI-Files
-    FileCreateDir C:\V-Projects\XDot-Controller\INI-Files
-IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
-    FileCreateDir C:\V-Projects\XDot-Controller\EXE-Files
-IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
-    FileCreateDir C:\V-Projects\XDot-Controller\AHK-Lib
-IfNotExist Z:\XDOT\Saved-Nodes
-    FileCreateDir Z:\XDOT\Saved-Nodes
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png, 1FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_brown.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_blue.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\folder-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
-
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
-
-;Global nodesToWritePath := "Z:\XDOT\nodesToWrite.txt"
-Global remotePath := "Z:\XDOT"
-Global lotCodeList := []
-
 Global xdotProperties := [{}]  ; Creates an array containing an object.
 xdotProperties[17] := {status: "G", mainPort: 117, breakPort: 17, portName: "PORT17", driveName: "D", ttXPos: 5, ttYPos: 5, ctrlVar: "XDot17"}
 xdotProperties[18] := {status: "G", mainPort: 118, breakPort: 18, portName: "PORT18", driveName: "E", ttXPos: 105, ttYPos: 5, ctrlVar: "XDot18"}
@@ -61,14 +18,6 @@ Global totalGoodPort := 8
 Global totalPort := 8
 Global mainWndTitle := "XDot Controller (PC3)"
 Global startedIndex := 17
-Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
-
-Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
-Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
-Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
-Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
-Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
-Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
@@ -100,15 +49,15 @@ Gui Add, Button, xs+250 ys+45 h21 gloadNodeFromLot, Load
 Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 3
 Gui Font, Bold, Ms Shell Dlg 2
 
-Gui Add, Button, xs+133 ys+15 w30 h30 vXDot17 gGetXDot, P17
-Gui Add, Button, xs+165 ys+15 w30 h30 vXDot18 gGetXDot, P18
+Gui Add, Button, xs+133 ys+15 w30 h30 vXDot17 gGetXDot hWndhXDot17, P17
+Gui Add, Button, xs+165 ys+15 w30 h30 vXDot18 gGetXDot hWndhXDot18, P18
 
-Gui Add, Button, xs+5 ys+50 w30 h30 vXDot19 gGetXDot, P19
-Gui Add, Button, xs+37 ys+50 w30 h30 vXDot20 gGetXDot, P20
-Gui Add, Button, xs+69 ys+50 w30 h30 vXDot21 gGetXDot, P21
-Gui Add, Button, xs+101 ys+50 w30 h30 vXDot22 gGetXDot, P22
-Gui Add, Button, xs+133 ys+50 w30 h30 vXDot23 gGetXDot, P23
-Gui Add, Button, xs+165 ys+50 w30 h30 vXDot24 gGetXDot, P24
+Gui Add, Button, xs+5 ys+50 w30 h30 vXDot19 gGetXDot hWndhXDot19, P19
+Gui Add, Button, xs+37 ys+50 w30 h30 vXDot20 gGetXDot hWndhXDot20, P20
+Gui Add, Button, xs+69 ys+50 w30 h30 vXDot21 gGetXDot hWndhXDot21, P21
+Gui Add, Button, xs+101 ys+50 w30 h30 vXDot22 gGetXDot hWndhXDot22, P22
+Gui Add, Button, xs+133 ys+50 w30 h30 vXDot23 gGetXDot hWndhXDot23, P23
+Gui Add, Button, xs+165 ys+50 w30 h30 vXDot24 gGetXDot hWndhXDot24, P24
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
@@ -160,6 +109,7 @@ IfNotExist C:\teraterm\ttermpro.exe
 #Persistent
 SetTimer, DrawLineNum, 1
 SetTimer, CheckFileChange, 20
+SetTimer, CheckLotChange, 200
 return
 
 DrawLineNum:
@@ -167,7 +117,7 @@ pos := DllCall("GetScrollPos", "UInt", Edit, "Int", 1)
 ifEqual, pos, % posPrev, return                       ;if nothing new
 posPrev := pos
 drawLineNumbers(pos)                                  ;draw line numbers
-return
+Return
 
 drawLineNumbers(firstLine = "") {
 local lines
@@ -189,6 +139,23 @@ IfExist %remotePath%
     if(newFileContent != lastFileContent) {
         lastFileContent := newFileContent
         loadNodesToWrite()
+    }
+}
+Return
+
+CheckLotChange:
+IfExist %remotePath%\Saved-Nodes
+{
+    newLotList := []
+    Loop Files, %remotePath%\Saved-Nodes\*.txt, R
+    {
+        newLotList[A_Index] := A_LoopFileName
+        reverseArray(newLotList)
+        newLot := newLotList[1]
+    }
+    if(newLot != oldLot) {
+        oldLot := newLotList[1]
+        updateLotCodeList()
     }
 }
 Return
@@ -392,7 +359,7 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         ifWinExist, %mainPort% FAILURE
             changeXdotBttnIcon(ctrlVar, "BAD")
         ifWinExist, %mainPort% PASSED
-            changeXdotBttnIcon(ctrlVar, "GOOD")
+            changeXdotBttnIcon(ctrlVar, "GOOD", "PROGRAMMING")
     Return
     
     WriteIDEach:
@@ -650,10 +617,12 @@ Return
     ExitApp
 ^t::
     runAll()
+return
 ^w::
     Gui, xdot: Destroy
     writeAll()
-#IfWinActive, PC3
+return
+#IfWinActive, PC1
 ^s::
     saveNodesToWrite()
 #IfWinActive
@@ -770,12 +739,12 @@ writeAll() {
             xStatus := xdotProperties[index].status
             if (xStatus = "G") {
                 GuiControl Text, nodeToWrite%index%, %node%
-                L_ReplaceNodeLine:
+                Lbl_ReplaceNodeLine:
                 replaceNodeLine(index, "----")
                 ;Recheck if replace node successful
                 replaceNode := readNodeLine(index)
                 if (replaceNode != "----")
-                    goto L_ReplaceNodeLine
+                    goto Lbl_ReplaceNodeLine
             }
             index++
         }
@@ -994,6 +963,7 @@ MakeShort(Long, ByRef LoWord, ByRef HiWord) {
 Return
 
 #^!+9::
+    GuiControlGet, isRunReprogChecked, , reproGPortRadio
     index := startedIndex
     Loop, %totalPort%
     {
@@ -1002,6 +972,8 @@ Return
         IfWinExist, PORT %mainPort% PASSED
         {
             changeXdotBttnIcon(ctrlVar, "GOOD")
+            if (isRunReprogChecked = 1)
+                changeXdotBttnIcon(ctrlVar, "GOOD", "PROGRAMMING")
         }
         index++
     }
