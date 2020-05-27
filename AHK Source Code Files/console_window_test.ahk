@@ -1,7 +1,7 @@
 ﻿#Include <Class_RichEdit>
 
 Gui, Add, Text,, Hello Reddit!
-log := new RichEdit(1, "w500 h900 vedit")
+log := new RichEdit(1, "w500 h900")
 log.SetBkgndColor(0x2C292D)
 log.SetOptions([""], "Set")
 log.SetDefaultFont({"Name": "Courier New", "Color": 0xFDF9F3, "Size": 12})

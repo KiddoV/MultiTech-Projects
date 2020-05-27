@@ -45,7 +45,6 @@ Class RichEdit {
    ; CONSTRUCTOR
    ; ===================================================================================================================
    __New(GuiName, Options, MultiLine := True) {
-      Global        ;;Added by Viet Ho to use Gui var as global variable
       Static WS_TABSTOP := 0x10000, WS_HSCROLL := 0x100000, WS_VSCROLL := 0x200000, WS_VISIBLE := 0x10000000
            , WS_CHILD := 0x40000000
            , WS_EX_CLIENTEDGE := 0x200, WS_EX_STATICEDGE := 0x20000

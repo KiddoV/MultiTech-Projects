@@ -51,8 +51,8 @@ SetBatchLines -1
 ;;;Menu bar
 Menu FileMenu, Add, Quit, quitHandler
 Menu MenuBar, Add, &File, :FileMenu
-Menu EditMenu, Add, Change File Location, changeFileHandler
-Menu MenuBar, Add, &Edit, :EditMenu
+Menu ToolMenu, Add, Get MTCDT IDs, getIDHandler
+Menu MenuBar, Add, &Tools, :ToolMenu
 Menu HelpMenu, Add, Keyboard Shortcuts, keyShcutHandler
 Menu HelpMenu, Add, About, aboutHandler
 Menu MenuBar, Add, &Help, :HelpMenu
@@ -113,18 +113,19 @@ Return
 
 ;;;;;;;;;All menu handlers
 quitHandler:
-ExitApp
+    ExitApp
 Return
 
-changeFileHandler:
-MsgBox 0, Message, This feature will be added in the future release!
+getIDHandler:
+    GetIDGUI()
 Return
 
 keyShcutHandler:
-MsgBox 0, Keyboard Shortcuts, Ctrl + T to RUN`nCtrl + Q to Exit App`nCtrl + I  to Toggle Check Box
+    MsgBox 0, Keyboard Shortcuts, Ctrl + T to RUN`nCtrl + Q to Exit App`nCtrl + I  to Toggle Check Box
 Return
+
 aboutHandler:
-MsgBox 0, Message, Created and Tested by Viet Ho
+    MsgBox 0, Message, Created and Tested by Viet Ho
 Return
 
 GuiClose:
@@ -664,4 +665,17 @@ PlayInCircleIcon() {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
+}
+
+;=======================================================================================;
+;;;;Additional GUI
+GetIDGUI() {
+    Global
+    ;;;GUI
+    Gui, getID: Default
+    Gui, getID: +ToolWindow +AlwaysOnTop +hWndhgetIDWnd
+    Gui, getID: Add, Button, , Test
+    
+    Gui getID: Show, , Get MTCDT IDs
+    Return
 }

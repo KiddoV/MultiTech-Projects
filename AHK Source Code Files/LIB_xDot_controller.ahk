@@ -58,6 +58,202 @@ Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
 Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
+runAll() {
+    GuiControlGet, isRunTestChecked, , totalGPortRadio
+    GuiControlGet, isRunReprogChecked, , reproGPortRadio
+    if (isRunTestChecked = 1) {
+        OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+        MsgBox 0x81, RUN FUNCTIONAL TEST, Begin FUNCTIONAL TESTS on all %totalGoodPort% ports?
+        OnMessage(0x44, "") ;Clear icon
+        index := startedIndex
+        IfMsgBox OK
+        {
+            resetXdotBttns()
+            deleteOldCacheFiles()
+            Loop, %totalPort%
+            {
+                ctrlVar := xdotProperties[index].ctrlVar
+                xStatus := xdotProperties[index].status
+                mainPort := xdotProperties[index].mainPort
+                breakPort := xdotProperties[index].breakPort
+                portName := xdotProperties[index].portName
+                driveName := xdotProperties[index].driveName
+                ttXPos := xdotProperties[index].ttXPos    ;Position X for teraterm window
+                ttYPos := xdotProperties[index].ttYPos    ;Position Y for teraterm window
+                
+                index++
+                
+                if (xStatus = "G") {
+                    WinKill COM%mainPort%
+                    ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
+                    IfWinExist PROGRAMMING
+                        Sleep 9000
+                    changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
+                    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                    Sleep 3000
+                }
+            }
+        }
+        IfMsgBox Cancel
+            return
+    }
+    
+    if (isRunReprogChecked = 1) {
+        OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+        MsgBox 0x81, Run, Begin re-program to debug mode on all %totalGoodPort% ports?
+        OnMessage(0x44, "") ;Clear icon
+        index := startedIndex
+        IfMsgBox OK
+        {
+            resetXdotBttns()
+            deleteOldCacheFiles()
+            Loop, %totalPort%
+            {
+                StartReprogram:
+                ctrlVar := xdotProperties[index].ctrlVar
+                xStatus := xdotProperties[index].status
+                mainPort := xdotProperties[index].mainPort
+                breakPort := xdotProperties[index].breakPort
+                portName := xdotProperties[index].portName
+                driveName := xdotProperties[index].driveName
+                ttXPos := xdotProperties[index].ttXPos    ;Position X for teraterm window
+                ttYPos := xdotProperties[index].ttYPos    ;Position Y for teraterm window
+                
+                index++
+                
+                if (xStatus = "G") {
+                    
+                    WinKill COM%mainPort%
+                    IfWinExist PROGRAMMING
+                        Sleep 9000
+                    changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
+                    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                    Sleep 2500
+                }
+            }
+        }
+        IfMsgBox Cancel
+            return
+    }
+    
+}
+
+writeAll() {
+    GuiControlGet, chosenFreq   ;Get value from DropDownList
+    if (chosenFreq = "") {
+        MsgBox 4144, WARNING, Please select a FREQUENCY!
+        return
+    }
+
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN EUID WRITE, Begin EUID WRITE on all %totalGoodPort% ports?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
+    {
+        resetXdotBttns()
+        deleteOldCacheFiles()
+        resetNodesToWrite()
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            ctrlVar := xdotProperties[index].ctrlVar
+            xStatus := xdotProperties[index].status
+            node := readNodeLine(index)
+            if (RegExMatch(node, "[0-9a-fA-F]") = 0) && if (xStatus = "G"){
+                changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
+            }
+            
+            xStatus := xdotProperties[index].status
+            if (xStatus = "G") {
+                GuiControl Text, nodeToWrite%index%, %node%
+                Lbl_ReplaceNodeLine:
+                replaceNodeLine(index, "----")
+                ;Recheck if replace node successful
+                replaceNode := readNodeLine(index)
+                if (replaceNode != "----")
+                    goto Lbl_ReplaceNodeLine
+            }
+            index++
+        }
+        saveNodesToWrite()
+        
+        ;Start writing
+        Sleep 500
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            ctrlVar := xdotProperties[index].ctrlVar
+            xStatus := xdotProperties[index].status
+            mainPort := xdotProperties[index].mainPort
+            breakPort := xdotProperties[index].breakPort
+            driveName := xdotProperties[index].driveName
+            if (xStatus = "G") {
+                WinKill COM%mainPort%
+                IfWinExist PROGRAMMING
+                    Sleep 9000
+                changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
+                Gui, Font, c0c63ed Bold
+                GuiControl, Font, portLabel%index%
+                Gui, Font
+                Gui, Font, c0c63ed
+                GuiControl, Font, nodeToWrite%index%
+                GuiControlGet, node, , nodeToWrite%index%
+                StringReplace node, node, %A_Space%, , All  ;Delete all white space in variable
+                
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, ,Hide
+                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                Sleep 3000
+            }
+            
+             if (index = 24) {
+                FileRead, fileContent, %remotePath%\nodesToWrite.txt
+                noNodeCount := 1
+                Loop, Parse, fileContent, `n
+                    if (A_Index < 24) 
+                        if (RegExMatch(A_LoopField, "[0-9a-fA-F]") = 0) {
+                            noNodeCount++
+                            if (noNodeCount = 24) {
+                                listNodeArray := StrSplit(fileContent, "`n", "`t")    ;Convert string to array
+                                Loop, 24
+                                    removedNode := listNodeArray.RemoveAt(1)  ;Remove the first 24 used nodes
+                                newListNodes := ""              ;Convert array back to string
+                                For key, var in listNodeArray
+                                    newListNodes .= var "`n"
+                                newListNodes := RTrim(newListNodes, "`n")       ;remove last while space
+                                GuiControl Text, editNode, %newListNodes%       ;Return nodes to edit field
+                                saveNodesToWrite()      ;Save new content
+                            }
+                        }
+            }
+            index++
+        }
+    }
+    IfMsgBox Cancel
+        return
+}
+
+giveBackToEdit() {
+    MsgBox 0x24, Confirmation, Are you sure you want to import all nodes back to edit field? 
+    IfMsgBox Yes
+    {
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            GuiControlGet, nodeToWrite, , nodeToWrite%index%
+            if (nodeToWrite != "")
+                writeNodeLine(index, nodeToWrite)
+            index++
+        }
+        saveNodesToWrite()
+        resetNodesToWrite()
+    }
+    IfMsgBox No
+        return
+}
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 resetXdotBttns() {
     Loop, 24
@@ -345,9 +541,35 @@ getCmdOut(command) {
     return Clipboard
 }
 
-;;OnMessage Functions
+;;;;OnMessage Functions
 WM_KEYDOWN(lparam) {
     if (lparam = 13 && A_GuiControl = "lotCodeSelected") {  ;When press enter in Lot code select section
         loadNodeFromLot()
     }
+    return
 }
+
+;;Add tooltip on hover for a control (%ControlName%_TT)
+;WM_MOUSEMOVE() {
+    ;Static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
+    ;CurrControl := A_GuiControl
+    ;If (CurrControl <> PrevControl and not InStr(CurrControl, " "))
+    ;{
+        ;ToolTip  ; Turn off any previous tooltip.
+        ;SetTimer, DisplayToolTip, 400
+        ;PrevControl := CurrControl
+    ;}
+    ;return
+
+    ;DisplayToolTip:
+        ;SetTimer, DisplayToolTip, Off
+        ;CurrControl_TT = %CurrControl%_TT
+        ;ToolTip % %CurrControl_TT%  ; The leading percent sign tell it to use an expression.
+        ;SetTimer, RemoveToolTip, 5000
+    ;Return
+
+    ;RemoveToolTip:
+        ;SetTimer, RemoveToolTip, Off
+        ;ToolTip
+    ;Return
+;}
