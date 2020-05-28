@@ -549,7 +549,7 @@ WM_KEYDOWN(lparam) {
     return
 }
 
-;;Add tooltip on hover for a control (%ControlName%_TT)
+;;;Add tooltip on hover for a control (%ControlName%_TT)
 ;WM_MOUSEMOVE() {
     ;Static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
     ;CurrControl := A_GuiControl
@@ -563,8 +563,7 @@ WM_KEYDOWN(lparam) {
 
     ;DisplayToolTip:
         ;SetTimer, DisplayToolTip, Off
-        ;CurrControl_TT = %CurrControl%_TT
-        ;ToolTip % %CurrControl_TT%  ; The leading percent sign tell it to use an expression.
+        ;ToolTip % %CurrControl%_TT  ; The leading percent sign tell it to use an expression.
         ;SetTimer, RemoveToolTip, 5000
     ;Return
 
