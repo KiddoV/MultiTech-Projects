@@ -2,6 +2,7 @@
     XDot Controller Function Library
     Contain all functions used by XDot Controller Scripts
 */
+
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
     FileCreateDir C:\V-Projects\XDot-Controller\Imgs-for-GUI
@@ -48,6 +49,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-f
 ;;;Global vars that used the same on 3 Apps
 Global remotePath := "Z:\XDOT"
 Global lotCodeList := []
+Global xdotTestFilePath := "C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl"
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 
@@ -58,6 +60,32 @@ Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
 Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
+;=======================================================================================;
+;;;;;;Menu bar for MAIN GUI
+AddMainMenuBar() {
+    Global
+    ;;;;;;Menu bar
+        Menu FileMenu, Add, Quit, quitHandler
+    Menu MainMenuBar, Add, &File, :FileMenu     ;Main button
+        Menu HelpMenu, Add, Image Indicators, imageIndicatorHandler
+        Menu HelpMenu, Add  ;Separator
+        Menu HelpMenu, Add, About, aboutHandler
+    Menu MainMenuBar, Add, &Help, :HelpMenu     ;Main button
+    Gui Menu, MainMenuBar
+}
+;;;;;;;;;All menu handlers
+quitHandler() {
+    ExitApp
+}
+
+imageIndicatorHandler() {
+    OpenAboutMsgGui1()
+}
+
+aboutHandler() {
+    
+}
+;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 runAll() {
@@ -180,6 +208,22 @@ writeAll() {
             index++
         }
         saveNodesToWrite()
+        ;After save...recheck if replacement successful again -- Fixing bug
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            xStatus := xdotProperties[index].status
+            if (xStatus = "G") {
+                Lbl_RecheckReplace:
+                replaceNodeAgain := readNodeLine(index)
+                if (replaceNodeAgain != "----") {
+                    replaceNodeLine(index, "----")
+                    goto Lbl_RecheckReplace
+                }
+            }
+            index++
+        }
+        saveNodesToWrite()
         
         ;Start writing
         Sleep 500
@@ -256,7 +300,8 @@ giveBackToEdit() {
 }
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 resetXdotBttns() {
-    Loop, 24
+    Global
+    Loop, 25
     {
         ctrlVar := xdotProperties[A_Index].ctrlVar
         RegExMatch(ctrlVar, "\d+$", num)    ;Get button number based on button variable
@@ -268,6 +313,7 @@ resetXdotBttns() {
         GuiControlGet, hwndVar, Hwnd , %ctrlVar%
         GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
     }
+    IL_Destroy(normal_il)   ;Detroy the ImageList stored in GuiButtonIcon() method
 }
 
 resetNodesToWrite() {
@@ -471,30 +517,79 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         GuiControl, +vPlay%origCtrlVar%, %guiControlVar%            ;Change var of control
     }
 }
+
+OnRightClick() {
+    Global
+    Gui, 1: Default    
+    GuiControlGet, hwndVar, Hwnd , %A_GuiControl%
+    RegExMatch(A_GuiControl, "\d+$", num)
+    numNo0 := LTrim(num, "0")
+    isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
+    isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
+    isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
+    isDisXdot := RegExMatch(A_GuiControl, "^DisXDot[0-9]{2}$")
+    isDisBadXdot := RegExMatch(A_GuiControl, "^DisBadXDot[0-9]{2}$")
+    isDisGoodXdot := RegExMatch(A_GuiControl, "^DisGoodXDot[0-9]{2}$")
+    if (isXdot = 1) {   ;Make it only works on Xdot Buttons
+        changeXdotBttnIcon(A_GuiControl, "DISABLE", , numNo0)
+    } else if (isDisXdot = 1 || isDisBadXdot = 1 || isDisGoodXdot = 1) {
+        totalGoodPort++
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Enable, portLabel%numNo0%
+        GuiControl, Enable, nodeToWrite%numNo0%
+        xdotProperties[num].status := "G"
+        if (isDisXdot = 1) {
+            newVar := SubStr(A_GuiControl, 4)
+            GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (XDot01)
+            GuiControl, Text, %newVar%, P%num%   ;Return button text
+            GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
+        } else if (isDisBadXdot = 1) {
+            newVar := SubStr(A_GuiControl, 4)
+            GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (BadXDot01)
+            GuiButtonIcon(hwndVar, xImg, 1, "s24")
+        } else if (isDisGoodXdot = 1) {
+            newVar := SubStr(A_GuiControl, 4)
+            GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (GoodXDot01)
+            GuiButtonIcon(hwndVar, checkImg, 1, "s24")
+        }
+        
+    } else if (isBadXdot = 1 || isGoodXdot = 1) {
+        totalGoodPort--
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Disable, portLabel%numNo0%
+        GuiControl, Disable, nodeToWrite%numNo0%        
+        xdotProperties[num].status := "D"
+        GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
+        GuiControl, Text, %A_GuiControl%,    ;Delete text
+        GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
+    }
+}
 ;=======================================================================================;
 ;;Add an icon to a button with external image file
 ;;;GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
 ;;;GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
-GuiButtonIcon(Handle, File, Index := 1, Options := "")
-{
-	RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
-	RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
-	RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
-	RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
-	RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
-	RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
-	RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
-	RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
-	Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
-	VarSetCapacity( button_il, 20 + Psz, 0 )
-	NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )	; Width & Height
-	NumPut( L, button_il, 0 + Psz, DW )		; Left Margin
-	NumPut( T, button_il, 4 + Psz, DW )		; Top Margin
-	NumPut( R, button_il, 8 + Psz, DW )		; Right Margin
-	NumPut( B, button_il, 12 + Psz, DW )	; Bottom Margin	
-	NumPut( A, button_il, 16 + Psz, DW )	; Alignment
-	SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
-	return IL_Add( normal_il, File, Index )
+GuiButtonIcon(Handle, File, Index := 1, Options := "") {
+    Local W, H, S, L, T, R, B, A, Psz, DW, Ptr
+    RegExMatch(Options, "i)w\K\d+", W), (W="") ? W := 16 :
+    RegExMatch(Options, "i)h\K\d+", H), (H="") ? H := 16 :
+    RegExMatch(Options, "i)s\K\d+", S), S ? W := H := S :
+    RegExMatch(Options, "i)l\K\d+", L), (L="") ? L := 0 :
+    RegExMatch(Options, "i)t\K\d+", T), (T="") ? T := 0 :
+    RegExMatch(Options, "i)r\K\d+", R), (R="") ? R := 0 :
+    RegExMatch(Options, "i)b\K\d+", B), (B="") ? B := 0 :
+    RegExMatch(Options, "i)a\K\d+", A), (A="") ? A := 4 :
+    Psz := A_PtrSize = "" ? 4 : A_PtrSize, DW := "UInt", Ptr := A_PtrSize = "" ? DW : "Ptr"
+    VarSetCapacity( button_il, 20 + Psz, 0 )
+    NumPut( normal_il := DllCall( "ImageList_Create", DW, W, DW, H, DW, 0x21, DW, 1, DW, 1 ), button_il, 0, Ptr )   ; Width & Height
+    NumPut( L, button_il, 0 + Psz, DW )     ; Left Margin
+    NumPut( T, button_il, 4 + Psz, DW )     ; Top Margin
+    NumPut( R, button_il, 8 + Psz, DW )     ; Right Margin
+    NumPut( B, button_il, 12 + Psz, DW )    ; Bottom Margin
+    NumPut( A, button_il, 16 + Psz, DW )    ; Alignment
+    SendMessage, BCM_SETIMAGELIST := 5634, 0, &button_il,, AHK_ID %Handle%
+    return IL_Add( normal_il, File, Index)
 }
 
 ;;;Icon for MsgBox
@@ -541,7 +636,7 @@ getCmdOut(command) {
     return Clipboard
 }
 
-;;;;OnMessage Functions
+;;;;OnMessage Functions;;;;
 WM_KEYDOWN(lparam) {
     if (lparam = 13 && A_GuiControl = "lotCodeSelected") {  ;When press enter in Lot code select section
         loadNodeFromLot()
@@ -572,3 +667,44 @@ WM_KEYDOWN(lparam) {
         ;ToolTip
     ;Return
 ;}
+;=======================================================================================;
+;=======================================================================================;
+;;;;;;;;;;;;;;;;;;;;ADDITIONAL GUIs
+OpenAboutMsgGui1() {
+    Global
+    Gui, msgGui1: Default
+    Gui, msgGui1: +ToolWindow +AlwaysOnTop +hWndhMsgGui1Wnd
+    
+    Gui, msgGui1: Add, Picture, x10 y10 w25 h25 +BackgroundTrans, %play1Img%
+    Gui, msgGui1: Add, Picture, x10 y40 w25 h25 +BackgroundTrans, %play2Img%
+    Gui, msgGui1: Add, Picture, x10 y70 w25 h25 +BackgroundTrans, %play3Img%
+    Gui, msgGui1: Add, Picture, x10 y100 w25 h25 +BackgroundTrans, %xImg%
+    Gui, msgGui1: Add, Picture, x10 y130 w25 h25 +BackgroundTrans, %checkImg%
+    Gui, msgGui1: Add, Picture, x10 y160 w25 h25 +BackgroundTrans, %check2Img%
+    Gui, msgGui1: Add, Picture, x10 y190 w25 h25 +BackgroundTrans, %disImg%
+    
+    Gui, msgGui1: Font, s9 Bold, Arial
+    Gui, msgGui1: Add, Text, x50 y15, Running Testing Process
+    Gui, msgGui1: Add, Text, x50 y45, Running Re-Programming Process
+    Gui, msgGui1: Add, Text, x50 y75, Running Writing Process
+    Gui, msgGui1: Add, Text, x50 y105, XDot is FAILED on Testing or Writing
+    Gui, msgGui1: Add, Text, x50 y135, XDot is PASSED on Testing or Writing
+    Gui, msgGui1: Add, Text, x50 y165, XDot is PASSED on Re-Programming
+    Gui, msgGui1: Add, Text, x50 y195, XDot Button is DISABLED
+    Gui, msgGui1: Font
+    
+    Gui, msgGui1: Add, Button, x210 y230 w55 gOkBttnOnclick, OK
+    
+    Gui, msgGui1: Show, , Application Image Indicators
+    
+    Return  ;;;;;;;;;;;;
+    
+    msgGui1GuiEscape:
+    msgGui1GuiClose:
+        Gui, msgGui1: Destroy
+    Return
+    
+    OkBttnOnclick:
+        Gui, msgGui1: Destroy
+    Return
+}

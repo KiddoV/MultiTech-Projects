@@ -17,13 +17,12 @@ Global comListDropList := ""
 Global appTitle := "Alternate Teraterm"
 
 ;;Main GUI
-;Gui, Font, s10, Terminal
-;Gui Add, Edit, x10 y40 w550 h368 +ReadOnly hWndhOutput voutputField
-;Gui, Font
-RichEdit := new RichEdit(1, "x10 y40 w550 h368")
+Gui, Add, Text,,    ;For RichEdit to display
+RichEdit := new RichEdit(1, "x10 y40 w550 h368 voutputField")
 RichEdit.SetBkgndColor(0x2C292D)
 RichEdit.SetOptions(["ReadOnly"], "Set")
-RichEdit.SetDefaultFont({"Name": "Courier New", "Color": 0xFDF9F3, "Size": 12})
+RichEdit.SetDefaultFont({"Name": "Terminal", "Color": 0xFDF9F3, "Size": 10})
+hOutput := RichEdit.HWND
 Gui Add, Edit, x10 y415 w550 h21 +Multi -VScroll hWndhInput vinputField gsendInput
 Gui Add, Button, x10 y8 w80 h23 gGetSerialPort, Serial Port
 

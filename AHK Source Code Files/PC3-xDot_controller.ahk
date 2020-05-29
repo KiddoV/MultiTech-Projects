@@ -92,15 +92,18 @@ Gui Add, Button, xs+73 ys+211 w55 h28 gwriteAll, START
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
 
-;;;Functions to run before main gui is started;;;
+;;;Functions to run BEFORE main gui is started;;;
 OnMessage(0x100, "WM_KEYDOWN")
 OnMessage(0x200, "WM_MOUSEMOVE")
 deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 
+;;Add Menu Bar
+AddMainMenuBar()
+
 posX := A_ScreenWidth - 600
 Gui, Show, x%posX% y150, %mainWndTitle%
 
-;;;Functions to run after main gui is started;;;
+;;;Functions to run AFTER main gui is started;;;
 editnodeToolbar := CreateEditNodeToolbar()
 ;loadNodesToWrite()
 
@@ -111,7 +114,7 @@ IfNotExist C:\teraterm\ttermpro.exe
 SetTimer, DrawLineNum, 1
 SetTimer, CheckFileChange, 20
 SetTimer, CheckLotChange, 200
-return
+Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawLineNum:
 pos := DllCall("GetScrollPos", "UInt", Edit, "Int", 1)
@@ -171,7 +174,7 @@ GuiClose:
         ExitApp
      }
 Return
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;=======================================================================================;
 ;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;;;
 ;;;;;;XDot GUI
 GetXDot:
@@ -303,7 +306,7 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         }
     }
     
-    mainY := mainY + 120
+    mainY := mainY + 145
     Gui xdot: Show, x%mainX% y%mainY%, XDot %num%
     Return
 
@@ -317,8 +320,8 @@ if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
         changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
         
         WinKill COM%mainPort%
-        ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
-        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
+        ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="%xdotTestFilePath% "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
+        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE %xdotTestFilePath% dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
 
         ;;;Track processes
         Gui xdot: Default
@@ -609,6 +612,7 @@ GetAddNew:
         Gui, adNew: Destroy
     Return
 Return
+;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
@@ -623,68 +627,16 @@ return
     Gui, xdot: Destroy
     writeAll()
 return
-#IfWinActive, PC1
+#IfWinActive, PC3
 ^s::
     saveNodesToWrite()
 #IfWinActive
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;Additional Labels;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;Additional Label Functions;;;;;;;;;;;;;;;;;
 ;Launched whenever the user right-clicks on gui controls
 GuiContextMenu:
-    Gui, 1: Default    
-    GuiControlGet, hwndVar, Hwnd , %A_GuiControl%
-    RegExMatch(A_GuiControl, "\d+$", num)
-    numNo0 := LTrim(num, "0")
-    isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
-    isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
-    isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
-    isDisXdot := RegExMatch(A_GuiControl, "^DisXDot[0-9]{2}$")
-    isDisBadXdot := RegExMatch(A_GuiControl, "^DisBadXDot[0-9]{2}$")
-    isDisGoodXdot := RegExMatch(A_GuiControl, "^DisGoodXDot[0-9]{2}$")
-    if (isXdot = 1) {   ;Make it only works on Xdot Buttons
-        totalGoodPort--
-        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
-        GuiControl, Disable, portLabel%numNo0%
-        GuiControl, Disable, nodeToWrite%numNo0%
-        xdotProperties[num].status := "D"
-        GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
-        GuiControl, Text, %A_GuiControl%,    ;Delete text
-        GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
-    } else if (isDisXdot = 1 || isDisBadXdot = 1 || isDisGoodXdot = 1) {
-        totalGoodPort++
-        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
-        GuiControl, Enable, portLabel%numNo0%
-        GuiControl, Enable, nodeToWrite%numNo0%
-        xdotProperties[num].status := "G"
-        if (isDisXdot = 1) {
-            newVar := SubStr(A_GuiControl, 4)
-            GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (XDot01)
-            GuiControl, Text, %newVar%, P%num%   ;Return button text
-            GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
-        } else if (isDisBadXdot = 1) {
-            newVar := SubStr(A_GuiControl, 4)
-            GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (BadXDot01)
-            GuiButtonIcon(hwndVar, xImg, 1, "s24")
-        } else if (isDisGoodXdot = 1) {
-            newVar := SubStr(A_GuiControl, 4)
-            GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (GoodXDot01)
-            GuiButtonIcon(hwndVar, checkImg, 1, "s24")
-        }
-        
-    } else if (isBadXdot = 1 || isGoodXdot = 1) {
-        totalGoodPort--
-        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
-        GuiControl, Disable, portLabel%numNo0%
-        GuiControl, Disable, nodeToWrite%numNo0%
-        xdotProperties[num].status := "D"
-        GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
-        GuiControl, Text, %A_GuiControl%,    ;Delete text
-        GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
-    }
+    OnRightClick()
 Return
 
 ;;;;;;;;;;;;;;;;TOOLBAR CREATIVITY AND FUNCTIONS;;;;;;;;;;;;;;;;
