@@ -18,7 +18,7 @@ html body {
 }
 
 .xmarkImg {
-    
+
 }
 
 .xdotPanel {
@@ -40,12 +40,12 @@ html body {
 .mdl-layout__header{
     margin: 0;
     padding: 0;
-    height: 30px;
-    min-height: 30px;
+    height: 20px;
+    min-height: 20px;
 }
 
 .mdl-layout__header-row{
     margin: 0;
     padding: 0;
-    height: 30px;
+    height: 20px;
 }

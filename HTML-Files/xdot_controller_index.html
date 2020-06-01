@@ -4,14 +4,21 @@
 <head>
 	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="stylesheet" href="Assets/css/material.min.css">
-	<link rel="stylesheet" href="Assets/css/xdot_controller_main.css">
+	<link rel="stylesheet" type="text/css" href="Assets/css/material.min.css">
+	<link rel="stylesheet" type="text/css" href="Assets/css/xdot_controller_main.css">
 	<script src="Assets/js/material.min.js"></script>
-	<style>
 
+	<link rel="stylesheet" type="text/css" href="Assets/css/tln.min.css"/>
+	<script src="Assets/js/tln.min.js"></script>
+	<style type="text/css">
+		#wrapper{border:1px solid black;position:relative;
+		height:500px;width:500px;margin:15px auto}
+		#wrapper::before {
+		content:"note";text-transform: uppercase;left:0px;
+		position:absolute;top:-18px;font-size:16px;color:red; }
 	</style>
 </head>
-<body class="">
+<body class="" onload="TLN.append_line_numbers('test')">
 	<header class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
 		<div class="mdl-layout__header">
 			<div class="mdl-layout__header-row">
@@ -22,12 +29,12 @@
 		</div>
 	</header>
 	<!-------------------------------------------------------------------->
-	<main class="mdl-layout__content" style="padding-top: 30px;">
+	<main class="mdl-layout__content" style="padding-top: 20px;">
 		<div class="mdl-card mdl-shadow--6dp xdotPanel">
 			<p class="cardTitle mdl-card__subtitle-text">XDot Panel Group 1</p>
 			<button id="xDot1" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn" onclick="AHK('testbutton')"><img id="xDot1Img" width="0" height="0"/>P01</button>
 			<button id="xDot2" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn"><img id="xDot2Img" width="0" height="0">P02</button>
-			<button id="xDot3" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn xdotPassBttn"><img src="C:\Users\Vieth\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png" width="30" height="30"></button>
+			<button id="xDot3" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn xdotPassBttn"><img src="C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png" width="30" height="30"></button>
 			<button id="xDot4" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P04</button>
 			<button id="xDot5" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P05</button>
 			<button id="xDot6" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab xdotBttn">P06</button>
@@ -44,6 +51,10 @@
 		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot7">XDot 07</span>
 		<span id="xDot1Tooltip" class="mdl-tooltip" data-mdl-for="xDot8">XDot 08</span>
 		<!-------------------------------------------------------------------->
+		<button onclick="TLN.append_line_numbers('test')"> NUMBERIFY! </button>
+		<div id="wrapper">
+				<textarea id="test" class="banana-cake"></textarea>
+		</div>
 	</main>
 </body>
 <script>

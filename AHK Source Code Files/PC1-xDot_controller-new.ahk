@@ -77,7 +77,7 @@ Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 Global circlImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\circle_green.png"
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
-#Include C:\V-Projects\XDot-Controller\AHK-Lib\Toolbar.ahk
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -132,7 +132,7 @@ Gui Add, DropDownList, xs+110 ys+37 w80 vchosenFreq, %freq%
 Gui, Font, c0c63ed Bold
 Gui Add, ListView, xs+5 ys+63 r9 w190 vidListView +Grid +NoSortHdr, #|Node ID|              |
 Loop, 8
-    LV_Add("", A_Index, "008000000401C228")
+    LV_Add("", A_Index, "")
 Gui, Font
 Gui Add, Button, xs+73 ys+250 w55 h28 gwriteAll, START
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records

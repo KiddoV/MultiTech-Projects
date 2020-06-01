@@ -10,14 +10,14 @@ SendMode Input
 
 ;=======================================================================================;
 ;;;Libraries
-#Include C:\Users\Vieth\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\Webapp.ahk
-#Include C:\Users\Vieth\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\JSON_ToObj.ahk
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\Webapp.ahk
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\JSON_ToObj.ahk
 ;;;Start HTML UI
 __Webapp_AppStart:
 ;<< Header End >>
 Global _webCtrl_ := getDOM()     ;get HTML DOM object
 
-Gui -MaximizeBox -Resize -Caption
+Gui -MaximizeBox -Resize
 ;Actions before page is load
 OnMessage(0x201, "GuiMove")
 _webCtrl_.Document.getElementById("appTitle").innerText := __Webapp_Name
