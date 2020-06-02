@@ -61,7 +61,7 @@ Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot hWndhXDot08, P08
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
-Gui Add, Text, cgray xs+10 ys+20, Test firmware version: 3.0.2-debug
+Gui Add, Text, cgray xs+10 ys+20, Test firmware version: v3.0.2-debug
 Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run tests on %totalGoodPort% ports
 Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
@@ -117,23 +117,23 @@ SetTimer, CheckLotChange, 200
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawLineNum:
-pos := DllCall("GetScrollPos", "UInt", Edit, "Int", 1)
-ifEqual, pos, % posPrev, return                       ;if nothing new
-posPrev := pos
-drawLineNumbers(pos)                                  ;draw line numbers
+    pos := DllCall("GetScrollPos", "UInt", Edit, "Int", 1)
+    ifEqual, pos, % posPrev, return                       ;if nothing new
+    posPrev := pos
+    drawLineNumbers(pos)                                  ;draw line numbers
 Return
 
 drawLineNumbers(firstLine = "") {
-local lines
-static prevFirstLine
-prevFirstLine := firstLine != "" ? firstLine : prevFirstLine
-firstLine := prevFirstLine
-loop, 24
-{
-    lines .= ++firstLine . "`n"
-}
+    Local lines
+    Static prevFirstLine
+    prevFirstLine := firstLine != "" ? firstLine : prevFirstLine
+    firstLine := prevFirstLine
+    loop, 24
+    {
+        lines .= ++firstLine . "`n"
+    }
 
-GuiControl,, lineNo, % lines
+    GuiControl,, lineNo, % lines
 }
 
 CheckFileChange:
@@ -734,5 +734,19 @@ Return
         index++
     }
 Return
+
+;#^!+8::
+    ;index := startedIndex
+    ;Loop, %totalPort%
+    ;{
+        ;mainPort := xdotProperties[index].mainPort
+        ;ctrlVar := xdotProperties[index].ctrlVar
+        ;IfWinExist, PORT %mainPort% ERROR
+        ;{
+            ;changeXdotBttnIcon(ctrlVar, "ERROR")
+        ;}
+        ;index++
+    ;}
+;Return
 
 ;;num := Format("{1:02}", index) ;Format to 2 digit number 01 02 03...

@@ -24,6 +24,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pla
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_brown.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_blue.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\disable.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\excla_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\folder-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\folder-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
@@ -60,6 +61,7 @@ Global play1Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_orange.png"
 Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
+Global exclaImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png"
 ;=======================================================================================;
 ;;;;;;Menu bar for MAIN GUI
 AddMainMenuBar() {
@@ -120,7 +122,7 @@ runAll() {
                         Sleep 9000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE /V C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort%, , Hide
                     Sleep 3000
                 }
             }
@@ -159,7 +161,7 @@ runAll() {
                         Sleep 9000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
                     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                    Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort%, , Hide
                     Sleep 2500
                 }
             }
@@ -249,7 +251,7 @@ writeAll() {
                 StringReplace node, node, %A_Space%, , All  ;Delete all white space in variable
                 
                 Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, ,Hide
-                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort%, , Hide
+                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort%, , Hide
                 Sleep 3000
             }
             
@@ -483,6 +485,9 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
     
     if (option = "NORMAL") {
         
+    } else if (option = "ERROR") {            ;;;;=====================ERROR ICON
+        GuiButtonIcon(%hwndVar%, exclaImg, 1, "s24")         ;Display icon
+        GuiControl, +v%origCtrlVar%,  Play%origCtrlVar%          ;Change var of control
     } else if (option = "DISABLE") {            ;;;;=====================DISABLE ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         GuiButtonIcon(%hwndVar%, disImg, 1, "s24")         ;Display icon
@@ -682,6 +687,7 @@ OpenAboutMsgGui1() {
     Gui, msgGui1: Add, Picture, x10 y130 w25 h25 +BackgroundTrans, %checkImg%
     Gui, msgGui1: Add, Picture, x10 y160 w25 h25 +BackgroundTrans, %check2Img%
     Gui, msgGui1: Add, Picture, x10 y190 w25 h25 +BackgroundTrans, %disImg%
+    Gui, msgGui1: Add, Picture, x10 y220 w25 h25 +BackgroundTrans, %exclaImg%
     
     Gui, msgGui1: Font, s9 Bold, Arial
     Gui, msgGui1: Add, Text, x50 y15, Running Testing Process
@@ -691,9 +697,10 @@ OpenAboutMsgGui1() {
     Gui, msgGui1: Add, Text, x50 y135, XDot is PASSED on Testing or Writing
     Gui, msgGui1: Add, Text, x50 y165, XDot is PASSED on Re-Programming
     Gui, msgGui1: Add, Text, x50 y195, XDot Button is DISABLED
+    Gui, msgGui1: Add, Text, x50 y225, Teraterm was CLOSED unexpectedly
     Gui, msgGui1: Font
     
-    Gui, msgGui1: Add, Button, x210 y230 w55 gOkBttnOnclick, OK
+    Gui, msgGui1: Add, Button, x210 y255 w55 gOkBttnOnclick, OK
     
     Gui, msgGui1: Show, , Application Image Indicators
     
