@@ -27,7 +27,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 
 Global 240_ItemNums := ["70000035L", "70000037L", "70000039L", "70000041L", "70000049L"]
 Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000025L", "70000026L", "70000043L", "70000054L"]
-Global 247_ItemNums := ["70000044L", "70000048L", "70000053L", "70001174L"]
+Global 247_ItemNums := ["70000044L", "70000045L", "70000048L", "70000053L", "70001174L"]
 
 ;;;Paths and Links
 ;GUI images

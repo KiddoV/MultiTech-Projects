@@ -160,3 +160,25 @@ at#rxdiv? =>	#RXDIV: 0,1
 at+csq =>	OK Only
 at+cgatt? =>	+CGATT: 0
 at#tempcfg? =>	#TEMPCFG: -40,-15,55,85
+
+-----LAP3 (70000045L)------------------------
+at
+ate1
+at+cgsn (print imei)
+at+gmi
+at+gmm =>	LE910C1-AP
+at+gmr =>	25.26.255
+at#cfvr =>	#CFVR: 1
+at#sled=2
+at#sledsav
+at+cpin? =>	+CPIN: READY
+at#rxdiv? =>	#RXDIV: 1,1
+at#rxdiv=1,1	<== Must set to 1,1
+at#tempcfg? =>	#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3
+at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","TELSTRA.WAP","",0,0,0,0
+		+CGDCONT: 2,"IPV4V6","ims","",0,0,0,0
+		+CGDCONT: 3,"IPV4V6","hos","",0,0,0,0
+		+CGDCONT: 4,"IPV4V6","SOS","",0,0,0,1
+at#servinfo =>	#SERVINFO: 1007,-83,"AT&T","310410",235,7F03,128,1,-93,"II",01,4294967295
+AT+CSQ => 	+CSQ: ##,#
+at+csq => 	+CSQ: ##,#

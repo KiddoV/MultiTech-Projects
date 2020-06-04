@@ -2,6 +2,7 @@
 SetTitleMatchMode, RegEx
 mainPort = % A_Args[1]
 breakPort = % A_Args[2]
+TTWinPID = % A_Args[3]
 Loop,
 {
     WinWait %mainPort% FAILURE|%mainPort% PASSED, , 1
@@ -18,23 +19,21 @@ Loop,
         Break
     }
     
-    ;If (A_Index > 3) {
-        ;index := 1
-        ;IfWinNotExist COM%mainPort%|COM%breakPort%
-        ;{
-            ;SetTimer, TriggerIcon, 10
-            ;MsgBox 16, PORT %mainPort% ERROR, PORT %mainPort% Teraterm window has been closed unexpectedly!`nXDot might need to Re-Program again!
-            ;Return
-            ;
-            ;TriggerIcon:
-                ;SendInput #^!+8
-                ;SendInput #^!+8     ;Just to be sure it work!
-                ;IfWinExist PORT %mainPort% ERROR
-                    ;SetTimer, TriggerIcon, Off
-            ;Return
-            ;
-            ;Break
-        ;}
-    ;}
+    If (A_Index > 3) {
+        IfWinNotExist, ahk_pid %TTWinPID%
+        {
+            SetTimer, TriggerIcon, 10
+            MsgBox 16, PORT %mainPort% ERROR, PORT %mainPort% Teraterm window has been CLOSED UNEXPECTEDLY while RUNNING!`nXDot might need to Re-Program again!
+            Return
+            
+            TriggerIcon:
+                SendInput #^!+8
+                IfWinExist PORT %mainPort% ERROR
+                    SetTimer, TriggerIcon, Off
+            Return
+            
+            Break
+        }
+    }
 }
 Return

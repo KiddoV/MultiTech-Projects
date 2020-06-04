@@ -24,6 +24,7 @@ isL4N1 = -1
 isLVW2 = -1
 isLSB3 = -1
 isLDC3 = -1
+isLAP3 = -1
 try = 0
 
 :CHECK_MTCDT_TYPE
@@ -68,6 +69,9 @@ if isLSB3=0 goto START
 strcompare param3 'LDC3'
 isLDC3 = result
 if isLDC3=0 goto START
+strcompare param3 'LAP3'
+isLAP3 = result
+if isLAP3=0 goto START
 
 :START
 if isLAT1=0 then 
@@ -105,6 +109,10 @@ elseif isLSB3=0 then
 elseif isLDC3=0 then
 	radioVersion = '20.00.203'
 	telModuleVer = 'LE910-JN1'
+	fwBuild = '#CFVR: 4'
+elseif isLAP3=0 then
+	radioVersion = '20.00.203'
+	telModuleVer = 'LE910C1-AP'
 	fwBuild = '#CFVR: 4'
 endif
 
@@ -373,9 +381,11 @@ strconcat imei inputstr
 mpause 500
 sendln 'at+cgsn'
 wait 'OK'
-mpause 500
-sendln 'at#gpio=1,0,2'
-waitln'OK'
+if isLAP3 != 0 then
+    mpause 500
+    sendln 'at#gpio=1,0,2'
+    waitln'OK'
+endif
 mpause 500
 sendln 'at#sled=2'
 waitln 'OK'
@@ -395,6 +405,8 @@ elseif isL4N1=0 then
 	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 elseif isLAT3=0 then
 	waitln '#TEMPCFG: -40,-15,55,85'
+elseif isLAP3=0 then
+	waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
 elseif isLAT1=0 then
 	waitln '#TEMPCFG: -40,-33,0,-35,-28,0,-30,89,0,79,95,3,89,100,3'
 	if result = 0 then
@@ -505,10 +517,48 @@ if isL4E1 = 0 goto L4E1_TEST
 if isL4N1 = 0 goto L4N1_TEST
 if isLSB3 = 0 goto LSB3_TEST
 if isLDC3 = 0 goto LDC3_TEST
+if isLAP3 = 0 goto LAP3_TEST
 
 ;;;;;;;;;;;;;;
 :ALL_VERSION
 
+
+;;;;;;;;;;;;;;
+:LAP3_TEST
+mpause 500
+sendln 'at+gmi'
+wait 'OK'
+mpause 500
+sendln 'at+gmm'
+waitln 'LE910C1-AP'
+if result = 0 then
+    messagebox 'INCORRECT TELIT MODULE. EXPECTED: LE910C1-AP' 'MODULE FAILURE'
+   	disconnect
+   	closett
+   	end
+endif
+flushrecv
+mpause 500
+sendln 'at+gmr'
+waitln '25.26.255'
+if result = 0 then
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.26.255' 'FIRMWARE FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+mpause 500 
+flushrecv
+sendln 'at#cfvr'
+waitln '1'
+if result=0 then
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 1' 'FIRMWARE BUILD FAILURE'
+	disconnect
+   	closett
+   	end
+endif
+
+goto csq_check
 
 ;;;;;;;;;;;;;;
 :LDC3_TEST

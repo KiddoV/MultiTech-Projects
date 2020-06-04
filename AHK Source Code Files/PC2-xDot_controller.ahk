@@ -100,8 +100,9 @@ deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 ;;Add Menu Bar
 AddMainMenuBar()
 
-posX := A_ScreenWidth - 600
-Gui, Show, x%posX% y150, %mainWndTitle%
+posX := A_ScreenWidth - 540
+posY := A_ScreenHeight - 560
+Gui, Show, x%posX% y%posY%, %mainWndTitle%
 
 ;;;Functions to run AFTER main gui is started;;;
 editnodeToolbar := CreateEditNodeToolbar()
@@ -168,7 +169,7 @@ GuiClose:
     MsgBox 36, , Are you sure you want to quit?
     IfMsgBox Yes
     {
-        for process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")
+        For process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")
         Process, close, % process.ProcessId
         
         ExitApp
@@ -176,264 +177,7 @@ GuiClose:
 Return
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;;;
-;;;;;;XDot GUI
-GetXDot:
-isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
-isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
-isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
 
-if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
-    WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
-    Gui, xdot: Cancel
-    Gui, xdot: Destroy
-    RegExMatch(A_GuiControl, "\d+$", num) ;Get button number based on button variable
-    
-    ctrlVar := xdotProperties[num].ctrlVar
-    mainPort := xdotProperties[num].mainPort
-    breakPort := xdotProperties[num].breakPort
-    portName := xdotProperties[num].portName
-    driveName := xdotProperties[num].driveName
-    ttXPos := xdotProperties[num].ttXPos    ;Position X for teraterm window
-    ttYPos := xdotProperties[num].ttYPos    ;Position Y for teraterm window
-    FileRead, data, C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
-    
-    WinActivate COM%mainPort%
-    ;;;GUI
-    Gui, xdot: Default
-    Gui, xdot: +ToolWindow +AlwaysOnTop +hWndhXdotWnd
-    Gui xdot: Add, GroupBox, xm+0 ym+0 w200 h70 Section, XDot-%num% Connecting Infomation
-    Gui Font, Bold
-    Gui xdot: Add, Text, xs+8 ys+20, • COM PORT: %mainPort%
-    Gui xdot: Add, Link, xs+145 ys+19 gConnectMainPort, <a href="#">Connect</a>
-    Gui xdot: Add, Text, xs+8 ys+35, • BREAK PORT: %breakPort%
-    Gui xdot: Add, Text, xs+8 ys+50, • DRIVE NAME: %driveName%
-    Gui xdot: Add, Link, xs+145 ys+49 gOpenXdotFolder, <a href="#">Open</a>
-    Gui Font
-    
-    ;Gui xdot: Add, GroupBox, xm+0 ym+70 w200 h120 Section, Functional Test
-    ;Gui xdot: Add, GroupBox, xm+0 ym+240 w200 h130 Section, EUID Write
-    
-    Gui xdot: Add, Tab3, xm+0 ym+75 w200 h130 +Theme -Background Section, Functional Test|EUID Write
-    Gui xdot: Tab, 1
-    Gui xdot: Add, Text, xs+110 ys+30, Connecting
-    Gui xdot: Add, Text, xs+110 ys+50, Programmable
-    Gui xdot: Add, Text, xs+110 ys+70, Joinning
-    Gui xdot: Add, Text, xs+110 ys+90, Ping
-    Gui xdot: Add, Text, xs+110 ys+110, RSSI
-    
-    ;Image indicators
-    Gui xdot: Add, Picture, xs+80 ys+28 w17 h17 +BackgroundTrans vprocess1, 
-    Gui xdot: Add, Picture, xs+80 ys+48 w17 h17 +BackgroundTrans vprocess2, 
-    Gui xdot: Add, Picture, xs+80 ys+68 w17 h17 +BackgroundTrans vprocess3, 
-    Gui xdot: Add, Picture, xs+80 ys+88 w17 h17 +BackgroundTrans vprocess4, 
-    Gui xdot: Add, Picture, xs+80 ys+108 w17 h17 +BackgroundTrans vprocess5, 
-    buttonLabel1 := (isBadXdot = 1 && RegExMatch(data, "TEST") > 0) ? "RE-RUN" : "RUN"
-    Gui xdot: Add, Button, w50 h45 xs+10 ys+50 gFunctionalTestEach, %buttonLabel1%
-    Gui xdot: Tab
-    
-    Gui xdot: Tab, 2
-    Gui xdot: Add, Text, xs+5 ys+35, STAT:
-    Gui xdot: Add, Text, xs+5 ys+55, FREQ:
-    Gui xdot: Add, Text, xs+5 ys+75, EUID:
-    Gui xdot: Add, Edit, xs+45 ys+33 w148 h16 vxStatus +ReadOnly, READY
-    Gui xdot: Add, Edit, xs+45 ys+53 w148 h16 vxFreq,
-    Gui xdot: Add, Edit, xs+45 ys+73 w148 h16 vxEUID,
-    buttonLabel2 := (isBadXdot = 1 && RegExMatch(data, "WRITE") > 0) ? "RE-RUN" : "RUN"
-    Gui xdot: Add, Button, xs+75 ys+95 w50 h30 vwriteBttnEach gWriteIDEach, %buttonLabel2%
-    Gui xdot: Tab
-    
-    Gui xdot: Add, GroupBox, xm+0 ym+205 w200 h55 Section, Programming
-    Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
-    
-    if (RegExMatch(data, "WRITE") > 0)
-        GuiControl, xdot: Choose, SysTabControl321, 2    ;Focus on tab 2
-    
-    ;;Labels or Functions to run before gui start
-    if (RegExMatch(data, "CONNECTION FAILED") > 0) {
-        GuiControl, , process1, %xImg%
-    } else if (RegExMatch(data, "FAILED TO PROGRAM") > 0) {
-        GuiControl, , process1, %checkImg%
-        GuiControl, , process2, %xImg%
-    } else if (RegExMatch(data, "FAILED TO JOIN") > 0) {
-        GuiControl, , process1, %checkImg%
-        GuiControl, , process2, %checkImg%
-        GuiControl, , process3, %xImg%
-    } else if (RegExMatch(data, "PING.*FAILURE") > 0) {
-        GuiControl, , process1, %checkImg%
-        GuiControl, , process2, %checkImg%
-        GuiControl, , process3, %checkImg%
-        GuiControl, , process4, %xImg%
-    } else if (RegExMatch(data, "RSSI LEVEL FAILURE") > 0) {
-        GuiControl, , process1, %checkImg%
-        GuiControl, , process2, %checkImg%
-        GuiControl, , process3, %checkImg%
-        GuiControl, , process4, %checkImg%
-        GuiControl, , process5, %xImg%
-    } else if (RegExMatch(data, "ALL PASSED") > 0) {
-        GuiControl, , process1, %checkImg%
-        GuiControl, , process2, %checkImg%
-        GuiControl, , process3, %checkImg%
-        GuiControl, , process4, %checkImg%
-        GuiControl, , process5, %checkImg%
-    }
-    IfNotExist C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
-    {
-        Gui 1: Default
-        GuiControlGet, chosenFreq   ;Get value from DropDownList
-        RegExMatch(A_GuiControl, "\d+$", num)
-        node := readNodeLine(num)
-        
-        Gui xdot: Default
-        GuiControl, Text, xFreq, %chosenFreq%   ;Change text
-        GuiControl, Text, xEUID, %node%   ;Change text
-    }
-    
-    if (isBadXdot = 1 || isGoodXdot = 1) && if (RegExMatch(data, "WRITE") > 0) {
-        Loop, Parse, data, `,
-        {
-            if (A_Index = 3)
-                GuiControl, Text, xEUID, %A_LoopField%   ;Change text
-            if (A_Index = 4) {
-                if (RegExMatch(A_LoopField, "FAIL|WRONG|INVALID"))
-                    Gui, Font, cf24b3f
-                else if (RegExMatch(A_LoopField, "PASS"))
-                    Gui, Font, c41e81c
-                GuiControl, Font, xStatus
-                GuiControl, Text, xStatus, %A_LoopField%   ;Change text
-            }
-            if (A_Index = 5)
-                GuiControl, Text, xFreq, %A_LoopField%   ;Change text
-        }
-    }
-    
-    mainY := mainY + 145
-    Gui xdot: Show, x%mainX% y%mainY%, XDot %num%
-    Return
-
-    xdotGuiEscape:
-    xdotGuiClose:
-        Gui, xdot: Destroy
-    Return
-    
-    ;;;Functions and Labels for xdot GUI;;;
-    FunctionalTestEach:
-        changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
-        
-        WinKill COM%mainPort%
-        ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="%xdotTestFilePath% "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
-        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE %xdotTestFilePath% dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
-
-        ;;;Track processes
-        Gui xdot: Default
-        Loop, 5
-        {
-           GuiControl, , process%A_Index%, %play1Img%
-           WinWait PASSED%A_Index%|%mainPort% FAILURE
-           IfWinExist %mainPort% FAILURE
-           {
-               GuiControl, , process%A_Index%, %xImg%
-               goto XdotFailed
-           }
-           GuiControl, , process%A_Index%, %checkImg%
-        }
-        
-        changeXdotBttnIcon(ctrlVar, "GOOD")
-    Return
-    
-    XdotFailed:
-        changeXdotBttnIcon(ctrlVar, "BAD")
-    Return
-        
-    ToDebugEach:
-        IfNotExist %driveName%:\
-        {
-            MsgBox 16, ERROR, Drive (%driveName%:\) does not exist!
-            Return
-        }
-        
-        changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
-        WinKill COM%mainPort%
-        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-        ;msg = Reprogramming on PORT %mainPort%...Please wait!
-        ;title = PORT %mainPort% PROGRAMMING
-        ;addTipMsg(msg, title, 17000)
-        ;RunWait, %ComSpec% /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %driveName%:\ , ,Hide
-        ;Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
-        WinWait %mainPort% FAILURE|%mainPort% PASSED
-        ifWinExist, %mainPort% FAILURE
-            changeXdotBttnIcon(ctrlVar, "BAD")
-        ifWinExist, %mainPort% PASSED
-            changeXdotBttnIcon(ctrlVar, "GOOD", "PROGRAMMING")
-    Return
-    
-    WriteIDEach:
-        WinKill COM%mainPort%
-        GuiControlGet, inFreq, , xFreq
-        GuiControlGet, inId, , xEUID
-        GuiControlGet, writeBttnLabel, , writeBttnEach
-        if (inFreq = "" || inId = "") {
-            MsgBox 16 , ,Please enter all requires fields!
-            return
-        }
-        
-        if (RegExMatch(inFreq, "[A-Z]+([0-9]{3})") = 0) {
-            MsgBox 16 , ERROR ,INPUT INVALID FREQUENCY. RETRY!
-            return
-        }
-        
-        if (RegExMatch(inId, "[g-zG-Z]") > 0) {
-            MsgBox 16 , ERROR ,INPUT INVALID UUID. RETRY!
-            return
-        }
-        
-        if (writeBttnLabel = "RUN") {
-            OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-            MsgBox 0x81, RUN WRITE EUID, Begin EUID WRITE on PORT %mainPort%?
-            OnMessage(0x44, "") ;Clear icon
-            IfMsgBox Cancel
-                return
-        }
-        changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
-        Gui xdot: Default
-        Gui, Font, c0c63ed
-        GuiControl, Font, xStatus
-        GuiControl, Text, xStatus, RUNNING   ;Change text
-        Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% newTTVersion, ,Hide
-        
-        WinWait %mainPort% FAILURE|%mainPort% PASSED
-        ifWinExist, %mainPort% FAILURE
-        {
-            WinGetText textOnWin, %mainPort% FAILURE
-            Gui, Font, cf24b3f
-            GuiControl, Font, xStatus
-            GuiControl, Text, xStatus, %textOnWin%   ;Change text
-            changeXdotBttnIcon(ctrlVar, "BAD")
-        }
-        ifWinExist, %mainPort% PASSED
-        {
-            Gui, Font, c41e81c
-            GuiControl, Font, xStatus
-            GuiControl, Text, xStatus, PASSED   ;Change text
-            changeXdotBttnIcon(ctrlVar, "GOOD")
-        }
-    Return
-    
-    ConnectMainPort:
-        IfWinNotExist COM%mainPort%
-            Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /C=%mainPort%, , Hide
-        WinActivate COM%mainPort%
-    Return
-    
-    OpenXdotFolder:
-        IfNotExist %driveName%:\
-        {
-            MsgBox 16, ERROR, Drive (%driveName%:\) does not exist!
-            Return
-        }
-        Run, %driveName%:\
-    Return
-}
-Return
 ;;;;;;User Prompt GUI
 ;;;auGen GUI
 GetAutoGenerate:
@@ -736,16 +480,16 @@ Return
     }
 Return
 
-;#^!+8::
-    ;index := startedIndex
-    ;Loop, %totalPort%
-    ;{
-        ;mainPort := xdotProperties[index].mainPort
-        ;ctrlVar := xdotProperties[index].ctrlVar
-        ;IfWinExist, PORT %mainPort% ERROR
-        ;{
-            ;changeXdotBttnIcon(ctrlVar, "ERROR")
-        ;}
-        ;index++
-    ;}
-;Return
+#^!+8::
+    index := startedIndex
+    Loop, %totalPort%
+    {
+        mainPort := xdotProperties[index].mainPort
+        ctrlVar := xdotProperties[index].ctrlVar
+        IfWinExist, PORT %mainPort% ERROR
+        {
+            changeXdotBttnIcon(ctrlVar, "ERROR")
+        }
+        index++
+    }
+Return
