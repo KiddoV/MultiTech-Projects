@@ -472,9 +472,11 @@ Return
         ctrlVar := xdotProperties[index].ctrlVar
         IfWinExist, PORT %mainPort% PASSED
         {
-            changeXdotBttnIcon(ctrlVar, "GOOD")
-            if (isRunReprogChecked = 1)
+            if (isRunReprogChecked = 1 && isReprogram) {
                 changeXdotBttnIcon(ctrlVar, "GOOD", "PROGRAMMING")
+            } else {
+                changeXdotBttnIcon(ctrlVar, "GOOD")
+            }
         }
         index++
     }

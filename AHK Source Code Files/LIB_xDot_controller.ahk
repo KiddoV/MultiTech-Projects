@@ -53,6 +53,8 @@ Global lotCodeList := []
 Global xdotTestFilePath := "C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl"
 Global teratermMacroExePath := "C:\teraterm\ttpmacro.exe"
 
+Global isReprogram := False
+
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
@@ -72,19 +74,29 @@ AddMainMenuBar() {
         Menu FileMenu, Add  ;Separator
         Menu FileMenu, Add, Quit, quitHandler
     Menu MainMenuBar, Add, &File, :FileMenu     ;Main button
+        Menu OptionMenu, Add, Enable Sync Mode, endableSyncModeHandler
+    Menu MainMenuBar, Add, &Options, :OptionMenu     ;Main button
         Menu HelpMenu, Add, Image Indicators, imageIndicatorHandler
         Menu HelpMenu, Add  ;Separator
         Menu HelpMenu, Add, About, aboutHandler
     Menu MainMenuBar, Add, &Help, :HelpMenu     ;Main button
     Gui Menu, MainMenuBar
+    
+    ;;;;Run after menu bar is created
+    Menu, OptionMenu, Disable, Enable Sync Mode
+    Menu, HelpMenu, Disable, About
 }
 ;;;;;;;;;All menu handlers
 reloadProgHandler() {
-    
+    Reload
 }
 
 quitHandler() {
     ExitApp
+}
+
+endableSyncModeHandler() {
+    Menu, OptionMenu, ToggleCheck, Enable Sync Mode
 }
 
 imageIndicatorHandler() {
@@ -100,6 +112,7 @@ aboutHandler() {
 runAll() {
     GuiControlGet, isRunTestChecked, , totalGPortRadio
     GuiControlGet, isRunReprogChecked, , reproGPortRadio
+    isReprogram := isRunReprogChecked = 1 ? True : False
     if (isRunTestChecked = 1) {
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
         MsgBox 0x81, RUN FUNCTIONAL TEST, Begin FUNCTIONAL TESTS on all %totalGoodPort% ports?
@@ -191,6 +204,7 @@ writeAll() {
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
+        isReprogram := False
         resetXdotBttns()
         deleteOldCacheFiles()
         resetNodesToWrite()
