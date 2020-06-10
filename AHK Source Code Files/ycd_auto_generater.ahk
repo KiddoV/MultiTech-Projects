@@ -2,6 +2,15 @@
     
 */
 ;=======================================================================================;
+;;;;;;;;;;Installs necessary files;;;;;;;;;;
+IfNotExist C:\V-Projects\YCD-Auto-Generator\Templates
+    FileCreateDir C:\V-Projects\YCD-Auto-Generator\Templates
+    
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TXT-Files\TemplateYCD.txt, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, 1
+;=======================================================================================;
+;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\tf.ahk
+;=======================================================================================;
 ;;;Main Gui
 #SingleInstance Force
 #NoEnv
@@ -10,16 +19,30 @@ SetBatchLines -1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
-Gui, MainG: Add, Button, x10 y5 gGetAddDataGui, Add Data
+Gui, MainG: Add, GroupBox, hWndhGrpbox xm+0 ym+0 w440 h460 Section,
+Gui, MainG: Add, Button, xs+10 ys+15 gGetAddDataGui, Add Data
+Gui, MainG: Add, Tab3, hWndhTab xs+10 ys+40 w425 h405 vDataTab -Wrap,
+Gui, MainG: Tab
 
-Gui, MainG: Add, Tab3, x10 y35 w425 h575 vDataTab -Wrap, 
+Gui, MainG: Add, GroupBox, xm+0 ym+460 w440 h100 Section,
+Gui, MainG: Add, Text, xs+10 ys+20, Blank Board ID:
+Gui, MainG: Add, Text, xs+10 ys+40, ECO:
+Gui, MainG: Add, Text, xs+10 ys+60, ECL:
 
+Gui, MainG: Add, Edit, xs+100 ys+16 h18 vBBoardID
+Gui, MainG: Add, Edit, xs+100 ys+36 h18 vEcoNum
+Gui, MainG: Add, Edit, xs+100 ys+56 h18 vEclNum
+
+Gui, MainG: Add, Button, x195 y570 h30 gGenerateYCD, GENERATE
 ;;;Functions to run BEFORE main gui is started;;;
 
 Gui, MainG: Show, , YCD Auto Generator
 
 ;;;Functions to run AFTER main gui is started;;;
-
+;;Fix bug where Groupbox lay over Tabs
+SendMessage 0xB, 0, 0,, ahk_id %hGrpbox% ; WM_SETREDRAW
+WinSet Redraw,, ahk_id %hTab%
+DllCall("SetWindowPos", "Ptr", hTab, "Ptr", 0, "Int", 0, "Int", 0, "Int", 0, "Int", 0, "UInt", 0x3)
 
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -30,6 +53,56 @@ Return
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTIONs;;;;;;;;;;;;;;;;;; 
 GetAddDataGui() {
     ShowAddDataGui()
+}
+
+GenerateYCD() {
+    Global      ;Access global vars
+    
+    justCreatedFilesArr := []
+    
+    GuiControlGet, bBoardID, , BBoardID
+    GuiControlGet, ecoNum, , EcoNum
+    GuiControlGet, eclNum, , EclNum
+    
+    FileSelectFolder, selectedFolder, , 3
+    if (selectedFolder = "")
+        return
+    
+    ;Create YCD files based on how many 7 level PCB
+    Loop, % listTabArr.Length()
+    {
+        7LPcb := listTabArr[A_Index]
+        ycdTopFilePath = %selectedFolder%\%7LPcb%_%eclNum%_TOP.ycd
+        ycdBotFilePath = %selectedFolder%\%7LPcb%_%eclNum%_BOT.ycd
+        FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdTopFilePath%, 1
+        FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdBotFilePath%, 1
+        justCreatedFilesArr.Push(ycdTopFilePath)
+        justCreatedFilesArr.Push(ycdBotFilePath)
+    }
+    
+    ;Modify YCD files
+    Loop, % justCreatedFilesArr.Length()
+    {
+        ycdFilePath := "!" . justCreatedFilesArr[A_Index]
+        TF(ycdFilePath)
+        
+        ;Modify TOP files
+        if (RegExMatch(ycdFilePath, "TOP") > 0) {
+            TF_Replace(ycdFilePath, "ycdIsXInvert", "0")
+            TF_Replace(ycdFilePath, "ycdIsTopSide", "1")
+        }
+        
+        ;Modify BOT files
+        if (RegExMatch(ycdFilePath, "BOT") > 0) {
+            TF_Replace(ycdFilePath, "ycdIsXInvert", "1")
+            TF_Replace(ycdFilePath, "ycdIsTopSide", "0")
+        }
+    }
+    
+    ;;DONE!
+    OnMessage(0x44, "CheckIcon") ;Add icon
+    MsgBox 0x80, DONE, Finished auto generate *.ycd files!!!
+    OnMessage(0x44, "") ;Clear icon
 }
 
 ;=======================================================================================;
@@ -143,6 +216,7 @@ generateDataToView(dataField1, dataField2) {
     Gui, MainG: Default
     
     ;Create tabs based on EBOM field
+    listTabArr := []
     listTabNames := ""
     Loop, Parse, dataField1, `n
     {
@@ -153,6 +227,7 @@ generateDataToView(dataField1, dataField2) {
                 if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([0-9]){3}$") > 0) {
                     tabCount++
                     listTabNames .= "|" . A_LoopField       ;Format: 70006750L000
+                    listTabArr.Push(A_LoopField)
                 }
             }
         }
@@ -248,13 +323,37 @@ generateDataToView(dataField1, dataField2) {
     {
         tabCountIndex := A_Index    ;Count how many tabs (How many parts)
         Gui, MainG: Tab, %A_Index%
-        Gui, MainG: Add, ListView, r30 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package
+        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package
         Loop, %mainPartTotal%
         {
             ;Add data to each ListView
             LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package)
             LV_ModifyCol( , Auto)
         }
+    }
+}
+
+;;;;;;;;;;;;;;;;;;;;
+;;;Icon for MsgBox
+/*Usage Sample
+OnMessage(0x44, "CheckIcon") ;Add icon
+MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
+OnMessage(0x44, "") ;Clear icon
+*/
+CheckIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
+PlayInCircleIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
 }
 ;=======================================================================================;
