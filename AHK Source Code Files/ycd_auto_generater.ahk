@@ -5,8 +5,11 @@
 ;;;;;;;;;;Installs necessary files;;;;;;;;;;
 IfNotExist C:\V-Projects\YCD-Auto-Generator\Templates
     FileCreateDir C:\V-Projects\YCD-Auto-Generator\Templates
+IfNotExist C:\V-Projects\YCD-Auto-Generator\Data
+    FileCreateDir C:\V-Projects\YCD-Auto-Generator\Data
     
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TXT-Files\TemplateYCD.txt, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TXT-Files\omit_list.dat, C:\V-Projects\YCD-Auto-Generator\Data\omit_list.dat, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\tf.ahk
@@ -35,10 +38,12 @@ Gui, MainG: Add, Edit, xs+100 ys+56 h18 vEclNum
 
 Gui, MainG: Add, Button, x195 y570 h30 gGenerateYCD, GENERATE
 ;;;Functions to run BEFORE main gui is started;;;
-
+getOmitListData()
 Gui, MainG: Show, , YCD Auto Generator
 
 ;;;Functions to run AFTER main gui is started;;;
+
+
 ;;Fix bug where Groupbox lay over Tabs
 SendMessage 0xB, 0, 0,, ahk_id %hGrpbox% ; WM_SETREDRAW
 WinSet Redraw,, ahk_id %hTab%
@@ -57,7 +62,7 @@ GetAddDataGui() {
 
 GenerateYCD() {
     Global      ;Access global vars
-    
+
     justCreatedFilesArr := []
     
     GuiControlGet, bBoardID, , BBoardID
@@ -80,7 +85,9 @@ GenerateYCD() {
         justCreatedFilesArr.Push(ycdBotFilePath)
     }
     
-    ;Modify YCD files
+    ;Modify YCD files (Loop each file just created)
+    Loop, 110
+        blankLine .= A_Space
     Loop, % justCreatedFilesArr.Length()
     {
         ycdFilePath := "!" . justCreatedFilesArr[A_Index]
@@ -90,6 +97,39 @@ GenerateYCD() {
         if (RegExMatch(ycdFilePath, "TOP") > 0) {
             TF_Replace(ycdFilePath, "ycdIsXInvert", "0")
             TF_Replace(ycdFilePath, "ycdIsTopSide", "1")
+            ;Add parts
+            startedLine := 19
+            Loop, % listTabArr.Length()
+            {
+                tabCountIndex := A_Index
+                Loop, %mainPartTotal%
+                {
+                    if ((tabArray%tabCountIndex%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0")) {
+                        TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT") {
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID . "_OMIT", 0)  ;Got bug here
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].omitPN, 0)
+                        }
+                        else {
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID, 0)  ;Got bug here, it creates more blanklines
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].partNum, 0)
+                        
+                        }
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 61, tabArray%tabCountIndex%[A_Index].xPos, 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 75, tabArray%tabCountIndex%[A_Index].yPos, 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndex%[A_Index].rotation, 0)
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT")
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].omitPkg, 0)
+                        else
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].package, 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 138, "----", 0)
+                        startedLine++
+                    }
+                }
+            }
+            ;;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
+            endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
+            TF_RemoveLines(ycdFilePath, endedLine + 1, 0)
         }
         
         ;Modify BOT files
@@ -252,18 +292,36 @@ generateDataToView(dataField1, dataField2) {
             {
                 if (A_Index = 1)
                     tabArray%tabCountIndex%[mainPartCount].refID := A_LoopField
-                if (A_Index = 2)
+                if (A_Index = 2) {
+                    pn := A_LoopField
                     tabArray%tabCountIndex%[mainPartCount].partNum := A_LoopField
+                }
                 if (A_Index = 3)
                     tabArray%tabCountIndex%[mainPartCount].layer := A_LoopField
-                if (A_Index = 4)
+                if (A_Index = 4) {
+                    pkg := A_LoopField
                     tabArray%tabCountIndex%[mainPartCount].package := A_LoopField
+                }
                 if (A_Index = 5)
                     tabArray%tabCountIndex%[mainPartCount].xPos := A_LoopField
                 if (A_Index = 6)
                     tabArray%tabCountIndex%[mainPartCount].yPos := A_LoopField
                 if (A_Index = 7)
-                    tabArray%tabCountIndex%[mainPartCount].rotation := A_LoopField            
+                    tabArray%tabCountIndex%[mainPartCount].rotation := A_LoopField
+                
+                ;Add omit data
+                Loop, % omitListDatArr.Length()
+                {
+                    origPkg := omitListDatArr[A_Index].origPkg
+                    if (origPkg = pkg) {
+                        tabArray%tabCountIndex%[mainPartCount].omitPN := omitListDatArr[A_Index].omitPN
+                        tabArray%tabCountIndex%[mainPartCount].omitPkg := omitListDatArr[A_Index].omitPkg
+                    } 
+                    else {
+                        tabArray%tabCountIndex%[mainPartCount].omitPN := "!OMIT-PN-NOT-FOUND!"
+                        tabArray%tabCountIndex%[mainPartCount].omitPkg := "!OMIT-PKG-NOT-FOUND!"
+                    }
+                }
             }
         }
     }
@@ -330,6 +388,31 @@ generateDataToView(dataField1, dataField2) {
             LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package)
             LV_ModifyCol( , Auto)
         }
+    }
+}
+
+getOmitListData() {
+    Global
+    omitListDatArr := [{}]
+    Local omitPartNum := 1
+    Loop, Read, C:\V-Projects\YCD-Auto-Generator\Data\omit_list.dat
+    {
+        if (A_LoopReadLine = "" || RegExMatch(A_LoopReadLine, "##") > 0)
+            Continue
+            
+        omitListDatArr[omitPartNum] := {}
+        Loop, Parse, A_LoopReadLine, `,
+        {
+            if (A_Index = 1)
+                omitListDatArr[omitPartNum].omitPN := A_LoopField
+            if (A_Index = 2)
+                omitListDatArr[omitPartNum].omitPkg := A_LoopField
+            if (A_Index = 3)
+                omitListDatArr[omitPartNum].origPkg := A_LoopField
+            if (A_Index = 4)
+                omitListDatArr[omitPartNum].origPN := A_LoopField
+        }
+        omitPartNum++
     }
 }
 

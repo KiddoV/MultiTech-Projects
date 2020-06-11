@@ -15,6 +15,5 @@ PkgNameMap=        \\Aoi-progpc\aoi_data2\StdPkg\PkgNameMap.txt
 IsTopSide=         ycdIsTopSide
 
 [PartList]
-RefID.            P/N                                                           XPos          YPos       Rtn       Pkg                                       Extension
-C2                04041101L                                                     3005          1230       90        SM-C-0402-B                               ----
+RefID.            P/N                                       XPos          YPos       Rtn       Pkg                                       Extension
 [PartListEnd]
