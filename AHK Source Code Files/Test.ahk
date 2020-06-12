@@ -1,85 +1,53 @@
-﻿list=
-(
-1,2,3,4
-5,6,7,8
-9,10,11,12
-99,98,97,96
-)
+﻿
+TestArray := [  {refID: "C1", pn: "1234"}
+        ,       {refID: "C20", pn: "1234"}
+        ,       {refID: "C3", pn: "1234"}
+        ,       {refID: "C2", pn: "1234"}
+        ,       {refID: "C50", pn: "1234"}
+        ,       {refID: "C11", pn: "1234"}
+        ,       {refID: "B1", pn: "1234"}
+        ,       {refID: "B20", pn: "1234"}
+        ,       {refID: "B12", pn: "1234"}
+        ,       {refID: "B2", pn: "1234"}
+        ,       {refID: "C12", pn: "1234"}
+        ,       {refID: "FB11", pn: "1234"}
+        ,       {refID: "FB9", pn: "1234"}
+        ,       {refID: "FB15", pn: "1234"}
+        ,       {refID: "FB122", pn: "1234"}
+        ,       {refID: "C19", pn: "1234"} ]
 
-Gui, Add, ListView, r12 w425 Grid vMyListView gcalculateTotal, C1|C2|C3|C4|Total|
-loop, parse, list, `n, `r
-{
-  stringsplit, temp, A_LoopField, `,
-  {
-    LV_Add("", temp1, temp2, temp3, temp4)
-  }
+
+Sort2DArray(TestArray, "refID")
+For index, obj in TestArray
+   list3 .= TestArray[index].refID . "`n"
+msgbox % list3
+
+
+
+Sort2DArray(Byref TDArray, KeyName, Order=1) {
+   ;TDArray : a two dimensional TDArray
+   ;KeyName : the key name to be sorted
+   ;Order: 1:Ascending 0:Descending
+ 
+    For index2, obj2 in TDArray {           
+        For index, obj in TDArray {
+            if (lastIndex = index)
+                break
+            RegExMatch(TDArray[index][KeyName], "[A-Z]+", letter)
+            RegExMatch(TDArray[prevIndex][KeyName], "[A-Z]+", prevLetter)
+            RegExMatch(TDArray[index][KeyName], "\d+", number)
+            RegExMatch(TDArray[prevIndex][KeyName], "\d+", prevnumber)
+            if !(A_Index = 1) &&  ((Order=1) ? (prevLetter > letter) && (prevnumber > number) : (prevLetter < letter)) {    
+               tmp := TDArray[index][KeyName] 
+               TDArray[index][KeyName] := TDArray[prevIndex][KeyName]
+               TDArray[prevIndex][KeyName] := tmp
+            }         
+            prevIndex := index
+        }     
+        lastIndex := prevIndex
+    }
 }
-LV_ModifyCol(1, 70)
-LV_ModifyCol(1, "float +Left sort")
-LV_ModifyCol(2, 70)
-LV_ModifyCol(3, 70)
-LV_ModifyCol(4, 70)
-
-Gosub calculateTotal
-
-gui, show, y100, My List
 
 
-return
-
-;---------------------------------------------------------------------------------------
 ^q::
-Gui, 2:Destroy
-Gui, 2:Add, Text, x16 y10 w80, C1 value
-Gui, 2:Add, Edit, x105 y6 w75 vC1, 
-Gui, 2:Add, Text, x16 y45 w80, C2 value
-Gui, 2:Add, Edit, x105 y41 w75 vC2,
-Gui, 2:Add, Text, x16 y80 w80, C3 value
-Gui, 2:Add, Edit, x105 y76 w75 vC3,
-Gui, 2:Add, Text, x16 y115 w80, C4 value
-Gui, 2:Add, Edit, x105 y111 w75 vC4,
- 
-Gui, 2: Add, Button, x50 y150 w100 Default, OK
- 
-Gui, 2:Show, Autosize, Enter values
-Return 
-
-2ButtonOk: 
-Gui, 2:Submit
-
-list .= "`n" . C1 . "," . C2 . "," . C3 . "," . C4 ; I want to have the entered values added to the list and the ListView GUI "refreshed"
-Gui, 1:Default
-LV_Add("", C1, C2, C3, C4)
-LV_ModifyCol(1, "sort")
-
-Gosub calculateTotal
-
- 
-Return
-
-;---------------------------------------------------------------------------------------
-
-guiclose:
-exitapp
-
-calculateTotal:
-
-C4RunningTotal=0
-
-; Loop through all the rows
-Loop % LV_GetCount()
-{
-  ; Save the value of each cell in the row
-  LV_GetText(C1val, A_Index, 1)
-  LV_GetText(C2val, A_Index, 2)
-  LV_GetText(C3val, A_Index, 3)
-  LV_GetText(C4val, A_Index, 4)
-  LV_GetText(this_value, A_Index, 4)
-
-  ; Add the value of the fourth cell to a running total
-  C4RunningTotal += this_value
-
-  ; Modify each row putting back their original values and adding the running total to the 5th column.
-  LV_Modify(A_Index, "",C1val,C2val,C3val, C4val, C4RunningTotal)
-}
-return
+    ExitApp

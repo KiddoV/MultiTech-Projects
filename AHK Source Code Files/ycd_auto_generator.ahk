@@ -92,21 +92,21 @@ GenerateYCD() {
     {
         ycdFilePath := "!" . justCreatedFilesArr[A_Index]
         TF(ycdFilePath)
-        
         ;Modify TOP files
         if (RegExMatch(ycdFilePath, "TOP") > 0) {
+            TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
             TF_Replace(ycdFilePath, "ycdIsXInvert", "0")
             TF_Replace(ycdFilePath, "ycdIsTopSide", "1")
             ;Add parts
             startedLine := 19
-            Loop, % listTabArr.Length()
+            Loop, % listTabArr.Length() / 2
             {
                 tabCountIndex := A_Index
                 Loop, %mainPartTotal%
                 {
                     if ((tabArray%tabCountIndex%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0")) {
                         TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT") {
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, "SPJ") = 0) {
                             TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID . "_OMIT", 0)  ;Got bug here
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].omitPN, 0)
                         }
@@ -115,10 +115,10 @@ GenerateYCD() {
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].partNum, 0)
                         
                         }
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 61, tabArray%tabCountIndex%[A_Index].xPos, 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 75, tabArray%tabCountIndex%[A_Index].yPos, 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].xPos), 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].yPos), 0)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndex%[A_Index].rotation, 0)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT")
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, "SPJ") = 0)
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].omitPkg, 0)
                         else
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].package, 0)
@@ -130,10 +130,13 @@ GenerateYCD() {
             ;;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
             endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
             TF_RemoveLines(ycdFilePath, endedLine + 1, 0)
+            ;Sort lines
+            TF_Sort(ycdFilePath, "", 19, endedLine - 1)
         }
         
         ;Modify BOT files
         if (RegExMatch(ycdFilePath, "BOT") > 0) {
+            TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
             TF_Replace(ycdFilePath, "ycdIsXInvert", "1")
             TF_Replace(ycdFilePath, "ycdIsTopSide", "0")
         }
@@ -312,10 +315,10 @@ generateDataToView(dataField1, dataField2) {
                 ;Add omit data
                 Loop, % omitListDatArr.Length()
                 {
-                    origPkg := omitListDatArr[A_Index].origPkg
-                    if (origPkg = pkg) {
+                    if (omitListDatArr[A_Index].origPkg = pkg || omitListDatArr[A_Index].origPN = pn) {
                         tabArray%tabCountIndex%[mainPartCount].omitPN := omitListDatArr[A_Index].omitPN
                         tabArray%tabCountIndex%[mainPartCount].omitPkg := omitListDatArr[A_Index].omitPkg
+                        Break
                     } 
                     else {
                         tabArray%tabCountIndex%[mainPartCount].omitPN := "!OMIT-PN-NOT-FOUND!"
@@ -372,8 +375,8 @@ generateDataToView(dataField1, dataField2) {
     ;Shorting the object arrays (Short by Ref ID EX: C1 - C2 - C3...)
     Loop, %tabCount%
     {
-        ;MsgBox % tabArray%A_Index%[1].refID
-        
+        MsgBox tabArray%A_Index%
+        ;Sort2DArray(tabArray%A_Index%, "refID")
     }
     
     ;Create ListView(s) based on how many tabs had created
@@ -381,11 +384,11 @@ generateDataToView(dataField1, dataField2) {
     {
         tabCountIndex := A_Index    ;Count how many tabs (How many parts)
         Gui, MainG: Tab, %A_Index%
-        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package
+        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
         Loop, %mainPartTotal%
         {
             ;Add data to each ListView
-            LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package)
+            LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package,tabArray%tabCountIndex%[A_Index].omitPkg, tabArray%tabCountIndex%[A_Index].omitPN)
             LV_ModifyCol( , Auto)
         }
     }
@@ -416,7 +419,7 @@ getOmitListData() {
     }
 }
 
-;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
 ;;;Icon for MsgBox
 /*Usage Sample
 OnMessage(0x44, "CheckIcon") ;Add icon
@@ -438,6 +441,14 @@ PlayInCircleIcon() {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
+}
+
+RemoveTrailingZeros(number) {
+   Loop % StrLen(number) {
+      StringTrimRight n, number, 1
+      IfNotEqual n,%number%, Return number
+      number = %n%
+   }
 }
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;HOT KEYs;;;;;;;;;;;;;;;;;;
