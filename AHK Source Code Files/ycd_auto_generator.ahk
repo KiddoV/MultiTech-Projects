@@ -20,6 +20,8 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TXT-Files\omit_l
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
+Global ignoreOmitRefID := "SPJ"
+Global ignoreRefID := "JP|FID"
 
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 Gui, MainG: Add, GroupBox, hWndhGrpbox xm+0 ym+0 w440 h460 Section,
@@ -104,9 +106,9 @@ GenerateYCD() {
                 tabCountIndex := A_Index
                 Loop, %mainPartTotal%
                 {
-                    if ((tabArray%tabCountIndex%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0")) {
+                    if ((tabArray%tabCountIndex%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreRefID) = 0) {
                         TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, "SPJ") = 0) {
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0) {
                             TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID . "_OMIT", 0)  ;Got bug here
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].omitPN, 0)
                         }
@@ -118,7 +120,7 @@ GenerateYCD() {
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].xPos), 0)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].yPos), 0)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndex%[A_Index].rotation, 0)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, "SPJ") = 0)
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0)
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].omitPkg, 0)
                         else
                             TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].package, 0)
@@ -127,11 +129,6 @@ GenerateYCD() {
                     }
                 }
             }
-            ;;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
-            endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
-            TF_RemoveLines(ycdFilePath, endedLine + 1, 0)
-            ;Sort lines
-            TF_Sort(ycdFilePath, "", 19, endedLine - 1)
         }
         
         ;Modify BOT files
@@ -139,7 +136,42 @@ GenerateYCD() {
             TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
             TF_Replace(ycdFilePath, "ycdIsXInvert", "1")
             TF_Replace(ycdFilePath, "ycdIsTopSide", "0")
+            ;Add parts
+            startedLine := 19
+            Loop, % listTabArr.Length() / 2
+            {
+                tabCountIndex := A_Index
+                Loop, %mainPartTotal%
+                {
+                    if ((tabArray%tabCountIndex%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreRefID) = 0) {
+                        TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0) {
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID . "_OMIT", 0)  ;Got bug here
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].omitPN, 0)
+                        }
+                        else {
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID, 0)  ;Got bug here, it creates more blanklines
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].partNum, 0)
+                        
+                        }
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].xPos), 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].yPos), 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndex%[A_Index].rotation, 0)
+                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0)
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].omitPkg, 0)
+                        else
+                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].package, 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 138, "----", 0)
+                        startedLine++
+                    }
+                }
+            }
         }
+        ;;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
+        endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
+        TF_RemoveLines(ycdFilePath, endedLine + 1, 0)
+        ;Sort lines
+        TF_Sort(ycdFilePath, "F SortStrCmpLogical", 19, endedLine - 1)
     }
     
     ;;DONE!
@@ -204,7 +236,7 @@ ShowAddDataGui() {
             MsgBox 4112, ERROR, Invalid EBOM data! Please retry!
             return
         }
-        if (!validateDesignInfoData(editFieldVar2)) {
+        if (!validateINSData(editFieldVar2)) {
             MsgBox 4112, ERROR, Invalid Part Design Infomation data! Please retry!
             return
         }
@@ -234,7 +266,7 @@ validateEBOMData(data) {
     Loop, Parse, data, `t`n
     {
         if (A_Index = 3) {
-            if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([0-9]){3}$") > 0 && A_LoopField != "")
+            if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([A-Z]|[0-9]){3}$") > 0 && A_LoopField != "")
                 return True
         }
     }
@@ -242,7 +274,7 @@ validateEBOMData(data) {
     return False
 }
 
-validateDesignInfoData(data) {
+validateINSData(data) {
     Loop, Parse, data, `t`n
     {
         if (A_Index = 14) {
@@ -267,7 +299,7 @@ generateDataToView(dataField1, dataField2) {
         if (A_Index = 1) {
             Loop, Parse, A_LoopField, `t`n
             {
-                if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([0-9]){3}$") > 0) {
+                if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([A-Z]|[0-9]){3}$") > 0) {
                     tabCount++
                     listTabNames .= "|" . A_LoopField       ;Format: 70006750L000
                     listTabArr.Push(A_LoopField)
@@ -372,13 +404,6 @@ generateDataToView(dataField1, dataField2) {
         goto NextArray
     }
     
-    ;Shorting the object arrays (Short by Ref ID EX: C1 - C2 - C3...)
-    Loop, %tabCount%
-    {
-        MsgBox tabArray%A_Index%
-        ;Sort2DArray(tabArray%A_Index%, "refID")
-    }
-    
     ;Create ListView(s) based on how many tabs had created
     Loop, %tabCount%
     {
@@ -449,6 +474,14 @@ RemoveTrailingZeros(number) {
       IfNotEqual n,%number%, Return number
       number = %n%
    }
+}
+
+;;Function for Sort
+SortStrCmpLogical(vTextA, vTextB, vOffset) ;for use with AHK's Sort command
+{
+	local
+	vRet := DllCall("shlwapi\StrCmpLogicalW", "WStr",vTextA, "WStr",vTextB)
+	return vRet ? vRet : -vOffset
 }
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;HOT KEYs;;;;;;;;;;;;;;;;;;
