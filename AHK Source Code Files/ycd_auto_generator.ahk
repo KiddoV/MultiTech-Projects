@@ -2,6 +2,8 @@
     
 */
 ;=======================================================================================;
+SetTitleMatchMode, RegEx
+FileEncoding, UTF-8
 ;;;;;;;;;;Installs necessary files;;;;;;;;;;
 IfNotExist C:\V-Projects\YCD-Auto-Generator\Templates
     FileCreateDir C:\V-Projects\YCD-Auto-Generator\Templates
@@ -93,7 +95,7 @@ GenerateYCD() {
     Loop, % justCreatedFilesArr.Length()
     {
         ycdFilePath := "!" . justCreatedFilesArr[A_Index]
-        TF(ycdFilePath)
+        ;TF(ycdFilePath)
         ;Modify TOP files
         if (RegExMatch(ycdFilePath, "TOP") > 0) {
             TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
@@ -169,7 +171,7 @@ GenerateYCD() {
         }
         ;;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
         endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
-        TF_RemoveLines(ycdFilePath, endedLine + 1, 0)
+        TF_RemoveBlankLines(ycdFilePath, endedLine + 1, 0)
         ;Sort lines
         TF_Sort(ycdFilePath, "F SortStrCmpLogical", 19, endedLine - 1)
     }
@@ -193,7 +195,7 @@ ShowAddDataGui() {
     Gui, AddDataG: Add, Text, x10 y10, Paste EBOM data here!
     Gui, AddDataG: Add, Edit, xm+34 ym+25 w350 r30 Section +HScroll hWndheditField1 veditField1
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField1
-    Gui, AddDataG: Add, Text, x455 y10, Paste Part Design Information data here!
+    Gui, AddDataG: Add, Text, x455 y10, Paste INS data here!
     Gui, AddDataG: Add, Edit, xm+479 ym+25 w350 r30 Section +HScroll hWndheditField2 veditField2
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField2
     
@@ -237,12 +239,13 @@ ShowAddDataGui() {
             return
         }
         if (!validateINSData(editFieldVar2)) {
-            MsgBox 4112, ERROR, Invalid Part Design Infomation data! Please retry!
+            MsgBox 4112, ERROR, Invalid INS data! Please retry!
             return
         }
         
         Gui, AddDataG: Destroy
         generateDataToView(editFieldVar1, editFieldVar2)
+        MsgBox FINISED merging data!
     Return
 }
 
@@ -455,7 +458,7 @@ CheckIcon() {
     DetectHiddenWindows, On
     Process, Exist
     If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
-        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
+        hIcon := LoadPicture("comres.dll", "w32 Icon9", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
 }
