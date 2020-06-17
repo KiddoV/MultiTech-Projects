@@ -68,6 +68,7 @@ GenerateYCD() {
     Global      ;Access global vars
 
     justCreatedFilesArr := []
+    blankLine := ""
     
     GuiControlGet, bBoardID, , BBoardID
     GuiControlGet, ecoNum, , EcoNum
@@ -92,10 +93,11 @@ GenerateYCD() {
     ;Modify YCD files (Loop each file just created)
     Loop, 110
         blankLine .= A_Space
+    tabCountIndexTop := 1
+    tabCountIndexBot := 1
     Loop, % justCreatedFilesArr.Length()
     {
         ycdFilePath := "!" . justCreatedFilesArr[A_Index]
-        ;TF(ycdFilePath)
         ;Modify TOP files
         if (RegExMatch(ycdFilePath, "TOP") > 0) {
             TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
@@ -103,34 +105,31 @@ GenerateYCD() {
             TF_Replace(ycdFilePath, "ycdIsTopSide", "1")
             ;Add parts
             startedLine := 19
-            Loop, % listTabArr.Length() / 2
+            Loop, %mainPartTotal%
             {
-                tabCountIndex := A_Index
-                Loop, %mainPartTotal%
-                {
-                    if ((tabArray%tabCountIndex%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreRefID) = 0) {
-                        TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0) {
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID . "_OMIT", 0)  ;Got bug here
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].omitPN, 0)
-                        }
-                        else {
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID, 0)  ;Got bug here, it creates more blanklines
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].partNum, 0)
-                        
-                        }
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].xPos), 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].yPos), 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndex%[A_Index].rotation, 0)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0)
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].omitPkg, 0)
-                        else
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].package, 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 138, "----", 0)
-                        startedLine++
+                if ((tabArray%tabCountIndexTop%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndexTop%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreRefID) = 0) {
+                    TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
+                    if (tabArray%tabCountIndexTop%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreOmitRefID) = 0) {
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexTop%[A_Index].refID . "_OMIT", 1)  ;Got bug here
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexTop%[A_Index].omitPN, 1)
                     }
+                    else {
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexTop%[A_Index].refID, 1)  ;Got bug here, it creates more blanklines
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexTop%[A_Index].partNum, 1)
+                        
+                    }
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndexTop%[A_Index].xPos), 1)
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndexTop%[A_Index].yPos), 1)
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndexTop%[A_Index].rotation, 1)
+                    if (tabArray%tabCountIndexTop%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreOmitRefID) = 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndexTop%[A_Index].omitPkg, 1)
+                    else
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndexTop%[A_Index].package, 1)
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 138, "----", 1)
+                    startedLine++
                 }
             }
+            tabCountIndexTop++
         }
         
         ;Modify BOT files
@@ -140,36 +139,33 @@ GenerateYCD() {
             TF_Replace(ycdFilePath, "ycdIsTopSide", "0")
             ;Add parts
             startedLine := 19
-            Loop, % listTabArr.Length() / 2
+            Loop, %mainPartTotal%
             {
-                tabCountIndex := A_Index
-                Loop, %mainPartTotal%
-                {
-                    if ((tabArray%tabCountIndex%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndex%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreRefID) = 0) {
-                        TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0) {
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID . "_OMIT", 0)  ;Got bug here
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].omitPN, 0)
-                        }
-                        else {
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndex%[A_Index].refID, 0)  ;Got bug here, it creates more blanklines
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndex%[A_Index].partNum, 0)
-                        
-                        }
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].xPos), 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndex%[A_Index].yPos), 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndex%[A_Index].rotation, 0)
-                        if (tabArray%tabCountIndex%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndex%[A_Index].refID, ignoreOmitRefID) = 0)
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].omitPkg, 0)
-                        else
-                            TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndex%[A_Index].package, 0)
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, 138, "----", 0)
-                        startedLine++
+                if ((tabArray%tabCountIndexBot%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndexBot%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreRefID) = 0) {
+                    TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
+                    if (tabArray%tabCountIndexBot%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreOmitRefID) = 0) {
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexBot%[A_Index].refID . "_OMIT", 1)  ;Got bug here
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexBot%[A_Index].omitPN, 1)
                     }
+                    else {
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexBot%[A_Index].refID, 1)  ;Got bug here, it creates more blanklines
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexBot%[A_Index].partNum, 1)
+                        
+                    }
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndexBot%[A_Index].xPos), 1)
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndexBot%[A_Index].yPos), 1)
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndexBot%[A_Index].rotation, 1)
+                    if (tabArray%tabCountIndexBot%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreOmitRefID) = 0)
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndexBot%[A_Index].omitPkg, 1)
+                    else
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndexBot%[A_Index].package, 1)
+                    TF_ColPut(ycdFilePath, startedLine, startedLine, 138, "----", 1)
+                    startedLine++
                 }
             }
+            tabCountIndexBot++
         }
-        ;;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
+        ;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
         endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
         TF_RemoveBlankLines(ycdFilePath, endedLine + 1, 0)
         ;Sort lines
@@ -245,7 +241,9 @@ ShowAddDataGui() {
         
         Gui, AddDataG: Destroy
         generateDataToView(editFieldVar1, editFieldVar2)
-        MsgBox FINISED merging data!
+        OnMessage(0x44, "CheckIcon") ;Add icon
+        MsgBox 0x80, DONE, Finished merging data!!!!
+        OnMessage(0x44, "") ;Clear icon
     Return
 }
 
@@ -314,7 +312,7 @@ generateDataToView(dataField1, dataField2) {
     Sleep 100
     
     ;;;;Create array data for ListView(s)
-    ;;Create arrays and get data from Info field
+    ;;Create arrays and get data from INS field
     tabCountIndex := 1
     DefineArray:
     tabArray%tabCountIndex% := [{}]
@@ -412,13 +410,14 @@ generateDataToView(dataField1, dataField2) {
     {
         tabCountIndex := A_Index    ;Count how many tabs (How many parts)
         Gui, MainG: Tab, %A_Index%
-        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
-        Loop, %mainPartTotal%
-        {
-            ;Add data to each ListView
-            LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package,tabArray%tabCountIndex%[A_Index].omitPkg, tabArray%tabCountIndex%[A_Index].omitPN)
-            LV_ModifyCol( , Auto)
-        }
+        GuiControl, Choose, DataTab, |%A_Index%
+        ;Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
+        ;Loop, %mainPartTotal%
+        ;{
+            ;;Add data to each ListView
+            ;LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package,tabArray%tabCountIndex%[A_Index].omitPkg, tabArray%tabCountIndex%[A_Index].omitPN)
+            ;LV_ModifyCol( , Auto)
+        ;}
     }
 }
 
