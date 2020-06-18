@@ -23,7 +23,8 @@ SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global ignoreOmitRefID := "SPJ"
-Global ignoreRefID := "JP|FID"
+Global ignoreRefID := "FID"
+Global ignorePN := "01020155L|01050200L|01051366L|01051372L|01053695L|01053700L|01054101L|01055309L|01055720L|01055730L|01056392L|01058017L|01058018L|01058023L|01058024L|01058047L|01058248L|01059010L|01059015L|01059115L"
 
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 Gui, MainG: Add, GroupBox, hWndhGrpbox xm+0 ym+0 w440 h460 Section,
@@ -31,16 +32,14 @@ Gui, MainG: Add, Button, xs+10 ys+15 gGetAddDataGui, Add Data
 Gui, MainG: Add, Tab3, hWndhTab xs+10 ys+40 w425 h405 vDataTab -Wrap,
 Gui, MainG: Tab
 
-Gui, MainG: Add, GroupBox, xm+0 ym+460 w440 h100 Section,
+Gui, MainG: Add, GroupBox, xm+0 ym+460 w440 h70 Section,
 Gui, MainG: Add, Text, xs+10 ys+20, Blank Board ID:
 Gui, MainG: Add, Text, xs+10 ys+40, ECO:
-Gui, MainG: Add, Text, xs+10 ys+60, ECL:
 
 Gui, MainG: Add, Edit, xs+100 ys+16 h18 vBBoardID
 Gui, MainG: Add, Edit, xs+100 ys+36 h18 vEcoNum
-Gui, MainG: Add, Edit, xs+100 ys+56 h18 vEclNum
 
-Gui, MainG: Add, Button, x195 y570 h30 gGenerateYCD, GENERATE
+Gui, MainG: Add, Button, x195 y540 h30 gGenerateYCD, GENERATE
 ;;;Functions to run BEFORE main gui is started;;;
 getOmitListData()
 Gui, MainG: Show, , YCD Auto Generator
@@ -72,7 +71,6 @@ GenerateYCD() {
     
     GuiControlGet, bBoardID, , BBoardID
     GuiControlGet, ecoNum, , EcoNum
-    GuiControlGet, eclNum, , EclNum
     
     FileSelectFolder, selectedFolder, , 3
     if (selectedFolder = "")
@@ -81,7 +79,8 @@ GenerateYCD() {
     ;Create YCD files based on how many 7 level PCB
     Loop, % listTabArr.Length()
     {
-        7LPcb := listTabArr[A_Index]
+        RegExMatch(listTabArr[A_Index], "^([0-9]){8}+L", 7LPcb)
+        RegExMatch(listTabArr[A_Index], "([A-Z]|[0-9]){3}$", eclNum)
         ycdTopFilePath = %selectedFolder%\%7LPcb%_%eclNum%_TOP.ycd
         ycdBotFilePath = %selectedFolder%\%7LPcb%_%eclNum%_BOT.ycd
         FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdTopFilePath%, 1
@@ -107,20 +106,22 @@ GenerateYCD() {
             startedLine := 19
             Loop, %mainPartTotal%
             {
-                if ((tabArray%tabCountIndexTop%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndexTop%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreRefID) = 0) {
-                    TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
+                if ((tabArray%tabCountIndexTop%[A_Index].layer = "TopLayer") && (tabArray%tabCountIndexTop%[A_Index].partNum != "0") && (RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreRefID) = 0) && (RegExMatch(tabArray%tabCountIndexTop%[A_Index].partNum, ignorePN) = 0)) {
                     if (tabArray%tabCountIndexTop%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreOmitRefID) = 0) {
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexTop%[A_Index].refID . "_OMIT", 1)  ;Got bug here
+                        TF_InsertLine(ycdFilePath, startedLine, startedLine, tabArray%tabCountIndexTop%[A_Index].refID . "_OMIT" . blankLine)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexTop%[A_Index].omitPN, 1)
                     }
                     else {
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexTop%[A_Index].refID, 1)  ;Got bug here, it creates more blanklines
+                        TF_InsertLine(ycdFilePath, startedLine, startedLine, tabArray%tabCountIndexTop%[A_Index].refID . blankLine)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexTop%[A_Index].partNum, 1)
                         
                     }
                     TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndexTop%[A_Index].xPos), 1)
                     TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndexTop%[A_Index].yPos), 1)
-                    TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndexTop%[A_Index].rotation, 1)
+                    if (tabArray%tabCountIndexTop%[A_Index].rotation = "360")
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, "0", 1)
+                    else
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndexTop%[A_Index].rotation, 1)
                     if (tabArray%tabCountIndexTop%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreOmitRefID) = 0)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndexTop%[A_Index].omitPkg, 1)
                     else
@@ -141,20 +142,22 @@ GenerateYCD() {
             startedLine := 19
             Loop, %mainPartTotal%
             {
-                if ((tabArray%tabCountIndexBot%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndexBot%[A_Index].partNum != "0") && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreRefID) = 0) {
-                    TF_InsertLine(ycdFilePath, startedLine, startedLine, blankLine)
+                if ((tabArray%tabCountIndexBot%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndexBot%[A_Index].partNum != "0") && (RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreRefID) = 0) && (RegExMatch(tabArray%tabCountIndexTop%[A_Index].partNum, ignorePN) = 0)) {
                     if (tabArray%tabCountIndexBot%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreOmitRefID) = 0) {
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexBot%[A_Index].refID . "_OMIT", 1)  ;Got bug here
+                        TF_InsertLine(ycdFilePath, startedLine, startedLine, tabArray%tabCountIndexBot%[A_Index].refID . "_OMIT" . blankLine)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexBot%[A_Index].omitPN, 1)
                     }
                     else {
-                        TF_ColPut(ycdFilePath, startedLine, startedLine, "1,1", tabArray%tabCountIndexBot%[A_Index].refID, 1)  ;Got bug here, it creates more blanklines
+                        TF_InsertLine(ycdFilePath, startedLine, startedLine, tabArray%tabCountIndexBot%[A_Index].refID . blankLine)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexBot%[A_Index].partNum, 1)
                         
                     }
                     TF_ColPut(ycdFilePath, startedLine, startedLine, 61, RemoveTrailingZeros(tabArray%tabCountIndexBot%[A_Index].xPos), 1)
                     TF_ColPut(ycdFilePath, startedLine, startedLine, 75, RemoveTrailingZeros(tabArray%tabCountIndexBot%[A_Index].yPos), 1)
-                    TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndexBot%[A_Index].rotation, 1)
+                    if (tabArray%tabCountIndexBot%[A_Index].rotation = "360")
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, "0", 1)
+                    else
+                        TF_ColPut(ycdFilePath, startedLine, startedLine, 86, tabArray%tabCountIndexBot%[A_Index].rotation, 1)
                     if (tabArray%tabCountIndexBot%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreOmitRefID) = 0)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 96, tabArray%tabCountIndexBot%[A_Index].omitPkg, 1)
                     else
@@ -165,9 +168,8 @@ GenerateYCD() {
             }
             tabCountIndexBot++
         }
-        ;Remove all blanklines (bug) after PartListEnd (bug above fixed!)
-        endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
-        TF_RemoveBlankLines(ycdFilePath, endedLine + 1, 0)
+        ;endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
+        endedLine:=TF_CountLines(ycdFilePath)
         ;Sort lines
         TF_Sort(ycdFilePath, "F SortStrCmpLogical", 19, endedLine - 1)
     }
@@ -187,7 +189,7 @@ ShowAddDataGui() {
     posPrev2 := 1    ;just for not-showing line number bug
     
     Gui, AddDataG: Default
-    Gui, AddDataG: +ToolWindow +AlwaysOnTop +hWndhAddDataGWnd
+    Gui, AddDataG: +ToolWindow +hWndhAddDataGWnd
     Gui, AddDataG: Add, Text, x10 y10, Paste EBOM data here!
     Gui, AddDataG: Add, Edit, xm+34 ym+25 w350 r30 Section +HScroll hWndheditField1 veditField1
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField1
@@ -196,6 +198,8 @@ ShowAddDataGui() {
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField2
     
     Gui, AddDataG: Add, Button, x400 y415 w50 h30 gMergeData, Merge
+    
+    Gui, AddDataG: Add, Checkbox, x10 vskipDataCheckBox, Skip showing data 
     
     Gui, AddDataG: Show, , Get Part Data
     
@@ -226,6 +230,8 @@ ShowAddDataGui() {
     MergeData:
         GuiControlGet, editFieldVar1, , editField1
         GuiControlGet, editFieldVar2, , editField2
+        GuiControlGet, isSkipShowData, , skipDataCheckBox
+        
         if (editFieldVar1 = "" || editFieldVar2 = "") {
             MsgBox 4112, ERROR, Field 1 or Field 2 is empty!
             return
@@ -240,7 +246,7 @@ ShowAddDataGui() {
         }
         
         Gui, AddDataG: Destroy
-        generateDataToView(editFieldVar1, editFieldVar2)
+        generateDataToView(editFieldVar1, editFieldVar2, isSkipShowData)
         OnMessage(0x44, "CheckIcon") ;Add icon
         MsgBox 0x80, DONE, Finished merging data!!!!
         OnMessage(0x44, "") ;Clear icon
@@ -287,15 +293,20 @@ validateINSData(data) {
     return False
 }
 
-generateDataToView(dataField1, dataField2) {
+generateDataToView(dataField1, dataField2, isSkipShowData) {
     Global
     Gui, MainG: Default
     
     ;Create tabs based on EBOM field
     listTabArr := []
     listTabNames := ""
+    totalEBOMLines := 0
+    Loop, Parse, dataField1, `n
+        totalEBOMLines++
     Loop, Parse, dataField1, `n
     {
+        progressCount := A_Index * 100 / totalEBOMLines
+        Progress, %progressCount%, ....., Collecting EBOM data..., YCD Auto Generator
         partTotal++
         if (A_Index = 1) {
             Loop, Parse, A_LoopField, `t`n
@@ -308,16 +319,22 @@ generateDataToView(dataField1, dataField2) {
             }
         }
     }
+    Progress, Off
     GuiControl, , DataTab, %listTabNames%
     Sleep 100
     
     ;;;;Create array data for ListView(s)
     ;;Create arrays and get data from INS field
     tabCountIndex := 1
+    totalINSLines := 0
+    Loop, Parse, dataField2, `t`n
+        totalINSLines++
     DefineArray:
     tabArray%tabCountIndex% := [{}]
     Loop, Parse, dataField2, `t`n
     {
+        progressCount := A_Index * 100 / totalINSLines
+        Progress, %progressCount%, ....., Collecting INS data..., YCD Auto Generator
         if (A_LoopField = "")   ;Skip blank line
             Continue
         if (A_Index >= 14) {     ;Skip all the intro, go from line 14 (usually is) which has data...
@@ -354,8 +371,8 @@ generateDataToView(dataField1, dataField2) {
                         Break
                     } 
                     else {
-                        tabArray%tabCountIndex%[mainPartCount].omitPN := "!OMIT-PN-NOT-FOUND!"
-                        tabArray%tabCountIndex%[mainPartCount].omitPkg := "!OMIT-PKG-NOT-FOUND!"
+                        tabArray%tabCountIndex%[mainPartCount].omitPN := "OMIT_CATCH"
+                        tabArray%tabCountIndex%[mainPartCount].omitPkg := pkg
                     }
                 }
             }
@@ -365,6 +382,7 @@ generateDataToView(dataField1, dataField2) {
         tabCountIndex++
         goto DefineArray
     }
+    Progress, Off
     mainPartTotal := mainPartCount  ; At this point after loop, mainPartCount is the total of line count
     
     ;;After arrays are defined and data from Info field are stored in arrays, get data from EBOM field
@@ -411,14 +429,20 @@ generateDataToView(dataField1, dataField2) {
         tabCountIndex := A_Index    ;Count how many tabs (How many parts)
         Gui, MainG: Tab, %A_Index%
         GuiControl, Choose, DataTab, |%A_Index%
-        ;Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
-        ;Loop, %mainPartTotal%
-        ;{
-            ;;Add data to each ListView
-            ;LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package,tabArray%tabCountIndex%[A_Index].omitPkg, tabArray%tabCountIndex%[A_Index].omitPN)
-            ;LV_ModifyCol( , Auto)
-        ;}
+        if (isSkipShowData)
+            Continue
+        tabName := listTabArr[A_Index]
+        progressCount := A_Index * 100 / tabCount
+        Progress, %progressCount%, %tabName%, Displaying Data..., YCD Auto Generator
+        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
+        Loop, %mainPartTotal%
+        {
+            ;Add data to each ListView
+            LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package,tabArray%tabCountIndex%[A_Index].omitPkg, tabArray%tabCountIndex%[A_Index].omitPN)
+            LV_ModifyCol( , Auto)
+        }
     }
+    Progress, Off
 }
 
 getOmitListData() {
@@ -457,7 +481,7 @@ CheckIcon() {
     DetectHiddenWindows, On
     Process, Exist
     If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
-        hIcon := LoadPicture("comres.dll", "w32 Icon9", _)
+        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
 }
