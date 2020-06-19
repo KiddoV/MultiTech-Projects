@@ -88,19 +88,16 @@ GenerateYCD() {
         justCreatedFilesArr.Push(ycdTopFilePath)
         justCreatedFilesArr.Push(ycdBotFilePath)
     }
+    
     ;Modify YCD files (Loop each file just created)
     Loop, 110
         blankLine .= A_Space
     tabCountIndexTop := 1
     tabCountIndexBot := 1
-    totalYCDFile := justCreatedFilesArr.Length()
     Loop, % justCreatedFilesArr.Length()
-    {   
+    {
         ycdFilePath := "!" . justCreatedFilesArr[A_Index]
         ;Modify TOP files
-        SplitPath, ycdFilePath, name
-        progressCount := A_Index * 100 / justCreatedFilesArr.Length()
-        Progress, %progressCount%, File: .../%name% `n File Number %A_Index%/%totalYCDFile%, Generating YCD Files..., YCD Auto Generator
         if (RegExMatch(ycdFilePath, "TOP") > 0) {
             TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
             TF_Replace(ycdFilePath, "ycdIsXInvert", "0")
@@ -176,14 +173,11 @@ GenerateYCD() {
         ;Sort lines
         TF_Sort(ycdFilePath, "F SortStrCmpLogical", 19, endedLine - 1)
     }
-    Progress, Off
     
     ;;DONE!
     OnMessage(0x44, "CheckIcon") ;Add icon
     MsgBox 0x80, DONE, Finished auto generate *.ycd files!!!
     OnMessage(0x44, "") ;Clear icon
-    
-    Run, %selectedFolder%
 }
 
 ;=======================================================================================;
@@ -302,21 +296,23 @@ validateINSData(data) {
 generateDataToView(dataField1, dataField2, isSkipShowData) {
     Global
     Gui, MainG: Default
-
-    Loop, Parse, dataField1, `t`n
-        totalEBOMLines++
-    Loop, Parse, dataField2, `t`n
-        totalINSLines++
     
     ;Create tabs based on EBOM field
     listTabArr := []
     listTabNames := ""
+    totalEBOMLines := 0
+    Loop, Parse, dataField1, `n
+        totalEBOMLines++
+    progrStrView := "...."
     Loop, Parse, dataField1, `n
     {
+        ;progressCount := A_Index * 100 / totalEBOMLines
+        ;Progress, %progressCount%, %progrStrView%, Collecting EBOM data..., YCD Auto Generator
         partTotal++
         if (A_Index = 1) {
             Loop, Parse, A_LoopField, `t`n
             {
+                progrStrView := A_LoopField
                 if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([A-Z]|[0-9]){3}$") > 0) {
                     tabCount++
                     listTabNames .= "|" . A_LoopField       ;Format: 70006750L000
@@ -325,14 +321,17 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
             }
         }
     }
+    ;Progress, Off
     GuiControl, , DataTab, %listTabNames%
+    Sleep 100
+    
     ;;;;Create array data for ListView(s)
     ;;Create arrays and get data from INS field
     tabCountIndex := 1
+    Loop, Parse, dataField2, `t`n
+        totalINSLines++
+    totalINSLinesAllBuild := 0
     DefineArray:
-    tabName := listTabArr[tabCountIndex]
-    progressCount := totalINSLinesAllBuild * 100 / (totalINSLines * (tabCount - 1))
-    Progress, %progressCount%, Build %tabCountIndex%/%tabCount% is stored, Collecting data..., YCD Auto Generator
     tabArray%tabCountIndex% := [{}]
     Loop, Parse, dataField2, `t`n
     {
@@ -345,10 +344,11 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
             strLine := RegExReplace(A_LoopField, "\s+", "`,")
             Loop, Parse, strLine, `,`n
             {
-                if (A_Index = 1) {
+                ;progressCount := totalINSLinesAllBuild * 100 / (totalINSLines * tabCount)
+                ;Progress, %progressCount%, Build: %tabCountIndex% -- Part: %mainPartCount% -- RefID: %refID%, Collecting INS data..., YCD Auto Generator
+                if (A_Index = 1)
                     refID := A_LoopField
                     tabArray%tabCountIndex%[mainPartCount].refID := A_LoopField
-                }
                 if (A_Index = 2) {
                     pn := A_LoopField
                     tabArray%tabCountIndex%[mainPartCount].partNum := A_LoopField
@@ -385,7 +385,8 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
     if (tabCountIndex < tabCount) {
         tabCountIndex++
         goto DefineArray
-    }   
+    }
+    ;Progress, Off
     mainPartTotal := mainPartCount  ; At this point after loop, mainPartCount is the total of line count
     
     ;;After arrays are defined and data from Info field are stored in arrays, get data from EBOM field
@@ -398,11 +399,9 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
     }
     
     tabCountIndex := 1
+    totalEBOMLineAllBuild := 0
     NextArray:
-    tabName := listTabArr[tabCountIndex]
     statusIndex := tabCountIndex + 2    ; + 2 to skip refID and P/N
-    progressCount := tabCountIndex * 100 / (tabCount - 1)
-    Progress, %progressCount%, BuildID: %tabName% -- %tabCountIndex%/%tabCount% Build, Merging EBOM & INS data..., YCD Auto Generator
     Loop, Parse, dataField1, `n
     {
         if (A_Index > 1) {      ;Skip the first line cuz it's the titles
@@ -416,6 +415,9 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
             }
             Loop, %ebomPartTotal%
             {
+                ;totalEBOMLineAllBuild++
+                ;progressCount := totalEBOMLineAllBuild * 100 / (ebomPartTotal * (totalEBOMLines * tabCount))
+                ;Progress, %progressCount%, Build: %tabCountIndex% -- RefID: %comparedPartID% -- Status: %partStatus%, Merging EBOM & INS data..., YCD Auto Generator
                 if (tabArray%tabCountIndex%[A_Index].refID = comparedPartID) {
                     tabArray%tabCountIndex%[A_Index].status := partStatus
                     Break
@@ -428,8 +430,10 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
         tabCountIndex++
         goto NextArray
     }
+    ;Progress, Off
     
     ;Create ListView(s) based on how many tabs had created
+    mainPartTotalAllBuild := 0
     Loop, %tabCount%
     {
         tabCountIndex := A_Index    ;Count how many tabs (How many parts)
@@ -438,20 +442,18 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
         if (isSkipShowData)
             Continue
         tabName := listTabArr[A_Index]
-        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index% hWndhLV%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
-        hwndLVID := hLV%A_Index%
+        Gui, MainG: Add, ListView, r20 w400 Grid vPartDataListView%A_Index%, RefID|Part Number|Status|Layer|X-Pos|Y-Pos|Rotation|Package|Omit Package|Omit Part Number
         Loop, %mainPartTotal%
         {
-            mainPartTotalAllBuild++
-            progressCount := mainPartTotalAllBuild * 100 / (mainPartTotal * tabCount)
-            Progress, %progressCount%, Build: %tabCountIndex%/%tabCount% -- Row#: %A_Index%/%mainPartTotal%, Displaying Data..., YCD Auto Generator
-            ;;;Add data to each ListView
+            ;mainPartTotalAllBuild++
+            ;progressCount := mainPartTotalAllBuild * 100 / (mainPartTotal * tabCount)
+            ;Progress, %progressCount%, BuildID: %tabName% -- Row#: %A_Index%, Displaying Data..., YCD Auto Generator
+            ;Add data to each ListView
             LV_Add("", tabArray%tabCountIndex%[A_Index].refID, tabArray%tabCountIndex%[A_Index].partNum, tabArray%tabCountIndex%[A_Index].status, tabArray%tabCountIndex%[A_Index].layer, tabArray%tabCountIndex%[A_Index].xPos, tabArray%tabCountIndex%[A_Index].yPos, tabArray%tabCountIndex%[A_Index].rotation, tabArray%tabCountIndex%[A_Index].package,tabArray%tabCountIndex%[A_Index].omitPkg, tabArray%tabCountIndex%[A_Index].omitPN)
             LV_ModifyCol( , Auto)
-            SendMessage, 0x115, 7,,, ahk_id %hwndLVID%  ;WM_VSCROLL
         }
     }
-    Progress, Off
+    ;Progress, Off
 }
 
 getOmitListData() {
