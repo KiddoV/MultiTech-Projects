@@ -200,12 +200,14 @@ ShowAddDataGui() {
     Gui, AddDataG: Add, Edit, xm+34 ym+25 w350 r30 Section +HScroll hWndheditField1 veditField1
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField1
     Gui, AddDataG: Add, Text, x455 y10, Paste INS data here!
+    Gui, AddDataG: Add, Radio, x680 y10 vRadioNewFormat +Checked Group, New Format
+    Gui, AddDataG: Add, Radio, x770 y10 vRadioOldFormat, Old Format
     Gui, AddDataG: Add, Edit, xm+479 ym+25 w350 r30 Section +HScroll hWndheditField2 veditField2
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField2
     
     Gui, AddDataG: Add, Button, x400 y415 w50 h30 gMergeData, Merge
     
-    Gui, AddDataG: Add, Checkbox, x10 vskipDataCheckBox, Skip showing data 
+    Gui, AddDataG: Add, Checkbox, x370 vskipDataCheckBox, Skip showing data
     
     Gui, AddDataG: Show, , Get Part Data
     
@@ -279,30 +281,56 @@ validateEBOMData(data) {
     Loop, Parse, data, `t`n
     {
         if (A_Index = 3) {
-            if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([A-Z]|[0-9]){3}$") > 0 && A_LoopField != "")
-                return True
+            if (RegExMatch(A_LoopField, "^([0-9]){8}+L+([A-Z]|[0-9]){3}$") = 0 && A_LoopField = "")
+                return False
         }
     }
     
-    return False
+    return True
 }
 
 validateINSData(data) {
-    Loop, Parse, data, `t`n
-    {
-        if (A_Index = 14) {
-            if (RegExMatch(A_LoopField, "^([A-Z]){1,}+\d{1,}") > 0)
-                return True
+    Global
+    GuiControlGet, isNewFormat, , RadioNewFormat
+    GuiControlGet, isOldFormat, , RadioOldFormat
+    
+    if (isNewFormat = 1) {
+        Loop, Parse, data, `t`n
+        {
+            if (A_Index = 1) {
+                if (RegExMatch(A_LoopField, "Altium Designer Pick and Place Locations") = 0)
+                    return False
+            }
+            
+            if (A_Index = 14) {
+                if (RegExMatch(A_LoopField, "^([A-Z]){1,}+\d{1,}") = 0)
+                    return False
+            }
         }
     }
     
-    return False
+    if (isOldFormat = 1) {
+        Loop, Parse, data, `t`n
+        {
+            if (A_Index = 1) {
+                if (RegExMatch(A_LoopField, "insertfile.txt") = 0)
+                    return False
+            }
+            
+            if (A_Index = 6) {
+                if (RegExMatch(A_LoopField, "^([A-Z]){1,}+\d{1,}") = 0)
+                    return False
+            }
+        }
+    }
+    
+    return True
 }
 
 generateDataToView(dataField1, dataField2, isSkipShowData) {
     Global
     Gui, MainG: Default
-
+    
     Loop, Parse, dataField1, `t`n
         totalEBOMLines++
     Loop, Parse, dataField2, `t`n
@@ -339,46 +367,58 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
         totalINSLinesAllBuild++
         if (A_LoopField = "")   ;Skip blank line
             Continue
-        if (A_Index >= 14) {     ;Skip all the intro, go from line 14 (usually is) which has data...
-            mainPartCount := A_Index - 13    ;Count how many line in Info data
-            tabArray%tabCountIndex%[mainPartCount] := {}    ;Create object inside array
-            strLine := RegExReplace(A_LoopField, "\s+", "`,")
-            Loop, Parse, strLine, `,`n
-            {
-                if (A_Index = 1) {
-                    refID := A_LoopField
-                    tabArray%tabCountIndex%[mainPartCount].refID := A_LoopField
-                }
-                if (A_Index = 2) {
-                    pn := A_LoopField
-                    tabArray%tabCountIndex%[mainPartCount].partNum := A_LoopField
-                }
-                if (A_Index = 3)
-                    tabArray%tabCountIndex%[mainPartCount].layer := A_LoopField
-                if (A_Index = 4) {
-                    pkg := A_LoopField
-                    tabArray%tabCountIndex%[mainPartCount].package := A_LoopField
-                }
-                if (A_Index = 5)
-                    tabArray%tabCountIndex%[mainPartCount].xPos := A_LoopField
-                if (A_Index = 6)
-                    tabArray%tabCountIndex%[mainPartCount].yPos := A_LoopField
-                if (A_Index = 7)
-                    tabArray%tabCountIndex%[mainPartCount].rotation := A_LoopField
-                
-                ;Add omit data
-                Loop, % omitListDatArr.Length()
+        ;;;;;Adding data with new format
+        if (isNewFormat = 1) {
+            if (A_Index >= 14) {     ;Skip all the intro, go from line 14 (usually is) which has data...
+                mainPartCount := A_Index - 13    ;Count how many line in Info data
+                tabArray%tabCountIndex%[mainPartCount] := {}    ;Create object inside array
+                strLine := RegExReplace(A_LoopField, "\s+", "`,")
+                Loop, Parse, strLine, `,`n
                 {
-                    if (omitListDatArr[A_Index].origPkg = pkg || omitListDatArr[A_Index].origPN = pn) {
-                        tabArray%tabCountIndex%[mainPartCount].omitPN := omitListDatArr[A_Index].omitPN
-                        tabArray%tabCountIndex%[mainPartCount].omitPkg := omitListDatArr[A_Index].omitPkg
-                        Break
-                    } 
-                    else {
-                        tabArray%tabCountIndex%[mainPartCount].omitPN := "OMIT_CATCH"
-                        tabArray%tabCountIndex%[mainPartCount].omitPkg := pkg
+                    if (A_Index = 1) {
+                        refID := A_LoopField
+                        tabArray%tabCountIndex%[mainPartCount].refID := A_LoopField
+                    }
+                    if (A_Index = 2) {
+                        pn := A_LoopField
+                        tabArray%tabCountIndex%[mainPartCount].partNum := A_LoopField
+                    }
+                    if (A_Index = 3)
+                        tabArray%tabCountIndex%[mainPartCount].layer := A_LoopField
+                    if (A_Index = 4) {
+                        pkg := A_LoopField
+                        tabArray%tabCountIndex%[mainPartCount].package := A_LoopField
+                    }
+                    if (A_Index = 5)
+                        tabArray%tabCountIndex%[mainPartCount].xPos := A_LoopField
+                    if (A_Index = 6)
+                        tabArray%tabCountIndex%[mainPartCount].yPos := A_LoopField
+                    if (A_Index = 7)
+                        tabArray%tabCountIndex%[mainPartCount].rotation := A_LoopField
+                    
+                    ;Add omit data
+                    Loop, % omitListDatArr.Length()
+                    {
+                        if (omitListDatArr[A_Index].origPkg = pkg || omitListDatArr[A_Index].origPN = pn) {
+                            tabArray%tabCountIndex%[mainPartCount].omitPN := omitListDatArr[A_Index].omitPN
+                            tabArray%tabCountIndex%[mainPartCount].omitPkg := omitListDatArr[A_Index].omitPkg
+                            Break
+                        } 
+                        else {
+                            tabArray%tabCountIndex%[mainPartCount].omitPN := "OMIT_CATCH"
+                            tabArray%tabCountIndex%[mainPartCount].omitPkg := pkg
+                        }
                     }
                 }
+            }
+        }
+        
+        ;;;;;Adding data with old format
+        if (isOldFormat = 1) {
+            if (A_Index >= 6) {
+                mainPartCount := A_Index - 5    ;Count how many line in Info data
+                tabArray%tabCountIndex%[mainPartCount] := {}    ;Create object inside array
+                
             }
         }
     }

@@ -138,7 +138,7 @@ drawLineNumbers(firstLine = "") {
 }
 
 CheckFileChange:
-IfExist %remotePath%
+IfExist %remotePath%\XDOT
 {
     Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
     if(newFileContent != lastFileContent) {
