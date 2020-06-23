@@ -418,7 +418,45 @@ generateDataToView(dataField1, dataField2, isSkipShowData) {
             if (A_Index >= 6) {
                 mainPartCount := A_Index - 5    ;Count how many line in Info data
                 tabArray%tabCountIndex%[mainPartCount] := {}    ;Create object inside array
-                
+                Loop, Parse, A_LoopField, `,`n
+                {
+                    if (A_Index = 1)
+                        tabArray%tabCountIndex%[mainPartCount].refID := A_LoopField
+                    if (A_Index = 2) {
+                        pn := A_LoopField
+                        tabArray%tabCountIndex%[mainPartCount].partNum := A_LoopField
+                    }
+                    if (A_Index = 3) {
+                        pkg := A_LoopField
+                        tabArray%tabCountIndex%[mainPartCount].package := A_LoopField
+                    }
+                    if (A_Index = 4)
+                        tabArray%tabCountIndex%[mainPartCount].xPos := A_LoopField
+                    if (A_Index = 5)
+                        tabArray%tabCountIndex%[mainPartCount].yPos := A_LoopField
+                    if (A_Index = 6)
+                        tabArray%tabCountIndex%[mainPartCount].rotation := RemoveTrailingZeros(A_LoopField)
+                    if (A_Index = 7) {
+                        if (A_LoopField = "NO")
+                            tabArray%tabCountIndex%[mainPartCount].layer := "TopLayer"
+                        if (A_LoopField = "YES")
+                            tabArray%tabCountIndex%[mainPartCount].layer := "BottomLayer"
+                    }
+                    
+                    ;Add omit data
+                    Loop, % omitListDatArr.Length()
+                    {
+                        if (omitListDatArr[A_Index].origPkg = pkg || omitListDatArr[A_Index].origPN = pn) {
+                            tabArray%tabCountIndex%[mainPartCount].omitPN := omitListDatArr[A_Index].omitPN
+                            tabArray%tabCountIndex%[mainPartCount].omitPkg := omitListDatArr[A_Index].omitPkg
+                            Break
+                        } 
+                        else {
+                            tabArray%tabCountIndex%[mainPartCount].omitPN := "OMIT_CATCH"
+                            tabArray%tabCountIndex%[mainPartCount].omitPkg := pkg
+                        }
+                    }
+                }
             }
         }
     }

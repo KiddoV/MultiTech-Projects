@@ -34,7 +34,7 @@ html=
 
 <div>
 <button class="xdotBttn"><img src="C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png" width="24" height="24"></button>
-<button class="xdotBttn">P01</button>
+<button id="xdot1" class="xdotBttn">P01</button>
 </div>
 
 </body>
@@ -56,7 +56,7 @@ return
 GuiClose:
     ExitApp
 
-green_OnClick() {
+xdot1_OnClick() {
     MsgBox Foo!
 }
 

@@ -2,6 +2,8 @@
     XDot Controller Function Library
     Contain all functions used by XDot Controller Scripts
 */
+;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
 
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
@@ -74,8 +76,11 @@ AddMainMenuBar() {
         Menu FileMenu, Add  ;Separator
         Menu FileMenu, Add, Quit, quitHandler
     Menu MainMenuBar, Add, &File, :FileMenu     ;Main button
+        Menu OptionMenu, Add, Eco Lab Mode, ecoLabModeHandler
         Menu OptionMenu, Add, Enable Sync Mode, endableSyncModeHandler
     Menu MainMenuBar, Add, &Options, :OptionMenu     ;Main button
+        Menu ToolMenu, Add, Analyst, analystHandler
+    Menu MainMenuBar, Add, &Tools, :ToolMenu     ;Main button
         Menu HelpMenu, Add, Image Indicators, imageIndicatorHandler
         Menu HelpMenu, Add  ;Separator
         Menu HelpMenu, Add, About, aboutHandler
@@ -95,8 +100,17 @@ quitHandler() {
     ExitApp
 }
 
+ecoLabModeHandler() {
+    Menu, OptionMenu, ToggleCheck, Eco Lab Mode
+    toggleEcoLabMode()
+}
+
 endableSyncModeHandler() {
     Menu, OptionMenu, ToggleCheck, Enable Sync Mode
+}
+
+analystHandler() {
+    MsgBox Not implemented yet!
 }
 
 imageIndicatorHandler() {
@@ -303,6 +317,10 @@ writeAll() {
         return
 }
 
+writeEcoLab() {
+    
+}
+
 giveBackToEdit() {
     MsgBox 0x24, Confirmation, Are you sure you want to import all nodes back to edit field? 
     IfMsgBox Yes
@@ -321,6 +339,7 @@ giveBackToEdit() {
     IfMsgBox No
         return
 }
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 resetXdotBttns() {
     Global
@@ -591,6 +610,47 @@ OnRightClick() {
         GuiControl, Text, %A_GuiControl%,    ;Delete text
         GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
     }
+}
+
+toggleEcoLabMode() {
+    Global
+    Gui, 1: Default
+    Static toggleState := 1
+    
+    if (toggleState = 1) {
+        ;;Hide old gui controls
+        GuiControl, Hide, selectFreqLabel
+        GuiControl, Hide, chosenFreq
+        Loop, 24
+        {
+            GuiControl, Hide, portLabel%A_Index%
+            GuiControl, Hide, nodeToWrite%A_Index%
+        }
+        GuiControl, Hide, giveBackBttn
+        GuiControl, , fwLabel, FW: ???
+        
+        ;;Show new gui controls
+        GuiControl, Show, idListView
+        GuiControl, +gwriteEcoLab, writeAllBttn
+        
+        toggleState := 0
+    } else {
+        GuiControl, Show, selectFreqLabel
+        GuiControl, Show, chosenFreq
+        Loop, 24
+        {
+            GuiControl, Show, portLabel%A_Index%
+            GuiControl, Show, nodeToWrite%A_Index%
+        }
+        GuiControl, Show, giveBackBttn
+        GuiControl, , fwLabel, FW: v3.2.1
+        
+        GuiControl, Hide, idListView
+        GuiControl, +gwriteAll, writeAllBttn
+        
+        toggleState := 1
+    }
+    
 }
 ;=======================================================================================;
 ;;Add an icon to a button with external image file

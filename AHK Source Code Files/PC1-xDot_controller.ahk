@@ -20,7 +20,6 @@ Global mainWndTitle := "XDot Controller (PC1)"
 Global startedIndex := 1
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\LIB_xDot_controller.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
@@ -67,7 +66,7 @@ Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodP
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
 Gui Add, GroupBox, xm+0 ym+205 w200 h245 Section, EUID Write
-Gui Add, Text, xs+10 ys+20, Select Frequency:
+Gui Add, Text, xs+10 ys+20 vselectFreqLabel, Select Frequency:
 For each, item in allFregs
     freq .= (each == 1 ? "" : "|") . item
 Gui Add, DropDownList, xs+105 ys+17 w85 vchosenFreq, %freq%
@@ -85,9 +84,21 @@ Loop, 8
     index++
     yVarStarted += 20
 }
-Gui Add, Button, xs+182 ys+50 w15 h155 ggiveBackToEdit, >
-Gui Add, Text, cgray xs+5 ys+225, FW: v3.2.1
-Gui Add, Button, xs+73 ys+211 w55 h28 gwriteAll, START
+
+Gui Add, Button, xs+182 ys+50 w15 h155 vgiveBackBttn ggiveBackToEdit, >
+Gui Add, Text, cgray xs+5 ys+225 vfwLabel, FW: v3.2.1
+Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
+
+;;For Eco Lab
+Gui Add, ListView, xs+5 ys+20 r9 w190 vidListView +Grid +NoSortHdr Hidden, P#|Node ID|Serial Number|App Key|UUID
+index := startedIndex
+Loop, 8
+{
+    mainPort := xdotProperties[index].mainPort
+    LV_Add("", mainPort, "")
+    
+    index++
+}
 
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
@@ -138,7 +149,7 @@ drawLineNumbers(firstLine = "") {
 }
 
 CheckFileChange:
-IfExist %remotePath%\XDOT
+IfExist %remotePath%
 {
     Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
     if(newFileContent != lastFileContent) {
