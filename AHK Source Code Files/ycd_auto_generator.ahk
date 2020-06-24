@@ -145,7 +145,7 @@ GenerateYCD() {
             startedLine := 19
             Loop, %mainPartTotal%
             {
-                if ((tabArray%tabCountIndexBot%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndexBot%[A_Index].partNum != "0") && (RegExMatch(tabArray%tabCountIndexTop%[A_Index].refID, ignoreRefID) = 0) && (RegExMatch(tabArray%tabCountIndexTop%[A_Index].partNum, ignorePN) = 0)) {
+                if ((tabArray%tabCountIndexBot%[A_Index].layer = "BottomLayer") && (tabArray%tabCountIndexBot%[A_Index].partNum != "0") && (RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreRefID) = 0) && (RegExMatch(tabArray%tabCountIndexBot%[A_Index].partNum, ignorePN) = 0)) {
                     if (tabArray%tabCountIndexBot%[A_Index].status = "OMIT" && RegExMatch(tabArray%tabCountIndexBot%[A_Index].refID, ignoreOmitRefID) = 0) {
                         TF_InsertLine(ycdFilePath, startedLine, startedLine, tabArray%tabCountIndexBot%[A_Index].refID . "_OMIT" . blankLine)
                         TF_ColPut(ycdFilePath, startedLine, startedLine, 19, tabArray%tabCountIndexBot%[A_Index].omitPN, 1)

@@ -4,7 +4,7 @@
 */
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
-
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Class_LV_Colors.ahk
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
     FileCreateDir C:\V-Projects\XDot-Controller\Imgs-for-GUI
@@ -68,6 +68,7 @@ Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 Global exclaImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png"
 ;=======================================================================================;
+WinSet, Redraw, , ahk_id %hIdListView%
 ;;;;;;Menu bar for MAIN GUI
 AddMainMenuBar() {
     Global
@@ -318,7 +319,35 @@ writeAll() {
 }
 
 writeEcoLab() {
+    Global
+    Gui, ListView, idListView
+    isReprogram := False
+    resetXdotBttns()
+    deleteOldCacheFiles()
+    resetNodesToWrite()
     
+    ;LVInstance := ""
+    LVInstance.NoSizing(False)
+    
+    Loop, 8
+    {
+        allIdStr := ""
+        rowNum := A_Index
+        LV_Modify(A_Index, "+Select")
+        LVInstance.Row(A_Index, 0x0048b5, 0xFFFFFF)
+        LV_Modify(A_Index, "-Select")
+        
+        ;;Get all id string in ListView
+        Loop, 5
+        {
+            LV_GetText(idStr, rowNum, A_Index)
+            allIdStr .= idStr ","
+        }
+        
+        Sleep 200
+    }
+    
+    MsgBox DONE
 }
 
 giveBackToEdit() {
@@ -342,7 +371,7 @@ giveBackToEdit() {
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 resetXdotBttns() {
-    Global
+    Global   
     Loop, 25
     {
         ctrlVar := xdotProperties[A_Index].ctrlVar
@@ -359,6 +388,7 @@ resetXdotBttns() {
 }
 
 resetNodesToWrite() {
+    Global
     Gui, 1: Default
     index := startedIndex
     Loop, %totalPort%
@@ -369,6 +399,18 @@ resetNodesToWrite() {
         Gui, Font
         Gui, Font, cblack
         GuiControl, Font, nodeToWrite%index%
+        index++
+    }
+    
+    Gui, ListView, idListView
+    LVInstance.Clear()
+    LV_Delete()
+    index := startedIndex
+    Loop, 8
+    {
+        mainPort := xdotProperties[index].mainPort
+        LV_Add("", mainPort)
+        
         index++
     }
 }

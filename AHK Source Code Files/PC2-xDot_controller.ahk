@@ -90,15 +90,17 @@ Gui Add, Text, cgray xs+5 ys+225 vfwLabel, FW: v3.2.1
 Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
 
 ;;For Eco Lab
-Gui Add, ListView, xs+5 ys+20 r9 w190 vidListView +Grid +NoSortHdr Hidden, P#|Node ID|Serial Number|App Key|UUID
+Gui Add, ListView, xs+5 ys+20 r9 w190 vidListView hWndhIdListView +Grid +NoSortHdr Hidden, P#|Node ID|Serial Number|App Key|UUID
 index := startedIndex
 Loop, 8
 {
     mainPort := xdotProperties[index].mainPort
-    LV_Add("", mainPort, "")
+    LV_Add("", mainPort)
     
     index++
 }
+;Create instance to use LV_Color
+LVInstance := New LV_Colors(hIdListView)
 
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
