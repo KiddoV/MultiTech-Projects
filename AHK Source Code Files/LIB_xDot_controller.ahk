@@ -320,34 +320,108 @@ writeAll() {
 
 writeEcoLab() {
     Global
-    Gui, ListView, idListView
-    isReprogram := False
-    resetXdotBttns()
-    deleteOldCacheFiles()
-    resetNodesToWrite()
     
-    ;LVInstance := ""
-    LVInstance.NoSizing(False)
-    
-    Loop, 8
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN EUID WRITE, Begin (ECO LAB) EUID WRITE on %totalGoodPort% ports?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
     {
-        allIdStr := ""
-        rowNum := A_Index
-        LV_Modify(A_Index, "+Select")
-        LVInstance.Row(A_Index, 0x0048b5, 0xFFFFFF)
-        LV_Modify(A_Index, "-Select")
+        Gui, ListView, idListView
+        isReprogram := False
+        resetXdotBttns()
+        deleteOldCacheFiles()
+        resetNodesToWrite()
         
-        ;;Get all id string in ListView
-        Loop, 5
-        {
-            LV_GetText(idStr, rowNum, A_Index)
-            allIdStr .= idStr ","
+        ;LVInstance := ""
+        LVInstance.NoSizing(False)
+        
+        ;;Add data to ListView
+        index := startedIndex
+        Loop, %totalPort%
+        {            
+            ctrlVar := xdotProperties[index].ctrlVar
+            xStatus := xdotProperties[index].status
+            mainPort := xdotProperties[index].mainPort
+            
+            allIdRead := readNodeLine(index)
+            if (RegExMatch(allIdRead, "[0-9a-fA-F]") = 0) && if (xStatus = "G"){
+                changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
+            }
+            
+            if (xStatus = "G") {
+                Loop, Parse, allIdRead, `,
+                {
+                    if (A_Index = 1)
+                        serialNumRead := A_LoopField
+                    if (A_Index = 2)
+                        nodeIdRead := A_LoopField
+                    if (A_Index = 3)
+                        appKeyRead := A_LoopField
+                    if (A_Index = 4)
+                        uuidRead := A_LoopField
+                }
+                
+                LV_Insert( A_Index, "", mainPort, nodeIdRead, serialNumRead, appKeyRead, uuidRead)
+                LV_Delete(A_Index + 1)
+                
+                Lbl_ReplaceNodeLine2:
+                replaceNodeLine(index, "----")
+                ;Recheck if replace node successful
+                replaceNode := readNodeLine(index)
+                if (replaceNode != "----")
+                    goto Lbl_ReplaceNodeLine2
+            }
+            index++
         }
+        LV_ModifyCol( , "AutoHdr")
+        saveNodesToWrite()
+        ;After save...recheck if replacement successful again -- Fixing bug
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            xStatus := xdotProperties[index].status
+            if (xStatus = "G") {
+                Lbl_RecheckReplace2:
+                replaceNodeAgain := readNodeLine(index)
+                if (replaceNodeAgain != "----") {
+                    replaceNodeLine(index, "----")
+                    goto Lbl_RecheckReplace2
+                }
+            }
+            index++
+        }
+        saveNodesToWrite()
         
-        Sleep 200
+        ;;Start writing
+        Sleep 500
+        index := startedIndex
+        Loop, %totalPort%
+        {
+            xStatus := xdotProperties[index].status
+            allIdStr := ""
+            
+            if (xStatus = "G") {
+                rowNum := A_Index
+                
+                
+                LV_Modify(A_Index, "+Select")
+                LVInstance.Row(A_Index, 0x0048b5, 0xFFFFFF)
+                LV_Modify(A_Index, "-Select")
+                
+                ;;Get all id string in ListView each row
+                Loop, 5
+                {
+                    LV_GetText(idStr, rowNum, A_Index)
+                    allIdStr .= idStr ","
+                }
+                Sleep 500
+            }
+            index++
+        }
     }
     
-    MsgBox DONE
+    IfMsgBox Cancel
+        return
 }
 
 giveBackToEdit() {
