@@ -65,7 +65,7 @@ Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run te
 Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
-Gui Add, GroupBox, xm+0 ym+205 w200 h245 Section, EUID Write
+Gui Add, GroupBox, xm+0 ym+205 w200 h245 vwriteLabel Section, EUID Write
 Gui Add, Text, xs+10 ys+20 vselectFreqLabel, Select Frequency:
 For each, item in allFregs
     freq .= (each == 1 ? "" : "|") . item
@@ -87,6 +87,7 @@ Loop, 8
 
 Gui Add, Button, xs+182 ys+50 w15 h155 vgiveBackBttn ggiveBackToEdit, >
 Gui Add, Text, cgray xs+5 ys+225 vfwLabel, FW: v3.2.1
+Gui Add, Text, cgray xs+140 ys+225 w40 vfreqLabel,
 Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
 
 ;;For Eco Lab

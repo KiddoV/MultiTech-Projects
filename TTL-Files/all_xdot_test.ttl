@@ -225,7 +225,7 @@ filesearch cacheFileLoc
 if result = 0 filecreate fhandle cacheFileLoc
 
 fileopen fhandle cacheFileLoc 0	;0 for overwrite
-sprintf2 writeStr 'TEST,%s,,%s' xdotMainPort testStatus
+sprintf2 writeStr 'TEST|%s||%s' xdotMainPort testStatus
 filewrite fhandle writeStr
 fileclose fhandle
 

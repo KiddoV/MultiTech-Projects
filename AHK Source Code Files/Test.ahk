@@ -9,7 +9,7 @@ AnalystGui() {
     Gui, alystGui: Default
     Gui, alystGui: +ToolWindow +hWndhAlystGuiWnd
     
-    Gui, alystGui: Add, ActiveX, w500 h300 vWebDoc, Shell.Explore
+    Gui, alystGui: Add, ActiveX, w450 h250 vWebDoc, Shell.Explore
     WebDoc.Navigate("C:\Users\Administrator\Documents\MultiTech-Projects\HTML-Files\test.html")
     WebWindow := WebDoc.document.parentWindow
     Gui, alystGui: Add, Button, x210 y450 w55 gTestBttn, TEST

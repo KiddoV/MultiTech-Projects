@@ -33,12 +33,14 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\pen
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_write_eco-lab.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reprogram.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_xdot_reset.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reset.ttl, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\INI-Files\xdot-tt-settings.INI, C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\EXE-Files\xdot-winwaitEachPort.exe, C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe, 1
 
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin, 1
@@ -56,6 +58,7 @@ Global xdotTestFilePath := "C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_tes
 Global teratermMacroExePath := "C:\teraterm\ttpmacro.exe"
 
 Global isReprogram := False
+Global isEcoLabMode := False
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 
@@ -215,7 +218,7 @@ writeAll() {
     }
 
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, RUN EUID WRITE, Begin EUID WRITE on all %totalGoodPort% ports?
+    MsgBox 0x81, RUN EUID WRITE, Begin EUID WRITE on all %totalGoodPort% ports?`n**Make sure you pick the right FREQUENCY**
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
@@ -231,6 +234,11 @@ writeAll() {
             node := readNodeLine(index)
             if (RegExMatch(node, "[0-9a-fA-F]") = 0) && if (xStatus = "G"){
                 changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
+            }
+            
+            if (StrLen(node) > 17) {
+                MsgBox 16 , ERROR, Invalid Node ID in one of the IDs. Please recheck your input!!!`nNode ID should only have 17 digits!
+                return
             }
             
             xStatus := xdotProperties[index].status
@@ -348,9 +356,10 @@ writeEcoLab() {
                 changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
             }
             
+            xStatus := xdotProperties[index].status
             if (xStatus = "G") {
                 Loop, Parse, allIdRead, `,
-                {
+                {   
                     if (A_Index = 1)
                         serialNumRead := A_LoopField
                     if (A_Index = 2)
@@ -359,6 +368,11 @@ writeEcoLab() {
                         appKeyRead := A_LoopField
                     if (A_Index = 4)
                         uuidRead := A_LoopField
+                }
+                
+                if (uuidRead = "") {
+                    MsgBox 16 , ERROR, Invalid IDs in the node field. Please recheck your input!!!`nRemember this is the WRITING PROCESS for ECO LAB
+                    return
                 }
                 
                 LV_Insert( A_Index, "", mainPort, nodeIdRead, serialNumRead, appKeyRead, uuidRead)
@@ -370,10 +384,11 @@ writeEcoLab() {
                 replaceNode := readNodeLine(index)
                 if (replaceNode != "----")
                     goto Lbl_ReplaceNodeLine2
+                
+                LV_ModifyCol( , "AutoHdr")
             }
             index++
         }
-        LV_ModifyCol( , "AutoHdr")
         saveNodesToWrite()
         ;After save...recheck if replacement successful again -- Fixing bug
         index := startedIndex
@@ -394,15 +409,22 @@ writeEcoLab() {
         
         ;;Start writing
         Sleep 500
-        index := startedIndex
+        indexCount := startedIndex
         Loop, %totalPort%
         {
-            xStatus := xdotProperties[index].status
+            ctrlVar := xdotProperties[indexCount].ctrlVar
+            xStatus := xdotProperties[indexCount].status
+            mainPort := xdotProperties[indexCount].mainPort
+            breakPort := xdotProperties[indexCount].breakPort
+            driveName := xdotProperties[indexCount].driveName
             allIdStr := ""
             
             if (xStatus = "G") {
                 rowNum := A_Index
-                
+                WinKill COM%mainPort%
+                IfWinExist PROGRAMMING
+                    Sleep 9000
+                changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
                 
                 LV_Modify(A_Index, "+Select")
                 LVInstance.Row(A_Index, 0x0048b5, 0xFFFFFF)
@@ -414,9 +436,12 @@ writeEcoLab() {
                     LV_GetText(idStr, rowNum, A_Index)
                     allIdStr .= idStr ","
                 }
-                Sleep 500
+                
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 dummyParam7 %allIdStr% newTTVersion, , Hide, TTWinPID
+                Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
+                Sleep 3000
             }
-            index++
+            indexCount++
         }
     }
     
@@ -734,6 +759,7 @@ toggleEcoLabMode() {
     Static toggleState := 1
     
     if (toggleState = 1) {
+        isEcoLabMode := True
         ;;Hide old gui controls
         GuiControl, Hide, selectFreqLabel
         GuiControl, Hide, chosenFreq
@@ -743,14 +769,17 @@ toggleEcoLabMode() {
             GuiControl, Hide, nodeToWrite%A_Index%
         }
         GuiControl, Hide, giveBackBttn
-        GuiControl, , fwLabel, FW: ???
+        GuiControl, , fwLabel, FW: v3.0.2
         
         ;;Show new gui controls
         GuiControl, Show, idListView
+        GuiControl, , writeLabel, EUID Write (ECO LAB)
+        GuiControl, , freqLabel, US915
         GuiControl, +gwriteEcoLab, writeAllBttn
         
         toggleState := 0
     } else {
+        isEcoLabMode := False
         GuiControl, Show, selectFreqLabel
         GuiControl, Show, chosenFreq
         Loop, 24
@@ -762,6 +791,8 @@ toggleEcoLabMode() {
         GuiControl, , fwLabel, FW: v3.2.1
         
         GuiControl, Hide, idListView
+        GuiControl, , writeLabel, EUID Write
+        GuiControl, , freqLabel,
         GuiControl, +gwriteAll, writeAllBttn
         
         toggleState := 1
@@ -986,7 +1017,7 @@ GetXDot() {
         }
         
         if (isBadXdot = 1 || isGoodXdot = 1) && if (RegExMatch(data, "WRITE") > 0) {
-            Loop, Parse, data, `,
+            Loop, Parse, data, `|
             {
                 if (A_Index = 3)
                     GuiControl, Text, xEUID, %A_LoopField%   ;Change text
@@ -1001,6 +1032,11 @@ GetXDot() {
                 if (A_Index = 5)
                     GuiControl, Text, xFreq, %A_LoopField%   ;Change text
             }
+        }        
+        ;;Modify GUI for ECO LAB MODE!!!
+        if (isEcoLabMode) {
+            GuiControl, Text, xFreq, US915  ;Change text
+            GuiControl, Disable, xFreq
         }
         
         mainY := mainY + 145
@@ -1078,10 +1114,17 @@ GetXDot() {
                 return
             }
             
-            if (RegExMatch(inId, "[g-zG-Z]") > 0) {
-                MsgBox 16 , ERROR ,INPUT INVALID UUID. RETRY!
-                return
-            }
+            if (!isEcoLabMode)
+                if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) > 17) {
+                    MsgBox 16 , ERROR ,INPUT INVALID UUID. RETRY!
+                    return
+                }
+            
+            if (isEcoLabMode)
+                if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) < 18) {
+                    MsgBox 16 , ERROR ,INPUT INVALID IDs FOR ECO LAB. RETRY!
+                    return
+                }
             
             if (writeBttnLabel = "RUN") {
                 OnMessage(0x44, "PlayInCircleIcon") ;Add icon
@@ -1095,7 +1138,10 @@ GetXDot() {
             Gui, Font, c0c63ed
             GuiControl, Font, xStatus
             GuiControl, Text, xStatus, RUNNING   ;Change text
-            Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% newTTVersion, ,Hide
+            if (isEcoLabMode)
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 dummyParam7 %inId% newTTVersion, , Hide
+            else
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% newTTVersion, ,Hide
             
             WinWait %mainPort% FAILURE|%mainPort% PASSED
             ifWinExist, %mainPort% FAILURE

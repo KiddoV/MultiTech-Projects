@@ -10,40 +10,32 @@ timeout = 5
 mpause 1000
 
 :GET_SET_VARS
-firmwareVers = 'Firmware : 3.2.1-mbed51101'
+firmwareVers = 'Firmware : 3.0.2-mbed144'
 debugFirmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
 sprintf2 xdotDriveLoc '%s:\' param5
 strcompare param6 'singleWrite'
 isSingleWrite = result
-freq = param7
+freq = 'US915'
 outDFreq = ''
-deadNode = param8
+allID = param8
 outDeadNode = ''
+outAppKey = ''
+outUuid = ''
 writeStatus = ''
 fail = 0
 connFail = 0
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
-binFileLoc = ''
+binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7.bin'
 
-strcompare freq 'AS923'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin'
-strcompare freq 'AS923-JAPAN'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin'
-strcompare freq 'AU915'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin'
-strcompare freq 'EU868'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin'
-strcompare freq 'IN865'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin'
-strcompare freq 'KR920'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin'
-strcompare freq 'RU864'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin'
-strcompare freq 'US915'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin'
+;;;Split data
+strsplit allID ','
+deadNode = groupmatchstr2
+serialNum = groupmatchstr3
+appKey = groupmatchstr4
+uuid = groupmatchstr5
 
 :WRITE_BLANK_LINE
 isFirstNode = -1
@@ -144,20 +136,37 @@ sprintf2 cmd 'at+di=%s' deadNode
 sendln cmd
 wait 'OK'
 mpause 500
-sprintf2 cmd 'at+dfreq=%s' freq
+statusbox appKey portNumberTitleMsg
+sprintf2 cmd 'at+ni=2,%s' appKey
 sendln cmd
 wait 'OK'
 mpause 500
+statusbox uuid portNumberTitleMsg
+sprintf2 cmd 'at+nk=2,%s' uuid
+sendln cmd
+wait 'OK'
+mpause 500
+sprintf2 cmd 'at+dfreq=%s' freq
+sendln cmd
+wait 'OK'
+
+mpause 500
 sendln 'at&wp'
+wait "OK"
+mpause 500
+sendln 'at&f'
+wait "OK"
+mpause 500
+sendln 'at&w'
 wait "OK"
 mpause 500
 sendln 'atz'
 wait "OK"
 if isSingleWrite = 0 then
-     statusbox 'WRITE NODE SUCCESSFULLY' 'PASSED2'
+     statusbox 'WRITE ALL NODE IDs SUCCESSFULLY' 'PASSED2'
      mpause 300
 	 closesbox
-endif 
+endif
 
 :REPROGRAM
 sprintf2 cmd 'cmd /c copy %s %s' binFileLoc xdotDriveLoc
@@ -254,14 +263,59 @@ next
 if result=1 then
     strcompare outDeadNode deadNode
     if result <> 0 then
-        writeStatus = 'INVALID EUID - NOT MATCH'
+        writeStatus = 'INVALID NODE ID - NOT MATCH'
         statusbox writeStatus portNumberFailureMsg
 		mpause 300
 		goto RESULT_LOGGING
 	endif
 endif
 if result=2 then
-    writeStatus = 'INVALID EUID - ALL ZERO'
+    writeStatus = 'INVALID NODE ID - ALL ZERO'
+    statusbox writeStatus portNumberFailureMsg
+	mpause 300
+	goto RESULT_LOGGING
+endif
+mpause 500
+sendln 'at+ni?'
+waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
+outAppKey = inputstr
+for i 1 17
+	strreplace outAppKey 1 '-' ''
+next
+if result=1 then
+    strcompare outAppKey appKey
+    if result <> 0 then
+        writeStatus = 'INVALID APP KEY - NOT MATCH'
+        statusbox writeStatus portNumberFailureMsg
+		mpause 300
+		goto RESULT_LOGGING
+	endif
+endif
+if result=2 then
+    writeStatus = 'INVALID APP KEY - ALL ZERO'
+    statusbox writeStatus portNumberFailureMsg
+	mpause 300
+	goto RESULT_LOGGING
+endif
+mpause 500
+sendln 'at+nk?'
+waitregex '([0-9a-fA-F]{2}[.:-]){15}([0-9a-fA-F]{2})' '00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00'
+outUuid = inputstr
+
+for i 1 32
+	strreplace outUuid 1 '\.' ''
+next
+if result=1 then
+    strcompare outUuid uuid
+    if result <> 0 then
+        writeStatus = 'INVALID UUID - NOT MATCH'
+        statusbox writeStatus portNumberFailureMsg
+		mpause 300
+		goto RESULT_LOGGING
+	endif
+endif
+if result=2 then
+    writeStatus = 'INVALID UUID - ALL ZERO'
     statusbox writeStatus portNumberFailureMsg
 	mpause 300
 	goto RESULT_LOGGING
@@ -281,7 +335,7 @@ time = ''
 logStr = ''
 getdate date "%Y\%m\%d"
 getdate time "%H:%M:%S"
-sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
+sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, UUID: %s, ReadUUID: %s, AppKey: %s, ReadAppKey: %s,BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode uuid outUuid appKey outAppKey freq outDFreq xdotBreakPort
 fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
 filewrite fhandle #13#10
 filewrite fhandle logStr
@@ -298,7 +352,8 @@ filesearch cacheFileLoc
 if result = 0 filecreate fhandle cacheFileLoc
 
 fileopen fhandle cacheFileLoc 0	;0 for overwrite
-sprintf2 writeStr 'WRITE|%s|%s|%s|%s' xdotMainPort deadNode writeStatus freq
+sprintf2 allID '%s,%s,%s,%s' serialNum deadNode appKey uuid
+sprintf2 writeStr 'WRITE|%s|%s|%s|%s' xdotMainPort allID writeStatus freq
 filewrite fhandle writeStr
 fileclose fhandle
 
