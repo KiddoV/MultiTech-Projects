@@ -1,4 +1,18 @@
-﻿
+﻿    htmlTemp = 
+    (LTrim
+    <!DOCTYPE HTML>
+    <html>
+    <head>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <script src="C:\Users\Administrator\Documents\MultiTech-Projects\JAVASCRIPT-Files\chart.min.js"></script>
+    </head>
+    <body>
+    <canvas id="myChart" width="350" height="200"></canvas>
+    </body>
+    <script>
+    </script>
+    </html>
+    )
 
 
 AnalystGui()
@@ -10,7 +24,7 @@ AnalystGui() {
     Gui, alystGui: +ToolWindow +hWndhAlystGuiWnd
     
     Gui, alystGui: Add, ActiveX, w450 h250 vWebDoc, Shell.Explore
-    WebDoc.Navigate("C:\Users\Administrator\Documents\MultiTech-Projects\HTML-Files\test.html")
+    WebDoc.Read(htmlTemp)
     WebWindow := WebDoc.document.parentWindow
     Gui, alystGui: Add, Button, x210 y450 w55 gTestBttn, TEST
     

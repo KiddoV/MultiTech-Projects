@@ -388,6 +388,12 @@ writeEcoLab() {
                 LV_ModifyCol( , "AutoHdr")
             }
             index++
+            
+            if (xStatus = "D") {
+                LV_Modify(A_Index, "+Select")
+                LVInstance.Row(A_Index, 0xd9d9d9, 0xc4c4c4)
+                LV_Modify(A_Index, "-Select")
+            }
         }
         saveNodesToWrite()
         ;After save...recheck if replacement successful again -- Fixing bug
@@ -426,9 +432,7 @@ writeEcoLab() {
                     Sleep 9000
                 changeXdotBttnIcon(ctrlVar, "PLAY", "WRITING")
                 
-                LV_Modify(A_Index, "+Select")
-                LVInstance.Row(A_Index, 0x0048b5, 0xFFFFFF)
-                LV_Modify(A_Index, "-Select")
+                changeLVStatusRow(rowNum, "RAN")
                 
                 ;;Get all id string in ListView each row
                 Loop, 5
@@ -441,6 +445,28 @@ writeEcoLab() {
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 Sleep 3000
             }
+            
+             if (indexCount = 24) {
+                FileRead, fileContent, %remotePath%\nodesToWrite.txt
+                noNodeCount := 1
+                Loop, Parse, fileContent, `n
+                    if (A_Index < 24) 
+                        if (RegExMatch(A_LoopField, "[0-9a-fA-F]") = 0) {
+                            noNodeCount++
+                            if (noNodeCount = 24) {
+                                listNodeArray := StrSplit(fileContent, "`n", "`t")    ;Convert string to array
+                                Loop, 24
+                                    removedNode := listNodeArray.RemoveAt(1)  ;Remove the first 24 used nodes
+                                newListNodes := ""              ;Convert array back to string
+                                For key, var in listNodeArray
+                                    newListNodes .= var "`n"
+                                newListNodes := RTrim(newListNodes, "`n")       ;remove last while space
+                                GuiControl Text, editNode, %newListNodes%       ;Return nodes to edit field
+                                saveNodesToWrite()      ;Save new content
+                            }
+                        }
+            }
+            
             indexCount++
         }
     }
@@ -679,6 +705,7 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
         GuiControl, Disable, portLabel%xIndex%
         GuiControl, Disable, nodeToWrite%xIndex%
+        changeLVStatusRow(num, "DISABLE")
     } else if (option = "BAD") {                ;;;;=====================BAD ICON
         GuiControl, Text, %guiControlVar%,                          ;Delete text
         GuiButtonIcon(%hwndVar%, xImg, 1, "s24")         ;Display icon
@@ -706,10 +733,11 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
 
 OnRightClick() {
     Global
-    Gui, 1: Default    
+    Gui, 1: Default
     GuiControlGet, hwndVar, Hwnd , %A_GuiControl%
     RegExMatch(A_GuiControl, "\d+$", num)
     numNo0 := LTrim(num, "0")
+    lvNum := num
     isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
     isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
     isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
@@ -724,6 +752,7 @@ OnRightClick() {
         GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
         GuiControl, Enable, portLabel%numNo0%
         GuiControl, Enable, nodeToWrite%numNo0%
+        changeLVStatusRow(num, "ENABLE")
         xdotProperties[num].status := "G"
         if (isDisXdot = 1) {
             newVar := SubStr(A_GuiControl, 4)
@@ -733,10 +762,12 @@ OnRightClick() {
         } else if (isDisBadXdot = 1) {
             newVar := SubStr(A_GuiControl, 4)
             GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (BadXDot01)
+            changeLVStatusRow(num, "RAN")
             GuiButtonIcon(hwndVar, xImg, 1, "s24")
         } else if (isDisGoodXdot = 1) {
             newVar := SubStr(A_GuiControl, 4)
             GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (GoodXDot01)
+            changeLVStatusRow(num, "RAN")
             GuiButtonIcon(hwndVar, checkImg, 1, "s24")
         }
         
@@ -749,7 +780,33 @@ OnRightClick() {
         xdotProperties[num].status := "D"
         GuiControl, +vDis%A_GuiControl%, %A_GuiControl%     ;Change var of control
         GuiControl, Text, %A_GuiControl%,    ;Delete text
+        changeLVStatusRow(num, "DISABLE")
         GuiButtonIcon(hwndVar, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png", 1, "s24")   ;Display icon
+    }
+}
+
+changeLVStatusRow(lvRowNum, lvStatus := "") {
+    Global
+    Gui, ListView, idListView       ;Eco Lab ListView
+    lvRowNum := (lvRowNum > 8 && lvRowNum < 17) ? lvRowNum -= 8 : lvRowNum
+    lvRowNum := (lvRowNum > 16) ? lvRowNum -= 16 : lvRowNum
+    
+    if (lvStatus = "RAN") {
+        LV_Modify(lvRowNum, "+Select")
+        LVInstance.Row(lvRowNum, 0x0048b5, 0xFFFFFF)     ;Change to blue/white
+        LV_Modify(lvRowNum, "-Select")
+    }
+    
+    if (lvStatus = "DISABLE") {
+        LV_Modify(lvRowNum, "+Select")
+        LVInstance.Row(lvRowNum, 0xd9d9d9, 0xc4c4c4)     ;Change to grey/grey
+        LV_Modify(lvRowNum, "-Select")
+    }
+    
+    if (lvStatus = "ENABLE") {
+        LV_Modify(lvRowNum, "+Select")
+        LVInstance.Row(lvRowNum, 0xffffff, 0x000000)     ;Change to white/black
+        LV_Modify(lvRowNum, "-Select")
     }
 }
 
