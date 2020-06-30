@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+	<link href="bootstrap.min.css" rel="stylesheet">
+	<link href="conduit_controller_main.css" rel="stylesheet">
+	<script src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
+	<script src="bootstrap.bundle.min.js"></script>
+	<style>
+		
+	</style>
+</head>
+<body class="d-flex flex-column" oncontextmenu="return false;"><!------------------------------------------------------------>
+	<!-- Title Bar -->
+	<header>
+		<div class="d-flex align-items-stretch bg-app-theme-dark text-white no-select-text shadow-sm">
+			<span class="flex-grow-1 px-2 py-1 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
+			<span class="title-btn" onclick="neutron.Minimize()">0</span>
+			<span class="title-btn-disable" onclick="neutron.Maximize()" disabled>1</span>
+			<span class="title-btn title-btn-close" onclick="neutron.Close()">r</span>
+		</div>
+	</header>
+	<!-- Menu Bar -->
+	<div class="bg-app-theme-light text-white d-flex flex-row no-select-text" style="height: 20px; font-size: 12px;">
+		<span class="menu-btn dropdown" id="dropdownFileMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</span>
+		<span class="menu-btn">Options</span>
+		<span class="menu-btn">Edit</span>
+		<span class="menu-btn dropdown" id="dropdownHelpMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Help</span>
+		
+		<!-- Dropdown Items -->
+		<div class="dropdown-menu bg-app-theme-light shadow" aria-labelledby="dropdownFileMenu">
+			<a class="dropdown-item text-white" href="#">Open</a>
+			<a class="dropdown-item text-white" href="#">Test</a>
+			<div class="dropdown-divider"></div>
+			<a class="dropdown-item text-white" href="#">Quit</a>
+		</div>
+		<div class="dropdown-menu bg-app-theme-light shadow" aria-labelledby="dropdownHelpMenu">
+			<a class="dropdown-item text-white" href="#">About</a>
+		</div>
+	</div>
+	
+	<!-- Main Content -->
+	<main class="flex-grow-1 d-flex">
+		<!-- Sidebar -->
+	</main>
+</body><!------------------------------------------------------------>
+<script>
+	
+</script>
+</html>
