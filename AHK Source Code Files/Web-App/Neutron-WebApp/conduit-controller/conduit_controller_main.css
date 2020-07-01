@@ -47,7 +47,7 @@ body {
 	font-size: 12px;
 }
 
-.menu-btn:hover, .title-btn:hover {
+.title-btn:hover {
 	background: rgba(0, 0, 0, .3);
 }
 
@@ -55,12 +55,17 @@ body {
 	background: #dc3545;
 }
 
+.app-tabs {
+	font-weight: 800;
+}
+
 /*******************************************************/
+.main-menu.dropdown:hover {
+	background: rgba(0, 0, 0, .3) !important;
+}
 .dropdown-menu {
 	font-size: 12px !important;
 	border-radius: 0px !important;
-	margin-top: -1px !important;
-	margin-left: -6px !important;
 }
 
 .dropdown-item {
@@ -70,4 +75,21 @@ body {
 
 .dropdown-item:hover {
 	background: rgba(0, 0, 0, .3) !important;
+}
+
+.nav-link {
+	border-radius: 0px !important;
+}
+
+.nav-link:hover {
+	background: rgba(0, 0, 0, .3);
+}
+
+.nav-link.active {
+	background: #FFFFFF !important;
+	color: black !important;
+}
+
+.nav-item {
+	padding: 1px;
 }

@@ -23,26 +23,50 @@
 	</header>
 	<!-- Menu Bar -->
 	<div class="bg-app-theme-light text-white d-flex flex-row no-select-text" style="height: 20px; font-size: 12px;">
-		<span class="menu-btn dropdown" id="dropdownFileMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</span>
+		<div class="dropdown main-menu">	<!-- File Dropdown Menu -->
+			<span class="menu-btn" id="dropdownFileMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">File</span>
+			<div class="dropdown-menu bg-app-theme-light shadow" >
+				<a class="dropdown-item text-white" href="#">Open</a>
+				<a class="dropdown-item text-white" href="#">Test</a>
+				<div class="dropdown-divider"></div>
+				<a class="dropdown-item text-white" href="#">Quit</a>
+			</div>
+		</div>
 		<span class="menu-btn">Options</span>
 		<span class="menu-btn">Edit</span>
-		<span class="menu-btn dropdown" id="dropdownHelpMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Help</span>
-		
-		<!-- Dropdown Items -->
-		<div class="dropdown-menu bg-app-theme-light shadow" aria-labelledby="dropdownFileMenu">
-			<a class="dropdown-item text-white" href="#">Open</a>
-			<a class="dropdown-item text-white" href="#">Test</a>
-			<div class="dropdown-divider"></div>
-			<a class="dropdown-item text-white" href="#">Quit</a>
-		</div>
-		<div class="dropdown-menu bg-app-theme-light shadow" aria-labelledby="dropdownHelpMenu">
-			<a class="dropdown-item text-white" href="#">About</a>
+		<div class="dropdown main-menu">	<!-- Help Dropdown Menu -->
+			<span class="menu-btn" id="dropdownHelpMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Help</span>
+			<div class="dropdown-menu bg-app-theme-light shadow" >
+				<a class="dropdown-item text-white" href="#">About</a>
+			</div>
 		</div>
 	</div>
 	
 	<!-- Main Content -->
 	<main class="flex-grow-1 d-flex">
-		<!-- Sidebar -->
+		<!-- Bottombar -->
+		<div class="nav fixed-bottom bg-app-theme-dark nav-pills nav-fill app-tabs">
+			<a class="nav-item nav-link text-light active" id="programming-tab" data-toggle="pill" href="#programming" role="tab" aria-selected="true">Programming</a>
+			<a class="nav-item nav-link text-light" id="testing-tab" data-toggle="pill" href="#testing" role="tab" aria-selected="true">Testing</a>
+			<a class="nav-item nav-link text-light" id="scanning-tab" data-toggle="pill" href="#scanning" role="tab" aria-selected="true">Scanning</a>
+		</div>
+		<!-- Tabs Contents -->
+		<div class="flex-grow-1 overflow-auto no-select-text">
+			<div class="tab-content container p-2">
+				<!-- Programming -->
+				<div class="tab-pane fade show active" id="programming" role="tabpanel">
+					Hello 1
+				</div>
+				<!-- Testing -->
+				<div class="tab-pane fade" id="testing" role="tabpanel">
+					Hello 2
+				</div>
+				<!-- Scanning -->
+				<div class="tab-pane fade" id="scanning" role="tabpanel">
+					Hello 3
+				</div>
+			</div>
+		</div>
 	</main>
 </body><!------------------------------------------------------------>
 <script>

@@ -25,7 +25,7 @@ NeutronWebApp.Gui("-Resize +LabelCController")
 NeutronWebApp.doc.getElementById("title-label").innerHTML := "Conduit Controller"    ;;Set app title
 
 ;Display the Neutron main window
-NeutronWebApp.Show("w350 h500")
+NeutronWebApp.Show("w320 h500")
 Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file
