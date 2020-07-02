@@ -1173,7 +1173,7 @@ GetXDot() {
             
             if (!isEcoLabMode)
                 if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) > 17) {
-                    MsgBox 16 , ERROR ,INPUT INVALID UUID. RETRY!
+                    MsgBox 16 , ERROR ,INPUT INVALID EUID. RETRY!
                     return
                 }
             

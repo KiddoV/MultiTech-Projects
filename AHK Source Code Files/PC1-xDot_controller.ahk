@@ -45,6 +45,10 @@ For each, item in lotCodeList
     lotCode .= (each == 1 ? "" : "|") . item
 Gui Add, ComboBox, xs+120 ys+45 vlotCodeSelected gCbAutoComplete, %lotCode%
 Gui Add, Button, xs+250 ys+45 h21 gloadNodeFromLot, Load
+Gui Font, Bold
+Gui Add, Text, cred x215 y440 verrLbl +Hidden, ERROR, SERVER PC IS NOT RESPONSE!!
+Gui Font
+
 Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 1
 Gui Font, Bold, Ms Shell Dlg 2
 
@@ -154,11 +158,16 @@ drawLineNumbers(firstLine = "") {
 CheckFileChange:
 IfExist %remotePath%
 {
+    GuiControl, Hide, errLbl
     Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
     if(newFileContent != lastFileContent) {
         lastFileContent := newFileContent
         loadNodesToWrite()
     }
+}
+IfNotExist %remotePath%
+{
+    GuiControl, Show, errLbl
 }
 Return
 
