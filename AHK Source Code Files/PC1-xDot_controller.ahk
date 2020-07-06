@@ -45,8 +45,9 @@ For each, item in lotCodeList
     lotCode .= (each == 1 ? "" : "|") . item
 Gui Add, ComboBox, xs+120 ys+45 vlotCodeSelected gCbAutoComplete, %lotCode%
 Gui Add, Button, xs+250 ys+45 h21 gloadNodeFromLot, Load
+Gui Add, GroupBox, xm+205 ym+415 w300 h35 Section
 Gui Font, Bold
-Gui Add, Text, cred x215 y440 verrLbl +Hidden, ERROR, SERVER PC IS NOT RESPONSE!!
+Gui Add, Text, cfc4e1e xs+10 ys+15 verrLbl +Hidden, WARNING, SERVER PC IS NOT RESPONDING!!
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 1
@@ -156,8 +157,8 @@ drawLineNumbers(firstLine = "") {
 }
 
 CheckFileChange:
-IfExist %remotePath%
-{
+DriveGet, driveStatus, Status, %remotePath%
+if (driveStatus = "Ready") {
     GuiControl, Hide, errLbl
     Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
     if(newFileContent != lastFileContent) {
@@ -165,15 +166,17 @@ IfExist %remotePath%
         loadNodesToWrite()
     }
 }
-IfNotExist %remotePath%
-{
+if (driveStatus != "Ready") {
     GuiControl, Show, errLbl
+    if (lastFileContent != "NoRes")
+        GuiControl Text, editNode, ???????????????`n!!SERVER NOT RESPONDING!!`n???????????????
+    lastFileContent := "NoRes"
 }
 Return
 
 CheckLotChange:
-IfExist %remotePath%\Saved-Nodes
-{
+DriveGet, driveStatus, Status, %remotePath%
+if (driveStatus = "Ready") {
     newLotList := []
     Loop Files, %remotePath%\Saved-Nodes\*.txt, R
     {
@@ -292,7 +295,7 @@ GetAddNew:
     Gui, adNew: +ToolWindow +AlwaysOnTop +hWndhadNewWnd
     Gui, adNew: Add, GroupBox, xm+0 ym+0 w230 h60 Section, Option 1
     Gui Font, Bold
-    Gui, adNew: Add, Text, xs+10 ys+15, Add New From Current Editor
+    Gui, adNew: Add, Text, xs+10 ys+15, Add New Lot From Edit Field
     Gui, Font
     Gui, adNew: Add, Text, xs+10 ys+35, Enter LOT CODE:
     Gui, adNew: Add, Edit, xs+100 ys+32 w75 h20 vinLotCode +Number Limit10
@@ -300,7 +303,7 @@ GetAddNew:
     
     Gui, adNew: Add, GroupBox, xm+0 ym+65 w230 h60 Section, Option 2
     Gui Font, Bold
-    Gui, adNew: Add, Text, xs+10 ys+15, Add New From A File
+    Gui, adNew: Add, Text, xs+10 ys+15, Add New Lot From A File
     Gui, Font
     
     Gui, adNew: Add, Button, xs+10 ys+35 h20 gBrowseLot, Browse...
