@@ -311,7 +311,7 @@ GetAddNew:
     Gui, adNew: Add, Button, xs+185 ys+35 h20 gSaveLot2, Save
     
     mainY := mainY + 30
-    Gui, adNew: Show, x%mainX% y%mainY%, Add New Node List
+    Gui, adNew: Show, x%mainX% y%mainY%, Add New Lot Code
     Return
     
     SaveLot1:

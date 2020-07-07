@@ -254,22 +254,37 @@ writeAll() {
             index++
         }
         saveNodesToWrite()
+        
         ;After save...recheck if replacement successful again -- Fixing bug
         index := startedIndex
-        Loop, %totalPort%
-        {
-            xStatus := xdotProperties[index].status
-            if (xStatus = "G") {
-                Lbl_RecheckReplace:
-                replaceNodeAgain := readNodeLine(index)
-                if (replaceNodeAgain != "----") {
+        Random, randIndex, %startedIndex%, % startedIndex + (totalPort - 1)
+        replaceNodeAgain := readNodeLine(randIndex)
+        if (replaceNodeAgain != "----") {
+            Loop, %totalPort%
+            {
+                xStatus := xdotProperties[index].status
+                if (xStatus = "G") {
                     replaceNodeLine(index, "----")
-                    goto Lbl_RecheckReplace
                 }
+                index++
             }
-            index++
+            saveNodesToWrite()
         }
-        saveNodesToWrite()
+        ;index := startedIndex
+        ;Loop, %totalPort%
+        ;{
+            ;xStatus := xdotProperties[index].status
+            ;if (xStatus = "G") {
+                ;Lbl_RecheckReplace:
+                ;replaceNodeAgain := readNodeLine(index)
+                ;if (replaceNodeAgain != "----") {
+                    ;replaceNodeLine(index, "----")
+                    ;goto Lbl_RecheckReplace
+                ;}
+            ;}
+            ;index++
+        ;}
+        ;saveNodesToWrite()
         
         ;Start writing
         Sleep 500
@@ -669,7 +684,7 @@ updateLotCodeList() {
         newLotCodeDrop .= (each == 1 ? "" : "|") . item
     }
     GuiControl, , lotCodeSelected, |%newLotCodeDrop%
-    GuiControl, Text, lotCodeSelected, %newLotCode%
+    ;GuiControl, Text, lotCodeSelected, %newLotCode%
 }
 
 loadNodeFromLot() {
@@ -680,6 +695,8 @@ loadNodeFromLot() {
         StringReplace, outVar, outVar, %A_Space%, , All
         StringReplace, outVar, outVar, %A_Tab%, , All
         GuiControl Text, editNode, %outVar%
+        saveNodesToWrite()
+        GuiControl, Text, lotCodeSelected,      ;Empty the text field
     }
 }
 
