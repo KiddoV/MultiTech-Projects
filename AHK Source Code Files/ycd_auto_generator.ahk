@@ -32,14 +32,20 @@ Gui, MainG: Add, Button, xs+10 ys+15 gGetAddDataGui, Add Data
 Gui, MainG: Add, Tab3, hWndhTab xs+10 ys+40 w425 h405 vDataTab -Wrap,
 Gui, MainG: Tab
 
-Gui, MainG: Add, GroupBox, xm+0 ym+460 w440 h70 Section,
+Gui, MainG: Add, GroupBox, xm+0 ym+460 w440 h85 Section,
 Gui, MainG: Add, Text, xs+10 ys+20, Blank Board ID:
 Gui, MainG: Add, Text, xs+10 ys+40, ECO:
+Gui, MainG: Add, Text, xs+250 ys+20, TOP Board Rotation:
+Gui, MainG: Add, Text, xs+250 ys+40, BOT Board Rotation:
 
-Gui, MainG: Add, Edit, xs+100 ys+16 h18 vBBoardID
-Gui, MainG: Add, Edit, xs+100 ys+36 h18 vEcoNum
+Gui, MainG: Add, Edit, xs+100 ys+16 h18 vBBoardID +Limit9
+Gui, MainG: Add, Edit, xs+100 ys+36 h18 vEcoNum +Limit5
+Gui, MainG: Add, Edit, xs+360 ys+16 h18 w60 vTopRtn +Number +Limit3
+Gui, MainG: Add, Edit, xs+360 ys+36 h18 w60 vBotRtn +Number +Limit3
 
-Gui, MainG: Add, Button, x195 y540 h30 gGenerateYCD, GENERATE
+Gui, MainG: Add, CheckBox, xs+10 ys+65 vIsGenBB, Also generate the build board YCDs
+
+Gui, MainG: Add, Button, x195 y560 h30 gGenerateYCD, GENERATE
 ;;;Functions to run BEFORE main gui is started;;;
 getOmitListData()
 Gui, MainG: Show, , YCD Auto Generator
@@ -71,22 +77,47 @@ GenerateYCD() {
     
     GuiControlGet, bBoardID, , BBoardID
     GuiControlGet, ecoNum, , EcoNum
+    GuiControlGet, topRtn, , TopRtn
+    GuiControlGet, botRtn, , BotRtn
+    GuiControlGet, isGenBB, , IsGenBB
+    
+    if (topRtn = "" || botRtn = "" || bBoardID = "" || ecoNum = "") {
+        MsgBox, 16, ERROR, Please fill out all required field!!!
+        return
+    }
+    
+    if (listTabArr.Length() = "") {
+        MsgBox, 16, ERROR, No data to generate!!!!`nPlease add!!
+        return
+    }
     
     FileSelectFolder, selectedFolder, , 3
     if (selectedFolder = "")
         return
     
-    ;Create YCD files based on how many 7 level PCB
-    Loop, % listTabArr.Length()
+    ;Create YCD files based on how many 7 level PCB also included 1st level if checked
+    Loop, % isGenBB ? listTabArr.Length() + 1 : listTabArr.Length()
     {
-        RegExMatch(listTabArr[A_Index], "^([0-9]){8}+L", 7LPcb)
-        RegExMatch(listTabArr[A_Index], "([A-Z]|[0-9]){3}$", eclNum)
-        ycdTopFilePath = %selectedFolder%\%7LPcb%_%eclNum%_TOP.ycd
-        ycdBotFilePath = %selectedFolder%\%7LPcb%_%eclNum%_BOT.ycd
-        FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdTopFilePath%, 1
-        FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdBotFilePath%, 1
-        justCreatedFilesArr.Push(ycdTopFilePath)
-        justCreatedFilesArr.Push(ycdBotFilePath)
+        if (A_Index < listTabArr.Length() + 1) {
+            RegExMatch(listTabArr[A_Index], "^([0-9]){8}+L", 7LPcb)
+            RegExMatch(listTabArr[A_Index], "([A-Z]|[0-9]){3}$", eclNum)
+            RegExMatch(eclNum, "^([A-Z]|[0-9]){1}", eclChar)
+            ycdTopFilePath = %selectedFolder%\%7LPcb%_%eclNum%_TOP.ycd
+            ycdBotFilePath = %selectedFolder%\%7LPcb%_%eclNum%_BOT.ycd
+            FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdTopFilePath%, 1
+            FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdBotFilePath%, 1
+            justCreatedFilesArr.Push(ycdTopFilePath)
+            justCreatedFilesArr.Push(ycdBotFilePath)
+        }
+        
+        if (isGenBB && A_Index > listTabArr.Length()) {
+            ycdTopFilePath = %selectedFolder%\%bBoardID%_%eclChar%_%ecoNum%_TOP.ycd
+            ycdBotFilePath = %selectedFolder%\%bBoardID%_%eclChar%_%ecoNum%_BOT.ycd
+            FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdTopFilePath%, 1
+            FileCopy, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, %ycdBotFilePath%, 1
+            justCreatedFilesArr.Push(ycdTopFilePath)
+            justCreatedFilesArr.Push(ycdBotFilePath)
+        }
     }
     ;Modify YCD files (Loop each file just created)
     Loop, 110
@@ -94,17 +125,20 @@ GenerateYCD() {
     tabCountIndexTop := 1
     tabCountIndexBot := 1
     totalYCDFile := justCreatedFilesArr.Length()
-    Loop, % justCreatedFilesArr.Length()
+    Loop, % totalYCDFile
     {   
         ycdFilePath := "!" . justCreatedFilesArr[A_Index]
-        ;Modify TOP files
-        SplitPath, ycdFilePath, name
+        
+        SplitPath, ycdFilePath, ycdFileName
         progressCount := A_Index * 100 / justCreatedFilesArr.Length()
-        Progress, %progressCount%, File: .../%name% `n File Number %A_Index%/%totalYCDFile%, Generating YCD Files..., YCD Auto Generator
+        Progress, %progressCount%, File: .../%ycdFileName% `n File Number %A_Index%/%totalYCDFile%, Generating YCD Files..., YCD Auto Generator
+        
+        ;Modify TOP files
         if (RegExMatch(ycdFilePath, "TOP") > 0) {
-            TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
+            TF_Replace(ycdFilePath, "ycdRecipeName", bBoardID . "_" . eclChar . "_INS_" ecoNum)
             TF_Replace(ycdFilePath, "ycdIsXInvert", "0")
             TF_Replace(ycdFilePath, "ycdIsTopSide", "1")
+            TF_Replace(ycdFilePath, "ycdBoardRtn", topRtn)
             ;Add parts
             startedLine := 19
             Loop, %mainPartTotal%
@@ -134,13 +168,30 @@ GenerateYCD() {
                 }
             }
             tabCountIndexTop++
+            
+            ;Generate data for blank board ycd!!!
+            if (isGenBB && RegExMatch(ycdFileName, bBoardID) > 0) {
+                fileList := ""
+                mergeFile := ""
+                Loop, % totalYCDFile
+                {
+                    if (RegExMatch(justCreatedFilesArr[A_Index], "TOP") > 0 && RegExMatch(justCreatedFilesArr[A_Index], bBoardID) > 0)
+                        mergeFile := justCreatedFilesArr[A_Index]
+                    if (RegExMatch(justCreatedFilesArr[A_Index], "TOP") = 0 || RegExMatch(justCreatedFilesArr[A_Index], bBoardID) > 0)
+                        Continue
+                    fileList .= justCreatedFilesArr[A_Index] "`n"
+                }
+                TF_Merge(fileList, , "!" . mergeFile)
+                TF_RemoveDuplicateLines("!" . mergeFile, , , 0, True)
+            }
         }
         
         ;Modify BOT files
         if (RegExMatch(ycdFilePath, "BOT") > 0) {
-            TF_Replace(ycdFilePath, "ycdRecipeName", BBoardID . "_" . EclNum . "_INS_" EcoNum)
+            TF_Replace(ycdFilePath, "ycdRecipeName", bBoardID . "_" . eclChar . "_INS_" ecoNum)
             TF_Replace(ycdFilePath, "ycdIsXInvert", "1")
             TF_Replace(ycdFilePath, "ycdIsTopSide", "0")
+            TF_Replace(ycdFilePath, "ycdBoardRtn", botRtn)
             ;Add parts
             startedLine := 19
             Loop, %mainPartTotal%
@@ -170,11 +221,33 @@ GenerateYCD() {
                 }
             }
             tabCountIndexBot++
+            
+            ;Generate data for blank board ycd!!!
+            if (isGenBB && RegExMatch(ycdFileName, bBoardID) > 0) {
+                fileList := ""
+                mergeFile := ""
+                Loop, % totalYCDFile
+                {
+                    if (RegExMatch(justCreatedFilesArr[A_Index], "BOT") > 0 && RegExMatch(justCreatedFilesArr[A_Index], bBoardID) > 0)
+                        mergeFile := justCreatedFilesArr[A_Index]
+                    if (RegExMatch(justCreatedFilesArr[A_Index], "BOT") = 0 || RegExMatch(justCreatedFilesArr[A_Index], bBoardID) > 0)
+                        Continue
+                    fileList .= justCreatedFilesArr[A_Index] "`n"
+                }
+                TF_Merge(fileList, , "!" . mergeFile)
+                TF_RemoveDuplicateLines("!" . mergeFile, , , 0, True)
+            }
         }
         ;endedLine := TF_Find(ycdFilePath, 20, "", "PartListEnd", ReturnFirst = 1, ReturnText = 0)
-        endedLine:=TF_CountLines(ycdFilePath)
+        endedLine := TF_CountLines(ycdFilePath)
         ;Sort lines
         TF_Sort(ycdFilePath, "F SortStrCmpLogical", 19, endedLine - 1)
+        if (isGenBB && RegExMatch(ycdFileName, bBoardID) > 0) {
+            lineToRemove := TF_Find(ycdFilePath, , , "PartListEnd", 1, 0)
+            TF_RemoveLines(ycdFilePath, lineToRemove, lineToRemove)
+            ycdFilePathNormal := StrReplace(ycdFilePath, "!", "")
+            FileAppend, `n[PartListEnd], %ycdFilePathNormal%
+        }
     }
     Progress, Off
     

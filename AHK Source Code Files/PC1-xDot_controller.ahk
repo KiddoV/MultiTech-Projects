@@ -134,6 +134,7 @@ IfNotExist C:\teraterm\ttermpro.exe
 SetTimer, DrawLineNum, 1
 SetTimer, CheckFileChange, 20
 SetTimer, CheckLotChange, 200
+SetTimer, SyncModeCheck, 100
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawLineNum:
@@ -189,6 +190,10 @@ if (driveStatus = "Ready") {
         updateLotCodeList()
     }
 }
+Return
+
+SyncModeCheck:
+    
 Return
 
 GuiClose:

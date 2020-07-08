@@ -216,6 +216,12 @@ writeAll() {
         MsgBox 4144, WARNING, Please select a FREQUENCY!
         return
     }
+    
+    DriveGet, driveStatus, Status, %remotePath%
+    if (driveStatus != "Ready") {
+        MsgBox 16, ERROR, Server PC not responding. Please check before running!!
+        return
+    }
 
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, RUN EUID WRITE, Begin EUID WRITE on all %totalGoodPort% ports?`n**Make sure you pick the right FREQUENCY**
@@ -256,6 +262,7 @@ writeAll() {
         saveNodesToWrite()
         
         ;After save...recheck if replacement successful again -- Fixing bug
+        Lbl_RecheckReplace:
         index := startedIndex
         Random, randIndex, %startedIndex%, % startedIndex + (totalPort - 1)
         replaceNodeAgain := readNodeLine(randIndex)
@@ -269,24 +276,10 @@ writeAll() {
                 index++
             }
             saveNodesToWrite()
+            goto Lbl_RecheckReplace
         }
-        ;index := startedIndex
-        ;Loop, %totalPort%
-        ;{
-            ;xStatus := xdotProperties[index].status
-            ;if (xStatus = "G") {
-                ;Lbl_RecheckReplace:
-                ;replaceNodeAgain := readNodeLine(index)
-                ;if (replaceNodeAgain != "----") {
-                    ;replaceNodeLine(index, "----")
-                    ;goto Lbl_RecheckReplace
-                ;}
-            ;}
-            ;index++
-        ;}
-        ;saveNodesToWrite()
         
-        ;Start writing
+        ;;;Start writing
         Sleep 500
         index := startedIndex
         Loop, %totalPort%
@@ -343,6 +336,12 @@ writeAll() {
 
 writeEcoLab() {
     Global
+    
+    DriveGet, driveStatus, Status, %remotePath%
+    if (driveStatus != "Ready") {
+        MsgBox 16, ERROR, Server PC not responding. Please check before running!!
+        return
+    }
     
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, RUN EUID WRITE, Begin (ECO LAB) EUID WRITE on %totalGoodPort% ports?
@@ -411,22 +410,24 @@ writeEcoLab() {
             }
         }
         saveNodesToWrite()
+        
         ;After save...recheck if replacement successful again -- Fixing bug
+        Lbl_RecheckReplace2:
         index := startedIndex
-        Loop, %totalPort%
-        {
-            xStatus := xdotProperties[index].status
-            if (xStatus = "G") {
-                Lbl_RecheckReplace2:
-                replaceNodeAgain := readNodeLine(index)
-                if (replaceNodeAgain != "----") {
+        Random, randIndex, %startedIndex%, % startedIndex + (totalPort - 1)
+        replaceNodeAgain := readNodeLine(randIndex)
+        if (replaceNodeAgain != "----") {
+            Loop, %totalPort%
+            {
+                xStatus := xdotProperties[index].status
+                if (xStatus = "G") {
                     replaceNodeLine(index, "----")
-                    goto Lbl_RecheckReplace2
                 }
+                index++
             }
-            index++
+            saveNodesToWrite()
+            goto Lbl_RecheckReplace2
         }
-        saveNodesToWrite()
         
         ;;Start writing
         Sleep 500
