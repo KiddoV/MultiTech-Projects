@@ -74,7 +74,7 @@ Gui Add, GroupBox, xm+0 ym+205 w200 h245 vwriteLabel Section, EUID Write
 Gui Add, Text, xs+10 ys+20 vselectFreqLabel, Select Frequency:
 For each, item in allFregs
     freq .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, xs+105 ys+17 w85 vchosenFreq, %freq%
+Gui Add, DropDownList, AltSubmit xs+105 ys+17 w85 vchosenFreq gonChosenFreq, %freq%
 index := startedIndex
 xVarStarted := 5
 yVarStarted := 50
@@ -193,13 +193,16 @@ if (driveStatus = "Ready") {
 Return
 
 SyncModeCheck:
-    
+    DriveGet, driveStatus, Status, %remotePath%
+    if (driveStatus = "Ready")
+        syncModeActive()
 Return
 
 GuiClose:
     MsgBox 36, , Are you sure you want to quit?
     IfMsgBox Yes
     {
+        resetSyncDataFile()
         For process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")
         Process, close, % process.ProcessId
         
@@ -392,6 +395,7 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
 ^q::
+    resetSyncDataFile()
     For process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")
     Process, close, % process.ProcessId
     ExitApp

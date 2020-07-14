@@ -56,9 +56,11 @@ Global remotePath := "Z:\XDOT"
 Global lotCodeList := []
 Global xdotTestFilePath := "C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl"
 Global teratermMacroExePath := "C:\teraterm\ttpmacro.exe"
+Global syncModeFilePath := "Z:\XDOT\Data\syncdata.snc"
 
 Global isReprogram := False
 Global isEcoLabMode := False
+Global isSyncMode := False
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 
@@ -92,7 +94,10 @@ AddMainMenuBar() {
     Gui Menu, MainMenuBar
     
     ;;;;Run after menu bar is created
-    Menu, OptionMenu, Disable, Enable Sync Mode
+    ;Menu, OptionMenu, Disable, Enable Sync Mode
+    Menu, OptionMenu, Check, Enable Sync Mode
+    isSyncMode := True
+    syncModeWriteIni("AutoPickFrequency", True)
     Menu, HelpMenu, Disable, About
 }
 ;;;;;;;;;All menu handlers
@@ -111,6 +116,8 @@ ecoLabModeHandler() {
 
 endableSyncModeHandler() {
     Menu, OptionMenu, ToggleCheck, Enable Sync Mode
+    isSyncMode := !isSyncMode
+    syncModeWriteIni("AutoPickFrequency", isSyncMode)
 }
 
 analystHandler() {
@@ -211,7 +218,8 @@ runAll() {
 }
 
 writeAll() {
-    GuiControlGet, chosenFreq   ;Get value from DropDownList
+    GuiControlGet, chosenFreq, , chosenFreq, Text   ;Get value from DropDownList
+    
     if (chosenFreq = "") {
         MsgBox 4144, WARNING, Please select a FREQUENCY!
         return
@@ -641,6 +649,10 @@ browseNode() {
     FileSelectFile, selectedFile, , , Select a NodeID text file..., Text Documents (*.txt; *.doc)
     if (selectedFile = "")
         return
+    if (RegExMatch(selectedFile, "\d{10}.txt") = 0) {
+        MsgBox, 16, ERROR, Wrong NODE file!!!
+        return
+    }
     FileRead, outStr, %selectedFile%
     GuiControl Text, editNode, %outStr%
     
@@ -874,6 +886,55 @@ toggleEcoLabMode() {
     }
     
 }
+
+syncModeActive() {
+    IfNotExist, %syncModeFilePath%
+    {
+        FileCreateDir, %remotePath%\Data
+        FileAppend, [Sync]`nAutoPickFrequency=`nFrequencyDropPos=`n, %syncModeFilePath%
+    }
+            
+    IfExist, %syncModeFilePath%
+    {
+        Static oldFreqDropPos
+        IniRead, autoPickFreq, %syncModeFilePath%, Sync, AutoPickFrequency
+        if (autoPickFreq) {
+            ;MsgBox isSyncMode := True
+            isSyncMode := True
+            Menu, OptionMenu, Check, Enable Sync Mode
+            IniRead, freqDropPos, %syncModeFilePath%, Sync, FrequencyDropPos
+            if (freqDropPos != oldFreqDropPos) {
+                oldFreqDropPos := freqDropPos
+                GuiControl, Choose, chosenFreq, %freqDropPos%
+            }
+        } 
+        if (!autoPickFreq) {
+            ;MsgBox isSyncMode := False
+            isSyncMode := False
+            Menu, OptionMenu, Uncheck, Enable Sync Mode
+        }
+    }
+}
+
+syncModeWriteIni(key, var) {
+    IfExist, %syncModeFilePath%
+    {
+        IniWrite, %var%, %syncModeFilePath%, Sync, %key%
+    }
+}
+
+resetSyncDataFile() {
+    IniDelete, %syncModeFilePath%, Sync, AutoPickFrequency
+    IniDelete, %syncModeFilePath%, Sync, FrequencyDropPos
+}
+
+onChosenFreq() {
+    GuiControlGet, chosenFreqPos, , chosenFreq
+    if (isSyncMode) {
+        syncModeWriteIni("FrequencyDropPos", chosenFreqPos)
+    }
+}
+
 ;=======================================================================================;
 ;;Add an icon to a button with external image file
 ;;;GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
