@@ -246,7 +246,7 @@ writeAll() {
             ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
             node := readNodeLine(index)
-            if (RegExMatch(node, "[0-9a-fA-F]") = 0) && if (xStatus = "G"){
+            if (RegExMatch(node, "^([0-9a-fA-F]){16}$") = 0) && if (xStatus = "G"){
                 changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
             }
             
