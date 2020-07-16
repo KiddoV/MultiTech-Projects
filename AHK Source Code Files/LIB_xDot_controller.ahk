@@ -246,13 +246,14 @@ writeAll() {
             ctrlVar := xdotProperties[index].ctrlVar
             xStatus := xdotProperties[index].status
             node := readNodeLine(index)
-            if (RegExMatch(node, "^([0-9a-fA-F]){16}$") = 0) && if (xStatus = "G"){
-                changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
+            
+            if (StrLen(node) > 16) {
+                MsgBox 16 , ERROR, Invalid Node ID in one of the IDs. Please recheck your input!!!`nNode ID should only have 16 digits!
+                return
             }
             
-            if (StrLen(node) > 17) {
-                MsgBox 16 , ERROR, Invalid Node ID in one of the IDs. Please recheck your input!!!`nNode ID should only have 17 digits!
-                return
+            if (RegExMatch(node, "^([0-9a-fA-F]){16}$") = 0) && if (xStatus = "G"){
+                changeXdotBttnIcon(ctrlVar, "DISABLE", , index)
             }
             
             xStatus := xdotProperties[index].status
@@ -393,7 +394,7 @@ writeEcoLab() {
                 }
                 
                 if (uuidRead = "") {
-                    MsgBox 16 , ERROR, Invalid IDs in the node field. Please recheck your input!!!`nRemember this is the WRITING PROCESS for ECO LAB
+                    MsgBox 16 , ERROR, Invalid IDs in the node field. Please recheck your input!!!`nRemember, this is the WRITING PROCESS for ECO LAB
                     return
                 }
                 
@@ -1143,7 +1144,7 @@ GetXDot() {
         IfNotExist C:\V-Projects\XDot-Controller\TEMP-DATA\%mainPort%.dat
         {
             Gui 1: Default
-            GuiControlGet, chosenFreq   ;Get value from DropDownList
+            GuiControlGet, chosenFreq, , chosenFreq, Text   ;Get value from DropDownList
             RegExMatch(A_GuiControl, "\d+$", num)
             node := readNodeLine(num)
             

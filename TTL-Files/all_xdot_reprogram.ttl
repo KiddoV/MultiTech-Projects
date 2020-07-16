@@ -10,7 +10,10 @@ timeout = 3
 mpause 1000
 
 :GET_SET_VARS
-firmwareVers = '3.0.2-debug-mbed144'
+firmwareVers = 'Firmware : 3.1.0-mbed161'
+binFileLoc = 'C:\xdot\v3.1.0\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin'
+;firmwareVers = '3.0.2-debug-mbed144'
+;binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
 xdotPortName = param5 	;PORT1
@@ -93,7 +96,7 @@ if result>1 goto REPROGRAM
 if result=0 goto program_failed
 
 :REPROGRAM
-sprintf2 cmd2 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
+sprintf2 cmd2 'cmd /c copy %s %s' binFileLoc xdotDriveLoc
 exec cmd2
 sprintf2 msg1 'PORT %s PROGRAMMING' xdotMainPort
 sprintf2 msg2 'Transfering bin file to %s...' xdotDriveLoc
