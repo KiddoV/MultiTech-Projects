@@ -38,13 +38,15 @@ Gui Font, Bold q5, Consolas
 Gui, Add, Edit, xs+40 ys+75 r24 hwndEdit w255 +HScroll veditNode
 Gui Font
 Gui Font, Bold
-Gui Add, Text, xs+10 ys+50 , Select LOT Code:
+Gui Add, Text, xs+10 ys+50 , LOT:
 Gui Font
 lotCodeList := getLotCodeList()
 For each, item in lotCodeList
     lotCode .= (each == 1 ? "" : "|") . item
-Gui Add, ComboBox, xs+120 ys+45 vlotCodeSelected gCbAutoComplete, %lotCode%
-Gui Add, Button, xs+250 ys+45 h21 gloadNodeFromLot, Load
+Gui Add, ComboBox, xs+40 ys+46 w85 vlotCodeSelected gCbAutoComplete, %lotCode%
+Gui Add, Button, xs+130 ys+46 h21 gloadNodeFromLot, Load
+Gui Add, Edit, xs+225 ys+60 w70 h15 vrecentLotCode Disabled,
+
 Gui Add, GroupBox, xm+205 ym+415 w300 h35 Section
 Gui Font, Bold
 Gui Add, Text, cfc4e1e xs+10 ys+15 verrLbl +Hidden, WARNING, SERVER PC IS NOT RESPONDING!!
@@ -71,10 +73,14 @@ Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodP
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
 
 Gui Add, GroupBox, xm+0 ym+205 w200 h245 vwriteLabel Section, EUID Write
-Gui Add, Text, xs+10 ys+20 vselectFreqLabel, Select Frequency:
+Gui Add, Text, xs+5 ys+20 vselectFreqLabel, Freq:
+Gui Add, Text, xs+115 ys+20 vselectFwLabel, Fw:
 For each, item in allFregs
     freq .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, AltSubmit xs+105 ys+17 w85 vchosenFreq gonChosenFreq, %freq%
+Gui Add, DropDownList, AltSubmit xs+30 ys+17 w75 vchosenFreq gonChosenFreq, %freq%
+For each, item in allWriteFw
+    wFw .= (each == 1 ? "" : "|") . item
+Gui Add, DropDownList, AltSubmit xs+135 ys+17 w60 vchosenWFw gonChosenWFw Choose1, %wFw%
 index := startedIndex
 xVarStarted := 5
 yVarStarted := 50
@@ -91,7 +97,7 @@ Loop, 8
 }
 
 Gui Add, Button, xs+182 ys+50 w15 h155 vgiveBackBttn ggiveBackToEdit, >
-Gui Add, Text, cgray xs+5 ys+225 vfwLabel, FW: v3.2.1
+Gui Add, Text, cgray xs+5 ys+225 vwfwLabel, FW: v3.2.1
 Gui Add, Text, cgray xs+140 ys+225 w40 vfreqLabel,
 Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
 
@@ -341,10 +347,16 @@ GetAddNew:
         
         Gui, 1: Default
         GuiControlGet editContent, , editNode    ;get new text in edit field
+        if (editContent = "") {
+            MsgBox 16, , Edit field is empty!!??!
+            return
+        }
         
         FileAppend, %editContent%, %remotePath%\Saved-Nodes\%newLotCode%.txt
+        syncModeWriteIni("RecentUsedLotCode", newLotCode)
         Gui, adNew: Destroy
         updateLotCodeList()
+        saveNodesToWrite()
     Return
     
     BrowseLot:
@@ -362,7 +374,7 @@ GetAddNew:
             return
         }
         
-        SplitPath selectedFile, fileName    ;Get the filename
+        SplitPath selectedFile, fileName, , , fileNameNoExt    ;Get the filename
         Loop % lotCodeArray.Length()
         {
             if (RegExMatch(fileName, lotCodeArray[A_Index]) > 0) {
@@ -371,19 +383,24 @@ GetAddNew:
             }
         }
         
-        fileNameNoEx := StrReplace(fileName, ".txt", "")
-        if(RegExMatch(fileNameNoEx, "^(\d){10}$") = 0) {
+        if(RegExMatch(fileNameNoExt, "^(\d){10}$") = 0) {
             MsgBox 16, ERROR, Wrong Node File!`nPlease pick a file with this format: ##########.txt! (EX: 1234567890.txt)
             return
         }
         
-        FileCopy, %selectedFile%, %remotePath%\Saved-Nodes\%fileName%
         Gui, 1: Default
         FileRead, fileContent, %selectedFile%
+        if (fileContent = "") {
+            MsgBox 16, , File is empty!!??!
+            return
+        }
+        FileCopy, %selectedFile%, %remotePath%\Saved-Nodes\%fileName%
         GuiControl Text, editNode, %fileContent%
         Gui, adNew: Destroy
+        syncModeWriteIni("RecentUsedLotCode", fileNameNoExt)
         updateLotCodeList()
-    Return 
+        saveNodesToWrite()
+    Return
     
     adNewGuiEscape:
     adNewGuiClose:

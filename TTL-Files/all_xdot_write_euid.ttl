@@ -10,7 +10,13 @@ timeout = 5
 mpause 1000
 
 :GET_SET_VARS
-firmwareVers = 'Firmware : 3.2.1-mbed51101'
+writeFirmwareVers = param9
+
+strcompare writeFirmwareVers 'v3.2.1'
+if result=0 firmwareVers = 'Firmware : 3.2.1-mbed51101'
+strcompare writeFirmwareVers 'v3.1.0'
+if result=0 firmwareVers = 'Firmware : 3.1.0-mbed161'
+
 debugFirmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
@@ -28,22 +34,45 @@ sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
 binFileLoc = ''
 
-strcompare freq 'AS923'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin'
-strcompare freq 'AS923-JAPAN'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin'
-strcompare freq 'AU915'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin'
-strcompare freq 'EU868'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin'
-strcompare freq 'IN865'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin'
-strcompare freq 'KR920'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin'
-strcompare freq 'RU864'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin'
-strcompare freq 'US915'
-if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin'
+strcompare writeFirmwareVers 'v3.2.1'
+if result=0 then
+	strcompare freq 'AS923'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923-mbed-os-5.11.1.bin'
+	strcompare freq 'AS923-JAPAN'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AS923_JAPAN-mbed-os-5.11.1.bin'
+	strcompare freq 'AU915'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-AU915-mbed-os-5.11.1.bin'
+	strcompare freq 'EU868'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin'
+	strcompare freq 'IN865'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-IN865-mbed-os-5.11.1.bin'
+	strcompare freq 'KR920'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin'
+	strcompare freq 'RU864'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin'
+	strcompare freq 'US915'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin'
+endif
+
+strcompare writeFirmwareVers 'v3.1.0'
+if result=0 then
+	strcompare freq 'AS923'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923-mbed-os-5.7.7.bin'
+	strcompare freq 'AS923-JAPAN'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923_JAPAN-mbed-os-5.7.7.bin'
+	strcompare freq 'AU915'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin'
+	strcompare freq 'EU868'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-EU868-mbed-os-5.7.7.bin'
+	strcompare freq 'IN865'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-IN865-mbed-os-5.7.7.bin'
+	strcompare freq 'KR920'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-KR920-mbed-os-5.7.7.bin'
+	strcompare freq 'RU864'
+	if result=0 binFileLoc = ''
+	strcompare freq 'US915'
+	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin'
+endif
 
 :WRITE_BLANK_LINE
 isFirstNode = -1
@@ -60,13 +89,9 @@ if isFirstNode = 0 then
 endif
 
 :CONNECT
-strcompare param9 'newTTVersion'
-isTTNewVersion = result
-if isTTNewVersion = 0 then
-    sprintf2 cmdStr '/C=%s' param3
-    connect cmdStr
-    if result=1 goto connection_failed
-endif
+sprintf2 cmdStr '/C=%s' param3
+connect cmdStr
+if result=1 goto connection_failed
 
 :CHECK_CONNECTION
 mpause 500
@@ -138,6 +163,7 @@ wait 'OK'
 goto CHECK_CURRENT_PROGRAM
 
 :BEGIN_WRITE_NODE
+flushrecv
 statusbox deadNode portNumberTitleMsg
 mpause 500
 sprintf2 cmd 'at+di=%s' deadNode
@@ -146,7 +172,8 @@ wait 'OK'
 mpause 500
 sprintf2 cmd 'at+dfreq=%s' freq
 sendln cmd
-wait 'OK'
+waitln 'OK' 'ERROR'
+if result=2 goto invalid_dfreq
 mpause 500
 sendln 'at&wp'
 wait "OK"
@@ -160,6 +187,8 @@ if isSingleWrite = 0 then
 endif 
 
 :REPROGRAM
+strlen binFileLoc
+if result < 5 goto binfile_failed
 sprintf2 cmd 'cmd /c copy %s %s' binFileLoc xdotDriveLoc
 exec cmd
 sprintf2 title 'PORT %s IS PROGRAMMING' xdotMainPort
@@ -298,8 +327,21 @@ filesearch cacheFileLoc
 if result = 0 filecreate fhandle cacheFileLoc
 
 fileopen fhandle cacheFileLoc 0	;0 for overwrite
-sprintf2 writeStr 'WRITE|%s|%s|%s|%s' xdotMainPort deadNode writeStatus freq
+sprintf2 writeStr 'WRITE|%s|%s|%s|%s|%s' xdotMainPort deadNode writeStatus freq writeFirmwareVers
 filewrite fhandle writeStr
 fileclose fhandle
 
 end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:invalid_dfreq
+writeStatus = 'INPUT INVALID DFREQ'
+statusbox writeStatus portNumberFailureMsg
+mpause 300
+goto RESULT_LOGGING
+
+:binfile_failed
+writeStatus = 'BIN FILE NOT FOUND'
+statusbox writeStatus portNumberFailureMsg
+mpause 300
+goto RESULT_LOGGING

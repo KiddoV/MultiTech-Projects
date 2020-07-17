@@ -49,6 +49,14 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-f
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-KR920-mbed-os-5.11.1.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, 1
+
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-AS923_JAPAN-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923_JAPAN-mbed-os-5.7.7.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-AS923-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923-mbed-os-5.7.7.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-EU868-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-EU868-mbed-os-5.7.7.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-IN865-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-IN865-mbed-os-5.7.7.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-KR920-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-KR920-mbed-os-5.7.7.bin, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin, 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;;;Global vars that used the same on 3 Apps
@@ -63,6 +71,7 @@ Global isEcoLabMode := False
 Global isSyncMode := False
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
+Global allWriteFw := ["v3.2.1", "v3.1.0"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
@@ -97,7 +106,7 @@ AddMainMenuBar() {
     ;Menu, OptionMenu, Disable, Enable Sync Mode
     Menu, OptionMenu, Check, Enable Sync Mode
     isSyncMode := True
-    syncModeWriteIni("AutoPickFrequency", True)
+    syncModeWriteIni("AutoPick", True)
     Menu, HelpMenu, Disable, About
 }
 ;;;;;;;;;All menu handlers
@@ -117,7 +126,7 @@ ecoLabModeHandler() {
 endableSyncModeHandler() {
     Menu, OptionMenu, ToggleCheck, Enable Sync Mode
     isSyncMode := !isSyncMode
-    syncModeWriteIni("AutoPickFrequency", isSyncMode)
+    syncModeWriteIni("AutoPick", isSyncMode)
 }
 
 analystHandler() {
@@ -162,7 +171,6 @@ runAll() {
                 
                 if (xStatus = "G") {
                     WinKill COM%mainPort%
-                    ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%"", , Hide
                     IfWinExist PROGRAMMING
                         Sleep 9000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
@@ -219,6 +227,7 @@ runAll() {
 
 writeAll() {
     GuiControlGet, chosenFreq, , chosenFreq, Text   ;Get value from DropDownList
+    GuiControlGet, chosenWFw, , chosenWFw, Text     ;Get value from DropDownList
     
     if (chosenFreq = "") {
         MsgBox 4144, WARNING, Please select a FREQUENCY!
@@ -311,7 +320,7 @@ writeAll() {
                 GuiControlGet, node, , nodeToWrite%index%
                 StringReplace node, node, %A_Space%, , All  ;Delete all white space in variable
                 
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% newTTVersion, , Hide, TTWinPID
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% %chosenWFw%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 Sleep 3000
             }
@@ -650,16 +659,22 @@ browseNode() {
     FileSelectFile, selectedFile, , , Select a NodeID text file..., Text Documents (*.txt; *.doc)
     if (selectedFile = "")
         return
-    if (RegExMatch(selectedFile, "\d{10}.txt") = 0) {
+    if (RegExMatch(selectedFile, "\d{10}.txt$") = 0) {
         MsgBox, 16, ERROR, Wrong NODE file!!!
         return
     }
+    
     FileRead, outStr, %selectedFile%
+    if (outStr = "") {
+        MsgBox, 16, ERROR, File is empty!!??
+        return
+    }
     GuiControl Text, editNode, %outStr%
     
-    ;xdotNodeArray := StrSplit(outStr, "`n", "`t", MaxParts := 25)
-    ;MsgBox % xdotNodeArray.Length()
-    ;MsgBox %  xdotNodeArray[24]
+    SplitPath, selectedFile, , , , nameNoExt
+    syncModeWriteIni("RecentUsedLotCode", nameNoExt)
+    
+    saveNodesToWrite()
 }
 
 getLotCodeList() {
@@ -698,11 +713,11 @@ updateLotCodeList() {
         newLotCodeDrop .= (each == 1 ? "" : "|") . item
     }
     GuiControl, , lotCodeSelected, |%newLotCodeDrop%
-    ;GuiControl, Text, lotCodeSelected, %newLotCode%
 }
 
 loadNodeFromLot() {
     GuiControlGet outStr, , lotCodeSelected
+    syncModeWriteIni("RecentUsedLotCode", outStr)
     if (outStr != "") {
         outStr = %outStr%.txt
         FileRead outVar, %remotePath%\Saved-Nodes\%outStr%
@@ -710,6 +725,8 @@ loadNodeFromLot() {
         StringReplace, outVar, outVar, %A_Tab%, , All
         GuiControl Text, editNode, %outVar%
         saveNodesToWrite()
+        IniRead, lot, %syncModeFilePath%, Sync, RecentUsedLotCode
+        GuiControl, Text, recentLotCode, %lot%
         GuiControl, Text, lotCodeSelected,      ;Empty the text field
     }
 }
@@ -799,7 +816,10 @@ OnRightClick() {
             newVar := SubStr(A_GuiControl, 4)
             GuiControl, +v%newVar%, %A_GuiControl%  ;Return to original var (GoodXDot01)
             changeLVStatusRow(num, "RAN")
-            GuiButtonIcon(hwndVar, checkImg, 1, "s24")
+            if (isReprogram)
+                GuiButtonIcon(hwndVar, check2Img, 1, "s24")
+            else
+                GuiButtonIcon(hwndVar, checkImg, 1, "s24")
         }
         
     } else if (isBadXdot = 1 || isGoodXdot = 1) {
@@ -851,6 +871,8 @@ toggleEcoLabMode() {
         ;;Hide old gui controls
         GuiControl, Hide, selectFreqLabel
         GuiControl, Hide, chosenFreq
+        GuiControl, Hide, selectWFwLabel
+        GuiControl, Hide, chosenWFw
         Loop, 24
         {
             GuiControl, Hide, portLabel%A_Index%
@@ -870,6 +892,8 @@ toggleEcoLabMode() {
         isEcoLabMode := False
         GuiControl, Show, selectFreqLabel
         GuiControl, Show, chosenFreq
+        GuiControl, Show, selectWFwLabel
+        GuiControl, Show, chosenWFw
         Loop, 24
         {
             GuiControl, Show, portLabel%A_Index%
@@ -892,15 +916,23 @@ syncModeActive() {
     IfNotExist, %syncModeFilePath%
     {
         FileCreateDir, %remotePath%\Data
-        FileAppend, [Sync]`nAutoPickFrequency=`nFrequencyDropPos=`n, %syncModeFilePath%
+        FileAppend, [Sync]`nAutoPick=`nFrequencyDropPos=`n, %syncModeFilePath%
     }
             
     IfExist, %syncModeFilePath%
     {
         Static oldFreqDropPos
-        IniRead, autoPickFreq, %syncModeFilePath%, Sync, AutoPickFrequency
-        if (autoPickFreq) {
-            ;MsgBox isSyncMode := True
+        Static oldWFwDropPos
+        
+        ;;Update lot code label
+        GuiControlGet, oldLot, , recentLotCode
+        IniRead, lotCode, %syncModeFilePath%, Sync, RecentUsedLotCode
+        if (oldLot != lotCode) {
+            GuiControl, Text, recentLotCode, %lotCode%
+        }
+        
+        IniRead, autoPick, %syncModeFilePath%, Sync, AutoPick
+        if (autoPick) {
             isSyncMode := True
             Menu, OptionMenu, Check, Enable Sync Mode
             IniRead, freqDropPos, %syncModeFilePath%, Sync, FrequencyDropPos
@@ -908,9 +940,15 @@ syncModeActive() {
                 oldFreqDropPos := freqDropPos
                 GuiControl, Choose, chosenFreq, %freqDropPos%
             }
+            IniRead, wFwDropPos, %syncModeFilePath%, Sync, WriteFirmwareDropPos
+            if (wFwDropPos != oldWFwDropPos) {
+                oldWFwDropPos := wFwDropPos
+                GuiControl, Choose, chosenWFw, %wFwDropPos%
+                GuiControlGet, chosenWFw, , chosenWFw, Text
+                GuiControl, , wfwLabel, FW: %chosenWFw%
+            }
         } 
-        if (!autoPickFreq) {
-            ;MsgBox isSyncMode := False
+        if (!autoPick) {
             isSyncMode := False
             Menu, OptionMenu, Uncheck, Enable Sync Mode
         }
@@ -925,8 +963,9 @@ syncModeWriteIni(key, var) {
 }
 
 resetSyncDataFile() {
-    IniDelete, %syncModeFilePath%, Sync, AutoPickFrequency
+    IniDelete, %syncModeFilePath%, Sync, AutoPick
     IniDelete, %syncModeFilePath%, Sync, FrequencyDropPos
+    IniDelete, %syncModeFilePath%, Sync, WriteFirmwareDropPos
 }
 
 onChosenFreq() {
@@ -934,6 +973,26 @@ onChosenFreq() {
     if (isSyncMode) {
         syncModeWriteIni("FrequencyDropPos", chosenFreqPos)
     }
+}
+
+onChosenWFw() {
+    GuiControlGet, chosenWFw, , chosenWFw, Text
+    GuiControlGet, chosenWFwPos, , chosenWFw
+    GuiControl, , wfwLabel, FW: %chosenWFw%
+    if (isSyncMode) {
+        syncModeWriteIni("WriteFirmwareDropPos", chosenWFwPos)
+    }
+}
+
+HasValue(haystack, needle) {
+    if(!isObject(haystack))
+        return false
+    if(haystack.Length()==0)
+        return false
+    for k,v in haystack
+        if(v==needle)
+            return true
+    return false
 }
 
 ;=======================================================================================;
@@ -1075,9 +1134,6 @@ GetXDot() {
         Gui xdot: Add, Link, xs+145 ys+49 gOpenXdotFolder, <a href="#">Open</a>
         Gui Font
         
-        ;Gui xdot: Add, GroupBox, xm+0 ym+70 w200 h120 Section, Functional Test
-        ;Gui xdot: Add, GroupBox, xm+0 ym+240 w200 h130 Section, EUID Write
-        
         Gui xdot: Add, Tab3, xm+0 ym+75 w200 h130 +Theme -Background Section, Functional Test|EUID Write
         Gui xdot: Tab, 1
         Gui xdot: Add, Text, xs+110 ys+30, Connecting
@@ -1097,14 +1153,16 @@ GetXDot() {
         Gui xdot: Tab
         
         Gui xdot: Tab, 2
-        Gui xdot: Add, Text, xs+5 ys+35, STAT:
-        Gui xdot: Add, Text, xs+5 ys+55, FREQ:
-        Gui xdot: Add, Text, xs+5 ys+75, EUID:
-        Gui xdot: Add, Edit, xs+45 ys+33 w148 h16 vxStatus +ReadOnly, READY
-        Gui xdot: Add, Edit, xs+45 ys+53 w148 h16 vxFreq,
-        Gui xdot: Add, Edit, xs+45 ys+73 w148 h16 vxEUID,
+        Gui xdot: Add, Text, xs+5 ys+25, STAT:
+        Gui xdot: Add, Text, xs+5 ys+45, FREQ:
+        Gui xdot: Add, Text, xs+5 ys+65, FW:
+        Gui xdot: Add, Text, xs+5 ys+85, EUID:
+        Gui xdot: Add, Edit, xs+45 ys+23 w148 h16 vxStatus +ReadOnly, READY
+        Gui xdot: Add, Edit, xs+45 ys+43 w148 h16 vxFreq,
+        Gui xdot: Add, Edit, xs+45 ys+63 w148 h16 vxFw,
+        Gui xdot: Add, Edit, xs+45 ys+83 w148 h16 vxEUID,
         buttonLabel2 := (isBadXdot = 1 && RegExMatch(data, "WRITE") > 0) ? "RE-RUN" : "RUN"
-        Gui xdot: Add, Button, xs+75 ys+95 w50 h30 vwriteBttnEach gWriteIDEach, %buttonLabel2%
+        Gui xdot: Add, Button, xs+75 ys+100 w50 h25 vwriteBttnEach gWriteIDEach, %buttonLabel2%
         Gui xdot: Tab
         
         Gui xdot: Add, GroupBox, xm+0 ym+205 w200 h55 Section, Programming
@@ -1145,11 +1203,13 @@ GetXDot() {
         {
             Gui 1: Default
             GuiControlGet, chosenFreq, , chosenFreq, Text   ;Get value from DropDownList
+            GuiControlGet, chosenWFw, , chosenWFw, Text     ;Get value from DropDownList
             RegExMatch(A_GuiControl, "\d+$", num)
             node := readNodeLine(num)
             
             Gui xdot: Default
             GuiControl, Text, xFreq, %chosenFreq%   ;Change text
+            GuiControl, Text, xFw, %chosenWFw%   ;Change text
             GuiControl, Text, xEUID, %node%   ;Change text
         }
         
@@ -1159,7 +1219,7 @@ GetXDot() {
                 if (A_Index = 3)
                     GuiControl, Text, xEUID, %A_LoopField%   ;Change text
                 if (A_Index = 4) {
-                    if (RegExMatch(A_LoopField, "FAIL|WRONG|INVALID"))
+                    if (RegExMatch(A_LoopField, "FAIL|WRONG|INVALID|NOT"))
                         Gui, Font, cf24b3f
                     else if (RegExMatch(A_LoopField, "PASS"))
                         Gui, Font, c41e81c
@@ -1168,12 +1228,16 @@ GetXDot() {
                 }
                 if (A_Index = 5)
                     GuiControl, Text, xFreq, %A_LoopField%   ;Change text
+                if (A_Index = 6)
+                    GuiControl, Text, xFw, %A_LoopField%   ;Change text
             }
         }        
         ;;Modify GUI for ECO LAB MODE!!!
         if (isEcoLabMode) {
             GuiControl, Text, xFreq, US915  ;Change text
             GuiControl, Disable, xFreq
+            GuiControl, Text, xFw, v3.2.1  ;Change text
+            GuiControl, Disable, xFw
         }
         
         mainY := mainY + 145
@@ -1190,7 +1254,6 @@ GetXDot() {
             changeXdotBttnIcon(ctrlVar, "PLAY", "TESTING")
             
             WinKill COM%mainPort%
-            ;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /F=C:\V-Projects\XDot-Controller\INI-Files\xdot-tt-settings.INI /X=%ttXPos% /Y=%ttYPos% /C=%mainPort% /M="%xdotTestFilePath% "dummyParam" "%mainPort%" "%breakPort%" "%portName%" "%driveName%" "singleTest"", ,Hide
             Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE %xdotTestFilePath% dummyParam %mainPort% %breakPort% %portName% %driveName% singleTest newTTVersion, ,Hide
 
             ;;;Track processes
@@ -1215,6 +1278,7 @@ GetXDot() {
         Return
             
         ToDebugEach:
+            isReprogram := True
             IfNotExist %driveName%:\
             {
                 MsgBox 16, ERROR, Drive (%driveName%:\) does not exist!
@@ -1239,9 +1303,10 @@ GetXDot() {
         WriteIDEach:
             WinKill COM%mainPort%
             GuiControlGet, inFreq, , xFreq
+            GuiControlGet, inFw, , xFw
             GuiControlGet, inId, , xEUID
             GuiControlGet, writeBttnLabel, , writeBttnEach
-            if (inFreq = "" || inId = "") {
+            if (inFreq = "" || inId = "" || inFw = "") {
                 MsgBox 16 , ,Please enter all requires fields!
                 return
             }
@@ -1251,8 +1316,13 @@ GetXDot() {
                 return
             }
             
+            if (HasValue(allWriteFW, inFw) = 0) {
+                MsgBox 16 , ERROR ,INPUT INVALID FIRMWARE VERSION. RETRY!
+                return
+            }
+            
             if (!isEcoLabMode)
-                if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) > 17) {
+                if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) <> 16) {
                     MsgBox 16 , ERROR ,INPUT INVALID EUID. RETRY!
                     return
                 }
@@ -1278,7 +1348,7 @@ GetXDot() {
             if (isEcoLabMode)
                 Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 dummyParam7 %inId% newTTVersion, , Hide
             else
-                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% newTTVersion, ,Hide
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% %inFw%, ,Hide
             
             WinWait %mainPort% FAILURE|%mainPort% PASSED
             ifWinExist, %mainPort% FAILURE
