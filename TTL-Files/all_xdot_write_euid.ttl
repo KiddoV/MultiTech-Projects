@@ -17,13 +17,17 @@ if result=0 firmwareVers = 'Firmware : 3.2.1-mbed51101'
 strcompare writeFirmwareVers 'v3.1.0'
 if result=0 firmwareVers = 'Firmware : 3.1.0-mbed161'
 
-debugFirmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
 sprintf2 xdotDriveLoc '%s:\' param5
 strcompare param6 'singleWrite'
 isSingleWrite = result
 freq = param7
+
+strcompare freq 'IN865'
+if result=0 debugFirmwareVers = '3.2.1-debug-mbed51101'
+if result<>0 debugFirmwareVers = '3.0.2-debug-mbed144'
+
 outDFreq = ''
 deadNode = param8
 outDeadNode = ''
@@ -115,6 +119,7 @@ if result=0 then
 endif
 
 :CHECK_CURRENT_PROGRAM
+flushrecv
 sendln 'ati'
 wait debugFirmwareVers 'OK'
 if result>1 then
@@ -130,7 +135,9 @@ elseif result=1 then
 endif
 
 :REPROGRAM_TO_DEBUG
-sprintf2 cmd 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
+strcompare freq 'IN865'
+if result=0 sprintf2 cmd 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1-debug.bin %s' xdotDriveLoc
+if result<>0 sprintf2 cmd 'cmd /c copy C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %s' xdotDriveLoc
 exec cmd
 sprintf2 title 'PORT %s IS PROGRAMMING' xdotMainPort
 statusbox 'Transfering bin file........' title

@@ -13,7 +13,7 @@ SetBatchLines -1
 
 ;;;;;Variables Definition;;;;;
 Global comList := ""
-Global comListDropList := ""
+Global comListDropDown := ""
 Global appTitle := "Alternate Teraterm"
 
 ;;Main GUI
@@ -24,13 +24,6 @@ Gui Add, Edit, x10 y415 w550 h21 +Multi -VScroll hWndhInput vinputField gsendInp
 Gui Add, Button, x10 y8 w80 h23 gGetSerialPort, Serial Port
 
 ;;;;;Run Before Gui Started;;;;;
-comList := getCmdOut("[System.IO.Ports.SerialPort]::getportnames()")
-Loop, Parse, comList, `n
-{
-    if (A_LoopField = "")
-        Continue
-    comListDropList .= A_LoopField "|"
-}
 
 ;;Starts main gui
 Gui Show, , %appTitle%
@@ -38,6 +31,13 @@ Gui Show, , %appTitle%
 ;;;;;Run After Gui Started;;;;;
 ControlFocus, Edit2, %appTitle%
 ;connectRS232()
+comList := getCmdOut("[System.IO.Ports.SerialPort]::getportnames()")
+Loop, Parse, comList, `n
+{
+    if (A_LoopField = "")
+        Continue
+    comListDropDown .= A_LoopField "|"
+}
 
 Return
 
@@ -62,7 +62,7 @@ GetSerialPort() {
     Gui, serialPort: Add, Text, xs+10 ys+140, Stop:
     Gui, serialPort: Add, Text, xs+10 ys+170, Transmit Delay:
     Gui Font
-    Gui, serialPort: Add, DropDownList, xs+150 ys+17 vcomPort, %comListDropList%
+    Gui, serialPort: Add, DropDownList, xs+150 ys+17 vcomPort, %comListDropDown%
     Gui, serialPort: Add, DropDownList, xs+150 ys+47 vbaud, 9600|115200||
     Gui, serialPort: Add, DropDownList, xs+150 ys+77 vbitData, 7 bit|8 bit||
     Gui, serialPort: Add, DropDownList, xs+150 ys+107 vparity, None||Odd|Even|Mark|Space
@@ -197,9 +197,9 @@ Return
     }
 Return
 
-;~Backspace::
-    ;ControlGetFocus, focusedCtrl, %appTitle%
-    ;if (focusedCtrl = "Edit2") {
-        ;RS232_Write(RS232_FileHandle, 111)
-    ;}
-;Return
+~Backspace::
+    ControlGetFocus, focusedCtrl, %appTitle%
+    if (focusedCtrl = "Edit2") {
+        RS232_Write(RS232_FileHandle, 8)
+    }
+Return

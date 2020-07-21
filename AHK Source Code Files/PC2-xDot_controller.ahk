@@ -38,13 +38,13 @@ Gui Font, Bold q5, Consolas
 Gui, Add, Edit, xs+40 ys+75 r24 hwndEdit w255 +HScroll veditNode
 Gui Font
 Gui Font, Bold
-Gui Add, Text, xs+10 ys+50 , LOT:
+Gui Add, Text, xs+10 ys+50 , LOT CODE:
 Gui Font
 lotCodeList := getLotCodeList()
 For each, item in lotCodeList
     lotCode .= (each == 1 ? "" : "|") . item
-Gui Add, ComboBox, xs+40 ys+46 w85 vlotCodeSelected gCbAutoComplete, %lotCode%
-Gui Add, Button, xs+130 ys+46 h21 gloadNodeFromLot, Load
+Gui Add, ComboBox, xs+80 ys+46 w85 vlotCodeSelected gCbAutoComplete, %lotCode%
+Gui Add, Button, xs+170 ys+46 h21 gloadNodeFromLot, Load
 Gui Add, Edit, xs+225 ys+60 w70 h15 vrecentLotCode Disabled,
 
 Gui Add, GroupBox, xm+205 ym+415 w300 h35 Section

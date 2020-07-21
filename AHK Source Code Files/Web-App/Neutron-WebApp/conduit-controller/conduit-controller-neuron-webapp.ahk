@@ -59,21 +59,6 @@ GetDisplayData() {
         html .= NeutronWebApp.FormatHTML("<option>{}</option>", item)
     NeutronWebApp.qs("#firmwareDropdown").innerHTML := html
 }
-
-MainButton(NeutronWebApp, event) {
-    progBar := NeutronWebApp.doc.getElementById("programProgbar")
-    progBar.style.width :=  10`%
-    Sleep 100
-    progBar.style.width :=  20`%
-    Sleep 300
-    progBar.style.width :=  30`%
-    Sleep 200
-    progBar.style.width :=  40`%
-    Sleep 1000
-    progBar.style.width :=  50`%
-    Sleep 5000
-    progBar.style.width :=  100`%
-}
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;

@@ -50,6 +50,8 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-f
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-RU864-mbed-os-5.11.1.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1.bin, 1
 
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1-debug.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1-debug.bin, 1
+
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-AS923_JAPAN-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923_JAPAN-mbed-os-5.7.7.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-AS923-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923-mbed-os-5.7.7.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin, 1
@@ -92,6 +94,7 @@ AddMainMenuBar() {
         Menu FileMenu, Add, Quit, quitHandler
     Menu MainMenuBar, Add, &File, :FileMenu     ;Main button
         Menu OptionMenu, Add, Eco Lab Mode, ecoLabModeHandler
+        Menu OptionMenu, Add  ;Separator
         Menu OptionMenu, Add, Enable Sync Mode, endableSyncModeHandler
     Menu MainMenuBar, Add, &Options, :OptionMenu     ;Main button
         Menu ToolMenu, Add, Analyst, analystHandler

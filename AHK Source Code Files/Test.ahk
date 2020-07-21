@@ -24,7 +24,7 @@ AnalystGui() {
     Gui, alystGui: +ToolWindow +hWndhAlystGuiWnd
     
     Gui, alystGui: Add, ActiveX, w450 h250 vWebDoc, Shell.Explore
-    WebDoc.Read(htmlTemp)
+    WebDoc.Navigate("about:" . htmlTemp)
     WebWindow := WebDoc.document.parentWindow
     Gui, alystGui: Add, Button, x210 y450 w55 gTestBttn, TEST
     
