@@ -73,6 +73,7 @@ Global isEcoLabMode := False
 Global isSyncMode := False
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
+Global allReProgFw := ["v3.0.2-debug", "v3.2.1-debug"]
 Global allWriteFw := ["v3.2.1", "v3.1.0"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
@@ -188,8 +189,10 @@ runAll() {
     }
     
     if (isRunReprogChecked = 1) {
+        GuiControlGet, chosenPFw, , chosenPFw, Text
+        
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-        MsgBox 0x81, Run, Begin re-program to debug mode on all %totalGoodPort% ports?
+        MsgBox 0x81, Run, Begin re-program %totalGoodPort% port(s) to %chosenPFw%?
         OnMessage(0x44, "") ;Clear icon
         index := startedIndex
         IfMsgBox OK
@@ -216,7 +219,7 @@ runAll() {
                     IfWinExist PROGRAMMING
                         Sleep 9000
                     changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
-                    Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, , Hide, TTWinPID
+                    Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 %chosenPFw%, , Hide, TTWinPID
                     Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                     Sleep 2500
                 }
@@ -654,6 +657,9 @@ writeNodeLine(lineNum, writeStr) {
 }
 
 radioToggle() {
+    isReprogram := !isReprogram
+    syncModeWriteIni("TestRadioBttn", !isReprogram)
+    syncModeWriteIni("ProgRadioBttn", isReprogram)
     resetXdotBttns()
     deleteOldCacheFiles()
 }
@@ -753,7 +759,7 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         GuiControl, +vDis%origCtrlVar%,  %origCtrlVar%          ;Change var of control
         totalGoodPort--
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to
         GuiControl, Disable, portLabel%xIndex%
         GuiControl, Disable, nodeToWrite%xIndex%
         changeLVStatusRow(num, "DISABLE")
@@ -800,7 +806,7 @@ OnRightClick() {
     } else if (isDisXdot = 1 || isDisBadXdot = 1 || isDisGoodXdot = 1) {
         totalGoodPort++
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to
         GuiControl, Enable, portLabel%numNo0%
         GuiControl, Enable, nodeToWrite%numNo0%
         changeLVStatusRow(num, "ENABLE")
@@ -828,7 +834,7 @@ OnRightClick() {
     } else if (isBadXdot = 1 || isGoodXdot = 1) {
         totalGoodPort--
         GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
-        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to debug mode
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to
         GuiControl, Disable, portLabel%numNo0%
         GuiControl, Disable, nodeToWrite%numNo0%        
         xdotProperties[num].status := "D"
@@ -926,6 +932,7 @@ syncModeActive() {
     {
         Static oldFreqDropPos
         Static oldWFwDropPos
+        Static oldPFwDropPos
         
         ;;Update lot code label
         GuiControlGet, oldLot, , recentLotCode
@@ -938,11 +945,13 @@ syncModeActive() {
         if (autoPick) {
             isSyncMode := True
             Menu, OptionMenu, Check, Enable Sync Mode
+            
             IniRead, freqDropPos, %syncModeFilePath%, Sync, FrequencyDropPos
             if (freqDropPos != oldFreqDropPos) {
                 oldFreqDropPos := freqDropPos
                 GuiControl, Choose, chosenFreq, %freqDropPos%
             }
+            ;;Auto choose Writing Firmware
             IniRead, wFwDropPos, %syncModeFilePath%, Sync, WriteFirmwareDropPos
             if (wFwDropPos != oldWFwDropPos) {
                 oldWFwDropPos := wFwDropPos
@@ -950,10 +959,29 @@ syncModeActive() {
                 GuiControlGet, chosenWFw, , chosenWFw, Text
                 GuiControl, , wfwLabel, FW: %chosenWFw%
             }
-        } 
+            
+            ;;Auto choose Programming Firmware
+            IniRead, pFwDropPos, %syncModeFilePath%, Sync, ProgramFirmwareDropPos
+            if (pFwDropPos != oldPFwDropPos) {
+                oldPFwDropPos := pFwDropPos
+                GuiControl, Choose, chosenPFw, %pFwDropPos%
+            }
+            
+            ;;Auto choose radio bttn in Functional Test section
+            IniRead, testRadioBttn, %syncModeFilePath%, Sync, TestRadioBttn
+            IniRead, progRadioBttn, %syncModeFilePath%, Sync, ProgRadioBttn
+            if (testRadioBttn)
+                GuiControl, , totalGPortRadio, 1
+            else if (progRadioBttn)
+                GuiControl, , reproGPortRadio, 1
+        }
         if (!autoPick) {
             isSyncMode := False
             Menu, OptionMenu, Uncheck, Enable Sync Mode
+            
+            oldFreqDropPos = ""
+            oldWFwDropPos = ""
+            oldPFwDropPos = ""
         }
     }
 }
@@ -969,6 +997,9 @@ resetSyncDataFile() {
     IniDelete, %syncModeFilePath%, Sync, AutoPick
     IniDelete, %syncModeFilePath%, Sync, FrequencyDropPos
     IniDelete, %syncModeFilePath%, Sync, WriteFirmwareDropPos
+    IniDelete, %syncModeFilePath%, Sync, ProgramFirmwareDropPos
+    IniDelete, %syncModeFilePath%, Sync, TestRadioBttn
+    IniDelete, %syncModeFilePath%, Sync, ProgRadioBttn
 }
 
 onChosenFreq() {
@@ -984,6 +1015,13 @@ onChosenWFw() {
     GuiControl, , wfwLabel, FW: %chosenWFw%
     if (isSyncMode) {
         syncModeWriteIni("WriteFirmwareDropPos", chosenWFwPos)
+    }
+}
+
+onChosenPFw() {
+    GuiControlGet, chosenPFwPos, , chosenPFw
+    if (isSyncMode) {
+        syncModeWriteIni("ProgramFirmwareDropPos", chosenPFwPos)
     }
 }
 
@@ -1290,7 +1328,7 @@ GetXDot() {
             
             changeXdotBttnIcon(ctrlVar, "PLAY", "PROGRAMMING")
             WinKill COM%mainPort%
-            Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 newTTVersion, ,Hide
+            Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_reprogram.ttl dummyParam2 %mainPort% %breakPort% %portName% %driveName% dummyParam7 "v3.0.2-debug", ,Hide
             ;msg = Reprogramming on PORT %mainPort%...Please wait!
             ;title = PORT %mainPort% PROGRAMMING
             ;addTipMsg(msg, title, 17000)

@@ -67,10 +67,15 @@ Gui Add, Button, xs+37 ys+50 w30 h30 vXDot08 gGetXDot hWndhXDot08, P08
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+90 w200 h110 Section, Functional Test
-Gui Add, Text, cgray xs+10 ys+20, Test firmware version: v3.0.2-debug
-Gui Add, Radio, xs+15 ys+37 vtotalGPortRadio Group +Checked gradioToggle, Run tests on %totalGoodPort% ports
-Gui Add, Radio, xs+15 ys+54 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to debug mode
+;Gui Add, Text, cgray xs+60 ys+15, FW: v3.0.2-debug
+Gui Add, Radio, xs+5 ys+20 vtotalGPortRadio Group +Checked gradioToggle, Run tests on %totalGoodPort% ports
+Gui Add, Radio, xs+5 ys+40 vreproGPortRadio gradioToggle, Reprogram %totalGoodPort% ports to
+For each, item in allReProgFw
+    pFw .= (each == 1 ? "" : "|") . item
+Gui Add, DropDownList, AltSubmit xs+126 ys+37 w69 vchosenPFw gonChosenPFw Choose1, %pFw%
+Gui Font, Bold
 Gui Add, Button, xs+73 ys+75 w55 h28 grunAll, RUN
+Gui Font
 
 Gui Add, GroupBox, xm+0 ym+205 w200 h245 vwriteLabel Section, EUID Write
 Gui Add, Text, xs+5 ys+20 vselectFreqLabel, Freq:
@@ -99,7 +104,9 @@ Loop, 8
 Gui Add, Button, xs+182 ys+50 w15 h155 vgiveBackBttn ggiveBackToEdit, >
 Gui Add, Text, cgray xs+5 ys+225 vwfwLabel, FW: v3.2.1
 Gui Add, Text, cgray xs+140 ys+225 w40 vfreqLabel,
+Gui Font, Bold
 Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
+Gui Font
 
 ;;For Eco Lab
 Gui Add, ListView, xs+5 ys+20 r9 w190 vidListView hWndhIdListView +Grid +NoSortHdr Hidden, P#|Node ID|Serial Number|App Key|UUID
@@ -159,7 +166,7 @@ drawLineNumbers(firstLine = "") {
     {
         lines .= ++firstLine . "`n"
     }
-
+    
     GuiControl,, lineNo, % lines
 }
 

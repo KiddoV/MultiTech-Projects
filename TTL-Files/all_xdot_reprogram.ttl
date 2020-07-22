@@ -12,8 +12,17 @@ mpause 1000
 :GET_SET_VARS
 ;firmwareVers = 'Firmware : 3.1.0-mbed161'
 ;binFileLoc = 'C:\xdot\v3.1.0\xdot-firmware-3.1.0-AU915-mbed-os-5.7.7.bin'
-firmwareVers = '3.0.2-debug-mbed144'
-binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin'
+strcompare param8 'v3.0.2-debug'
+if result=0 then
+    firmwareVers = '3.0.2-debug-mbed144'
+    binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin'
+endif
+strcompare param8 'v3.2.1-debug'
+if result=0 then
+    firmwareVers = '3.2.1-debug-mbed51101'
+	binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-US915-mbed-os-5.11.1-debug.bin'
+endif
+
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
 xdotPortName = param5 	;PORT1
@@ -29,13 +38,9 @@ rssiLevel = ''
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 
 :CONNECT
-strcompare param8 'newTTVersion'
-isTTNewVersion = result
-if isTTNewVersion = 0 then
-    sprintf2 cmdStr '/C=%s' param3
-    connect cmdStr
-    if result=1 goto connection_failed
-endif
+sprintf2 cmdStr '/C=%s' param3
+connect cmdStr
+if result=1 goto connection_failed
 
 :CHECK_DRIVE
 sprintf2 cmdStr '%sDETAILS.TXT' xdotDriveLoc
@@ -49,6 +54,7 @@ if result = 0 then
 endif
 
 :CHECK_CONNECTION
+flushrecv
 mpause 300
 sendln 'at'
 waitln 'OK'
