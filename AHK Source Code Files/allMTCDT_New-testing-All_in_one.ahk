@@ -25,6 +25,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
+Global 210_ItemNums := ["70001161L"]
 Global 240_ItemNums := ["70000035L", "70000037L", "70000039L", "70000041L", "70000049L"]
 Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000024L", "70000025L", "70000026L", "70000032L", "70000043L", "70000054L"]
 Global 247_ItemNums := ["70000044L", "70000045L", "70000048L", "70000053L", "70001174L"]
@@ -62,7 +63,7 @@ Gui Add, Button, x155 y5 w55 h20 vhistoryBttn gshowTestHist, HISTORY
 
 Gui Add, Text, x17 y5 w100 h21 +0x200 vtopLabel, Select Item Number
 
-Gui Add, Tab3, x9 y27 w202 h65 vwhichTab gchangeTab +0x8, 240L|246L|247L
+Gui Add, Tab3, x9 y27 w202 h65 vwhichTab gchangeTab +0x8, 240L|246L|247L|210L
 Gui Tab, 1
 For each, item in 240_ItemNums
     itmNum1 .= (each == 1 ? "" : "|") . item
@@ -75,6 +76,10 @@ Gui Tab, 3
 For each, item in 247_ItemNums
     itmNum3 .= (each == 1 ? "" : "|") . item
 Gui Add, DropDownList, x22 y59 w176 vitemNum3 Choose1, %itmNum3%
+Gui Tab, 4
+For each, item in 210_ItemNums
+    itmNum4 .= (each == 1 ? "" : "|") . item
+Gui Add, DropDownList, x22 y59 w176 vitemNum4 Choose1, %itmNum4%
 Gui Tab
 
 Gui Add, CheckBox, x10 y101 w200 h23 +Checked vcheck gcheckBox, % "Included Configuration Step"
@@ -143,6 +148,7 @@ mainStart() {
     GuiControlGet, itemNum1 ;Get value from DropDownList
     GuiControlGet, itemNum2 ;Get value from DropDownList
     GuiControlGet, itemNum3 ;Get value from DropDownList
+    GuiControlGet, itemNum4 ;Get value from DropDownList
     GuiControlGet, check ;Get value from CheckBox
     GuiControlGet, whichTab ;Get value from Tab Title
     
@@ -157,6 +163,8 @@ mainStart() {
         itemNum := itemNum2
     If (whichTab = "247L")
         itemNum := itemNum3
+    If (whichTab = "210L")
+        itemNum := itemNum4
     
     Global radioType := getRadioType(itemNum)
     
@@ -367,7 +375,7 @@ functionalTestStep(itemN, mtcType, radType) {
     }
     
     ;Check GPS
-    if (mtcType != "240L") {
+    if (mtcType != "240L" && mtcType != "210L") {
         GuiControl , , process9, %arrowImg%
         Sleep 600
         WinWait GPS TEST FAILURE.*|PASSED.*
@@ -569,7 +577,7 @@ disableGuis(option) {
 
 getRadioType(itemN) {
     NONE := ["70000005L", "70000035L", "70001174L"]
-    H5 := ["70000006L"]
+    H5 := ["70000006L", "70001161L"]
     LAT1 := ["70000037L", "70000007L"]
     LAT3 := ["70000041L"]
     LEU1 := ["70000033L", ""]

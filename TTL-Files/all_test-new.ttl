@@ -37,6 +37,9 @@ if is246L=0 goto CHECK_RADIO_TYPE
 strcompare param2 '247L'
 is247L = result
 if is247L=0 goto CHECK_RADIO_TYPE
+strcompare param2 '210L'
+is210L = result
+if is210L=0 goto CHECK_RADIO_TYPE
 
 :CHECK_RADIO_TYPE
 strcompare param3 'NONE'
@@ -982,6 +985,7 @@ goto SHORTING_MTCDT
 if is240L=0 goto RESULT_LOGGING
 if is246L=0 goto GPS_TEST
 if is247L=0 goto GPS_TEST
+if is210L=0 goto RESULT_LOGGING
 
 :GPS_TEST
 timeout = 5

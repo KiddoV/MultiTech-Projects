@@ -43,6 +43,9 @@ if is246L = 0 goto SET_PRODUCT_ID
 strcompare mtcdtType '247L'
 is247L = result
 if is247L = 0 goto SET_PRODUCT_ID
+strcompare mtcdtType '210L'
+is210L = result
+if is210L = 0 goto SET_PRODUCT_ID
 goto GET_DATA
 
 :SET_PRODUCT_ID

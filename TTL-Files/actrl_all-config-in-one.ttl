@@ -1,0 +1,24 @@
+;
+;	Author: 		Viet Ho
+;
+
+showtt 1
+show 0
+timeout = 35
+
+:CONNECTING
+connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=admin /nosecuritywarning /timeout=1"
+if result<2 then
+    messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
+    end
+endif
+
+;;;STEP 1
+:STEP1
+mpause 1000
+send 13
+wait '#'
+sprintf2 cmd 'curl -s -m 5 -X PUT -H "Content-Type: json/application" -d '{"firstTimeSetup" : "false"}' 127.0.0.1/api/system'
+sendln cmd
+
+end

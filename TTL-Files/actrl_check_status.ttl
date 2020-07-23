@@ -1,0 +1,16 @@
+;
+;	Author: 		Viet Ho
+;
+
+showtt -1
+show 0
+show -1
+
+filecreate fhandle 'C:\V-Projects\ACTRLAuto-FinalConfig\caches\actrl_status.dat'
+
+
+connect "192.168.2.1 /ssh /2 /auth=password /user=admin /passwd=admin /nosecuritywarning /timeout=1 /nossh"
+if result=0 filewrite fhandle 'FAILED'
+if result=1 filewrite fhandle 'FAILED'
+if result=2 filewrite fhandle 'SUCCESSED'
+end
