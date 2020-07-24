@@ -1,24 +1,245 @@
 ;
 ;	Author: 		Viet Ho
+;	CANNOT STAND-ALONE RUN!!!!
 ;
 
-showtt 1
 show 0
 timeout = 35
 
+step2SrcFile = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\conduit-external.tar.gz'
+step2DesFile = '/home/root/conduit-external.tar.gz'
+
+step3SrcFile = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\config_MTCDT-LAT1-210A_1_4_3_10_12_17_CumulusAPN.tar'
+step3DesFile = '/tmp'
+step3SrcFileCmd = 'import_config /tmp/config_MTCDT-LAT1-210A_1_4_3_10_12_17_CumulusAPN.tar'
+
+step4SrcFile1 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\20_000_000_003_conduit_install'
+step4DesFile1 = '/external_flash_a/packages/unmod/20_000_000_003_conduit_install'
+step4SrcFile2 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\20_000_000_004_conduit_upgrade'
+step4DesFile2 = '/external_flash_a/packages/unmod/20_000_000_004_conduit_upgrade'
+step4SrcFile3 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\20_000_000_005_conduit_upgrade'
+step4DesFile3 = '/external_flash_a/packages/unmod/20_000_000_005_conduit_upgrade'
+step4SrcFile4 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\20_000_000_006_conduit_upgrade'
+step4DesFile4 = '/external_flash_a/packages/unmod/20_000_000_006_conduit_upgrade'
+step4SrcFile5 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\20_000_000_007_conduit_upgrade'
+step4DesFile5 = '/external_flash_a/packages/unmod/20_000_000_007_conduit_upgrade'
+
+step5SrcFile1 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\30_001_007_006_azureacutrol_install'
+step5DesFile1 = '/external_flash_a/packages/unmod/30_001_007_006_azureacutrol_install'
+step5SrcFile2 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\30_001_007_007_acutrol_upgrade'
+step5DesFile2 = '/external_flash_a/packages/unmod/30_001_007_007_acutrol_upgrade'
+
+whatStep = param2
+
+connectCmd = '192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=admin /nosecuritywarning /timeout=1'
+
 :CONNECTING
-connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=admin /nosecuritywarning /timeout=1"
+strcompare whatStep 'STEP4'
+if result=0 connectCmd = '192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=Conduit$@20Password16 /nosecuritywarning /timeout=1'
+strcompare whatStep 'STEP5'
+if result=0 connectCmd = '192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=Conduit$@20Password16 /nosecuritywarning /timeout=1'
+connect connectCmd
 if result<2 then
     messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
     end
 endif
 
-;;;STEP 1
+flushrecv
+strcompare whatStep 'STEP1&2'
+if result=0 goto STEP1
+strcompare whatStep 'STEP3'
+if result=0 goto STEP3
+strcompare whatStep 'STEP4'
+if result=0 goto STEP4
+strcompare whatStep 'STEP5'
+if result=0 goto STEP5
+
+
+;;;;;;;;;;;;;;STEP 1
 :STEP1
+flushrecv
 mpause 1000
+statusbox 'RUNNING STEP 1' 'STEP 1'
 send 13
 wait '#'
-sprintf2 cmd 'curl -s -m 5 -X PUT -H "Content-Type: json/application" -d '{"firstTimeSetup" : "false"}' 127.0.0.1/api/system'
+if result = 0 goto step1_failed
+sprintf2 cmd 'curl -s -m 5 -X PUT -H "Content-Type: json/application" -d %s{"firstTimeSetup" : "false"}%s 127.0.0.1/api/system' #39 #39
 sendln cmd
+wait 'success'
+if result<>1 goto step1_failed
+send 13
+wait '#'
+sprintf2 cmd 'curl -s -m 5 -X POST -H "Content-Type: json/application" -d %s{}%s 127.0.0.1/api/command/save' #39 #39
+sendln cmd
+wait 'success'
+if result<>1 goto step1_failed
+statusbox 'STEP 1 DONE' 'STEP 1 DONE'
+
+goto STEP2
+
+:step1_failed
+messagebox 'FAILED STEP 1! PLEASE CHECK CONNECTION!' 'STEP 1 FAILED'
+disconnect
+closett
+end
+
+;;;;;;;;;;;;;;STEP 2
+:STEP2
+timeout=150
+flushrecv
+mpause 1000
+statusbox 'RUNNING STEP 2' 'STEP 2'
+scpsend step2SrcFile step2DesFile
+do
+   statusbox 'TRANSFERING FILE 1/1...' 'STEP 2'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+statusbox 'RUNNING STEP 2' 'STEP 2'
+mpause 1000
+flushrecv
+sendln 'tar xvf conduit-external.tar.gz'
+wait '#'
+sendln 'cd conduit-external'
+wait '#'
+sendln './setupbasepackages_sdcard.sh'
+wait 'Initializing database:'
+statusbox 'INITIALIZING DATABASE...' 'STEP 2'
+mpause 2000
+wait 'The system is going down for reboot NOW!'
+statusbox 'STEP 2 DONE' 'STEP 2 DONE'
+mpause 1500
+
+end
+
+;;;;;;;;;;;;;;STEP 3
+:STEP3
+flushrecv
+mpause 1000
+statusbox 'RUNNING STEP 3' 'STEP 3'
+mpause 2000
+send 13
+wait '#'
+scpsend step3SrcFile step3DesFile
+do
+   statusbox 'TRANSFERING FILE 1/1...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+sendln step3SrcFileCmd
+statusbox 'IMPORTING FILE...' 'STEP 3'
+wait '#'
+sendln 'save_oem'
+statusbox 'SAVE OEM' 'STEP 3'
+wait '#'
+sendln 'reset-defaults'
+wait '#'
+sendln 'reboot'
+statusbox 'STEP 3 DONE' 'STEP 3 DONE'
+mpause 1500
+
+end
+
+;;;;;;;;;;;;;;STEP 4
+:STEP4
+flushrecv
+mpause 1000
+statusbox 'RUNNING STEP 4' 'STEP 4'
+mpause 2000
+send 13
+wait '#'
+scpsend step4SrcFile1 step4DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/5...' 'STEP 4'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 2000
+scpsend step4SrcFile2 step4DesFile2
+do
+   statusbox 'TRANSFERING FILE 2/5...' 'STEP 4'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 2000
+scpsend step4SrcFile3 step4DesFile3
+do
+   statusbox 'TRANSFERING FILE 3/5...' 'STEP 4'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 2000
+scpsend step4SrcFile4 step4DesFile4
+do
+   statusbox 'TRANSFERING FILE 4/5...' 'STEP 4'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 2000
+scpsend step4SrcFile5 step4DesFile5
+do
+   statusbox 'TRANSFERING FILE 5/5...' 'STEP 4'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 1000
+sendln 'reboot'
+wait '#'
+statusbox 'STEP 4 DONE' 'STEP 4 DONE'
+mpause 1500
+
+end
+
+;;;;;;;;;;;;;;STEP 5
+:STEP5
+flushrecv
+mpause 1000
+statusbox 'RUNNING STEP 5' 'STEP 5'
+
+mpause 2000
+scpsend step5SrcFile1 step5DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/2...' 'STEP 5'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 2000
+scpsend step5SrcFile2 step5DesFile2
+do
+   statusbox 'TRANSFERING FILE 2/2...' 'STEP 5'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+
+mpause 1000
+sendln 'reboot'
+wait '#'
+statusbox 'STEP 5 DONE' 'STEP 5 DONE'
+mpause 1500
 
 end
