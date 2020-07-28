@@ -65,8 +65,6 @@ posY := A_ScreenHeight - 900
 Gui, Show, x%posX% y%posY%, Acutrol Auto-Final Configurator    ;Starts GUI
 
 ;;;Functions to run AFTER main gui started;;;
-;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe /V /M=C:\V-Projects\ACTRLAuto-FinalConfig\ttl\actrl_check_status.ttl, ,Hide, TTWinPID
-;Run, %ComSpec% /c start C:\teraterm\ttermpro.exe 192.168.2.1 /ssh /2 /auth=password /user=admin /passwd=admin /timeout=1 /nossh /V, ,Hide, TTWinPID
 
 ;#Persistent
 ;SetTimer, WatchForWindowToClose, 5

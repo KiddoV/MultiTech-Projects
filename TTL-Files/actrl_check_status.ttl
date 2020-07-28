@@ -3,7 +3,6 @@
 ;
 
 showtt -1
-show 0
 show -1
 
 filecreate fhandle 'C:\V-Projects\ACTRLAuto-FinalConfig\caches\actrl_status.dat'

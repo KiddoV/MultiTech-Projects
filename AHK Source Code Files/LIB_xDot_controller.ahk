@@ -59,6 +59,8 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-IN865-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-IN865-mbed-os-5.7.7.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-KR920-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-KR920-mbed-os-5.7.7.bin, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin, 1
+
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\xdot-panel.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\xdot-panel.png, 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 ;;;Global vars that used the same on 3 Apps
@@ -98,6 +100,7 @@ AddMainMenuBar() {
         Menu OptionMenu, Add  ;Separator
         Menu OptionMenu, Add, Enable Sync Mode, endableSyncModeHandler
     Menu MainMenuBar, Add, &Options, :OptionMenu     ;Main button
+        Menu ToolMenu, Add, XDot Mapping, xdotMapHandler
         Menu ToolMenu, Add, Analyst, analystHandler
     Menu MainMenuBar, Add, &Tools, :ToolMenu     ;Main button
         Menu HelpMenu, Add, Image Indicators, imageIndicatorHandler
@@ -131,6 +134,10 @@ endableSyncModeHandler() {
     Menu, OptionMenu, ToggleCheck, Enable Sync Mode
     isSyncMode := !isSyncMode
     syncModeWriteIni("AutoPick", isSyncMode)
+}
+
+xdotMapHandler() {
+    XDotMappingTool()
 }
 
 analystHandler() {
@@ -1114,6 +1121,14 @@ WM_KEYDOWN(lparam) {
     return
 }
 
+DisplayWebPage(WB,html_str) {
+	Count:=0
+	while % FileExist(f:=A_Temp "\" A_TickCount A_NowUTC "-tmp" Count ".DELETEME.html")
+		Count+=1
+	FileAppend,%html_str%,%f%
+	WB.Navigate("file://" . f)
+}
+
 ;;;Add tooltip on hover for a control (%ControlName%_TT)
 ;WM_MOUSEMOVE() {
     ;Static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
@@ -1466,4 +1481,113 @@ OpenAboutMsgGui1() {
     OkBttnOnclick:
         Gui, msgGui1: Destroy
     Return
+}
+
+;=======================================================================================;
+;=======================================================================================;
+;=======================================================================================;
+;;;;;;;;;;;;;;;;;;;Application Tools;;;;;;;;;;;;;;;;;;;
+XDotMappingTool() {
+    Global
+    
+    HTML_PAGE =
+    ( LTrim
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv='X-UA-Compatible' content='IE=edge'/>
+<style>
+  html, body { padding: 0; margin: 0; overflow: hidden; }
+  .bg-img { background-repeat: no-repeat; opacity: 0.5; z-index: 0; }
+  .xdot-box { width: 84px; height: 84px; z-index: 2; cursor: pointer; display: inline-block; margin-right: -5px; background-color: rgba(0, 0, 0, 0.1);}
+  .xdot-box:hover { opacity: 0.6; }
+  .xdot-box-fail { background-color: rgba(255, 0, 0, 0.4); }
+  .xdot-box-pass { background-color: rgba(0, 255, 0, 0.4); }
+  .no-select-text { -ms-user-select: none; } /* Internet Explorer/Edge */
+  .overlay-div { position: fixed; display: block; width: 100`%; height: 100`%; background-color: rgba(0,0,0,0.5); z-index: 3;}
+  .overlay-text { position: absolute; top: 20`%; text-align: center; color: #e57373; cursor: default;}
+</style>
+</head>
+<body oncontextmenu="return false;" class="no-select-text">
+  <div style="position: fixed">
+      <img id="main-img" class="bg-img" src="C:\V-Projects\XDot-Controller\Imgs-for-GUI\xdot-panel.png" width="500" height="370">
+  </div>
+
+  <div id="overlayDiv" class="overlay-div">
+    <h2 class="overlay-text">**Could not connect to SERVER!**<br> All PC need to connect to SERVER PC to use this feature!!!</h2>
+  </div>
+
+  <div style="margin-top: 15px; position: fixed;">
+      <div id="xdot01" class="xdot-box" style=""> </div>
+      <div id="xdot02" class="xdot-box" style=""> </div>
+      <div id="xdot03" class="xdot-box" style=""> </div>
+      <div id="xdot04" class="xdot-box" style=""> </div>
+      <div id="xdot05" class="xdot-box" style=""> </div>
+      <div id="xdot06" class="xdot-box" style=""> </div>
+  </div>
+  <div style="margin-top: 100px; position: fixed;">
+      <div id="xdot01" class="xdot-box" style=""> </div>
+      <div id="xdot02" class="xdot-box" style=""> </div>
+      <div id="xdot03" class="xdot-box" style=""> </div>
+      <div id="xdot04" class="xdot-box" style=""> </div>
+      <div id="xdot05" class="xdot-box" style=""> </div>
+      <div id="xdot06" class="xdot-box" style=""> </div>
+  </div>
+  <div style="margin-top: 185px; position: fixed;">
+      <div id="xdot01" class="xdot-box" style=""> </div>
+      <div id="xdot02" class="xdot-box" style=""> </div>
+      <div id="xdot03" class="xdot-box" style=""> </div>
+      <div id="xdot04" class="xdot-box" style=""> </div>
+      <div id="xdot05" class="xdot-box" style=""> </div>
+      <div id="xdot06" class="xdot-box" style=""> </div>
+  </div>
+  <div style="margin-top: 270px; position: fixed;">
+      <div id="xdot01" class="xdot-box" style=""> </div>
+      <div id="xdot02" class="xdot-box" style=""> </div>
+      <div id="xdot03" class="xdot-box" style=""> </div>
+      <div id="xdot04" class="xdot-box" style=""> </div>
+      <div id="xdot05" class="xdot-box" style=""> </div>
+      <div id="xdot06" class="xdot-box" style=""> </div>
+  </div>
+</body>
+<script>
+  document.getElementById('main-img').ondragstart = function() { return false; };
+</script>
+</html>
+    )
+    
+    Gui, xdotMap: Destroy
+    Gui, xdotMap: -MinimizeBox -MaximizeBox
+    Gui, xdotMap: Add, ActiveX, w500 h370 vWebDoc, Shell.Explorer
+    WebDoc.silent := true ;Surpress JS Error boxes
+    DisplayWebPage(WebDoc, HTML_PAGE)
+    Gui, xdotMap: Add, GroupBox, xm+0 ym+380 w240 h70 Section, Functional Test
+    
+    Gui, xdotMap: Add, GroupBox, xm+260 ym+380 w240 h70 Section, EUID Write
+    
+    Gui, xdotMap: Show, , XDot Mapping Tool
+    
+    ;;Run BEFORE GUI started
+    
+    #Persistent
+    SetTimer, CheckServer, 100
+    
+    Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    ;;Run AFTER GUI started
+    
+    CheckServer:
+        DriveGet, driveStatus, Status, %remotePath%
+        if (driveStatus = "Ready") {
+            WebDoc.document.getElementById("overlayDiv").style.display := "none"
+        } else {
+            WebDoc.document.getElementById("overlayDiv").style.display := "block"
+        }
+    Return
+    
+    xdotMapGuiClose:
+        Gui, xdotMap: Destroy
+    Return
+    
+    ;;;;;;;;;;;Main Function
 }
