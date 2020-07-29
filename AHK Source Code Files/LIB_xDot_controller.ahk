@@ -1121,14 +1121,6 @@ WM_KEYDOWN(lparam) {
     return
 }
 
-DisplayWebPage(WB,html_str) {
-	Count:=0
-	while % FileExist(f:=A_Temp "\" A_TickCount A_NowUTC "-tmp" Count ".DELETEME.html")
-		Count+=1
-	FileAppend,%html_str%,%f%
-	WB.Navigate("file://" . f)
-}
-
 ;;;Add tooltip on hover for a control (%ControlName%_TT)
 ;WM_MOUSEMOVE() {
     ;Static CurrControl, PrevControl, _TT  ; _TT is kept blank for use by the ToolTip command below.
@@ -1487,6 +1479,7 @@ OpenAboutMsgGui1() {
 ;=======================================================================================;
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;Application Tools;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;XDot Mapping Tool
 XDotMappingTool() {
     Global
     
@@ -1500,9 +1493,11 @@ XDotMappingTool() {
   html, body { padding: 0; margin: 0; overflow: hidden; }
   .bg-img { background-repeat: no-repeat; opacity: 0.5; z-index: 0; }
   .xdot-box { width: 84px; height: 84px; z-index: 2; cursor: pointer; display: inline-block; margin-right: -5px; background-color: rgba(0, 0, 0, 0.1);}
-  .xdot-box:hover { opacity: 0.6; }
+  .xdot-box:not(.xdot-box-disable):hover { opacity: 0.6; }
   .xdot-box-fail { background-color: rgba(255, 0, 0, 0.4); }
   .xdot-box-pass { background-color: rgba(0, 255, 0, 0.4); }
+  .xdot-box-disable { background-color: rgba(120, 120, 120, 0.8); background-image: url(C:/V-Projects/XDot-Controller/Imgs-for-GUI/disable.png); background-repeat: no-repeat; background-size: 75px 75px; background-position: center; }
+  .xdot-box-disable::before {  }
   .no-select-text { -ms-user-select: none; } /* Internet Explorer/Edge */
   .overlay-div { position: fixed; display: block; width: 100`%; height: 100`%; background-color: rgba(0,0,0,0.5); z-index: 3;}
   .overlay-text { position: absolute; top: 20`%; text-align: center; color: #e57373; cursor: default;}
@@ -1526,28 +1521,28 @@ XDotMappingTool() {
       <div id="xdot06" class="xdot-box" style=""> </div>
   </div>
   <div style="margin-top: 100px; position: fixed;">
-      <div id="xdot01" class="xdot-box" style=""> </div>
-      <div id="xdot02" class="xdot-box" style=""> </div>
-      <div id="xdot03" class="xdot-box" style=""> </div>
-      <div id="xdot04" class="xdot-box" style=""> </div>
-      <div id="xdot05" class="xdot-box" style=""> </div>
-      <div id="xdot06" class="xdot-box" style=""> </div>
+      <div id="xdot07" class="xdot-box" style=""> </div>
+      <div id="xdot08" class="xdot-box" style=""> </div>
+      <div id="xdot09" class="xdot-box" style=""> </div>
+      <div id="xdot10" class="xdot-box" style=""> </div>
+      <div id="xdot11" class="xdot-box" style=""> </div>
+      <div id="xdot12" class="xdot-box" style=""> </div>
   </div>
   <div style="margin-top: 185px; position: fixed;">
-      <div id="xdot01" class="xdot-box" style=""> </div>
-      <div id="xdot02" class="xdot-box" style=""> </div>
-      <div id="xdot03" class="xdot-box" style=""> </div>
-      <div id="xdot04" class="xdot-box" style=""> </div>
-      <div id="xdot05" class="xdot-box" style=""> </div>
-      <div id="xdot06" class="xdot-box" style=""> </div>
+      <div id="xdot13" class="xdot-box" style=""> </div>
+      <div id="xdot14" class="xdot-box" style=""> </div>
+      <div id="xdot15" class="xdot-box" style=""> </div>
+      <div id="xdot16" class="xdot-box" style=""> </div>
+      <div id="xdot17" class="xdot-box" style=""> </div>
+      <div id="xdot18" class="xdot-box" style=""> </div>
   </div>
   <div style="margin-top: 270px; position: fixed;">
-      <div id="xdot01" class="xdot-box" style=""> </div>
-      <div id="xdot02" class="xdot-box" style=""> </div>
-      <div id="xdot03" class="xdot-box" style=""> </div>
-      <div id="xdot04" class="xdot-box" style=""> </div>
-      <div id="xdot05" class="xdot-box" style=""> </div>
-      <div id="xdot06" class="xdot-box" style=""> </div>
+      <div id="xdot19" class="xdot-box" style=""> </div>
+      <div id="xdot20" class="xdot-box" style=""> </div>
+      <div id="xdot21" class="xdot-box" style=""> </div>
+      <div id="xdot22" class="xdot-box" style=""> </div>
+      <div id="xdot23" class="xdot-box" style=""> </div>
+      <div id="xdot24" class="xdot-box" style=""> </div>
   </div>
 </body>
 <script>
@@ -1558,36 +1553,67 @@ XDotMappingTool() {
     
     Gui, xdotMap: Destroy
     Gui, xdotMap: -MinimizeBox -MaximizeBox
-    Gui, xdotMap: Add, ActiveX, w500 h370 vWebDoc, Shell.Explorer
-    WebDoc.silent := true ;Surpress JS Error boxes
-    DisplayWebPage(WebDoc, HTML_PAGE)
+    Gui, xdotMap: Add, ActiveX, w500 h370 vWB, Shell.Explorer
+    WB.silent := true ;Surpress JS Error boxes
+    DisplayWebPage(WB, HTML_PAGE)
     Gui, xdotMap: Add, GroupBox, xm+0 ym+380 w240 h70 Section, Functional Test
     
     Gui, xdotMap: Add, GroupBox, xm+260 ym+380 w240 h70 Section, EUID Write
     
     Gui, xdotMap: Show, , XDot Mapping Tool
     
-    ;;Run BEFORE GUI started
-    
     #Persistent
     SetTimer, CheckServer, 100
     
-    Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;Run BEFORE GUI started
+    While WB.readystate != 4 || WB.busy     ;Wait for IE to load the page
+        Sleep 10
+    ;;Defines DOM object
+    WDoc := WB.document
+    ComObjConnect(WDoc, "Doc_")
+    ;xdot01Bttn := WB.document.getElementById("xdot01")
+    ;rightClickObj := {"oncontextmenu": Func("OnXdotRightClick")}
+    ;ComObjConnect(xdot01Bttn, rightClickObj)
+    ;WB.document.parentWindow.AHK := Func("OnXdotRightClick")    ;Call AHK function from HTML using onclick="AHK('Function')"
+    Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     
-    ;;Run AFTER GUI started
+    ;;;Run AFTER GUI started
     
     CheckServer:
         DriveGet, driveStatus, Status, %remotePath%
         if (driveStatus = "Ready") {
-            WebDoc.document.getElementById("overlayDiv").style.display := "none"
+            WB.document.getElementById("overlayDiv").style.display := "none"
         } else {
-            WebDoc.document.getElementById("overlayDiv").style.display := "block"
+            WB.document.getElementById("overlayDiv").style.display := "block"
         }
     Return
     
     xdotMapGuiClose:
         Gui, xdotMap: Destroy
+        FileDelete,%A_Temp%\*.DELETEME.html ;clean html tmp file
     Return
+}
+;;;;;;;;;;;;;Main Function;;;;;;;;;;;;;;
+;;;When user RIGHT CLICK on HTML elements
+Doc_OnContextMenu(WDoc) {
+    htmlId := WDoc.parentWindow.event.srcElement.id
+    htmlClassName := WDoc.parentWindow.event.srcElement.classname
+    isHtmlXdot := RegExMatch(htmlId, "^xdot[0-9]{2}$")  ;Check if the htmlId is xdot box
+    isHtmlXdotDisable := RegExMatch(htmlClassName, "xdot-box-disable")
     
-    ;;;;;;;;;;;Main Function
+    if (isHtmlXdot) {
+        WDoc.getElementById(htmlId).classList.add("xdot-box-disable")
+        if (isHtmlXdotDisable) {
+            WDoc.getElementById(htmlId).classList.remove("xdot-box-disable")
+        }
+    }
+}
+
+;;;;;;;;;;;Additional Functions;;;;;;;;;;;
+DisplayWebPage(WB, html_str) {
+	Count:=0
+	While % FileExist(f:=A_Temp "\" A_TickCount A_NowUTC "-tmp" Count ".DELETEME.html")
+		Count+=1
+	FileAppend, %html_str%, %f%
+	WB.Navigate("file://" . f)
 }
