@@ -16,6 +16,8 @@ IfNotExist C:\V-Projects\XDot-Controller\EXE-Files
     FileCreateDir C:\V-Projects\XDot-Controller\EXE-Files
 IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
     FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
+IfNotExist C:\V-Projects\XDot-Controller\TEMP-DATA
+    FileCreateDir C:\V-Projects\XDot-Controller\TEMP-DATA
 IfNotExist Z:\XDOT\Saved-Nodes
     FileCreateDir Z:\XDOT\Saved-Nodes
 
@@ -86,7 +88,10 @@ Global play2Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_brown.png"
 Global play3Img := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\play_blue.png"
 Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 Global exclaImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png"
+
+Global xdotMapRemoteFilePath := "Z:\XDOT\Data\mapping-remote.dat"
 ;=======================================================================================;
+
 WinSet, Redraw, , ahk_id %hIdListView%
 ;;;;;;Menu bar for MAIN GUI
 AddMainMenuBar() {
@@ -1043,6 +1048,11 @@ HasValue(haystack, needle) {
     return false
 }
 
+OnExitMainApp(ExitReason, ExitCode) {
+    IniWrite, %False%, %xdotMapRemoteFilePath%, Mapping, Activate
+    IniDelete, %xdotMapRemoteFilePath%, XDot-Status
+}
+
 ;=======================================================================================;
 ;;Add an icon to a button with external image file
 ;;;GuiButtonIcon(hwndVar, "", , "")  ;Delete the icon
@@ -1483,72 +1493,75 @@ OpenAboutMsgGui1() {
 XDotMappingTool() {
     Global
     
+    IfNotExist %xdotMapRemoteFilePath%
+        FileAppend, , %xdotMapRemoteFilePath%
+    IniWrite, %True%, %xdotMapRemoteFilePath%, Mapping, Activate
+    
     HTML_PAGE =
     ( LTrim
-<!DOCTYPE html>
-<html>
-<head>
-<meta http-equiv='X-UA-Compatible' content='IE=edge'/>
-<style>
-  html, body { padding: 0; margin: 0; overflow: hidden; }
-  .bg-img { background-repeat: no-repeat; opacity: 0.5; z-index: 0; }
-  .xdot-box { width: 84px; height: 84px; z-index: 2; cursor: pointer; display: inline-block; margin-right: -5px; background-color: rgba(0, 0, 0, 0.1);}
-  .xdot-box:not(.xdot-box-disable):hover { opacity: 0.6; }
-  .xdot-box-fail { background-color: rgba(255, 0, 0, 0.4); }
-  .xdot-box-pass { background-color: rgba(0, 255, 0, 0.4); }
-  .xdot-box-disable { background-color: rgba(120, 120, 120, 0.8); background-image: url(C:/V-Projects/XDot-Controller/Imgs-for-GUI/disable.png); background-repeat: no-repeat; background-size: 75px 75px; background-position: center; }
-  .xdot-box-disable::before {  }
-  .no-select-text { -ms-user-select: none; } /* Internet Explorer/Edge */
-  .overlay-div { position: fixed; display: block; width: 100`%; height: 100`%; background-color: rgba(0,0,0,0.5); z-index: 3;}
-  .overlay-text { position: absolute; top: 20`%; text-align: center; color: #e57373; cursor: default;}
-</style>
-</head>
-<body oncontextmenu="return false;" class="no-select-text">
-  <div style="position: fixed">
-      <img id="main-img" class="bg-img" src="C:\V-Projects\XDot-Controller\Imgs-for-GUI\xdot-panel.png" width="500" height="370">
-  </div>
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'/>
+    <style>
+      html, body { padding: 0; margin: 0; overflow: hidden; }
+      .bg-img { background-repeat: no-repeat; opacity: 0.5; z-index: 0; }
+      .xdot-box { width: 84px; height: 84px; z-index: 2; cursor: pointer; display: inline-block; margin-right: -5px; background-color: rgba(0, 0, 0, 0.1);}
+      .xdot-box:not(.xdot-box-disable):hover { opacity: 0.6; }
+      .xdot-box-fail { background-color: rgba(255, 0, 0, 0.4); }
+      .xdot-box-pass { background-color: rgba(0, 255, 0, 0.4); }
+      .xdot-box-disable { background-color: rgba(120, 120, 120, 1); background-image: url(C:/V-Projects/XDot-Controller/Imgs-for-GUI/disable.png); background-repeat: no-repeat; background-size: 75px 75px; background-position: center; opacity: 0.8; }
+      .no-select-text { -ms-user-select: none; } /* Internet Explorer/Edge */
+      .overlay-div { position: fixed; display: block; width: 100`%; height: 100`%; background-color: rgba(0,0,0,0.5); z-index: 3;}
+      .overlay-text { position: absolute; top: 20`%; text-align: center; color: #e57373; cursor: default;}
+    </style>
+    </head>
+    <body oncontextmenu="return false;" class="no-select-text">
+      <div style="position: fixed">
+          <img id="main-img" class="bg-img" src="C:\V-Projects\XDot-Controller\Imgs-for-GUI\xdot-panel.png" width="500" height="370">
+      </div>
 
-  <div id="overlayDiv" class="overlay-div">
-    <h2 class="overlay-text">**Could not connect to SERVER!**<br> All PC need to connect to SERVER PC to use this feature!!!</h2>
-  </div>
+      <div id="overlayDiv" class="overlay-div">
+        <h2 class="overlay-text">**Could not connect to SERVER!**<br> All PC need to connect to SERVER PC to use this feature!!!</h2>
+      </div>
 
-  <div style="margin-top: 15px; position: fixed;">
-      <div id="xdot01" class="xdot-box" style=""> </div>
-      <div id="xdot02" class="xdot-box" style=""> </div>
-      <div id="xdot03" class="xdot-box" style=""> </div>
-      <div id="xdot04" class="xdot-box" style=""> </div>
-      <div id="xdot05" class="xdot-box" style=""> </div>
-      <div id="xdot06" class="xdot-box" style=""> </div>
-  </div>
-  <div style="margin-top: 100px; position: fixed;">
-      <div id="xdot07" class="xdot-box" style=""> </div>
-      <div id="xdot08" class="xdot-box" style=""> </div>
-      <div id="xdot09" class="xdot-box" style=""> </div>
-      <div id="xdot10" class="xdot-box" style=""> </div>
-      <div id="xdot11" class="xdot-box" style=""> </div>
-      <div id="xdot12" class="xdot-box" style=""> </div>
-  </div>
-  <div style="margin-top: 185px; position: fixed;">
-      <div id="xdot13" class="xdot-box" style=""> </div>
-      <div id="xdot14" class="xdot-box" style=""> </div>
-      <div id="xdot15" class="xdot-box" style=""> </div>
-      <div id="xdot16" class="xdot-box" style=""> </div>
-      <div id="xdot17" class="xdot-box" style=""> </div>
-      <div id="xdot18" class="xdot-box" style=""> </div>
-  </div>
-  <div style="margin-top: 270px; position: fixed;">
-      <div id="xdot19" class="xdot-box" style=""> </div>
-      <div id="xdot20" class="xdot-box" style=""> </div>
-      <div id="xdot21" class="xdot-box" style=""> </div>
-      <div id="xdot22" class="xdot-box" style=""> </div>
-      <div id="xdot23" class="xdot-box" style=""> </div>
-      <div id="xdot24" class="xdot-box" style=""> </div>
-  </div>
-</body>
-<script>
-  document.getElementById('main-img').ondragstart = function() { return false; };
-</script>
-</html>
+      <div style="margin-top: 15px; position: fixed;">
+          <div id="XDot01" class="xdot-box" > </div>
+          <div id="XDot02" class="xdot-box" > </div>
+          <div id="XDot03" class="xdot-box" > </div>
+          <div id="XDot04" class="xdot-box" > </div>
+          <div id="XDot05" class="xdot-box" > </div>
+          <div id="XDot06" class="xdot-box" > </div>
+      </div>
+      <div style="margin-top: 100px; position: fixed;">
+          <div id="XDot07" class="xdot-box" > </div>
+          <div id="XDot08" class="xdot-box" > </div>
+          <div id="XDot09" class="xdot-box" > </div>
+          <div id="XDot10" class="xdot-box" > </div>
+          <div id="XDot11" class="xdot-box" > </div>
+          <div id="XDot12" class="xdot-box" > </div>
+      </div>
+      <div style="margin-top: 185px; position: fixed;">
+          <div id="XDot13" class="xdot-box" > </div>
+          <div id="XDot14" class="xdot-box" > </div>
+          <div id="XDot15" class="xdot-box" > </div>
+          <div id="XDot16" class="xdot-box" > </div>
+          <div id="XDot17" class="xdot-box" > </div>
+          <div id="XDot18" class="xdot-box" > </div>
+      </div>
+      <div style="margin-top: 270px; position: fixed;">
+          <div id="XDot19" class="xdot-box" > </div>
+          <div id="XDot20" class="xdot-box" > </div>
+          <div id="XDot21" class="xdot-box" > </div>
+          <div id="XDot22" class="xdot-box" > </div>
+          <div id="XDot23" class="xdot-box" > </div>
+          <div id="XDot24" class="xdot-box" > </div>
+      </div>
+    </body>
+    <script>
+      document.getElementById('main-img').ondragstart = function() { return false; };
+    </script>
+    </html>
     )
     
     Gui, xdotMap: Destroy
@@ -1590,7 +1603,9 @@ XDotMappingTool() {
     
     xdotMapGuiClose:
         Gui, xdotMap: Destroy
-        FileDelete,%A_Temp%\*.DELETEME.html ;clean html tmp file
+        FileDelete, %A_Temp%\*.DELETEME.html ;clean html tmp file
+        IniDelete, %xdotMapRemoteFilePath%, XDot-Status
+        IniWrite, %False%, %xdotMapRemoteFilePath%, Mapping, Activate
     Return
 }
 ;;;;;;;;;;;;;Main Function;;;;;;;;;;;;;;
@@ -1598,13 +1613,15 @@ XDotMappingTool() {
 Doc_OnContextMenu(WDoc) {
     htmlId := WDoc.parentWindow.event.srcElement.id
     htmlClassName := WDoc.parentWindow.event.srcElement.classname
-    isHtmlXdot := RegExMatch(htmlId, "^xdot[0-9]{2}$")  ;Check if the htmlId is xdot box
+    isHtmlXdot := RegExMatch(htmlId, "^XDot[0-9]{2}$")  ;Check if the htmlId is xdot box
     isHtmlXdotDisable := RegExMatch(htmlClassName, "xdot-box-disable")
     
     if (isHtmlXdot) {
         WDoc.getElementById(htmlId).classList.add("xdot-box-disable")
+        IniWrite, D, %xdotMapRemoteFilePath%, XDot-Status, %htmlId%
         if (isHtmlXdotDisable) {
             WDoc.getElementById(htmlId).classList.remove("xdot-box-disable")
+            IniWrite, N, %xdotMapRemoteFilePath%, XDot-Status, %htmlId%
         }
     }
 }
@@ -1616,4 +1633,23 @@ DisplayWebPage(WB, html_str) {
 		Count+=1
 	FileAppend, %html_str%, %f%
 	WB.Navigate("file://" . f)
+}
+
+Global countNumMap := 1
+mappingToolActivate() {
+    IniRead, xDotStatList, %xdotMapRemoteFilePath%, XDot-Status
+    if (xDotStatList != "") {
+        Loop, 24
+        {
+            numW0 := Format("{1:02}", A_Index)
+            IniRead, xDotStat, %xdotMapRemoteFilePath%, XDot-Status, XDot%numW0%
+            ctrlVar = XDot%numW0%
+            RegExMatch(ctrlVar, "\d+$", num)
+            if (xDotStat = "D" && countNumMap = 1) {
+                changeXdotBttnIcon(ctrlVar, "DISABLE", , A_Index)
+            }
+        }
+        countNumMap++
+    }
+    countNumMap := 1
 }

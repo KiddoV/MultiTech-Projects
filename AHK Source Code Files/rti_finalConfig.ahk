@@ -14,7 +14,7 @@ FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\restoreButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\restoreArea.bmp, 1
 FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\okButton.bmp, C:\V-Projects\RTIAuto-LastConfiger\Imgs-for-Search-Func\okArea.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
-
+Global isRun2Step := False
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -24,7 +24,7 @@ StringTrimRight WorkingDir, A_ScriptDir, 22
 SetBatchLines -1
 
 Gui Add, GroupBox, x8 y10 w138 h117, Step by Step
-Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn, &LOGIN
+Gui Add, Button, x37 y30 w80 h17 gloginStep vloginBttn +Disabled, &LOGIN
 Gui Add, Text, x16 y52 w124 h2 +0x10
 Gui Add, Button, x37 y60 w70 h17 grunStep1 vstep1Bttn, STEP &1
 Gui Add, Text, x112 y61 w15 h15 +0x200, ┐
@@ -60,6 +60,8 @@ mainRun() {
 }
 
 step1and2() {
+    if (A_GuiControl = "step1and2Bttn")
+        isRun2Step := True
     GuiControl Disable, step1Bttn
     GuiControl Disable, step2Bttn
     GuiControl Disable, step1and2Bttn
@@ -81,7 +83,9 @@ step1and2() {
     GuiControl Enable, step1Bttn
     GuiControl Enable, step2Bttn
     GuiControl Enable, step1and2Bttn
+    isRun2Step := False
 }
+
 loginStep() {
     GuiControl Disable, loginBttn
     addTipMsg("BEGIN LOGIN STEP", 3000)
@@ -237,6 +241,8 @@ return
 ;}
 
 runStep1() {
+    if (A_GuiControl = "step1Bttn")
+        isRun2Step := False
     SB_SetText("Waiting for conduit to reset")
     WinWaitClose Save.*
     GuiControl Disable, step1Bttn
@@ -291,9 +297,15 @@ runStep1() {
     WinClose .*Chrome.*
     SB_SetText("Finished step 1!")
     GuiControl Enable, step1Bttn
+    
+    if (!isRun2Step) {
+        MsgBox, , DONE, STEP 1 IS DONE!!!!!
+    }
 }
 
 runStep2() {
+    if (A_GuiControl = "step2Bttn")
+        isRun2Step := False
     GuiControl Disable, step2Bttn
     if !FileExist("C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\Step2.saveOEM.ttl") {
         MsgBox 16, FILE NOT FOUND, The file:`nStep2.saveOEM.ttl`nwas not found in this location:`nC:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\`nPlease check and run again!
@@ -323,6 +335,10 @@ runStep2() {
     ControlClick, Button1, Port.*, , Left, 2
     SB_SetText("Finished step 2!")
     GuiControl Enable, step2Bttn
+    
+    if (!isRun2Step) {
+        MsgBox, , DONE, STEP 2 IS DONE!!!!!
+    }
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -340,10 +356,10 @@ addTipMsg(text, time) {
 
 ;option is Disable or Enable
 disableGuis(option) {
-    GuiControl %option%, loginBttn
+    ;GuiControl %option%, loginBttn
     GuiControl %option%, step1Bttn
     GuiControl %option%, step2Bttn
-    GuiControl %option%, allStepBttn
+    ;GuiControl %option%, allStepBttn
     GuiControl %option%, step1and2Bttn
 }
 

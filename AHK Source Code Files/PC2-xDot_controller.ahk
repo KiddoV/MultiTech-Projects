@@ -148,6 +148,8 @@ SetTimer, DrawLineNum, 1
 SetTimer, CheckFileChange, 20
 SetTimer, CheckLotChange, 200
 SetTimer, SyncModeCheck, 100
+SetTimer, MappingToolCheck, 50
+OnExit("OnExitMainApp")
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 DrawLineNum:
@@ -209,6 +211,13 @@ SyncModeCheck:
     DriveGet, driveStatus, Status, %remotePath%
     if (driveStatus = "Ready")
         syncModeActive()
+Return
+
+MappingToolCheck:
+    DriveGet, driveStatus, Status, %remotePath%
+    IniRead, isMapActivate, %xdotMapRemoteFilePath%, Mapping, Activate
+    if (driveStatus = "Ready" && isMapActivate)
+        mappingToolActivate()
 Return
 
 GuiClose:

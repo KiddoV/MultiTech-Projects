@@ -34,6 +34,19 @@ req.Send()
 MsgBox, % req.responseText
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;url:= "https://192.168.2.1/api/commissioning"
+    ;json =
+    ;(LTrim
+        ;{"username":"admin","aasID":"","aasAnswer":"admin2205!"}
+    ;)
+    ;
+    ;req := ComObjCreate("Msxml2.XMLHTTP")
+    ;req.Open("POST", url, False)
+    ;req.SetRequestHeader("Content-Type", "application/json")
+    ;req.Send(json)
+    ;MsgBox, % req.responseText
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 IE := ComObjCreate("InternetExplorer.Application")
 IE.Visible := 1
