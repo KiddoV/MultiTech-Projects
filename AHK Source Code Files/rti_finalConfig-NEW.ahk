@@ -3,6 +3,8 @@
 */
 
 SetTitleMatchMode, RegEx
+DetectHiddenWindows, On
+DetectHiddenText, On
 
 #SingleInstance Force
 #NoEnv
@@ -10,9 +12,16 @@ SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;Installs Files;;;;;;;;;;;;;;;;;
-
+IfNotExist C:\V-Projects\RTIAuto-FinalConfig\transfering-files
+    FileCreateDir C:\V-Projects\RTIAuto-FinalConfig\transfering-files
+    
+FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, 1
+    
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
+Global config4GFilePath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
 
+;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
 Gui, Add, GroupBox, xm+0 ym+0 w190 h140 Section
@@ -40,11 +49,113 @@ RunAll() {
     step0()
 }
 
+step0() {
+    Global          ;To use WB
+    
+    CommGui()
+    
+    Progress, ZH0 M FS10, RUNNING COMMISSIONING......., , STEP 0
+    ;;Setting new Username and password
+    Sleep 1000
+    url:= "https://192.168.2.1/api/commissioning"
+    json =
+    (LTrim
+        {"username":"admin","aasID":"","aasAnswer":""}
+    )
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "application/json")
+    req.Send(json)
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SET NEW USERNAME SUCCESSFULY!, , STEP 0
+    } else if (resObj.error = "commissioning is finished") {
+        Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
+        Sleep 500
+        Goto Login-Step
+    } else {
+        Progress, ZH0 M FS10 CTde1212, SET NEW USERNAME FALIED!, , STEP 0
+        return 0
+    }
+    userToken := resObj.result.aasID
+    
+    Sleep 1000
+    json =
+    (LTrim
+        {"username":"admin","aasID":"%userToken%","aasAnswer":"admin2205!"}
+    )
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "application/json")
+    req.Send(json)
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SET NEW PASSWORD SUCCESSFULY!, , STEP 0
+    } else {
+        Progress, ZH0 M FS10 CTde1212, SET NEW PASSWORD FALIED!, , STEP 0
+        return 0
+    }
+    
+    Sleep 1000
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "application/json")
+    req.Send(json)
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, CONFIRM NEW PASSWORD SUCCESSFULY!, , STEP 0
+    } else {
+        Progress, ZH0 M FS10 CTde1212, CONFIRM NEW PASSWORD FALIED!, , STEP 0
+        return 0
+    }
+    
+    ;;Login STEP
+    Sleep 1500
+    Login-Step:
+    url:= "https://192.168.2.1/api/login?username=admin&password=admin2205!"
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("GET", url, False)
+    req.Send()
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, LOGIN SUCCESSFULY!, , STEP 0
+    } else {
+        errMsg := Format("{:U}", resObj.error)
+        Progress, ZH0 M FS10 CTde1212, ERR: %errMsg%, LOGIN FALIED!, STEP 0
+        return 0
+    }
+    uploadConfigToken := resObj.result.token
+    
+    ;;Upload config STEP
+    Sleep 1000
+    WB.Navigate("https://192.168.2.1/administration/save-restore")
+    ;url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
+    ;req := ComObjCreate("Msxml2.XMLHTTP")
+    ;req.Open("POST", url, False)
+    ;req.SetRequestHeader("Content-Type", "multipart/form-data")
+    ;
+    ;;req.SetRequestHeader("Content-Disposition", "form-data; name='archivo'; filename='config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz'")
+    ;;fileContent := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
+    ;req.Send()
+    ;resObj := json_toobj(req.responseText)
+    ;if (resObj.status = "success") {
+        ;Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
+    ;} else {
+        ;errMsg := Format("{:U}", resObj.error)
+        ;Progress, ZH0 M FS10 CTde1212 W350, ERR: %errMsg%, UPLOAD CONFIG FILE FALIED!, STEP 0
+        ;return 0
+    ;}
+}
+
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;
 CommGui() {
     Global
-    
+
     Gui, comm: Add, ActiveX, w500 h500 vWB, Shell.Explorer
     WB.Navigate("https://192.168.2.1/commissioning")
     ;Gui, comm: Add, Button, gstep0, Test
@@ -66,81 +177,3 @@ CommGui() {
 }
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;ADDITIONAL FUNCTIONs;;;;;;;;;;;
-step0() {
-    Global          ;To use WB
-    
-    CommGui()
-    
-    WinWait, Commissioning Mode
-    SplashTextOn, 300, 20, STEP 0, COMMISSIONING.......
-    currentURL := WB.LocationURL
-    
-    Sleep 1500
-    if (currentURL = "https://192.168.2.1/sign-in")
-        Goto Login-Step
-    ;;Input Username
-    While (WB.document.getElementById("answer").value != "admin" && WB.document.getElementById("message").innerHTML = "Username: ")
-    {
-        WB.document.getElementById("answer").value := ""
-        WB.document.getElementById("answer").focus()
-        ControlSendRaw, , admin, Commissioning Mode
-        Sleep 500
-        btn := WB.document.getElementsByTagName("button")
-        btn[0].Click()
-    }
-    
-    Sleep 2000
-    ;;Input Password
-    While (WB.document.getElementById("answer").value != "admin2205!" && WB.document.getElementById("message").innerHTML = "New password: ")
-    {
-        WB.document.getElementById("answer").value := ""
-        WB.document.getElementById("answer").focus()
-        ControlSendRaw, , admin2205!, Commissioning Mode
-        Sleep 500
-        btn := WB.document.getElementsByTagName("button")
-        btn[0].Click()
-    }
-    
-    Sleep 2000
-    ;;Retype Password
-    While (WB.document.getElementById("answer").value != "admin2205!" && WB.document.getElementById("message").innerHTML = "Retype new password: ")
-    {
-        WB.document.getElementById("answer").value := ""
-        WB.document.getElementById("answer").focus()
-        ControlSendRaw, , admin2205!, Commissioning Mode
-        Sleep 500
-        btn := WB.document.getElementsByTagName("button")
-        btn[0].Click()
-    }
-    
-    
-    Login-Step:
-    Sleep 1000
-    ;;Login Step
-    While (WB.document.getElementById("login").value != "admin" && WB.document.getElementById("password").value != "admin2205!")
-    {
-        WB.document.getElementById("login").value := ""
-        WB.document.getElementById("password").value := ""
-        WB.document.getElementById("login").focus()
-        ControlSendRaw, , admin, Commissioning Mode
-        Sleep 300
-        WB.document.getElementById("password").focus()
-        ControlSendRaw, , admin2205!, Commissioning Mode
-        
-        Sleep 500
-        WB.document.getElementsByTagName("button").item[0].click()
-        
-    }
-    
-    Sleep 4000
-    ;;After Login
-    WB.document.getElementsByClassName("close").item[0].click()
-    Sleep 500
-    WB.Navigate("https://192.168.2.1/administration/save-restore")
-    Sleep 300
-    WB.document.getElementsByTagName("label").item[1].click()
-    
-    WinWait, Choose File to Upload
-    WinActivate, Choose File to Upload
-    ControlSetText, Edit1, TEST, Choose File to Upload
-}

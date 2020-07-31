@@ -30,3 +30,80 @@ IELoad(wb)    ;You need to send the IE handle to the function unless you define 
     Until (wb.Document.Readystate = "Complete")
 Return True
 }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;step0() {
+    ;Global          ;To use WB
+    ;
+    ;CommGui()
+    ;
+    ;WinWait, Commissioning Mode
+    ;SplashTextOn, 300, 20, STEP 0, RUNNING COMMISSIONING.......
+    ;;;currentURL := WB.LocationURL
+    ;
+    ;Input Username
+    ;While (WB.document.getElementById("answer").value != "admin" && WB.document.getElementById("message").innerHTML = "Username: ")
+    ;{
+        ;WB.document.getElementById("answer").value := ""
+        ;WB.document.getElementById("answer").focus()
+        ;ControlSendRaw, , admin, Commissioning Mode
+        ;Sleep 500
+        ;btn := WB.document.getElementsByTagName("button")
+        ;btn[0].Click()
+    ;}
+    ;
+    ;Sleep 2000
+    ;Input Password
+    ;While (WB.document.getElementById("answer").value != "admin2205!" && WB.document.getElementById("message").innerHTML = "New password: ")
+    ;{
+        ;WB.document.getElementById("answer").value := ""
+        ;WB.document.getElementById("answer").focus()
+        ;ControlSendRaw, , admin2205!, Commissioning Mode
+        ;Sleep 500
+        ;btn := WB.document.getElementsByTagName("button")
+        ;btn[0].Click()
+    ;}
+    ;
+    ;Sleep 2000
+    ;Retype Password
+    ;While (WB.document.getElementById("answer").value != "admin2205!" && WB.document.getElementById("message").innerHTML = "Retype new password: ")
+    ;{
+        ;WB.document.getElementById("answer").value := ""
+        ;WB.document.getElementById("answer").focus()
+        ;ControlSendRaw, , admin2205!, Commissioning Mode
+        ;Sleep 500
+        ;btn := WB.document.getElementsByTagName("button")
+        ;btn[0].Click()
+    ;}
+    ;
+    ;
+    ;SplashTextOn, 300, 20, STEP 0, UPLOADING CONFIGURATION FILE.......
+    ;Sleep 1000
+    ;Login Step
+    ;While (WB.document.getElementById("login").value != "admin" && WB.document.getElementById("password").value != "admin2205!")
+    ;{
+        ;WB.document.getElementById("login").value := ""
+        ;WB.document.getElementById("password").value := ""
+        ;WB.document.getElementById("login").focus()
+        ;ControlSendRaw, , admin, Commissioning Mode
+        ;Sleep 300
+        ;WB.document.getElementById("password").focus()
+        ;ControlSendRaw, , admin2205!, Commissioning Mode
+        ;
+        ;Sleep 500
+        ;WB.document.getElementsByTagName("button").item[0].click()
+        ;
+    ;}
+    ;
+    ;Sleep 4000
+    ;After Login
+    ;WB.document.getElementsByClassName("close").item[0].click()
+    ;Sleep 500
+    ;WB.Navigate("https://192.168.2.1/administration/save-restore")
+    ;Sleep 500
+    ;WB.document.getElementsByTagName("label").item[1].click()
+    ;
+    ;Sleep 1000
+    ;WinWait, Choose File to Upload
+    ;ControlSetText, Edit1, %config4GFilePath%, Choose File to Upload
+;}
