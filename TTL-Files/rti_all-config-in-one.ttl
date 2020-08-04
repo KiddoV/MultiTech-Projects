@@ -1,0 +1,196 @@
+;
+;	Author: 		Viet Ho
+;	CANNOT STAND-ALONE RUN!!!!
+;
+
+show 0
+timeout = 35
+
+try = 1
+step1SrcFile1 = 'C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_Python_Deps.tar.gz'
+step1DesFile1 = '/tmp/RT_Python_Deps.tar.gz'
+step1SrcFile2 = 'C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz'
+step1DesFile2 = '/tmp/minimalmodbus.tar.gz'
+
+whatStep = param2
+strcompare whatStep 'STEP1'
+isStep1 = result
+strcompare whatStep 'STEP2'
+isStep2 = result
+
+:CONNECTING
+mpause 1000
+connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning /timeout=1"
+if result < 2 then
+    messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
+    end
+endif
+setsync 1
+send 13
+wait '$'
+mpause 500
+sendln 'sudo -s'
+wait 'word:'
+sendln 'ThanksForFish42!'
+wait '#'
+
+if isStep1=0 goto STEP1
+if isStep2=0 goto STEP2
+
+;;;;;;;;;;;;;;STEP 1
+:STEP1
+flushrecv
+statusbox 'RUNNING STEP 1' 'STEP 1'
+mpause 1000
+send 13
+wait '#'
+timeout = 900
+flushrecv
+mpause 500
+scpsend step1SrcFile1 step1DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/2...' 'STEP 1'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFERING FILE 1/2 COMPLETED' 'STEP 1'
+mpause 1000
+statusbox 'PROCESSING CONFIG FILE...' 'STEP 1'
+flushrecv
+mpause 500
+sendln 'cd /tmp'
+wait '#'
+sendln 'tar -xvf RT_Python_Deps.tar.gz'
+wait '#'
+mpause 500
+sendln './rt_deps_install.sh'
+wait 'Processing complete!'
+statusbox 'PROCESSING COMPLETED!' 'STEP 1'
+mpause 2000
+
+timeout = 45
+flushrecv
+send 13
+wait '#'
+mpause 500
+scpsend step1SrcFile2 step1DesFile2
+do
+   statusbox 'TRANSFERING FILE 2/2...' 'STEP 1'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFERING FILE 2/2 COMPLETED' 'STEP 1'
+mpause 1000
+statusbox 'SETTING UP CONFIG FILE' 'STEP 1'
+flushrecv
+sendln 'cd /tmp'
+wait '#'
+mpause 500
+sendln 'app-manager --command local --appid 5b02f4783b181632c6ac5b18 --apptype CUSTOM --appname RT_CDC --appfile minimalmodbus.tar.gz'
+wait "Success"
+statusbox 'SETUP COMPLETED!' 'STEP 1'
+mpause 2000
+
+:check_cell_connection
+sprintf2 msg 'CHECKING CELL CONNECTION...(%d)' try
+statusbox msg 'STEP 1'
+timeout = 2
+flushrecv
+send 13
+wait '#'
+sendln 'ifconfig'
+wait 'ppp0'
+if result=0 then
+    try=try+1
+    if try < 11 goto check_cell_connection
+	if try = 11 goto step1_failed
+endif
+try = 1
+statusbox 'CELL CONNECTION IS OK' 'STEP 1'
+mpause 2000
+
+:ping_test
+sprintf2 msg 'RUNNING PING TEST...(%d)' try
+statusbox msg 'STEP 1'
+timeout = 8
+flushrecv
+send 13
+wait '#'
+sendln 'ping -c 5 mt-ping-test.dmz.rti-inc.com'
+wait 'icmp_seq=5'
+if result=0 then
+    try=try+1
+    if try < 4 goto ping_test
+	if try = 4 goto step1_failed
+endif
+try = 1
+statusbox 'PING TEST PASSED' 'STEP 1'
+mpause 2000
+
+statusbox 'STEP 1 IS FINISHED' 'STEP 1 DONE'
+mpause 1500
+
+goto STEP2
+
+:step1_failed
+closesbox
+messagebox 'PING TEST FAILED' 'STEP 1 FAILED'
+disconnect
+closett
+end
+;;;;;;;;;;;;;;STEP 2
+:STEP2
+loraUname = 'mtcdt_'
+flushrecv
+send 13
+wait '#'
+sprintf2 curlCmd 'curl -kX POST -H "Content-Type: application/json" -d %s{"username": "admin", "password": "ThanksForFish42!"}%s %shttps://127.0.0.1/api/login%s' #39 #39 #39 #39
+sendln curlCmd
+waitregex '"token"'
+strmatch inputstr '([0-9A-F]{32})'
+if result = 0 strmatch inputstr '([0-9A-F]{30})'
+token = matchstr
+statusbox token 'DISPLAY TOKEN'
+mpause 4000
+
+statusbox 'SETTING DEVICE HOST NAME...' 'STEP 2'
+sendln 'get-eeprom-device-info'
+waitregex 'device-id'
+strmatch inputstr '[\d+]{8}'
+deviceId = matchstr
+strconcat loraUname deviceId
+wait '#'
+sprintf2 curlCmd 'curl -kX PUT -H "Content-Type: application/json" -d %s{"deviceHostname":"%s"}%s %shttps://192.168.2.1/api/system?token=%s%s' #39 loraUname #39 #39 token #39
+sendln curlCmd
+wait "success"
+if result = 0 goto step2_failed
+mpause 1000
+statusbox 'SAVE CONFIGURATION' 'STEP 2'
+sprintf2 curlCmd 'curl -kX POST -d "" https://192.168.2.1/api/command/save?token=%s' token
+sendln curlCmd
+wait "success"
+if result = 0 goto step2_failed
+mpause 1000
+statusbox 'SAVE OEM' 'STEP 2'
+sprintf2 curlCmd 'curl -kX POST -d "" https://192.168.2.1/api/command/save_oem?token=%s' token
+sendln curlCmd
+wait "success"
+if result = 0 goto step2_failed
+mpause 2000
+
+statusbox 'STEP 2 IS FINISHED' 'STEP 2 DONE'
+mpause 1500
+end
+
+:step2_failed
+closesbox
+messagebox 'PING TEST FAILED' 'STEP 2 FAILED'
+disconnect
+closett
+end

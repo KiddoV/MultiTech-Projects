@@ -107,3 +107,33 @@ Return True
     ;WinWait, Choose File to Upload
     ;ControlSetText, Edit1, %config4GFilePath%, Choose File to Upload
 ;}
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;Upload config STEP
+    ;ControlGetText, textInput, Edit1, Choose File to Upload
+    ;MsgBox % textInput
+    ;While (textInput = "")
+    ;{
+        ;ToolTip Text is empty!
+        ;ControlGetText, textInput, Edit1, Choose File to Upload
+        ;ControlSetText, Edit1, %config4GFilePath%, Choose File to Upload
+    ;}
+    
+    
+    ;url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
+    ;req := ComObjCreate("Msxml2.XMLHTTP")
+    ;req.Open("POST", url, False)
+    ;req.SetRequestHeader("Content-Type", "multipart/form-data")
+    ;
+    ;;req.SetRequestHeader("Content-Disposition", "form-data; name='archivo'; filename='config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz'")
+    ;;fileContent := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
+    ;req.Send()
+    ;resObj := json_toobj(req.responseText)
+    ;if (resObj.status = "success") {
+        ;Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
+    ;} else {
+        ;errMsg := Format("{:U}", resObj.error)
+        ;Progress, ZH0 M FS10 CTde1212 W350, ERR: %errMsg%, UPLOAD CONFIG FILE FALIED!, STEP 0
+        ;return 0
+    ;}

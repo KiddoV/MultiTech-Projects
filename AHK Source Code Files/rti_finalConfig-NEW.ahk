@@ -14,9 +14,18 @@ SetBatchLines -1
 ;;;;;;;;;;;;;;;;;;Installs Files;;;;;;;;;;;;;;;;;
 IfNotExist C:\V-Projects\RTIAuto-FinalConfig\transfering-files
     FileCreateDir C:\V-Projects\RTIAuto-FinalConfig\transfering-files
+IfNotExist C:\V-Projects\RTIAuto-FinalConfig\ttl
+    FileCreateDir C:\V-Projects\RTIAuto-FinalConfig\ttl
+IfNotExist C:\V-Projects\RTIAuto-FinalConfig\caches
+    FileCreateDir C:\V-Projects\RTIAuto-FinalConfig\caches
     
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\rti_check_status.ttl, C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_check_status.ttl, 1
+FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\rti_all-config-in-one.ttl, C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl, 1
+
 FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, 1
-    
+FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\RT_Python_Deps.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_Python_Deps.tar.gz, 1
+FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz, 1
+
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global config4GFilePath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
 
@@ -24,20 +33,41 @@ Global config4GFilePath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
-Gui, Add, GroupBox, xm+0 ym+0 w190 h140 Section
+Gui, Add, GroupBox, xm+0 ym+0 w190 h155 Section
 Gui, Font, Bold
 Gui, Add, Text, xs+40 ys+20 vstep1Label, STEP 0. Commissioning
 Gui, Add, Text, xs+40 ys+45 vstep2Label, STEP 1. Ping Test
 Gui, Add, Text, xs+40 ys+70 vstep3Label, STEP 2. Save OEM
 Gui, Font
-
-Gui, Add, Button, xs+70 ys+100 w50 h30 gRunAll, RUN
+Gui, Add, Button, xs+20 ys+95 w50 h20 gRunStep0, Step 0
+Gui, Add, Button, xs+120 ys+95 w50 h20 gRunStep1and2, Step 1&&2
+Gui, Add, Button, xs+70 ys+120 w50 h30 gRunAll, RUN
 
 posX := A_ScreenWidth - 300
 posY := A_ScreenHeight - 900
 Gui, Show, x%posX% y%posY%, RTI Auto-Final Configurator    ;Starts GUI
 
 Return ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+PickFileHelper:
+    WinWait, Choose File to Upload
+    IfWinExist, Choose File to Upload
+    {
+        ControlSetText, Edit1, %config4GFilePath%, Choose File to Upload
+        ControlClick, Button1, Choose File to Upload, , Left, 2
+        Sleep 300
+        SetTimer, PickFileHelper, Off
+    }
+Return
+
+CloseSSLHelper:
+    IfWinExist, Security Alert
+    {
+        ControlClick, Button1, Security Alert, , Left, 2
+        Sleep 100
+        SetTimer, CloseSSLHelper, Off
+    }
+Return
 
 GuiClose:
     ExitApp
@@ -46,12 +76,57 @@ Return
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN FUNCTIONs;;;;;;;;;;;;;;
 RunAll() {
-    step0()
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN CONFIGURATION, Start running the final configuration steps for RTI?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
+    {
+        if (step0() = 0)
+            return
+        if (step1() = 0)
+            return
+        if (step2() = 0)
+            return
+    }   
+    IfMsgBox Cancel
+        Return
 }
 
+RunStep0() {
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN CONFIGURATION, Start running LOGIN STEP for RTI?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
+    {
+        step0()
+    }
+    IfMsgBox Cancel
+        Return
+}
+
+RunStep1and2() {
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN CONFIGURATION, Start running STEP 1 AND 2 for RTI?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
+    {
+        if (checkRTIStatus()) {
+            step1()
+            step2()
+        } else {
+            MsgBox, 16, ERROR, RTI is not READY!`nPlease wait or check connection!
+            return
+        }
+    }
+    IfMsgBox Cancel
+        Return
+}
+
+;;;;;;;;;;;;;
 step0() {
     Global          ;To use WB
     
+    SetTimer, CloseSSLHelper, 100
     CommGui()
     
     Progress, ZH0 M FS10, RUNNING COMMISSIONING......., , STEP 0
@@ -131,24 +206,29 @@ step0() {
     uploadConfigToken := resObj.result.token
     
     ;;Upload config STEP
+    Progress, ZH0 M FS10, UPLOADING CONFIG FILE..., , STEP 0
     Sleep 1000
     WB.Navigate("https://192.168.2.1/administration/save-restore")
-    ;url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
-    ;req := ComObjCreate("Msxml2.XMLHTTP")
-    ;req.Open("POST", url, False)
-    ;req.SetRequestHeader("Content-Type", "multipart/form-data")
-    ;
-    ;;req.SetRequestHeader("Content-Disposition", "form-data; name='archivo'; filename='config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz'")
-    ;;fileContent := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
-    ;req.Send()
-    ;resObj := json_toobj(req.responseText)
-    ;if (resObj.status = "success") {
-        ;Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
-    ;} else {
-        ;errMsg := Format("{:U}", resObj.error)
-        ;Progress, ZH0 M FS10 CTde1212 W350, ERR: %errMsg%, UPLOAD CONFIG FILE FALIED!, STEP 0
-        ;return 0
-    ;}
+    Sleep 500
+    ;Work around for bug fix!
+    SetTimer, PickFileHelper, 100
+    WB.document.getElementsByTagName("label").item[1].click()   ;Script stops here after dialog box dissapear!!!???
+    SetTimer, PickFileHelper, Off
+    
+    Sleep 1000
+    WB.document.getElementsByTagName("button").item[0].click()
+    Progress, ZH0 M FS10, UPLOAD CONFIG DONE`nWAITING FOR RESTART..., , STEP 0
+    Sleep 300
+    WB.document.getElementsByClassName("modal-default-button").item[0].click()
+    Progress, ZH0 M FS10, PLEASE WAIT`, REBOOTING....., , STEP 0
+}
+
+step1() {
+    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP1", , Hide, TTWinPID
+}
+
+step2() {
+    
 }
 
 ;===============================================;
@@ -177,3 +257,36 @@ CommGui() {
 }
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;ADDITIONAL FUNCTIONs;;;;;;;;;;;
+checkRTIStatus() {
+    cmd := "ping 192.168.2.1 -n 1 -w 1000"
+    RunWait, %cmd%,, Hide
+    if (ErrorLevel = 1) {
+        return False
+    }
+    if (ErrorLevel = 0) {
+        RunWait, %ComSpec% /c start C:\teraterm\ttermpro.exe /V /M=C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_check_status.ttl /nossh , ,Hide, TTWinPID
+        FileRead, actrlStatus, C:\V-Projects\RTIAuto-FinalConfig\caches\rti_status.dat
+        if (actrlStatus != "SUCCESSED") {
+            return False
+        }
+    }
+    return True
+}
+
+;;;Icon for MsgBox
+CheckIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
+PlayInCircleIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
