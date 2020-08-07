@@ -40,7 +40,6 @@ Global checkImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\check_mark.pn
 Global playImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png"
 ;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Chrome.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
 Gui, Add, GroupBox, xm+0 ym+0 w190 h155 Section
@@ -163,19 +162,6 @@ RunStep1and2() {
 
 ;;;;;;;;;;;;;
 step0() {
-    Global
-    Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
-    FileCreateDir, C:\ChromeProfileForRTI
-    ChromeInst := new Chrome("C:\ChromeProfileForRTI")
-    PageInst := ChromeInst.GetPage()
-    PageInst.Call("Page.navigate", {"url": "https://192.168.2.1/commissioning"})
-    PageInst.WaitForLoad()
-    MsgBox % PageInst.GetPageList()[1]
-    PageInst.Evaluate("document.getElementById('details-button').click();")
-    Sleep 300
-    PageInst.Evaluate("document.getElementById('proceed-link').click();")
-    PageInst.WaitForLoad()
-    
     ;WB := ComObjCreate("InternetExplorer.Application") ;create a IE instance
     ;WB.Visible := True
     ;WB.Navigate("https://192.168.2.1/commissioning")
@@ -200,105 +186,105 @@ step0() {
     ;}
     
     
-    ;Global          ;To use WB
-    ;Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
-    ;
-    ;SetTimer, CloseSSLHelper, 100
-    ;CommGui()
-    ;
-    ;Setting new Username and password
-    ;Sleep 1000
-    ;url:= "https://192.168.2.1/api/commissioning"
-    ;json =
-    ;(LTrim
-        ;{"username":"admin","aasID":"","aasAnswer":""}
-    ;)
-    ;req := ComObjCreate("Msxml2.XMLHTTP")
-    ;req.Open("POST", url, False)
-    ;req.SetRequestHeader("Content-Type", "application/json")
-    ;req.Send(json)
-    ;resObj := json_toobj(req.responseText)
-    ;
-    ;if (resObj.status = "success") {
-        ;Progress, ZH0 M FS10 CT0ac90a, SET NEW USERNAME SUCCESSFULY!, , STEP 0
-    ;} else if (resObj.error = "commissioning is finished") {
-        ;Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
-        ;Sleep 500
-        ;Goto Login-Step
-    ;} else {
-        ;Progress, ZH0 M FS10 CTde1212, SET NEW USERNAME FALIED!, , STEP 0
-        ;return 0
-    ;}
-    ;userToken := resObj.result.aasID
-    ;
-    ;Sleep 1000
-    ;json =
-    ;(LTrim
-        ;{"username":"admin","aasID":"%userToken%","aasAnswer":"admin2205!"}
-    ;)
-    ;req := ComObjCreate("Msxml2.XMLHTTP")
-    ;req.Open("POST", url, False)
-    ;req.SetRequestHeader("Content-Type", "application/json")
-    ;req.Send(json)
-    ;resObj := json_toobj(req.responseText)
-    ;
-    ;if (resObj.status = "success") {
-        ;Progress, ZH0 M FS10 CT0ac90a, SET NEW PASSWORD SUCCESSFULY!, , STEP 0
-    ;} else {
-        ;Progress, ZH0 M FS10 CTde1212, SET NEW PASSWORD FALIED!, , STEP 0
-        ;return 0
-    ;}
-    ;
-    ;Sleep 1000
-    ;req := ComObjCreate("Msxml2.XMLHTTP")
-    ;req.Open("POST", url, False)
-    ;req.SetRequestHeader("Content-Type", "application/json")
-    ;req.Send(json)
-    ;resObj := json_toobj(req.responseText)
-    ;
-    ;if (resObj.status = "success") {
-        ;Progress, ZH0 M FS10 CT0ac90a, CONFIRM NEW PASSWORD SUCCESSFULY!, , STEP 0
-    ;} else {
-        ;Progress, ZH0 M FS10 CTde1212, CONFIRM NEW PASSWORD FALIED!, , STEP 0
-        ;return 0
-    ;}
-    ;
-    ;Login STEP
-    ;Sleep 1500
-    ;Login-Step:
-    ;url:= "https://192.168.2.1/api/login?username=admin&password=admin2205!"
-    ;req := ComObjCreate("Msxml2.XMLHTTP")
-    ;req.Open("GET", url, False)
-    ;req.Send()
-    ;resObj := json_toobj(req.responseText)
-    ;
-    ;if (resObj.status = "success") {
-        ;Progress, ZH0 M FS10 CT0ac90a, LOGIN SUCCESSFULY!, , STEP 0
-    ;} else {
-        ;errMsg := Format("{:U}", resObj.error)
-        ;Progress, ZH0 M FS10 CTde1212, ERR: %errMsg%, LOGIN FALIED!, STEP 0
-        ;return 0
-    ;}
-    ;uploadConfigToken := resObj.result.token
-    ;Sleep 2000
-    ;
-    ;Upload config STEP
-    ;Progress, ZH0 M FS10, UPLOADING CONFIG FILE..., , STEP 0
-    ;Sleep 1000
-    ;WB.Navigate("https://192.168.2.1/administration/save-restore")
-    ;Sleep 3000
-    ;WB.document.getElementsByClassName("close").item[0].click()
-    ;Sleep 1000
-    ;;Work around for bug fix!
-    ;SetTimer, PickFileHelper, 100
-    ;WB.document.getElementsByTagName("label").item[1].click()   ;Script stops here after dialog box dissapear!!!???
-    ;
-    ;Sleep 2000
-    ;WB.document.getElementsByTagName("button").item[0].click()  ;Click Restore button
-    ;Progress, ZH0 M FS10, UPLOAD CONFIG DONE`nWAITING FOR RESTART..., , STEP 0
-    ;Sleep 500
-    ;WB.document.getElementsByClassName("modal-default-button").item[0].click()  ;Click confirm button
-    ;Progress, ZH0 M FS10, PLEASE WAIT`, REBOOTING....., , STEP 0
+    Global          ;To use WB
+    Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
+    
+    SetTimer, CloseSSLHelper, 100
+    CommGui()
+    
+    ;;;Setting new Username and password
+    Sleep 1000
+    url:= "https://192.168.2.1/api/commissioning"
+    json =
+    (LTrim
+        {"username":"admin","aasID":"","aasAnswer":""}
+    )
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "application/json")
+    req.Send(json)
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SET NEW USERNAME SUCCESSFULY!, , STEP 0
+    } else if (resObj.error = "commissioning is finished") {
+        Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
+        Sleep 500
+        Goto Login-Step
+    } else {
+        Progress, ZH0 M FS10 CTde1212, SET NEW USERNAME FALIED!, , STEP 0
+        return 0
+    }
+    userToken := resObj.result.aasID
+    
+    Sleep 1000
+    json =
+    (LTrim
+        {"username":"admin","aasID":"%userToken%","aasAnswer":"admin2205!"}
+    )
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "application/json")
+    req.Send(json)
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SET NEW PASSWORD SUCCESSFULY!, , STEP 0
+    } else {
+        Progress, ZH0 M FS10 CTde1212, SET NEW PASSWORD FALIED!, , STEP 0
+        return 0
+    }
+    
+    Sleep 1000
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "application/json")
+    req.Send(json)
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, CONFIRM NEW PASSWORD SUCCESSFULY!, , STEP 0
+    } else {
+        Progress, ZH0 M FS10 CTde1212, CONFIRM NEW PASSWORD FALIED!, , STEP 0
+        return 0
+    }
+    
+    ;;;Login STEP
+    Sleep 1500
+    Login-Step:
+    url:= "https://192.168.2.1/api/login?username=admin&password=admin2205!"
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("GET", url, False)
+    req.Send()
+    resObj := json_toobj(req.responseText)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, LOGIN SUCCESSFULY!, , STEP 0
+    } else {
+        errMsg := Format("{:U}", resObj.error)
+        Progress, ZH0 M FS10 CTde1212, ERR: %errMsg%, LOGIN FALIED!, STEP 0
+        return 0
+    }
+    uploadConfigToken := resObj.result.token
+    Sleep 2000
+    
+    ;;;Upload config STEP
+    Progress, ZH0 M FS10, UPLOADING CONFIG FILE..., , STEP 0
+    Sleep 1000
+    WB.Navigate("https://192.168.2.1/administration/save-restore")
+    Sleep 3000
+    WB.document.getElementsByClassName("close").item[0].click()
+    Sleep 1000
+    ;Work around for bug fix!
+    SetTimer, PickFileHelper, 100
+    WB.document.getElementsByTagName("label").item[1].click()   ;Script stops here after dialog box dissapear!!!???
+    
+    Sleep 2000
+    WB.document.getElementsByTagName("button").item[0].click()  ;Click Restore button
+    Progress, ZH0 M FS10, UPLOAD CONFIG DONE`nWAITING FOR RESTART..., , STEP 0
+    Sleep 500
+    WB.document.getElementsByClassName("modal-default-button").item[0].click()  ;Click confirm button
+    Progress, ZH0 M FS10, PLEASE WAIT`, REBOOTING....., , STEP 0
 }
 
 step1() {
@@ -322,7 +308,7 @@ CommGui() {
     ;;;Run BEFORE GUI started
     While WB.readystate != 4 || WB.busy     ;Wait for IE to load the page
         Sleep 10
-    WB.ExecWB(63, 2, 70, 0)                 ;Zoom WB window
+    ;WB.ExecWB(63, 2, 70, 0)                 ;Zoom WB window
     
     Gui, comm: Show, , Commissioning Mode
     Return ;;;;;;;;;;;;;;;;;;;;;;
