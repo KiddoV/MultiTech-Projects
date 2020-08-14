@@ -268,7 +268,7 @@ ShowAddDataGui() {
     posPrev2 := 1    ;just for not-showing line number bug
     
     Gui, AddDataG: Default
-    Gui, AddDataG: +ToolWindow +hWndhAddDataGWnd
+    Gui, AddDataG: -MinimizeBox -MaximizeBox +hWndhAddDataGWnd
     Gui, AddDataG: Add, Text, x10 y10, Paste EBOM data here!
     Gui, AddDataG: Add, Edit, xm+34 ym+25 w350 r30 Section +HScroll hWndheditField1 veditField1
     Gui, AddDataG: Add, Edit, xs-34 ys+0 w35 r31.3 -VScroll -HScroll -Border Disabled Right vlineNumEditField1

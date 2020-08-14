@@ -38,6 +38,8 @@ Global config4GFilePath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\
 Global xImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\x_mark.png"
 Global checkImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\check_mark.png"
 Global playImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png"
+
+Global step0ErrMsg := "Unknown ERROR"
 ;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
 ;===============================================;
@@ -110,7 +112,11 @@ RunAll() {
     IfMsgBox OK
     {
         if (step0() = 0)
+        {
+            Progress, Off
+            MsgBox, 16, STEP 0 FAILED, %step0ErrMsg%
             return
+        }
         Sleep 200000
         Loop,
         {
@@ -162,61 +168,67 @@ RunStep1and2() {
 
 ;;;;;;;;;;;;;
 step0() {
-    ;WB := ComObjCreate("InternetExplorer.Application") ;create a IE instance
-    ;WB.Visible := True
-    ;WB.Navigate("https://192.168.2.1/commissioning")
-    ;IELoad(WB)
-    ;WinWait, This page can’t be displayed|Certificate Error|Commissioning Mode
-    ;IfWinExist, This page can’t be displayed
-    ;{
-        ;MsgBox, 16, ERROR, CONNECTION ERROR!
-        ;return 0
-    ;}
-    ;IfWinExist, Certificate Error
-    ;{
-        ;SetTimer, CloseCertErrorHelper, 100
-        ;WB.document.getElementById("overridelink").click()
-        ;Sleep 1000
-        ;ControlClick, Button1, Security Warning, , Left, 1
-        ;
-    ;}
-    ;IfWinExist, Commissioning Mode
-    ;{
-        ;MsgBox READY!
-    ;}
-    
-    
     Global          ;To use WB
     Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
     
+    WB := ComObjCreate("InternetExplorer.Application") ;create a IE instance
+    ;WB.Visible := True
+    WB.Navigate("https://192.168.2.1/commissioning")
+    if (!CheckIELoad(WB)) {
+        step0ErrMsg := "Failed to connect to <https://192.168.2.1/commissioning>"
+        return 0
+    }
+    
+    ;;;Bypass security
     SetTimer, CloseSSLHelper, 100
-    CommGui()
+    Progress, ZH0 M FS10, BYPASSING SECURITY..., , STEP 0
+    Sleep 1000
+    url := "https://192.168.2.1/api/commissioning"
+    req := ComObjCreate("MSXML2.XMLHTTP.6.0")
+    req.open("GET", url, False)
+    req.Send()
+    resObj := json_toobj(req.responseText)
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, BYPASS SECURITY SUCCESSFULY!, , STEP 0
+    } else if (resObj.error = "commissioning is finished") {
+        Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
+        Sleep 500
+        Goto Login-Step 
+    } else {
+        Progress, ZH0 M FS10 CTde1212, BYPASS SECURITY FALIED!, , STEP 0
+        return 0
+    }
     
     ;;;Setting new Username and password
+    Progress, ZH0 M FS10, SETTING UP NEW USERNAME..., , STEP 0
     Sleep 1000
     url:= "https://192.168.2.1/api/commissioning"
     json =
     (LTrim
         {"username":"admin","aasID":"","aasAnswer":""}
     )
-    req := ComObjCreate("Msxml2.XMLHTTP")
+    req := ComObjCreate("MSXML2.XMLHTTP.6.0")
     req.Open("POST", url, False)
     req.SetRequestHeader("Content-Type", "application/json")
     req.Send(json)
+    
     resObj := json_toobj(req.responseText)
     
     if (resObj.status = "success") {
         Progress, ZH0 M FS10 CT0ac90a, SET NEW USERNAME SUCCESSFULY!, , STEP 0
+        Sleep 500
     } else if (resObj.error = "commissioning is finished") {
         Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
         Sleep 500
         Goto Login-Step
     } else {
         Progress, ZH0 M FS10 CTde1212, SET NEW USERNAME FALIED!, , STEP 0
+        Sleep 500
         return 0
     }
     userToken := resObj.result.aasID
     
+    Progress, ZH0 M FS10, SETTING UP NEW PASSWORD..., , STEP 0
     Sleep 1000
     json =
     (LTrim
@@ -230,11 +242,14 @@ step0() {
     
     if (resObj.status = "success") {
         Progress, ZH0 M FS10 CT0ac90a, SET NEW PASSWORD SUCCESSFULY!, , STEP 0
+        Sleep 500
     } else {
         Progress, ZH0 M FS10 CTde1212, SET NEW PASSWORD FALIED!, , STEP 0
+        Sleep 500
         return 0
     }
     
+    Progress, ZH0 M FS10, CONFIRMMING NEW PASSWORD..., , STEP 0
     Sleep 1000
     req := ComObjCreate("Msxml2.XMLHTTP")
     req.Open("POST", url, False)
@@ -244,12 +259,15 @@ step0() {
     
     if (resObj.status = "success") {
         Progress, ZH0 M FS10 CT0ac90a, CONFIRM NEW PASSWORD SUCCESSFULY!, , STEP 0
+        Sleep 500
     } else {
         Progress, ZH0 M FS10 CTde1212, CONFIRM NEW PASSWORD FALIED!, , STEP 0
+        Sleep 500
         return 0
     }
     
     ;;;Login STEP
+    Progress, ZH0 M FS10, LOGGING IN..., , STEP 0
     Sleep 1500
     Login-Step:
     url:= "https://192.168.2.1/api/login?username=admin&password=admin2205!"
@@ -268,23 +286,28 @@ step0() {
     uploadConfigToken := resObj.result.token
     Sleep 2000
     
-    ;;;Upload config STEP
-    Progress, ZH0 M FS10, UPLOADING CONFIG FILE..., , STEP 0
+    ;;;Upload file STEP
+    Progress, ZH0 M FS10, UPLOADING CONFIGURATION FILE..., , STEP 0
     Sleep 1000
-    WB.Navigate("https://192.168.2.1/administration/save-restore")
-    Sleep 3000
-    WB.document.getElementsByClassName("close").item[0].click()
-    Sleep 1000
-    ;Work around for bug fix!
-    SetTimer, PickFileHelper, 100
-    WB.document.getElementsByTagName("label").item[1].click()   ;Script stops here after dialog box dissapear!!!???
+    url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
+    req := ComObjCreate("Msxml2.XMLHTTP")
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", "multipart/form-data")
     
-    Sleep 2000
-    WB.document.getElementsByTagName("button").item[0].click()  ;Click Restore button
-    Progress, ZH0 M FS10, UPLOAD CONFIG DONE`nWAITING FOR RESTART..., , STEP 0
-    Sleep 500
-    WB.document.getElementsByClassName("modal-default-button").item[0].click()  ;Click confirm button
-    Progress, ZH0 M FS10, PLEASE WAIT`, REBOOTING....., , STEP 0
+    ;req.SetRequestHeader("Content-Disposition", "form-data; name='archivo'; filename='config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz'")
+    ;fileContent := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
+    req.Send()
+    resObj := json_toobj(req.responseText)
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
+        Sleep 500
+    } else {
+        errMsg := Format("{:U}", resObj.error)
+        ;Progress, ZH0 M FS10 CTde1212 W350, ERR: %errMsg%, UPLOAD CONFIG FILE FALIED!, STEP 0
+        step0ErrMsg = UPLOAD CONFIG FILE FALIED!,`nERR: %errMsg%
+        return 0
+    }
+    return 0
 }
 
 step1() {
@@ -337,20 +360,32 @@ checkRTIStatus() {
     return True
 }
 
-IELoad(wb)    ;You need to send the IE handle to the function unless you define it as global.
-{
-    If !wb    ;If wb is not a valid pointer then quit
+CheckIELoad(WB, Timeout := 50) {
+    If !WB
         Return False
-    Loop    ;Otherwise sleep for .1 seconds untill the page starts loading
+    Loop, %Timeout%
+    {
         Sleep,100
-    Until (wb.busy)
-    Loop    ;Once it starts loading wait until completes
+        ;ToolTip, Loop 1: %A_Index%
+        if (A_Index = Timeout)
+            Return False
+    } Until (WB.busy)
+    Loop, %Timeout%
+    {
         Sleep,100
-    Until (!wb.busy)
-    Loop    ;optional check to wait for the page to completely load
+        ;ToolTip, Loop 2: %A_Index%
+        if (A_Index = Timeout)
+            Return False
+    } Until (!WB.busy)
+    Loop, %Timeout%
+    {
         Sleep,100
-    Until (wb.Document.Readystate = "Complete")
-Return True
+        ;ToolTip, Loop 3: %A_Index%
+        if (A_Index = Timeout)
+            Return False
+    } Until (WB.Document.Readystate = "Complete")
+    
+    Return True
 }
 
 ;;;Icon for MsgBox
