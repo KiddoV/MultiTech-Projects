@@ -112,3 +112,21 @@ function resetConduit(token) {
 
     xhr.send();
 }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    var data = new FormData();
+    data.append("", fileInput.files[0], "/C:/vbtest/MTCDT/MTCDT-LAT3-240A-RTI/config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz");
+     
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        alert(this.responseText);
+      }
+    });
+
+    xhr.open("POST", "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%");
+    xhr.setRequestHeader("Cookie", "token=%uploadConfigToken%");
+
+    xhr.send(data);

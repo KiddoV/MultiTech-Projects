@@ -170,21 +170,22 @@ RunStep1and2() {
 step0() {
     Global          ;To use WB
     Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
-    
-    WB := ComObjCreate("InternetExplorer.Application") ;create a IE instance
-    ;WB.Visible := True
+    RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
+    SetTimer, CloseSSLHelper, 100
+    Gui Add, ActiveX, vWB, about:<!DOCTYPE html><meta http-equiv="X-UA-Compatible" content="IE=edge">
+    ;WB := ComObjCreate("InternetExplorer.Application") ;create a IE instance
+    req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;For http request
     WB.Navigate("https://192.168.2.1/commissioning")
     if (!CheckIELoad(WB)) {
         step0ErrMsg := "Failed to connect to <https://192.168.2.1/commissioning>"
         return 0
     }
-    
+
     ;;;Bypass security
-    SetTimer, CloseSSLHelper, 100
-    Progress, ZH0 M FS10, BYPASSING SECURITY..., , STEP 0
-    Sleep 1000
+    ;SetTimer, CloseSSLHelper, 100
+    ;Progress, ZH0 M FS10, BYPASSING SECURITY..., , STEP 0
+    ;Sleep 1000
     url := "https://192.168.2.1/api/commissioning"
-    req := ComObjCreate("MSXML2.XMLHTTP.6.0")
     req.open("GET", url, False)
     req.Send()
     resObj := json_toobj(req.responseText)
@@ -207,7 +208,6 @@ step0() {
     (LTrim
         {"username":"admin","aasID":"","aasAnswer":""}
     )
-    req := ComObjCreate("MSXML2.XMLHTTP.6.0")
     req.Open("POST", url, False)
     req.SetRequestHeader("Content-Type", "application/json")
     req.Send(json)
@@ -234,7 +234,6 @@ step0() {
     (LTrim
         {"username":"admin","aasID":"%userToken%","aasAnswer":"admin2205!"}
     )
-    req := ComObjCreate("Msxml2.XMLHTTP")
     req.Open("POST", url, False)
     req.SetRequestHeader("Content-Type", "application/json")
     req.Send(json)
@@ -251,7 +250,6 @@ step0() {
     
     Progress, ZH0 M FS10, CONFIRMMING NEW PASSWORD..., , STEP 0
     Sleep 1000
-    req := ComObjCreate("Msxml2.XMLHTTP")
     req.Open("POST", url, False)
     req.SetRequestHeader("Content-Type", "application/json")
     req.Send(json)
@@ -271,7 +269,6 @@ step0() {
     Sleep 1500
     Login-Step:
     url:= "https://192.168.2.1/api/login?username=admin&password=admin2205!"
-    req := ComObjCreate("Msxml2.XMLHTTP")
     req.Open("GET", url, False)
     req.Send()
     resObj := json_toobj(req.responseText)
@@ -289,25 +286,29 @@ step0() {
     ;;;Upload file STEP
     Progress, ZH0 M FS10, UPLOADING CONFIGURATION FILE..., , STEP 0
     Sleep 1000
-    url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
-    req := ComObjCreate("Msxml2.XMLHTTP")
-    req.Open("POST", url, False)
-    req.SetRequestHeader("Content-Type", "multipart/form-data")
     
-    ;req.SetRequestHeader("Content-Disposition", "form-data; name='archivo'; filename='config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz'")
-    ;fileContent := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
-    req.Send()
-    resObj := json_toobj(req.responseText)
-    if (resObj.status = "success") {
-        Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
-        Sleep 500
-    } else {
-        errMsg := Format("{:U}", resObj.error)
-        ;Progress, ZH0 M FS10 CTde1212 W350, ERR: %errMsg%, UPLOAD CONFIG FILE FALIED!, STEP 0
-        step0ErrMsg = UPLOAD CONFIG FILE FALIED!,`nERR: %errMsg%
-        return 0
-    }
-    return 0
+    ;WB.Navigate("https://192.168.2.1/administration/save-restore")
+    ;if (!CheckIELoad(WB)) {
+        ;step0ErrMsg := "Failed to connect to <https://192.168.2.1/administration/save-restore>"
+        ;return 0
+    ;}
+    
+    javascript =
+    (
+    var data = new FormData();
+    data.append("configFile", fileInput.files[0],"/C:/vbtest/MTCDT/MTCDT-LAT3-240A-RTI/config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz");
+    
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%");
+    xhr.addEventListener("readystatechange", function() {
+      if(xhr.readyState === 4) {
+        alert(xhr.responseText)
+      }
+    });
+    xhr.send(data);
+    )
+    WB.document.parentWindow.execScript(javascript)
+    ;MsgBox % WB.document.parentWindow.toAHKVar
 }
 
 step1() {
