@@ -5,7 +5,8 @@
 
 show 0
 timeout = 35
-
+isStep1 = -1
+isStep2 = -1
 try = 1
 step1SrcFile1 = 'C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_Python_Deps.tar.gz'
 step1DesFile1 = '/tmp/RT_Python_Deps.tar.gz'
@@ -58,7 +59,7 @@ loop while result != 1
 mpause 1000
 statusbox 'TRANSFERING FILE 1/2 COMPLETED' 'STEP 1'
 mpause 1000
-statusbox 'PROCESSING CONFIG FILE...' 'STEP 1'
+statusbox 'PROCESSING CONFIG FILE, PLEASE WAIT...' 'STEP 1'
 flushrecv
 mpause 500
 sendln 'cd /tmp'
@@ -106,6 +107,7 @@ send 13
 wait '#'
 sendln 'ifconfig'
 wait 'ppp0'
+;;;echo ppp0
 if result=0 then
     try=try+1
     if try < 11 goto check_cell_connection
@@ -124,6 +126,7 @@ send 13
 wait '#'
 sendln 'ping -c 5 mt-ping-test.dmz.rti-inc.com'
 wait 'icmp_seq=5'
+;;;echo icmp_seq=5
 if result=0 then
     try=try+1
     if try < 4 goto ping_test
@@ -136,16 +139,21 @@ mpause 2000
 statusbox 'STEP 1 IS FINISHED' 'STEP 1 DONE'
 mpause 1500
 
-goto STEP2
+closett
+end
+;;;goto STEP2
 
 :step1_failed
 closesbox
-messagebox 'PING TEST FAILED' 'STEP 1 FAILED'
+statusbox 'PING TEST FAILED' 'STEP 1 FAILED'
+mpause 400
 disconnect
 closett
 end
 ;;;;;;;;;;;;;;STEP 2
 :STEP2
+statusbox 'RUNNING STEP 2' 'STEP 2'
+mpause 1000
 loraUname = 'mtcdt_'
 flushrecv
 send 13
@@ -190,7 +198,8 @@ end
 
 :step2_failed
 closesbox
-messagebox 'PING TEST FAILED' 'STEP 2 FAILED'
+statusbox 'PING TEST FAILED' 'STEP 2 FAILED'
+mpause 400
 disconnect
 closett
 end

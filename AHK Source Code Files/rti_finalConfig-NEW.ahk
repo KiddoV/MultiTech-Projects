@@ -46,18 +46,18 @@ Global step0ErrMsg := "Unknown ERROR"
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
 Gui, Add, GroupBox, xm+0 ym+0 w190 h155 Section
 Gui, Font, Bold
-Gui, Add, Text, xs+40 ys+20 vstep1Label, STEP 0. Commissioning
-Gui, Add, Text, xs+40 ys+45 vstep2Label, STEP 1. Ping Test
-Gui, Add, Text, xs+40 ys+70 vstep3Label, STEP 2. Save OEM
+Gui, Add, Text, xs+40 ys+20 vstep0Label, STEP 0. Commissioning
+Gui, Add, Text, xs+40 ys+45 vstep1Label, STEP 1. Ping Test
+Gui, Add, Text, xs+40 ys+70 vstep2Label, STEP 2. Save OEM
 Gui, Font
 Gui Add, Text, xs+10 ys+90 w175 h2 +0x10
 Gui, Add, Button, xs+20 ys+95 w50 h20 gRunStep0, Step 0
 Gui, Add, Button, xs+120 ys+95 w50 h20 gRunStep1and2, Step 1&&2
 Gui, Add, Button, xs+70 ys+120 w50 h30 gRunAll, RUN
 
-Gui, Add, Picture, xs+7 ys+17 w18 h18 +BackgroundTrans vprocess1,
-Gui, Add, Picture, xs+7 ys+42 w18 h18 +BackgroundTrans vprocess2,
-Gui, Add, Picture, xs+7 ys+67 w18 h18 +BackgroundTrans vprocess3,
+Gui, Add, Picture, xs+7 ys+17 w18 h18 +BackgroundTrans vprocess0,
+Gui, Add, Picture, xs+7 ys+42 w18 h18 +BackgroundTrans vprocess1,
+Gui, Add, Picture, xs+7 ys+67 w18 h18 +BackgroundTrans vprocess2,
 
 posX := A_ScreenWidth - 300
 posY := A_ScreenHeight - 900
@@ -106,6 +106,7 @@ Return
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN FUNCTIONs;;;;;;;;;;;;;;
 RunAll() {
+    resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, RUN CONFIGURATION, Start running the final configuration steps for RTI?
     OnMessage(0x44, "") ;Clear icon
@@ -113,10 +114,12 @@ RunAll() {
     {
         if (step0() = 0)
         {
+            changeStepLabelStatus("step0Label", "FAIL")
             Progress, Off
             MsgBox, 16, STEP 0 FAILED, %step0ErrMsg%
             return
         }
+        Progress, ZH0 M FS10, WAITING FOR CONDUIT TO REBOOT..., , STEP 0
         Sleep 200000
         Loop,
         {
@@ -125,7 +128,6 @@ RunAll() {
             }
             Sleep 5000
         }
-        Gui, comm: Destroy
         Progress, Off
         if (step1() = 0)
             return
@@ -137,26 +139,44 @@ RunAll() {
 }
 
 RunStep0() {
+    resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, RUN CONFIGURATION, Start running LOGIN STEP for RTI?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
-        step0()
+        if (step0() = 0)
+        {
+            changeStepLabelStatus("step0Label", "FAIL")
+            Progress, Off
+            MsgBox, 16, STEP 0 FAILED, %step0ErrMsg%
+            return
+        }
+        Progress, Off
+        MsgBox, , STEP 0, STEP 0 LOGIN IS DONE. PLEASE WAIT UNTIL CONDUIT REBOOTED!
     }
     IfMsgBox Cancel
         Return
 }
 
 RunStep1and2() {
+    resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
     MsgBox 0x81, RUN CONFIGURATION, Start running STEP 1 AND 2 for RTI?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
         if (checkRTIStatus()) {
-            step1()
-            step2()
+            if (step1() = 0) {
+                MsgBox, 16, STEP 1 FAILED, %step0ErrMsg%
+                return
+            }
+                
+            if (step2() = 0) {
+                MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
+                return
+            }
+                
         } else {
             MsgBox, 16, ERROR, RTI is not READY!`nPlease wait or check connection!
             return
@@ -168,32 +188,38 @@ RunStep1and2() {
 
 ;;;;;;;;;;;;;
 step0() {
-    Global          ;To use WB
+    changeStepLabelStatus("step0Label", "PLAY")
     Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
     RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
-    SetTimer, CloseSSLHelper, 100
-    Gui Add, ActiveX, vWB, about:<!DOCTYPE html><meta http-equiv="X-UA-Compatible" content="IE=edge">
-    ;WB := ComObjCreate("InternetExplorer.Application") ;create a IE instance
+    
     req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;For http request
-    WB.Navigate("https://192.168.2.1/commissioning")
-    if (!CheckIELoad(WB)) {
-        step0ErrMsg := "Failed to connect to <https://192.168.2.1/commissioning>"
-        return 0
-    }
-
-    ;;;Bypass security
-    ;SetTimer, CloseSSLHelper, 100
-    ;Progress, ZH0 M FS10, BYPASSING SECURITY..., , STEP 0
-    ;Sleep 1000
+    
+    ;;;Check connection and Bypass security
+    Sleep 1000
+    SetTimer, CloseSSLHelper, 100
+    Progress, ZH0 M FS10, CHECKING FOR CONNECTION..., , STEP 0
     url := "https://192.168.2.1/api/commissioning"
-    req.open("GET", url, False)
+    req.open("GET", url, True)
     req.Send()
+    Loop, 100
+    {
+        Sleep 250
+        if (A_Index = 100) {
+            step0ErrMsg = Failed to connect to <https://192.168.2.1/commissioning>`nERR: TIMEOUT!!!
+            return 0
+        } else if (req.readyState = 4){
+            Break
+        }
+    }
+    ;Progress, ZH0 M FS10, BYPASSING SECURITY..., , STEP 0
     resObj := json_toobj(req.responseText)
+    
     if (resObj.status = "success") {
         Progress, ZH0 M FS10 CT0ac90a, BYPASS SECURITY SUCCESSFULY!, , STEP 0
+        Sleep 1000
     } else if (resObj.error = "commissioning is finished") {
         Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
-        Sleep 500
+        Sleep 1000
         Goto Login-Step 
     } else {
         Progress, ZH0 M FS10 CTde1212, BYPASS SECURITY FALIED!, , STEP 0
@@ -265,9 +291,9 @@ step0() {
     }
     
     ;;;Login STEP
+    Login-Step:
     Progress, ZH0 M FS10, LOGGING IN..., , STEP 0
     Sleep 1500
-    Login-Step:
     url:= "https://192.168.2.1/api/login?username=admin&password=admin2205!"
     req.Open("GET", url, False)
     req.Send()
@@ -276,8 +302,8 @@ step0() {
     if (resObj.status = "success") {
         Progress, ZH0 M FS10 CT0ac90a, LOGIN SUCCESSFULY!, , STEP 0
     } else {
-        errMsg := Format("{:U}", resObj.error)
-        Progress, ZH0 M FS10 CTde1212, ERR: %errMsg%, LOGIN FALIED!, STEP 0
+        errMsg := Format("{:U}", resObj.error)  ;CAP string
+        step0ErrMsg = LOGIN FALIED!`nERR: %errMsg%
         return 0
     }
     uploadConfigToken := resObj.result.token
@@ -287,64 +313,93 @@ step0() {
     Progress, ZH0 M FS10, UPLOADING CONFIGURATION FILE..., , STEP 0
     Sleep 1000
     
-    ;WB.Navigate("https://192.168.2.1/administration/save-restore")
-    ;if (!CheckIELoad(WB)) {
-        ;step0ErrMsg := "Failed to connect to <https://192.168.2.1/administration/save-restore>"
-        ;return 0
-    ;}
+    url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
+    configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
+    objParam := { Filedata: [configPath] }
+    CreateFormData(PostData, hdr_ContentType, objParam)
+    req.Open("POST", url, False)
+    req.SetRequestHeader("Content-Type", hdr_ContentType)
+    req.Send(PostData)
+
+    resObj := json_toobj(req.responseText)
+    ;MsgBox % req.responseText
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
+        Sleep 500
+    } else {
+        errMsg := Format("{:U}", resObj.error)  ;CAP string
+        step0ErrMsg = UPLOAD CONFIG FILE FALIED!`nERR: %errMsg%
+        ;Progress, ZH0 M FS10 CTde1212 W350, ERR: %errMsg%, UPLOAD CONFIG FILE FALIED!, STEP 0
+        return 0
+    }
     
-    javascript =
-    (
-    var data = new FormData();
-    data.append("configFile", fileInput.files[0],"/C:/vbtest/MTCDT/MTCDT-LAT3-240A-RTI/config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz");
-    
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%");
-    xhr.addEventListener("readystatechange", function() {
-      if(xhr.readyState === 4) {
-        alert(xhr.responseText)
-      }
-    });
-    xhr.send(data);
-    )
-    WB.document.parentWindow.execScript(javascript)
-    ;MsgBox % WB.document.parentWindow.toAHKVar
+    changeStepLabelStatus("step0Label", "DONE")
 }
 
 step1() {
+    changeStepLabelStatus("step1Label", "PLAY")
     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP1", , Hide, TTWinPID
+    WinWait, STEP 1 DONE|STEP 1 FAILED
+    IfWinExist, STEP 1 FAILED
+    {
+        changeStepLabelStatus("step1Label", "FAIL")
+        return 0
+    }
+    IfWinExist, STEP 1 DONE
+    {
+        changeStepLabelStatus("step1Label", "DONE")
+        return 1
+    }
 }
 
 step2() {
-    
+    changeStepLabelStatus("step2Label", "PLAY")
+    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP2", , Hide, TTWinPID
+    WinWait, STEP 2 DONE|STEP 2 FAILED
+    IfWinExist, STEP 2 FAILED
+    {
+        changeStepLabelStatus("step2Label", "FAIL")
+        return 0
+    }
+    IfWinExist, STEP 2 DONE
+    {
+        changeStepLabelStatus("step2Label", "DONE")
+        return 1
+    }
 }
 
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;ADDITIONAL GUIs;;;;;;;;;;;;;;;;
-CommGui() {
-    Global
 
-    Gui, comm: Add, ActiveX, w500 h500 vWB, Shell.Explorer
-    WB.Navigate("https://192.168.2.1/commissioning")
-    ;Gui, comm: Add, Button, gstep0, Test
-    ;WinWait, Security Alert
-    ;ControlClick, Button1, Security Alert, , Left, 2
-    ;;;Run BEFORE GUI started
-    While WB.readystate != 4 || WB.busy     ;Wait for IE to load the page
-        Sleep 10
-    ;WB.ExecWB(63, 2, 70, 0)                 ;Zoom WB window
-    
-    Gui, comm: Show, , Commissioning Mode
-    Return ;;;;;;;;;;;;;;;;;;;;;;
-    
-    ;;;Run AFTER GUI started
-    
-    commGuiClose:
-        Gui, comm: Destroy
-    Return
-}
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;ADDITIONAL FUNCTIONs;;;;;;;;;;;
+changeStepLabelStatus(ctrID := "", status := "") {
+    Gui, 1: Default
+    RegExMatch(ctrID, "\d", num)    ;Get button number in variable
+    
+    if (status = "PLAY") {
+        Gui, Font, cdeb812 Bold
+        GuiControl, Font, %ctrID%
+        Gui, Font
+        GuiControl, , process%num%, %playImg%
+    } else if (status = "FAIL") {
+        Gui, Font, cde1212 Bold
+        GuiControl, Font, %ctrID%
+        Gui, Font
+        GuiControl, , process%num%, %xImg%
+    } else if (status = "DONE") {
+        Gui, Font, c0ac90a Bold
+        GuiControl, Font, %ctrID%
+        Gui, Font
+        GuiControl, , process%num%, %checkImg%
+    } else {
+        Gui, Font, Bold
+        GuiControl, Font, %ctrID%
+        Gui, Font
+        GuiControl, , process%num%,
+    }
+}
+
 checkRTIStatus() {
     cmd := "ping 192.168.2.1 -n 1 -w 1000"
     RunWait, %cmd%,, Hide
@@ -361,32 +416,17 @@ checkRTIStatus() {
     return True
 }
 
-CheckIELoad(WB, Timeout := 50) {
-    If !WB
-        Return False
-    Loop, %Timeout%
+resetStepLabelStatus() {
+    Gui, 1: Default
+    index := 0
+    Loop, 3
     {
-        Sleep,100
-        ;ToolTip, Loop 1: %A_Index%
-        if (A_Index = Timeout)
-            Return False
-    } Until (WB.busy)
-    Loop, %Timeout%
-    {
-        Sleep,100
-        ;ToolTip, Loop 2: %A_Index%
-        if (A_Index = Timeout)
-            Return False
-    } Until (!WB.busy)
-    Loop, %Timeout%
-    {
-        Sleep,100
-        ;ToolTip, Loop 3: %A_Index%
-        if (A_Index = Timeout)
-            Return False
-    } Until (WB.Document.Readystate = "Complete")
-    
-    Return True
+        Gui, Font, Bold
+        GuiControl, Font, step%index%Label
+        Gui, Font
+        GuiControl, , process%index%,
+        index++
+    }
 }
 
 ;;;Icon for MsgBox
@@ -405,4 +445,92 @@ PlayInCircleIcon() {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
+}
+
+; CreateFormData() by tmplinshi, AHK Topic: https://autohotkey.com/boards/viewtopic.php?t=7647
+; Thanks to Coco: https://autohotkey.com/boards/viewtopic.php?p=41731#p41731
+; Modified version by SKAN, 09/May/2016
+
+CreateFormData(ByRef retData, ByRef retHeader, objParam) {
+	New CreateFormData(retData, retHeader, objParam)
+}
+
+Class CreateFormData {
+
+	__New(ByRef retData, ByRef retHeader, objParam) {
+
+		Local CRLF := "`r`n", i, k, v, str, pvData
+		; Create a random Boundary
+		Local Boundary := this.RandomBoundary()
+		Local BoundaryLine := "------------------------------" . Boundary
+
+    this.Len := 0 ; GMEM_ZEROINIT|GMEM_FIXED = 0x40
+    this.Ptr := DllCall( "GlobalAlloc", "UInt",0x40, "UInt",1, "Ptr"  )          ; allocate global memory
+
+		; Loop input paramters
+		For k, v in objParam
+		{
+			If IsObject(v) {
+				For i, FileName in v
+				{
+					str := BoundaryLine . CRLF
+					     . "Content-Disposition: form-data; name=""" . k . """; filename=""" . FileName . """" . CRLF
+					     . "Content-Type: " . this.MimeType(FileName) . CRLF . CRLF
+          this.StrPutUTF8( str )
+          this.LoadFromFile( Filename )
+          this.StrPutUTF8( CRLF )
+				}
+			} Else {
+				str := BoundaryLine . CRLF
+				     . "Content-Disposition: form-data; name=""" . k """" . CRLF . CRLF
+				     . v . CRLF
+        this.StrPutUTF8( str )
+			}
+		}
+
+		this.StrPutUTF8( BoundaryLine . "--" . CRLF )
+
+    ; Create a bytearray and copy data in to it.
+    retData := ComObjArray( 0x11, this.Len ) ; Create SAFEARRAY = VT_ARRAY|VT_UI1
+    pvData  := NumGet( ComObjValue( retData ) + 8 + A_PtrSize )
+    DllCall( "RtlMoveMemory", "Ptr",pvData, "Ptr",this.Ptr, "Ptr",this.Len )
+
+    this.Ptr := DllCall( "GlobalFree", "Ptr",this.Ptr, "Ptr" )                   ; free global memory 
+
+    retHeader := "multipart/form-data; boundary=----------------------------" . Boundary
+	}
+
+  StrPutUTF8( str ) {
+    Local ReqSz := StrPut( str, "utf-8" ) - 1
+    this.Len += ReqSz                                  ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42
+    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len + 1, "UInt", 0x42 )   
+    StrPut( str, this.Ptr + this.len - ReqSz, ReqSz, "utf-8" )
+  }
+  
+  LoadFromFile( Filename ) {
+    Local objFile := FileOpen( FileName, "r" )
+    this.Len += objFile.Length                     ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42 
+    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len, "UInt", 0x42 )
+    objFile.RawRead( this.Ptr + this.Len - objFile.length, objFile.length )
+    objFile.Close()       
+  }
+
+	RandomBoundary() {
+		str := "0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
+		Sort, str, D| Random
+		str := StrReplace(str, "|")
+		Return SubStr(str, 1, 12)
+	}
+
+	MimeType(FileName) {
+		n := FileOpen(FileName, "r").ReadUInt()
+		Return (n        = 0x474E5089) ? "image/png"
+		     : (n        = 0x38464947) ? "image/gif"
+		     : (n&0xFFFF = 0x4D42    ) ? "image/bmp"
+		     : (n&0xFFFF = 0xD8FF    ) ? "image/jpeg"
+		     : (n&0xFFFF = 0x4949    ) ? "image/tiff"
+		     : (n&0xFFFF = 0x4D4D    ) ? "image/tiff"
+		     : "application/octet-stream"
+	}
+
 }
