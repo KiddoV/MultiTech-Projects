@@ -42,6 +42,7 @@ Global playImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.pn
 Global step0ErrMsg := "Unknown ERROR"
 ;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
+#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\CreateFormData.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
 Gui, Add, GroupBox, xm+0 ym+0 w190 h155 Section
@@ -50,14 +51,17 @@ Gui, Add, Text, xs+40 ys+20 vstep0Label, STEP 0. Commissioning
 Gui, Add, Text, xs+40 ys+45 vstep1Label, STEP 1. Ping Test
 Gui, Add, Text, xs+40 ys+70 vstep2Label, STEP 2. Save OEM
 Gui, Font
-Gui Add, Text, xs+10 ys+90 w175 h2 +0x10
-Gui, Add, Button, xs+20 ys+95 w50 h20 gRunStep0, Step 0
-Gui, Add, Button, xs+120 ys+95 w50 h20 gRunStep1and2, Step 1&&2
-Gui, Add, Button, xs+70 ys+120 w50 h30 gRunAll, RUN
 
 Gui, Add, Picture, xs+7 ys+17 w18 h18 +BackgroundTrans vprocess0,
 Gui, Add, Picture, xs+7 ys+42 w18 h18 +BackgroundTrans vprocess1,
 Gui, Add, Picture, xs+7 ys+67 w18 h18 +BackgroundTrans vprocess2,
+
+Gui Add, Text, xs+10 ys+90 w175 h2 +0x10
+Gui, Add, Button, xs+20 ys+95 w50 h20 gRunStep0, Step 0
+Gui, Add, Button, xs+160 ys+42 w20 h20 gRunStep1, 1
+Gui, Add, Button, xs+160 ys+67 w20 h20 gRunStep2, 2
+Gui, Add, Button, xs+120 ys+95 w50 h20 gRunStep1and2, Step 1&&2
+Gui, Add, Button, xs+70 ys+120 w50 h30 gRunAll, RUN
 
 posX := A_ScreenWidth - 300
 posY := A_ScreenHeight - 900
@@ -129,11 +133,20 @@ RunAll() {
             Sleep 5000
         }
         Progress, Off
-        if (step1() = 0)
+        if (step1() = 0) {
+            MsgBox, 16, STEP 1 FAILED, %step0ErrMsg%
             return
-        if (step2() = 0)
+        }
+                
+        if (step2() = 0) {
+            MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
             return
-    }   
+        }
+        
+        OnMessage(0x44, "CheckIcon") ;Add icon
+        MsgBox 0x81, FINISHED, Finished auto-final configuration for RTI.
+        OnMessage(0x44, "") ;Clear icon
+    }
     IfMsgBox Cancel
         Return
 }
@@ -153,7 +166,51 @@ RunStep0() {
             return
         }
         Progress, Off
-        MsgBox, , STEP 0, STEP 0 LOGIN IS DONE. PLEASE WAIT UNTIL CONDUIT REBOOTED!
+        MsgBox, 64, STEP 0, STEP 0 LOGIN IS DONE. PLEASE WAIT UNTIL CONDUIT REBOOTED!
+    }
+    IfMsgBox Cancel
+        Return
+}
+
+RunStep1() {
+    resetStepLabelStatus()
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN CONFIGURATION, Start running STEP 1 for RTI?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
+    {
+        if (checkRTIStatus()) {
+            if (step1() = 0) {
+                MsgBox, 16, STEP 1 FAILED, %step0ErrMsg%
+                return
+            }
+            MsgBox, 64, STEP 1, STEP 1 IS DONE. YOU CAN RUN STEP 2 NOW!!
+        } else {
+            MsgBox, 16, ERROR, RTI is not READY!`nPlease wait or check connection!
+            return
+        }
+    }
+    IfMsgBox Cancel
+        Return
+}
+
+RunStep2() {
+    resetStepLabelStatus()
+    OnMessage(0x44, "PlayInCircleIcon") ;Add icon
+    MsgBox 0x81, RUN CONFIGURATION, Start running STEP 2 for RTI?
+    OnMessage(0x44, "") ;Clear icon
+    IfMsgBox OK
+    {
+        if (checkRTIStatus()) {
+            if (step2() = 0) {
+                MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
+                return
+            }
+            MsgBox, 64, STEP 2, STEP 2 IS DONE!!
+        } else {
+            MsgBox, 16, ERROR, RTI is not READY!`nPlease wait or check connection!
+            return
+        }
     }
     IfMsgBox Cancel
         Return
@@ -176,6 +233,10 @@ RunStep1and2() {
                 MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
                 return
             }
+            
+            OnMessage(0x44, "CheckIcon") ;Add icon
+            MsgBox 0x81, STEP 1&2, STEP 1 & 2 are DONE!!
+            OnMessage(0x44, "") ;Clear icon
                 
         } else {
             MsgBox, 16, ERROR, RTI is not READY!`nPlease wait or check connection!
@@ -316,7 +377,7 @@ step0() {
     url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
     configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
     objParam := { Filedata: [configPath] }
-    CreateFormData(PostData, hdr_ContentType, objParam)
+    CreateFormData(PostData, hdr_ContentType, objParam)     ;Create a form data to send file to the server
     req.Open("POST", url, False)
     req.SetRequestHeader("Content-Type", hdr_ContentType)
     req.Send(PostData)
@@ -425,6 +486,7 @@ resetStepLabelStatus() {
         GuiControl, Font, step%index%Label
         Gui, Font
         GuiControl, , process%index%,
+        GuiControl, Move, process%index%, w18 h18
         index++
     }
 }
@@ -445,92 +507,4 @@ PlayInCircleIcon() {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
-}
-
-; CreateFormData() by tmplinshi, AHK Topic: https://autohotkey.com/boards/viewtopic.php?t=7647
-; Thanks to Coco: https://autohotkey.com/boards/viewtopic.php?p=41731#p41731
-; Modified version by SKAN, 09/May/2016
-
-CreateFormData(ByRef retData, ByRef retHeader, objParam) {
-	New CreateFormData(retData, retHeader, objParam)
-}
-
-Class CreateFormData {
-
-	__New(ByRef retData, ByRef retHeader, objParam) {
-
-		Local CRLF := "`r`n", i, k, v, str, pvData
-		; Create a random Boundary
-		Local Boundary := this.RandomBoundary()
-		Local BoundaryLine := "------------------------------" . Boundary
-
-    this.Len := 0 ; GMEM_ZEROINIT|GMEM_FIXED = 0x40
-    this.Ptr := DllCall( "GlobalAlloc", "UInt",0x40, "UInt",1, "Ptr"  )          ; allocate global memory
-
-		; Loop input paramters
-		For k, v in objParam
-		{
-			If IsObject(v) {
-				For i, FileName in v
-				{
-					str := BoundaryLine . CRLF
-					     . "Content-Disposition: form-data; name=""" . k . """; filename=""" . FileName . """" . CRLF
-					     . "Content-Type: " . this.MimeType(FileName) . CRLF . CRLF
-          this.StrPutUTF8( str )
-          this.LoadFromFile( Filename )
-          this.StrPutUTF8( CRLF )
-				}
-			} Else {
-				str := BoundaryLine . CRLF
-				     . "Content-Disposition: form-data; name=""" . k """" . CRLF . CRLF
-				     . v . CRLF
-        this.StrPutUTF8( str )
-			}
-		}
-
-		this.StrPutUTF8( BoundaryLine . "--" . CRLF )
-
-    ; Create a bytearray and copy data in to it.
-    retData := ComObjArray( 0x11, this.Len ) ; Create SAFEARRAY = VT_ARRAY|VT_UI1
-    pvData  := NumGet( ComObjValue( retData ) + 8 + A_PtrSize )
-    DllCall( "RtlMoveMemory", "Ptr",pvData, "Ptr",this.Ptr, "Ptr",this.Len )
-
-    this.Ptr := DllCall( "GlobalFree", "Ptr",this.Ptr, "Ptr" )                   ; free global memory 
-
-    retHeader := "multipart/form-data; boundary=----------------------------" . Boundary
-	}
-
-  StrPutUTF8( str ) {
-    Local ReqSz := StrPut( str, "utf-8" ) - 1
-    this.Len += ReqSz                                  ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42
-    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len + 1, "UInt", 0x42 )   
-    StrPut( str, this.Ptr + this.len - ReqSz, ReqSz, "utf-8" )
-  }
-  
-  LoadFromFile( Filename ) {
-    Local objFile := FileOpen( FileName, "r" )
-    this.Len += objFile.Length                     ; GMEM_ZEROINIT|GMEM_MOVEABLE = 0x42 
-    this.Ptr := DllCall( "GlobalReAlloc", "Ptr",this.Ptr, "UInt",this.len, "UInt", 0x42 )
-    objFile.RawRead( this.Ptr + this.Len - objFile.length, objFile.length )
-    objFile.Close()       
-  }
-
-	RandomBoundary() {
-		str := "0|1|2|3|4|5|6|7|8|9|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z"
-		Sort, str, D| Random
-		str := StrReplace(str, "|")
-		Return SubStr(str, 1, 12)
-	}
-
-	MimeType(FileName) {
-		n := FileOpen(FileName, "r").ReadUInt()
-		Return (n        = 0x474E5089) ? "image/png"
-		     : (n        = 0x38464947) ? "image/gif"
-		     : (n&0xFFFF = 0x4D42    ) ? "image/bmp"
-		     : (n&0xFFFF = 0xD8FF    ) ? "image/jpeg"
-		     : (n&0xFFFF = 0x4949    ) ? "image/tiff"
-		     : (n&0xFFFF = 0x4D4D    ) ? "image/tiff"
-		     : "application/octet-stream"
-	}
-
 }

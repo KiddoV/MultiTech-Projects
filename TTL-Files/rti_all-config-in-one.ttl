@@ -194,6 +194,8 @@ mpause 2000
 
 statusbox 'STEP 2 IS FINISHED' 'STEP 2 DONE'
 mpause 1500
+
+closett
 end
 
 :step2_failed

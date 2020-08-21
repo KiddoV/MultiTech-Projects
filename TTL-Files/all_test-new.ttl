@@ -94,7 +94,7 @@ elseif isLEU1=0 then
     telModuleVer = 'N/A'
     fwBuild = 'N/A'
 elseif isL4E1=0 then
-	radioVersion = '25.20.673'
+	radioVersion = '25.20.676'
 	telModuleVer = 'LE910C4-EU'
 	fwBuild = '#CFVR: 2'
 elseif isL4N1=0 then
@@ -401,7 +401,7 @@ flushrecv
 mpause 500
 sendln 'at#tempcfg?'
 if isL4E1=0 then
-    waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,97,0,95,102,2,100,528,3'
+    waitln '#TEMPCFG: -273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 elseif isH5=0 then
 	waitln '#TEMPCFG: -30,-10,55,80'
 elseif isL4N1=0 then
@@ -774,10 +774,10 @@ if result = 0 then
 endif
 flushrecv
 mpause 500
-sendln 'at+gmr'
-waitln '25.20.673'
+sendln 'at#swpkgv'
+waitln '25.20.676'
 if result = 0 then
-    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.673' 'FIRMWARE FAILURE'
+    messagebox 'INCORRECT FIRMWARE VERSION. EXPECTED: 25.20.676' 'FIRMWARE FAILURE'
 	disconnect
    	closett
    	end
@@ -785,9 +785,9 @@ endif
 mpause 500 
 flushrecv
 sendln 'at#cfvr'
-waitln '2'
+waitln '1'
 if result=0 then
-    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 2' 'FIRMWARE BUILD FAILURE'
+    messagebox 'INCORRECT TELIT FIRMWARE BUILD. EXPECTED: 1' 'FIRMWARE BUILD FAILURE'
 	disconnect
    	closett
    	end

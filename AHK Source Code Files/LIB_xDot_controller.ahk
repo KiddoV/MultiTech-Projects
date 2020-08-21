@@ -75,6 +75,8 @@ Global syncModeFilePath := "Z:\XDOT\Data\syncdata.snc"
 Global isReprogram := False
 Global isEcoLabMode := False
 Global isSyncMode := False
+Global ecoLabOn := False ;For auto open ECO LAB mode
+Global syncCount := 1
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 Global allReProgFw := ["v3.0.2-debug", "v3.2.1-debug"]
@@ -132,7 +134,10 @@ quitHandler() {
 
 ecoLabModeHandler() {
     Menu, OptionMenu, ToggleCheck, Eco Lab Mode
-    toggleEcoLabMode()
+    ;toggleEcoLabMode()
+    ecoLabOn := !ecoLabOn
+    syncCount := 1
+    syncModeWriteIni("EcoLabOn", ecoLabOn)
 }
 
 endableSyncModeHandler() {
@@ -930,7 +935,6 @@ toggleEcoLabMode() {
         
         toggleState := 1
     }
-    
 }
 
 syncModeActive() {
@@ -945,7 +949,7 @@ syncModeActive() {
         Static oldFreqDropPos
         Static oldWFwDropPos
         Static oldPFwDropPos
-        
+         
         ;;Update lot code label
         GuiControlGet, oldLot, , recentLotCode
         IniRead, lotCode, %syncModeFilePath%, Sync, RecentUsedLotCode
@@ -986,6 +990,13 @@ syncModeActive() {
                 GuiControl, , totalGPortRadio, 1
             else if (progRadioBttn)
                 GuiControl, , reproGPortRadio, 1
+            
+            ;;Auto change to ECO LAB mode
+            IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOn
+            if (isEcoLabOn != "ERROR" && syncCount = 1) {
+                toggleEcoLabMode()
+                syncCount++
+            }
         }
         if (!autoPick) {
             isSyncMode := False
@@ -1012,6 +1023,7 @@ resetSyncDataFile() {
     IniDelete, %syncModeFilePath%, Sync, ProgramFirmwareDropPos
     IniDelete, %syncModeFilePath%, Sync, TestRadioBttn
     IniDelete, %syncModeFilePath%, Sync, ProgRadioBttn
+    IniDelete, %syncModeFilePath%, Sync, EcoLabOn
 }
 
 onChosenFreq() {
