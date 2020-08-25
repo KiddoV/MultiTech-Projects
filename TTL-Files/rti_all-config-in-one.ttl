@@ -21,7 +21,7 @@ isStep2 = result
 
 :CONNECTING
 mpause 1000
-connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning /timeout=1"
+connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning /timeout=20"
 if result < 2 then
     messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
     end
@@ -162,6 +162,7 @@ sprintf2 curlCmd 'curl -kX POST -H "Content-Type: application/json" -d %s{"usern
 sendln curlCmd
 waitregex '"token"'
 strmatch inputstr '([0-9A-F]{32})'
+if result = 0 strmatch inputstr '([0-9A-F]{31})'
 if result = 0 strmatch inputstr '([0-9A-F]{30})'
 token = matchstr
 statusbox token 'DISPLAY TOKEN'
@@ -176,25 +177,36 @@ strconcat loraUname deviceId
 wait '#'
 sprintf2 curlCmd 'curl -kX PUT -H "Content-Type: application/json" -d %s{"deviceHostname":"%s"}%s %shttps://192.168.2.1/api/system?token=%s%s' #39 loraUname #39 #39 token #39
 sendln curlCmd
-wait "success"
+wait "success" "token is not valid"
 if result = 0 goto step2_failed
+if result = 2 goto step2_failed_token
 mpause 1000
 statusbox 'SAVE CONFIGURATION' 'STEP 2'
 sprintf2 curlCmd 'curl -kX POST -d "" https://192.168.2.1/api/command/save?token=%s' token
 sendln curlCmd
-wait "success"
+wait "success" "token is not valid"
 if result = 0 goto step2_failed
+if result = 2 goto step2_failed_token
 mpause 1000
 statusbox 'SAVE OEM' 'STEP 2'
 sprintf2 curlCmd 'curl -kX POST -d "" https://192.168.2.1/api/command/save_oem?token=%s' token
 sendln curlCmd
-wait "success"
+wait "success" "token is not valid"
 if result = 0 goto step2_failed
+if result = 2 goto step2_failed_token
 mpause 2000
 
 statusbox 'STEP 2 IS FINISHED' 'STEP 2 DONE'
 mpause 1500
 
+closett
+end
+
+:step2_failed_token
+closesbox
+statusbox 'BAD TOKEN, REBOOT DEVICE!!!!' 'STEP 2 FAILED'
+mpause 400
+disconnect
 closett
 end
 

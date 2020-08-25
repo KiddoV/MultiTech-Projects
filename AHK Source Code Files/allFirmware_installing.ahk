@@ -16,10 +16,10 @@ Global isMTCAP := False
 Global productName := ""
 
 ;Firmware list
-Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6"]
-Global allMtcapFirmwares := ["mLinux 5.1.8", "AEP 5.1.6"]
+Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6", "AEP 5.2.1"]
+Global allMtcapFirmwares := ["mLinux 5.1.8", "AEP 5.1.6", "AEP 5.2.1"]
 
-;Paths and Links
+;;Paths and Links
 Global mli401Path := "C:\vbtest\MTCDT\mLinux-4.0.1-2x7\mtcdt-rs9113-flash-full-4.0.1.tcl"
 Global mli401NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.0.1-no-WiFiBT\mtcdt-flash-full-4.0.1.tcl"
 Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
@@ -32,9 +32,11 @@ Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
 Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
 Global aep515Path := "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"
 Global aep516Path := "C:\vbtest\MTCDT\AEP-5_1_6\mtcdt-flash-full-AEP.tcl"
+Global aep521Path := "C:\vbtest\MTCDT\AEP-5_2_1\mtcdt-flash-full-AEP.tcl"
 
 Global mtcapMLinux518Path := "C:\vbtest\MTCAP\mLinux_v5_1_8\mtcap-flash-full-5.1.8.tcl"
 Global mtcapAep516Path := "C:\vbtest\MTCAP\AEP_v5_1_6\mtcap-flash-full-AEP.tcl"
+Global mtcapAep521Path := "C:\vbtest\MTCAP\AEP_v5_2_1\mtcap-flash-full-AEP521.tcl"
 
 ;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
@@ -230,8 +232,8 @@ install_firmware(fw, chk) {
     }
     Else {
         addToProgressBar(10)
-        BlockInput On
-        BlockInput MouseMove
+        ;BlockInput On
+        ;BlockInput MouseMove
         WinActivate SAM-BA.*
         Sleep 300
         Click, 82, 43 Left, , Down
@@ -268,6 +270,8 @@ install_firmware(fw, chk) {
                 ControlSetText, Edit1, %aep515Path%, Select Script File.*
             If (fw = "AEP 5.1.6")
                 ControlSetText, Edit1, %aep516Path%, Select Script File.*
+            If (fw = "AEP 5.2.1")
+                ControlSetText, Edit1, %aep521Path%, Select Script File.*
         }
         
         If (isMTCAP) {
@@ -275,6 +279,8 @@ install_firmware(fw, chk) {
                 ControlSetText, Edit1, %mtcapMLinux518Path%, Select Script File.*
             If (fw = "AEP 5.1.6")
                 ControlSetText, Edit1, %mtcapAep516Path%, Select Script File.*
+            If (fw = "AEP 5.2.1")
+                ControlSetText, Edit1, %mtcapAep521Path%, Select Script File.*
         }
         
         
@@ -290,8 +296,8 @@ install_firmware(fw, chk) {
             Click, 511, 365 Left, , Up
         }
         
-        BlockInput MouseMoveOff
-        BlockInput Off
+        ;BlockInput MouseMoveOff
+        ;BlockInput Off
         
         WinWaitClose Select Script File.*
     

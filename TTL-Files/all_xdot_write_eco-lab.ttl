@@ -335,7 +335,7 @@ time = ''
 logStr = ''
 getdate date "%Y\%m\%d"
 getdate time "%H:%M:%S"
-sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, UUID: %s, ReadUUID: %s, AppKey: %s, ReadAppKey: %s,BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode uuid outUuid appKey outAppKey freq outDFreq xdotBreakPort
+sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, UUID: %s, ReadUUID: %s, AppKey: %s, ReadAppKey: %s,BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort
 fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
 filewrite fhandle #13#10
 filewrite fhandle logStr

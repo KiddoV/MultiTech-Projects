@@ -39,7 +39,9 @@ Global xImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\x_mark.png"
 Global checkImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\check_mark.png"
 Global playImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png"
 
-Global step0ErrMsg := "Unknown ERROR"
+Global step0ErrMsg := "Unknown ERROR!!?"
+Global step1ErrMsg := "Unknown ERROR!!?"
+Global step2ErrMsg := "UnKnown ERROR!!?"
 ;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
 #Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\CreateFormData.ahk
@@ -124,7 +126,7 @@ RunAll() {
             return
         }
         Progress, ZH0 M FS10, WAITING FOR CONDUIT TO REBOOT..., , STEP 0
-        Sleep 200000
+        Sleep 230000
         Loop,
         {
             if (checkRTIStatus()) {
@@ -134,12 +136,12 @@ RunAll() {
         }
         Progress, Off
         if (step1() = 0) {
-            MsgBox, 16, STEP 1 FAILED, %step0ErrMsg%
+            MsgBox, 16, STEP 1 FAILED, %step1ErrMsg%
             return
         }
                 
         if (step2() = 0) {
-            MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
+            MsgBox, 16, STEP 2 FAILED, %step2ErrMsg%
             return
         }
         
@@ -181,7 +183,7 @@ RunStep1() {
     {
         if (checkRTIStatus()) {
             if (step1() = 0) {
-                MsgBox, 16, STEP 1 FAILED, %step0ErrMsg%
+                MsgBox, 16, STEP 1 FAILED, %step1ErrMsg%
                 return
             }
             MsgBox, 64, STEP 1, STEP 1 IS DONE. YOU CAN RUN STEP 2 NOW!!
@@ -203,7 +205,7 @@ RunStep2() {
     {
         if (checkRTIStatus()) {
             if (step2() = 0) {
-                MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
+                MsgBox, 16, STEP 2 FAILED, %step2ErrMsg%
                 return
             }
             MsgBox, 64, STEP 2, STEP 2 IS DONE!!
@@ -225,12 +227,12 @@ RunStep1and2() {
     {
         if (checkRTIStatus()) {
             if (step1() = 0) {
-                MsgBox, 16, STEP 1 FAILED, %step0ErrMsg%
+                MsgBox, 16, STEP 1 FAILED, %step1ErrMsg%
                 return
             }
                 
             if (step2() = 0) {
-                MsgBox, 16, STEP 2 FAILED, %step0ErrMsg%
+                MsgBox, 16, STEP 2 FAILED, %step2ErrMsg%
                 return
             }
             
@@ -262,10 +264,10 @@ step0() {
     url := "https://192.168.2.1/api/commissioning"
     req.open("GET", url, True)
     req.Send()
-    Loop, 100
+    Loop, 50
     {
-        Sleep 250
-        if (A_Index = 100) {
+        Sleep 1000
+        if (A_Index = 50) {
             step0ErrMsg = Failed to connect to <https://192.168.2.1/commissioning>`nERR: TIMEOUT!!!
             return 0
         } else if (req.readyState = 4){
@@ -419,6 +421,8 @@ step2() {
     WinWait, STEP 2 DONE|STEP 2 FAILED
     IfWinExist, STEP 2 FAILED
     {
+        WinGetText, errMsg, STEP 2 FAILED
+        step2ErrMsg = %errMsg%
         changeStepLabelStatus("step2Label", "FAIL")
         return 0
     }

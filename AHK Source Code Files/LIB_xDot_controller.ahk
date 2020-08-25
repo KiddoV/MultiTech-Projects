@@ -135,6 +135,8 @@ quitHandler() {
 ecoLabModeHandler() {
     Menu, OptionMenu, ToggleCheck, Eco Lab Mode
     ;toggleEcoLabMode()
+    
+    ;;for autopick EcoLab Mode
     ecoLabOn := !ecoLabOn
     syncCount := 1
     syncModeWriteIni("EcoLabOn", ecoLabOn)
@@ -376,7 +378,7 @@ writeAll() {
 }
 
 writeEcoLab() {
-    Global
+    ;Global
     
     DriveGet, driveStatus, Status, %remotePath%
     if (driveStatus != "Ready") {
@@ -905,7 +907,7 @@ toggleEcoLabMode() {
             GuiControl, Hide, nodeToWrite%A_Index%
         }
         GuiControl, Hide, giveBackBttn
-        GuiControl, , fwLabel, FW: v3.0.2
+        GuiControl, , wfwLabel, FW: v3.0.2
         
         ;;Show new gui controls
         GuiControl, Show, idListView
@@ -926,7 +928,7 @@ toggleEcoLabMode() {
             GuiControl, Show, nodeToWrite%A_Index%
         }
         GuiControl, Show, giveBackBttn
-        GuiControl, , fwLabel, FW: v3.2.1
+        GuiControl, , wfwLabel, FW: v3.2.1
         
         GuiControl, Hide, idListView
         GuiControl, , writeLabel, EUID Write
@@ -992,6 +994,7 @@ syncModeActive() {
                 GuiControl, , reproGPortRadio, 1
             
             ;;Auto change to ECO LAB mode
+            ToolTip, % syncCount
             IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOn
             if (isEcoLabOn != "ERROR" && syncCount = 1) {
                 toggleEcoLabMode()
