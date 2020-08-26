@@ -8,6 +8,7 @@ timeout = 35
 isStep1 = -1
 isStep2 = -1
 try = 1
+errMsg = ""
 step1SrcFile1 = 'C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_Python_Deps.tar.gz'
 step1DesFile1 = '/tmp/RT_Python_Deps.tar.gz'
 step1SrcFile2 = 'C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz'
@@ -20,8 +21,9 @@ strcompare whatStep 'STEP2'
 isStep2 = result
 
 :CONNECTING
+timeout = 55 ; connection timeout in seconds
 mpause 1000
-connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning /timeout=20"
+connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning"
 if result < 2 then
     messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
     end
@@ -111,6 +113,7 @@ wait 'ppp0'
 if result=0 then
     try=try+1
     if try < 11 goto check_cell_connection
+    sprintf2 errMsg 'CELL CONNECTION FAILURE!'
 	if try = 11 goto step1_failed
 endif
 try = 1
@@ -130,6 +133,7 @@ wait 'icmp_seq=5'
 if result=0 then
     try=try+1
     if try < 4 goto ping_test
+    sprintf2 errMsg 'PING TEST FAILED'
 	if try = 4 goto step1_failed
 endif
 try = 1
@@ -145,11 +149,12 @@ end
 
 :step1_failed
 closesbox
-statusbox 'PING TEST FAILED' 'STEP 1 FAILED'
+statusbox errMsg 'STEP 1 FAILED'
 mpause 400
 disconnect
 closett
 end
+
 ;;;;;;;;;;;;;;STEP 2
 :STEP2
 statusbox 'RUNNING STEP 2' 'STEP 2'
@@ -161,9 +166,11 @@ wait '#'
 sprintf2 curlCmd 'curl -kX POST -H "Content-Type: application/json" -d %s{"username": "admin", "password": "ThanksForFish42!"}%s %shttps://127.0.0.1/api/login%s' #39 #39 #39 #39
 sendln curlCmd
 waitregex '"token"'
-strmatch inputstr '([0-9A-F]{32})'
-if result = 0 strmatch inputstr '([0-9A-F]{31})'
-if result = 0 strmatch inputstr '([0-9A-F]{30})'
+strmatch inputstr '([0-9A-F]+)'
+;if result = 0 strmatch inputstr '([0-9A-F]{31})'
+;if result = 0 strmatch inputstr '([0-9A-F]{30})'
+;if result = 0 strmatch inputstr '([0-9A-F]{29})'
+if result = 0 goto step2_failed_token
 token = matchstr
 statusbox token 'DISPLAY TOKEN'
 mpause 4000
@@ -204,7 +211,7 @@ end
 
 :step2_failed_token
 closesbox
-statusbox 'BAD TOKEN, REBOOT DEVICE!!!!' 'STEP 2 FAILED'
+statusbox 'CANNOT GET TOKEN, REBOOT DEVICE!!!!' 'STEP 2 FAILED'
 mpause 400
 disconnect
 closett
@@ -212,7 +219,7 @@ end
 
 :step2_failed
 closesbox
-statusbox 'PING TEST FAILED' 'STEP 2 FAILED'
+statusbox 'SAVING CONFIGURATIONS FAILED' 'STEP 2 FAILED'
 mpause 400
 disconnect
 closett

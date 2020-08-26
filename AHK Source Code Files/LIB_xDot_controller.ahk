@@ -76,7 +76,6 @@ Global isReprogram := False
 Global isEcoLabMode := False
 Global isSyncMode := False
 Global ecoLabOn := False ;For auto open ECO LAB mode
-Global syncCount := 1
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 Global allReProgFw := ["v3.0.2-debug", "v3.2.1-debug"]
@@ -134,12 +133,17 @@ quitHandler() {
 
 ecoLabModeHandler() {
     Menu, OptionMenu, ToggleCheck, Eco Lab Mode
-    ;toggleEcoLabMode()
-    
-    ;;for autopick EcoLab Mode
-    ecoLabOn := !ecoLabOn
-    syncCount := 1
-    syncModeWriteIni("EcoLabOn", ecoLabOn)
+    DriveGet, driveStatus, Status, %remotePath%
+    if (driveStatus != "Ready" || !isSyncMode) {
+        toggleEcoLabMode()
+    }
+    if (driveStatus = "Ready" && isSyncMode) {
+        ;;for autopick EcoLab Mode
+        ecoLabOn := !ecoLabOn
+        syncModeWriteIni("EcoLabOnPC1", ecoLabOn)
+        syncModeWriteIni("EcoLabOnPC2", ecoLabOn)
+        syncModeWriteIni("EcoLabOnPC3", ecoLabOn)
+    }
 }
 
 endableSyncModeHandler() {
@@ -766,7 +770,10 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
     RegExMatch(guiControlVar, "XDot\d.", origCtrlVar)       ;Get the original controlvar Ex: XDot01, XDot02
     hwndVar = h%origCtrlVar%
     
-    if (option = "NORMAL") {
+    if (option = "NORMAL") {                  ;;;;=====================NORMAL state
+        GuiButtonIcon(%hwndVar%, "", 1, "s24")                  ;Delete icon
+        GuiControl, Text, %guiControlVar%, P%num%               ;Add text back
+        GuiControl, +v%origCtrlVar%, %guiControlVar%           ;Change var of control to original
         
     } else if (option = "ERROR") {            ;;;;=====================ERROR ICON
         GuiButtonIcon(%hwndVar%, exclaImg, 1, "s24")         ;Display icon
@@ -805,6 +812,9 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         }
         GuiControl, +vPlay%origCtrlVar%, %guiControlVar%            ;Change var of control
     }
+    
+    ;;For Mapping Tool
+    mapToolStopCounter++
 }
 
 OnRightClick() {
@@ -994,12 +1004,10 @@ syncModeActive() {
                 GuiControl, , reproGPortRadio, 1
             
             ;;Auto change to ECO LAB mode
-            ToolTip, % syncCount
-            IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOn
-            if (isEcoLabOn != "ERROR" && syncCount = 1) {
-                toggleEcoLabMode()
-                syncCount++
-            }
+            ;IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOn
+            ;if (isEcoLabOn != "ERROR" && isEcoLabOn) {
+                ;toggleEcoLabMode()
+            ;}
         }
         if (!autoPick) {
             isSyncMode := False
@@ -1026,7 +1034,9 @@ resetSyncDataFile() {
     IniDelete, %syncModeFilePath%, Sync, ProgramFirmwareDropPos
     IniDelete, %syncModeFilePath%, Sync, TestRadioBttn
     IniDelete, %syncModeFilePath%, Sync, ProgRadioBttn
-    IniDelete, %syncModeFilePath%, Sync, EcoLabOn
+    IniDelete, %syncModeFilePath%, Sync, EcoLabOnPC1
+    IniDelete, %syncModeFilePath%, Sync, EcoLabOnPC2
+    IniDelete, %syncModeFilePath%, Sync, EcoLabOnPC3
 }
 
 onChosenFreq() {
@@ -1629,8 +1639,9 @@ Doc_OnContextMenu(WDoc) {
     htmlId := WDoc.parentWindow.event.srcElement.id
     htmlClassName := WDoc.parentWindow.event.srcElement.classname
     isHtmlXdot := RegExMatch(htmlId, "^XDot[0-9]{2}$")  ;Check if the htmlId is xdot box
-    isHtmlXdotDisable := RegExMatch(htmlClassName, "xdot-box-disable")
+    isHtmlXdotDisable := RegExMatch(htmlClassName, "xdot-box-disable")  ;Click if the html xdot bttn disable
     
+    mapToolStopCounter := 1
     if (isHtmlXdot) {
         WDoc.getElementById(htmlId).classList.add("xdot-box-disable")
         IniWrite, D, %xdotMapRemoteFilePath%, XDot-Status, %htmlId%
@@ -1650,7 +1661,7 @@ DisplayWebPage(WB, html_str) {
 	WB.Navigate("file://" . f)
 }
 
-Global countNumMap := 1
+Global mapToolStopCounter := 1
 mappingToolActivate() {
     IniRead, xDotStatList, %xdotMapRemoteFilePath%, XDot-Status
     if (xDotStatList != "") {
@@ -1660,11 +1671,12 @@ mappingToolActivate() {
             IniRead, xDotStat, %xdotMapRemoteFilePath%, XDot-Status, XDot%numW0%
             ctrlVar = XDot%numW0%
             RegExMatch(ctrlVar, "\d+$", num)
-            if (xDotStat = "D" && countNumMap = 1) {
+            if (xDotStat = "D" && mapToolStopCounter = 1) {
                 changeXdotBttnIcon(ctrlVar, "DISABLE", , A_Index)
             }
+            if (xDotStat = "N" && mapToolStopCounter = 1) {
+                changeXdotBttnIcon(ctrlVar, "NORMAL", , A_Index)
+            }
         }
-        countNumMap++
     }
-    countNumMap := 1
 }

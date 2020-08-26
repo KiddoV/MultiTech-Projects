@@ -49,7 +49,7 @@ Gui Add, Edit, xs+225 ys+60 w70 h15 vrecentLotCode Disabled,
 
 Gui Add, GroupBox, xm+205 ym+415 w300 h35 Section
 Gui Font, Bold
-Gui Add, Text, cfc4e1e xs+10 ys+15 verrLbl +Hidden, WARNING, SERVER PC IS NOT RESPONDING!!
+Gui Add, Text, cfc4e1e xs+10 ys+15 w285 verrLbl,
 Gui Font
 
 Gui Add, GroupBox, xm+0 ym+0 w200 h87 vxdotPanel Section, xDot Panel Group 3
@@ -148,7 +148,7 @@ SetTimer, DrawLineNum, 1
 SetTimer, CheckFileChange, 20
 SetTimer, CheckLotChange, 200
 SetTimer, SyncModeCheck, 100
-SetTimer, MappingToolCheck, 50
+SetTimer, MappingToolCheck, 20
 OnExit("OnExitMainApp")
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -175,7 +175,7 @@ drawLineNumbers(firstLine = "") {
 CheckFileChange:
 DriveGet, driveStatus, Status, %remotePath%
 if (driveStatus = "Ready") {
-    GuiControl, Hide, errLbl
+    GuiControl, Text, errLbl, 
     Fileread newFileContent, Z:\XDOT\nodesToWrite.txt
     if(newFileContent != lastFileContent) {
         lastFileContent := newFileContent
@@ -183,7 +183,7 @@ if (driveStatus = "Ready") {
     }
 }
 if (driveStatus != "Ready") {
-    GuiControl, Show, errLbl
+    GuiControl, Text, errLbl, WARNING, SERVER PC IS NOT RESPONDING!!
     if (lastFileContent != "NoRes")
         GuiControl Text, editNode, ???????????????`n!!SERVER NOT RESPONDING!!`n???????????????
     lastFileContent := "NoRes"
@@ -209,8 +209,20 @@ Return
 
 SyncModeCheck:
     DriveGet, driveStatus, Status, %remotePath%
-    if (driveStatus = "Ready")
+    if (driveStatus = "Ready") {
         syncModeActive()
+        
+        ;;For auto open EcoLab Mode
+        IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOnPC3
+        if (isEcoLabOn != "ERROR" && !isEcoLabCtrlVisible) {
+            toggleEcoLabMode()
+            IniWrite, ERROR, %syncModeFilePath%, Sync, EcoLabOnPC3
+        }
+        if (isEcoLabOn != "ERROR" && isEcoLabCtrlVisible) {
+            toggleEcoLabMode()
+            IniWrite, ERROR, %syncModeFilePath%, Sync, EcoLabOnPC3
+        }
+    }
 Return
 
 MappingToolCheck:

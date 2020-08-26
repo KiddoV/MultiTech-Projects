@@ -403,8 +403,10 @@ step1() {
     changeStepLabelStatus("step1Label", "PLAY")
     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP1", , Hide, TTWinPID
     WinWait, STEP 1 DONE|STEP 1 FAILED
-    IfWinExist, STEP 1 FAILED
+    IfWinExist, STEP 1 FAILED|CONNECTION ERROR
     {
+        WinGetText, errMsg, STEP 1 FAILED
+        step1ErrMsg = %errMsg%
         changeStepLabelStatus("step1Label", "FAIL")
         return 0
     }
@@ -419,7 +421,7 @@ step2() {
     changeStepLabelStatus("step2Label", "PLAY")
     Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP2", , Hide, TTWinPID
     WinWait, STEP 2 DONE|STEP 2 FAILED
-    IfWinExist, STEP 2 FAILED
+    IfWinExist, STEP 2 FAILED|CONNECTION ERROR
     {
         WinGetText, errMsg, STEP 2 FAILED
         step2ErrMsg = %errMsg%
