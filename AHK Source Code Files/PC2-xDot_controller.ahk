@@ -148,7 +148,7 @@ SetTimer, DrawLineNum, 1
 SetTimer, CheckFileChange, 20
 SetTimer, CheckLotChange, 200
 SetTimer, SyncModeCheck, 100
-SetTimer, MappingToolCheck, 20
+SetTimer, MappingToolCheck, 100
 OnExit("OnExitMainApp")
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -213,12 +213,14 @@ SyncModeCheck:
         syncModeActive()
         
         ;;For auto open EcoLab Mode
-        IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOnPC2
+        IniRead, isEcoLabOn, %syncModeFilePath%, Sync, EcoLabOnPC2  ;Remember EcoLabOnPCx is different from other PC
         if (isEcoLabOn != "ERROR" && !isEcoLabCtrlVisible) {
+            Menu, OptionMenu, ToggleCheck, Eco Lab Mode
             toggleEcoLabMode()
             IniWrite, ERROR, %syncModeFilePath%, Sync, EcoLabOnPC2
         }
         if (isEcoLabOn != "ERROR" && isEcoLabCtrlVisible) {
+            Menu, OptionMenu, ToggleCheck, Eco Lab Mode
             toggleEcoLabMode()
             IniWrite, ERROR, %syncModeFilePath%, Sync, EcoLabOnPC2
         }

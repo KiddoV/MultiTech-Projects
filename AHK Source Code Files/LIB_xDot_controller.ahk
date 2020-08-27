@@ -121,6 +121,7 @@ AddMainMenuBar() {
     isSyncMode := True
     syncModeWriteIni("AutoPick", True)
     Menu, HelpMenu, Disable, About
+    Menu, ToolMenu, Disable, XDot Mapping
 }
 ;;;;;;;;;All menu handlers
 reloadProgHandler() {
@@ -132,14 +133,15 @@ quitHandler() {
 }
 
 ecoLabModeHandler() {
-    Menu, OptionMenu, ToggleCheck, Eco Lab Mode
     DriveGet, driveStatus, Status, %remotePath%
     if (driveStatus != "Ready" || !isSyncMode) {
+        Menu, OptionMenu, ToggleCheck, Eco Lab Mode
         toggleEcoLabMode()
     }
     if (driveStatus = "Ready" && isSyncMode) {
         ;;for autopick EcoLab Mode
         ecoLabOn := !ecoLabOn
+        MsgBox % ecoLabOn
         syncModeWriteIni("EcoLabOnPC1", ecoLabOn)
         syncModeWriteIni("EcoLabOnPC2", ecoLabOn)
         syncModeWriteIni("EcoLabOnPC3", ecoLabOn)
@@ -774,7 +776,12 @@ changeXdotBttnIcon(guiControlVar, option, mode := "", xIndex := 0) {
         GuiButtonIcon(%hwndVar%, "", 1, "s24")                  ;Delete icon
         GuiControl, Text, %guiControlVar%, P%num%               ;Add text back
         GuiControl, +v%origCtrlVar%, %guiControlVar%           ;Change var of control to original
-        
+        totalGoodPort++
+        GuiControl, Text, totalGPortRadio, Run tests on %totalGoodPort% ports
+        GuiControl, Text, reproGPortRadio, Reprogram %totalGoodPort% ports to
+        GuiControl, Enable, portLabel%xIndex%
+        GuiControl, Enable, nodeToWrite%xIndex%
+        changeLVStatusRow(num, "ENABLE")
     } else if (option = "ERROR") {            ;;;;=====================ERROR ICON
         GuiButtonIcon(%hwndVar%, exclaImg, 1, "s24")         ;Display icon
         GuiControl, +v%origCtrlVar%,  Play%origCtrlVar%          ;Change var of control
@@ -1661,7 +1668,7 @@ DisplayWebPage(WB, html_str) {
 	WB.Navigate("file://" . f)
 }
 
-Global mapToolStopCounter := 1
+Global mapToolStopCounter := 1      ;To stop the sync loop
 mappingToolActivate() {
     IniRead, xDotStatList, %xdotMapRemoteFilePath%, XDot-Status
     if (xDotStatList != "") {

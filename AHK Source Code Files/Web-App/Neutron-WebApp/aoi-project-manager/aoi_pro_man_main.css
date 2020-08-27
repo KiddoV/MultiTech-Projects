@@ -1,0 +1,86 @@
+/*=========================================================*/
+/***********************Default CSS*************************/
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+
+html {
+	
+}
+
+button {
+	outline: none;
+	border: none;
+	box-shadow: none;
+}
+
+/* Prevent user from select text */
+.no-select-text {
+	-ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+.allow-select-text {
+	-ms-user-select: text; /* Internet Explorer/Edge */
+}
+
+.default-mouse {
+	cursor: default;
+}
+
+.bg-app-color {
+	background: #F5F5F5;
+}
+
+.bg-app-theme-dark {
+	background: #827717;
+}
+
+.bg-app-theme-light {
+	background: #C0CA33;
+}
+
+.title-btn {
+	padding: 0.35em 1.0em;
+	cursor: pointer;
+	vertical-align: bottom;
+	font-family: Webdings;	/* This font for the icons */
+	font-size: 11pt;
+}
+
+.title-btn-disable {
+	padding: 0.35em 1.0em;
+	cursor: default;
+	vertical-align: bottom;
+	font-family: Webdings;	/* This font for the icons */
+	font-size: 11pt;
+	background: #dadada;
+}
+
+.menu-btn {
+	cursor: pointer;
+	padding: 0px 10px 0px;
+	font-size: 12px;
+}
+
+.title-btn:hover {
+	background: rgba(0, 0, 0, .3);
+}
+
+.title-btn-close:hover {
+	background: #dc3545;
+}
+
+/*============================================================*/
+/***********************Additional CSS*************************/
+/**Nav Bar**/
+
+/*=================================================================*/
+/***********************Third-Party CSS Mod*************************/
+/***Boostrap CSS***/
+.btn,.btn:focus,.btn:active,.navbar-toggler,.navbar-toggler:focus {
+	border: none;
+  outline: none !important;	/* Get rid of the ugly dot border */
+  /* box-shadow: none; */
+}
