@@ -5,6 +5,7 @@
 showtt -1
 show -1
 
+flushrecv
 filecreate fhandle 'C:\V-Projects\RTIAuto-FinalConfig\caches\rti_status.dat'
 
 

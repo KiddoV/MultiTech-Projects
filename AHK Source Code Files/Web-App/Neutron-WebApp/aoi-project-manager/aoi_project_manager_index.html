@@ -1,56 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-	<!-- Custom CSS and JS -->
-	<link href="bootstrap.min.css" rel="stylesheet">
-	<link href="aoi_pro_man_main.css" rel="stylesheet">
 	<!-- Boostrap CSS and JS -->
-	<script src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
-	<script src="bootstrap.bundle.min.js"></script>
-
+	<link href="bootstrap.min.css" rel="stylesheet">
+	<script defer src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
+	<script defer src="bootstrap.bundle.min.js"></script>
 	<!-- Font Awesome JS -->
 	<script defer src="solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
 	<script defer src="fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
 
+	<!-- Custom CSS and JS -->
+	<link href="aoi_pro_man_main.css" rel="stylesheet">
+	<script src="aoi_pro_man_main.js"></script>
 
 	<!-- Inner CSS -->
 	<style>
 
 	</style>
 </head>
-<!-- Title Bar -->
-<header>
-	<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm">
-		<span class="flex-grow-1 px-2 py-1 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
-		<span class="title-btn" onclick="neutron.Minimize()"><i class="fas fa-window-minimize"></i></span>
-		<span class="title-btn-disable" onclick="" disabled><i class="fas fa-window-maximize"></i></span>
-		<span class="title-btn title-btn-close" onclick="neutron.Close()"><i class="fas fa-lg fa-times"></i></span>
-	</div>
-</header>
-<!-- Menu Bar -->
-<div>
 
-</div>
+<body class="d-flex flex-column bg-app-color no-select-text" oncontextmenu="return false;">
+	<header class=""><!------------------------------------------------>
+		<!-- Title Bar -->
+		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm">
+			<span class="flex-grow-1 ml-4 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
+			<span class="title-btn" onclick="neutron.Minimize()"><i class="fas fa-xs fa-window-minimize"></i></span>
+			<span class="title-btn title-btn-disable" onclick="" disabled><i class="fas fa-xs fa-window-maximize"></i></span>
+			<span class="title-btn title-btn-close" onclick="neutron.Close()"><i class="fas fa-sm fa-times" style="font-size: 0.8rem"></i></span>
+		</div>
+		<!-- Menu Bar -->
+		<div>
+			<!--  -->
+		</div>
+	</header><!----------------------------------------------->
 
-<body class="d-flex flex-column bg-app-color no-select-text" oncontextmenu="return false;"><!----------------------------------------------->
-	<!-- Left nav bar -->
-	
-	<!-- Main Content -->
-	<!-- <main class="p-2">
-		<button type="button" class="btn btn-primary">Primary</button>
-		<button type="button" class="btn btn-secondary">Secondary</button>
-		<button type="button" class="btn btn-success">Success</button>
-		<button type="button" class="btn btn-danger">Danger</button>
-		<button type="button" class="btn btn-warning">Warning</button>
-		<button type="button" class="btn btn-info">Info</button>
-		<button type="button" class="btn btn-light">Light</button>
-		<button type="button" class="btn btn-dark">Dark</button>
-		<button type="button" class="btn btn-link">Link</button>
-	</main> -->
-</body><!-------------------------------------------------------------------------------------------------------------------->
+	<div class="flex-grow-1 d-flex"><!------------------------------------------------>
+		<!-- Left nav bar -->
+		<div class="nav flex-column nav-pills bg-app-theme-light text-light" id="nav-tab" role="tablist" aria-orientation="vertical">
+			<span class="pt-5" id="spacer"></span>
+			<a class="nav-link text-light active" id="nav-project-tab" data-toggle="pill" href="#project-tab" role="tab" aria-controls="project-tab" aria-selected="true" data-toggle="tooltip" title="AOI Projects"><i class="fas fa-lg fa-project-diagram"></i></a>
+			<a class="nav-link text-light" id="nav-tool-tab" data-toggle="pill" href="#tool-tab" role="tab" aria-controls="tool-tab" aria-selected="false" data-toggle="tooltip" title="More Tools"><i class="fas fa-lg fa-toolbox" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
+		</div>
+
+		<!-- Main Content -->
+		<main class="flex-grow-1 overflow-auto">
+			<div class="tab-content container p-1" id="nav-all-tab-content">
+
+				<!-- First Tab Contents -->
+				<div class="tab-pane fade show active" id="project-tab">
+
+				</div>
+
+				<!-- Second Tab Contents -->
+				<div class="tab-pane fade" id="tool-tab">
+					<button type="button" class="btn btn-primary">Primary</button>
+					<button type="button" class="btn btn-secondary">Secondary</button>
+					<button type="button" class="btn btn-success">Success</button>
+					<button type="button" class="btn btn-danger">Danger</button>
+					<button type="button" class="btn btn-warning">Warning</button>
+					<button type="button" class="btn btn-info">Info</button>
+					<button type="button" class="btn btn-light">Light</button>
+					<button type="button" class="btn btn-dark">Dark</button>
+					<button type="button" class="btn btn-link">Link</button>
+				</div>
+		</div>
+	</main>
+
+	<footer class="d-flex align-items-stretch fixed-bottom bg-app-theme-dark text-white">
+		<span class="flex-grow-1"></span>
+		<span class="footer-btn"><i class="fas fa-sm fa-cog"></i></span>
+	</footer>
+	</div><!-------------------------------------------------------------------------->
+</body>
+
 <!-- Inner Javascript -->
 <script>
 

@@ -6,8 +6,16 @@ body {
 	height: 100%;
 }
 
-html {
-	
+html,#title-label {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+header {
+	font-size: 10pt;
+}
+
+body {
+	font-size: 10pt;
 }
 
 button {
@@ -34,42 +42,44 @@ button {
 }
 
 .bg-app-theme-dark {
-	background: #827717;
+	background: #37474F;
 }
 
 .bg-app-theme-light {
-	background: #C0CA33;
+	background: #546E7A;
 }
 
 .title-btn {
-	padding: 0.35em 1.0em;
+	padding: 0.05em 1.30em;
 	cursor: pointer;
-	vertical-align: bottom;
-	font-family: Webdings;	/* This font for the icons */
-	font-size: 11pt;
+	/* vertical-align: top; */
+	/* font-family: Webdings;	/* This font for the icons */ */
+	/* font-size: 11pt; */
 }
 
 .title-btn-disable {
-	padding: 0.35em 1.0em;
+	pointer-events: none;
 	cursor: default;
-	vertical-align: bottom;
-	font-family: Webdings;	/* This font for the icons */
-	font-size: 11pt;
 	background: #dadada;
+}
+
+.title-btn:hover, .footer-btn:hover {
+	background: rgba(0, 0, 0, .3);
+}
+
+.title-btn-close:hover {
+	background: #dc3545;
+}
+
+.footer-btn {
+	padding: 0.05em 0.90em;
+	cursor: pointer;
 }
 
 .menu-btn {
 	cursor: pointer;
 	padding: 0px 10px 0px;
 	font-size: 12px;
-}
-
-.title-btn:hover {
-	background: rgba(0, 0, 0, .3);
-}
-
-.title-btn-close:hover {
-	background: #dc3545;
 }
 
 /*============================================================*/
@@ -83,4 +93,20 @@ button {
 	border: none;
   outline: none !important;	/* Get rid of the ugly dot border */
   /* box-shadow: none; */
+}
+.nav {
+	width: 55px !important;
+}
+.nav-link {
+	border-radius: 0 !important;
+	max-height: 35px !important;
+}
+.nav-link:hover {
+	background: rgba(0, 0, 0, .3);
+}
+.nav-link.active {
+	background: #F5F5F5 !important;
+	color: black !important;
+	border-left: 5px solid coral;
+	padding-left: 20px;
 }

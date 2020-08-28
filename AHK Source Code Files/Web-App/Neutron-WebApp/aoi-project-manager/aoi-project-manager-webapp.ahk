@@ -28,7 +28,7 @@ NeutronWebApp.Gui("-Resize +LabelAOIProManager")
 NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 
 ;Display the Neutron main window
-NeutronWebApp.Show("w800 h700")
+NeutronWebApp.Show("w800 h600")
 
 ;;;Run AFTER WebApp Started;;;
 
@@ -41,9 +41,12 @@ FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.bundle.min.js, bootstrap.bundle.min.js
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
+FileInstall, fontawesome.js, fontawesome.js
+FileInstall, solid.js, solid.js
 ;=======================================================================================;
 ^q::
 AOIProManagerClose:
+    NeutronWebApp.Destroy()     ;Free memory
     Gui, Destroy
     ExitApp
 Return

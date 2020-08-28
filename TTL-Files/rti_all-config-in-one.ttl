@@ -4,7 +4,6 @@
 ;
 
 show 0
-timeout = 35
 isStep1 = -1
 isStep2 = -1
 try = 1
@@ -21,13 +20,19 @@ strcompare whatStep 'STEP2'
 isStep2 = result
 
 :CONNECTING
+flushrecv
+sprintf2 msg 'CONNECTING TO TERATERM...(%d)' try
+statusbox msg 'TERATERM CONNECTION'
 timeout = 55 ; connection timeout in seconds
 mpause 1000
 connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning"
 if result < 2 then
+    try=try +1
+    if try < 10 goto CONNECTING
     messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
     end
 endif
+try = 1
 setsync 1
 send 13
 wait '$'
