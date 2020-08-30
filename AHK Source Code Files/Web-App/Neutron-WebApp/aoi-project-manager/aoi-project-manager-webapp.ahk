@@ -7,7 +7,9 @@ SetTitleMatchMode, RegEx
 #NoEnv
 SetBatchLines -1
 ;;;Include the Neutron library
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\Neutron.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\Neutron.ahk
+;;;Other library
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\Class_SQLiteDB.ahk
 ;=======================================================================================;
 ;;;;;;;;;;Installs some files;;;;;;;;;;
 ;IfNotExist C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\assets\css
@@ -36,13 +38,14 @@ NeutronWebApp.Show("w800 h600")
 Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
-FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html
+FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.bundle.min.js, bootstrap.bundle.min.js
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, fontawesome.js, fontawesome.js
 FileInstall, solid.js, solid.js
+FileInstall, SQLite3.dll, SQLite3.dll       ;Required to use Class_SQLiteDB.ahk
 ;=======================================================================================;
 ^q::
 AOIProManagerClose:
