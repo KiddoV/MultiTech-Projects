@@ -82,6 +82,14 @@ button {
 	font-size: 12px;
 }
 
+.hide-el {
+	display: none;
+}
+
+.show-el {
+	display: block;
+}
+
 /*============================================================*/
 /***********************Additional CSS*************************/
 /**Nav Bar**/
@@ -90,10 +98,18 @@ button {
 /***********************Third-Party CSS Mod*************************/
 /***Boostrap CSS***/
 .btn,.btn:focus,.btn:active,.navbar-toggler,.navbar-toggler:focus {
-	border: none;
+	border: none !important;
   outline: none !important;	/* Get rid of the ugly dot border */
-  /* box-shadow: none; */
+  /* box-shadow: none !important; */
 }
+
+.btn-group-xs > .btn, .btn-xs {
+  padding: .50rem .45rem;
+  font-size: .875rem;
+  line-height: .5;
+  border-radius: .2rem;
+}
+
 .nav {
 	width: 55px !important;
 }
@@ -109,4 +125,10 @@ button {
 	color: black !important;
 	border-left: 5px solid coral;
 	padding-left: 20px;
+}
+
+.alert {
+	padding: 5px 50px 7px 20px !important;
+	display: inline-block !important;
+	text-align: left !important;
 }

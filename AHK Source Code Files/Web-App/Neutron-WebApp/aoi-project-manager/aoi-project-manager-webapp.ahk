@@ -39,6 +39,7 @@ Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
+FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.bundle.min.js, bootstrap.bundle.min.js
@@ -49,16 +50,41 @@ FileInstall, SQLite3.dll, SQLite3.dll       ;Required to use Class_SQLiteDB.ahk
 ;=======================================================================================;
 ^q::
 AOIProManagerClose:
-    NeutronWebApp.Destroy()     ;Free memory
+    NeutronWebApp.Destroy()     ;Free memory  
     Gui, Destroy
     ExitApp
 Return
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
+TestBttn(neutron, event) {
+    ;HtmlMsgBox("", "Test MsgBox", "", "")
+    ;MsgBox HELLO FROM AHK
+    ;NeutronWebApp.wnd.alert("Hi")
+    DisplayAlertMsg("Failed", "alert-danger")
+}
+
 
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+HtmlMsgBox(Options := "", Title := "", Text := "", Timeout := 0) {
+    NeutronMsgBox := new NeutronWindow()
+    NeutronMsgBox.Load("html_msgbox.html")
+    NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox")
+    ;NeutronMsgBox.doc.getElementById("title-label").innerHTML := %Title%    ;;;;Set MsgBox title
+    
+    NeutronMsgBox.Show("")
+    
+    Return
+    
+    NeutronMsgBoxClose:
+        NeutronMsgBox.Destroy()     ;Free memory
+    Return
+}
 
-
+DisplayAlertMsg(Text := "", Color := "", Timeout := 2000) {
+    NeutronWebApp.doc.getElementById("alert-box-content").innerHTML := Text
+    NeutronWebApp.doc.getElementById("alert-box").classList.add(Color)
+    NeutronWebApp.doc.getElementById("alert-box").classList.add("show")
+}

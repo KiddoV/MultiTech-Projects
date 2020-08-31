@@ -5,8 +5,8 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 	<!-- Boostrap CSS and JS -->
+	<script src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
 	<link href="bootstrap.min.css" rel="stylesheet">
-	<script defer src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
 	<script defer src="bootstrap.bundle.min.js"></script>
 	<!-- Font Awesome JS -->
 	<script defer src="solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
@@ -21,6 +21,14 @@
 
 	</style>
 </head>
+
+<!-- Top alert box -->
+<div class="position-fixed mt-2 alert-box-center default-mouse" style="background-color: red; width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word; text-align: center;">
+	<div id="alert-box" class="shadow alert alert-dismissible fade" role="alert" autohide=true>
+		<p id="alert-box-content" style="margin: 0;"><strong>Hello!</strong> Hello alert!</p>
+		<span type="button" class="close" data-toggle="collapse" href="#alert-box" style="padding: 2px 10px 0 0"><i class="fas fa-xs fa-times"></i></span>
+	</div>
+</div>
 
 <body class="d-flex flex-column bg-app-color no-select-text" oncontextmenu="return false;">
 	<header class=""><!------------------------------------------------>
@@ -51,7 +59,7 @@
 
 				<!-- First Tab Contents -->
 				<div class="tab-pane fade show active" id="project-tab">
-
+					<button id="test-btn" type="button" class="btn btn-primary btn-xs" onclick="ahk.TestBttn(event)">Test MsgBox</button>
 				</div>
 
 				<!-- Second Tab Contents -->
@@ -78,6 +86,23 @@
 
 <!-- Inner Javascript -->
 <script>
+	window.setTimeout(function() {
+		$("#alert-box").collapse();
+	}, 2000);
+	$(document).ready(function() {
+		// close the alert automatically
+		// setTimeout(function() {
+		// 		$("#alert-box").collapse();
+		// }, 2000);
 
+		// click to close alert
+	  // $(".close").click(function(){
+	  //   $("#alert-box").alert("close");
+	  // });
+		//
+		// $("#test-btn").click(function(){
+		// 	$("#alert-box").alert("show");
+		// })
+	});
 </script>
 </html>
