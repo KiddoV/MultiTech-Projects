@@ -34,13 +34,15 @@ NeutronWebApp.Show("w800 h600")
 
 ;;;Run AFTER WebApp Started;;;
 
+Return
+
 ;=======================================================================================;
 ;;;Callback Functions
 AutoCloseAlertBox:
     NeutronWebApp.doc.getElementById("close-alert-btn").click()
+    SetTimer, AutoCloseAlertBox, Off
 Return
 
-Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
@@ -66,7 +68,7 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("", "Test MsgBox", "", "")
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
-    DisplayAlertMsg("Failed", "alert-danger")
+    DisplayAlertMsg("Login successfully!", "alert-success")
 }
 
 
