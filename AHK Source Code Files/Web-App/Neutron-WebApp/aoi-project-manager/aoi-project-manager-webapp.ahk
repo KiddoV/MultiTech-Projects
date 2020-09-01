@@ -34,6 +34,11 @@ NeutronWebApp.Show("w800 h600")
 
 ;;;Run AFTER WebApp Started;;;
 
+;=======================================================================================;
+;;;Callback Functions
+AutoCloseAlertBox:
+    NeutronWebApp.doc.getElementById("close-alert-btn").click()
+Return
 
 Return
 ;=======================================================================================;
@@ -71,20 +76,19 @@ TestBttn(neutron, event) {
 HtmlMsgBox(Options := "", Title := "", Text := "", Timeout := 0) {
     NeutronMsgBox := new NeutronWindow()
     NeutronMsgBox.Load("html_msgbox.html")
-    NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox")
-    ;NeutronMsgBox.doc.getElementById("title-label").innerHTML := %Title%    ;;;;Set MsgBox title
+    ;NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox")
+    NeutronMsgBox.doc.getElementById("title-label").innerHTML := %Title%    ;;;;Set MsgBox title
     
     NeutronMsgBox.Show("")
     
     Return
     
-    NeutronMsgBoxClose:
-        NeutronMsgBox.Destroy()     ;Free memory
-    Return
 }
 
 DisplayAlertMsg(Text := "", Color := "", Timeout := 2000) {
     NeutronWebApp.doc.getElementById("alert-box-content").innerHTML := Text
     NeutronWebApp.doc.getElementById("alert-box").classList.add(Color)
     NeutronWebApp.doc.getElementById("alert-box").classList.add("show")
+    
+    SetTimer, AutoCloseAlertBox, %Timeout%
 }

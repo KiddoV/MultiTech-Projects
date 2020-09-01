@@ -10,11 +10,11 @@ IfNotExist C:\V-Projects\YCD-Auto-Generator\Templates
 IfNotExist C:\V-Projects\YCD-Auto-Generator\Data
     FileCreateDir C:\V-Projects\YCD-Auto-Generator\Data
     
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TXT-Files\TemplateYCD.txt, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TXT-Files\omit_list.dat, C:\V-Projects\YCD-Auto-Generator\Data\omit_list.dat, 1
+FileInstall C:\MultiTech-Projects\TXT-Files\TemplateYCD.txt, C:\V-Projects\YCD-Auto-Generator\Templates\TemplateYCD.txt, 1
+FileInstall C:\MultiTech-Projects\TXT-Files\omit_list.dat, C:\V-Projects\YCD-Auto-Generator\Data\omit_list.dat, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\tf.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\tf.ahk
 ;=======================================================================================;
 ;;;Main Gui
 #SingleInstance Force
