@@ -82,14 +82,6 @@ button {
 	font-size: 12px;
 }
 
-.hide-el {
-	display: none;
-}
-
-.show-el {
-	display: block;
-}
-
 /*============================================================*/
 /***********************Additional CSS*************************/
 /**Nav Bar**/
@@ -131,4 +123,21 @@ button {
 	padding: 5px 50px 7px 20px !important;
 	display: inline-block !important;
 	text-align: left !important;
+	z-index: 99;
+}
+
+.modal-header, .modal-footer {
+	padding: 5px 10px 5px 10px !important;
+}
+.modal-backdrop {
+	z-index: 97;
+}
+.modal {
+	z-index: 98;
+}
+.modal-backdrop, .modal {
+	margin-top: 20px;
+}
+.modal-dialog {
+	margin-top: 5px;
 }

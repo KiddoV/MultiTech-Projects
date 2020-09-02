@@ -23,8 +23,8 @@
 </head>
 
 <!-- Top alert box -->
-<div class="position-fixed mt-2 alert-box-center default-mouse" style="background-color: red; width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word; text-align: center;">
-	<div id="alert-box" class="shadow alert alert-dismissible fade" role="alert" autohide=true>
+<div class="position-fixed mt-2 alert-box-center default-mouse" style="width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word; text-align: center;">
+	<div id="alert-box" class="shadow alert alert-dismissible fade" role="alert">
 		<p id="alert-box-content" style="margin: 0;"><strong>Hello!</strong> Hello alert!</p>
 		<span id="close-alert-btn" type="button" class="close" data-toggle="collapse" href="#alert-box" style="padding: 2px 10px 0 0"><i class="fas fa-xs fa-times"></i></span>
 	</div>
@@ -33,7 +33,7 @@
 <body class="d-flex flex-column bg-app-color no-select-text" oncontextmenu="return false;">
 	<header class=""><!------------------------------------------------>
 		<!-- Title Bar -->
-		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm">
+		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm" style="z-index: 100;">
 			<span class="flex-grow-1 ml-4 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
 			<span class="title-btn" onclick="neutron.Minimize()"><i class="fas fa-xs fa-window-minimize"></i></span>
 			<span class="title-btn title-btn-disable" onclick="" disabled><i class="fas fa-xs fa-window-maximize"></i></span>
@@ -49,21 +49,22 @@
 		<!-- Left nav bar -->
 		<div class="nav flex-column nav-pills bg-app-theme-light text-light" id="nav-tab" role="tablist" aria-orientation="vertical">
 			<span class="pt-5" id="spacer"></span>
-			<a class="nav-link text-light active" id="nav-project-tab" data-toggle="pill" href="#project-tab" role="tab" aria-controls="project-tab" aria-selected="true" data-toggle="tooltip" title="AOI Projects"><i class="fas fa-lg fa-project-diagram"></i></a>
-			<a class="nav-link text-light" id="nav-tool-tab" data-toggle="pill" href="#tool-tab" role="tab" aria-controls="tool-tab" aria-selected="false" data-toggle="tooltip" title="More Tools"><i class="fas fa-lg fa-toolbox" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
+			<a class="nav-link text-light active" id="nav-project-tab" data-toggle="tab" href="#project-tab" role="tab" data-toggle="tooltip" title="AOI Projects"><i class="fas fa-lg fa-project-diagram"></i></a>
+			<a class="nav-link text-light" id="nav-tool-tab" data-toggle="tab" href="#tool-tab" role="tab" data-toggle="tooltip" title="More Tools"><i class="fas fa-lg fa-toolbox" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
+			<a class="nav-link text-light" id="database-tool-tab" data-toggle="tab" href="#database-tab" role="tab" data-toggle="tooltip" title="Database Controller"><i class="fas fa-lg fa-database" style="font-size: 1.5rem; margin-top: -4px; margin-left: 1.3px;"></i></a>
 		</div>
 
 		<!-- Main Content -->
-		<main class="flex-grow-1 overflow-auto">
-			<div class="tab-content container p-1" id="nav-all-tab-content">
+		<main class="flex-grow-1 overflow-auto bg-app-color">
+			<div id="nav-all-tab-content" class="tab-content container p-1">
 
-				<!-- First Tab Contents -->
+				<!-- Project Tab Contents -->
 				<div class="tab-pane fade show active" id="project-tab">
 					<button id="test-btn" type="button" class="btn btn-primary btn-xs" onclick="ahk.TestBttn(event)">Test MsgBox</button>
 				</div>
 
-				<!-- Second Tab Contents -->
-				<div class="tab-pane fade" id="tool-tab">
+				<!-- Tool Tab Contents -->
+				<div id="tool-tab" class="tab-pane fade">
 					<button type="button" class="btn btn-primary">Primary</button>
 					<button type="button" class="btn btn-secondary">Secondary</button>
 					<button type="button" class="btn btn-success">Success</button>
@@ -74,12 +75,36 @@
 					<button type="button" class="btn btn-dark">Dark</button>
 					<button type="button" class="btn btn-link">Link</button>
 				</div>
+
+				<!-- Database Tab Contents -->
+				<div id="database-tab" class="tab-pane fade">
+
+				</div>
+
+				<!-- Settings Contents -->
+				<div id="modal-settings" class="modal fade">
+					<div class="modal-dialog" style="max-width: 700px;">
+						<div class="modal-content">
+					     <div class="modal-header">
+					      <h6 class="modal-title">Application Settings</h6>
+								<span type="button" class="close" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
+					     </div>
+					     <div class="modal-body" style="word-wrap: break-word;">
+					        Settings here!!!
+					     </div>
+					     <div class="modal-footer">
+					       <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+					       <button type="button" class="btn btn-primary btn-sm">Save</button>
+					     </div>
+					   </div>
+					 </div>
+				</div>
 		</div>
 	</main>
 
 	<footer class="d-flex align-items-stretch fixed-bottom bg-app-theme-dark text-white">
 		<span class="flex-grow-1"></span>
-		<span class="footer-btn"><i class="fas fa-sm fa-cog"></i></span>
+		<span class="footer-btn" data-toggle="modal" data-target="#modal-settings"><i class="fas fa-sm fa-cog"></i></span>
 	</footer>
 	</div><!-------------------------------------------------------------------------->
 </body>

@@ -11,14 +11,13 @@ SetBatchLines -1
 ;;;Other library
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\Class_SQLiteDB.ahk
 ;=======================================================================================;
-;;;;;;;;;;Installs some files;;;;;;;;;;
-;IfNotExist C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\assets\css
-    ;FileCreateDir C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\Assets\css
-;IfNotExist C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\assets\js
-    ;FileCreateDir C:\V-Projects\WEB-APPLICATIONS\Conduit-Controller\assets\js
+;;;;;;;;;;Installs Folder Location and Files;;;;;;;;;;
+IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
+    FileCreateDir C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
 ;=======================================================================================;
-;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
-
+;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
+Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"
+Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\app-settings.ini"
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
@@ -28,6 +27,7 @@ NeutronWebApp.Gui("-Resize +LabelAOIProManager")
 
 ;;;Run BEFORE WebApp Started;;;
 NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
+ProcessIniFile()
 
 ;Display the Neutron main window
 NeutronWebApp.Show("w800 h600")
@@ -39,7 +39,9 @@ Return
 ;=======================================================================================;
 ;;;Callback Functions
 AutoCloseAlertBox:
-    NeutronWebApp.doc.getElementById("close-alert-btn").click()
+    ;NeutronWebApp.doc.getElementById("close-alert-btn").click()
+    NeutronWebApp.doc.getElementById("alert-box").classList.remove("show")
+    NeutronWebApp.doc.getElementById("alert-box").style.zIndex := "-99"
     SetTimer, AutoCloseAlertBox, Off
 Return
 
@@ -68,7 +70,7 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("", "Test MsgBox", "", "")
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
-    DisplayAlertMsg("Login successfully!", "alert-success")
+    DisplayAlertMsg("You <strong>click</strong> the button!!!!", "alert-success")
 }
 
 
@@ -87,10 +89,27 @@ HtmlMsgBox(Options := "", Title := "", Text := "", Timeout := 0) {
     
 }
 
-DisplayAlertMsg(Text := "", Color := "", Timeout := 2000) {
+DisplayAlertMsg(Text := "", Color := "", Timeout := 2500) {
     NeutronWebApp.doc.getElementById("alert-box-content").innerHTML := Text
     NeutronWebApp.doc.getElementById("alert-box").classList.add(Color)
+    NeutronWebApp.doc.getElementById("alert-box").style.zIndex := "99"
     NeutronWebApp.doc.getElementById("alert-box").classList.add("show")
     
     SetTimer, AutoCloseAlertBox, %Timeout%
+}
+
+ProcessIniFile() {
+    IfNotExist, %MainSettingsFilePath%
+    {
+        FileAppend,
+        (LTrim
+         [Settings]
+         MainDBFilePath=%MainDBFilePath%
+        ), %MainSettingsFilePath%
+    }
+    IfExist, %MainSettingsFilePath%
+    {
+        IniRead, out1, %MainSettingsFilePath%, Settings, MainDBFilePath
+        MainDBFilePath := out1
+    }
 }
