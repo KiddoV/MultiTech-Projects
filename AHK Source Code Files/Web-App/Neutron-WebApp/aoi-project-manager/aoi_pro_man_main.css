@@ -16,6 +16,7 @@ header {
 
 body {
 	font-size: 10pt;
+	overflow: hidden !important; /* Hide scrollbars */
 }
 
 button {
@@ -82,6 +83,17 @@ button {
 	font-size: 12px;
 }
 
+/* Scrollbar display */
+body{
+	scrollbar-3dlight-color: white;
+	scrollbar-arrow-color: none;
+	scrollbar-base-color:;
+	scrollbar-darkshadow-color: none;
+	scrollbar-face-color: coral;
+	scrollbar-highlight-color:;
+	scrollbar-shadow-color:
+}
+
 /*============================================================*/
 /***********************Additional CSS*************************/
 /**Nav Bar**/
@@ -96,7 +108,7 @@ button {
 }
 
 .btn-group-xs > .btn, .btn-xs {
-  padding: .50rem .45rem;
+  padding: .50rem .45rem .55rem .45rem;
   font-size: .875rem;
   line-height: .5;
   border-radius: .2rem;

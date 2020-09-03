@@ -33,6 +33,17 @@ ProcessIniFile()
 NeutronWebApp.Show("w800 h600")
 
 ;;;Run AFTER WebApp Started;;;
+;;Connecting to Database
+Global AOI_Pro_DB := new SQLiteDB()
+IfNotExist, %MainDBFilePath%
+{
+    MsgBox, 16, SQLite Error, Could not find Database file!!
+    Return
+}
+If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
+   MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+   Return
+}
 
 Return
 
@@ -52,6 +63,8 @@ FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.bundle.min.js, bootstrap.bundle.min.js
+FileInstall, bootstrap-table.min.css, bootstrap-table.min.css
+FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, fontawesome.js, fontawesome.js
 FileInstall, solid.js, solid.js
@@ -70,7 +83,11 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("", "Test MsgBox", "", "")
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
-    DisplayAlertMsg("You <strong>click</strong> the button!!!!", "alert-success")
+    ;DisplayAlertMsg("You <strong>click</strong> the button!!!!", "alert-success")
+    SQL := "SELECT * FROM Users;"
+    If !AOI_Pro_DB.GetTable(SQL, Result)
+       MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    MsgBox % Result.ColumnCount
 }
 
 
@@ -93,6 +110,7 @@ DisplayAlertMsg(Text := "", Color := "", Timeout := 2500) {
     NeutronWebApp.doc.getElementById("alert-box-content").innerHTML := Text
     NeutronWebApp.doc.getElementById("alert-box").classList.add(Color)
     NeutronWebApp.doc.getElementById("alert-box").style.zIndex := "99"
+    NeutronWebApp.doc.getElementById("close-alert-btn").style.display := "block"
     NeutronWebApp.doc.getElementById("alert-box").classList.add("show")
     
     SetTimer, AutoCloseAlertBox, %Timeout%
