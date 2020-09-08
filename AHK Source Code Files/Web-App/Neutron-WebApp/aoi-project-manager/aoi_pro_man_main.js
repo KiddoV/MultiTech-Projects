@@ -1,3 +1,20 @@
+// Custom short for boostrap table
+function customSort(sortName, sortOrder, data) {
+  var order = sortOrder === 'desc' ? -1 : 1
+  data.sort(function (a, b) {
+    var aa = +((a[sortName] + '').replace(/[^\d]/g, ''));
+    var bb = +((b[sortName] + '').replace(/[^\d]/g, ''));
+    if (aa < bb) {
+      return order * -1
+    }
+    if (aa > bb) {
+      return order
+    }
+    return 0
+  });
+}
+
+
 var $table = $('#database-table');
 var mydata =
 [
@@ -80,31 +97,6 @@ var mydata =
         "id": 15,
         "name": "test15",
         "price": "$15"
-    },
-    {
-        "id": 16,
-        "name": "test16",
-        "price": "$16"
-    },
-    {
-        "id": 17,
-        "name": "test17",
-        "price": "$17"
-    },
-    {
-        "id": 18,
-        "name": "test18",
-        "price": "$18"
-    },
-    {
-        "id": 19,
-        "name": "test19",
-        "price": "$19"
-    },
-    {
-        "id": 20,
-        "name": "test20",
-        "price": "$20"
     }
 ];
 

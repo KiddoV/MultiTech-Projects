@@ -85,18 +85,43 @@ button {
 
 /* Scrollbar display */
 body{
-	scrollbar-3dlight-color: white;
-	scrollbar-arrow-color: none;
-	scrollbar-base-color:;
-	scrollbar-darkshadow-color: none;
-	scrollbar-face-color: coral;
-	scrollbar-highlight-color:;
-	scrollbar-shadow-color:
+	scrollbar-track-color:  #AAA;
+	scrollbar-3dlight-color:  #AAA;
+	scrollbar-darkshadow-color:  #AAA;
+	scrollbar-arrow-color:  #AAA;
 }
 
 /*============================================================*/
 /***********************Additional CSS*************************/
 /**Nav Bar**/
+
+/* Program Card */
+.prog-card-title {
+	font-weight: bold;
+	font-family: sans-serif;
+}
+
+.pro-card-status-ready {
+	border-left: 7px solid #64DD17;
+}
+
+.pro-card-status-needupdate {
+	border-left: 7px solid #AA00FF;
+}
+
+.pro-card-status-notready {
+	border-left: 7px solid #D50000;
+}
+
+.pro-card-status-inprogress {
+	border-left: 7px solid #FFAB00;
+}
+
+/* Task Card */
+.task-title {
+	font-weight: bold;
+	font-size: 14px;
+}
 
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
@@ -114,21 +139,29 @@ body{
   border-radius: .2rem;
 }
 
-.nav {
+#nav-tab{
 	width: 55px !important;
 }
-.nav-link {
+.left-nav-link {
 	border-radius: 0 !important;
 	max-height: 35px !important;
 }
-.nav-link:hover {
+.left-nav-link:hover {
 	background: rgba(0, 0, 0, .3);
 }
-.nav-link.active {
+.left-nav-link.active {
 	background: #F5F5F5 !important;
 	color: black !important;
 	border-left: 5px solid coral;
 	padding-left: 20px;
+}
+
+.task-nav-link {
+	padding: 2px 6px !important;
+	color: black;
+}
+.task-nav-link.active {
+	background: coral !important;
 }
 
 .alert {

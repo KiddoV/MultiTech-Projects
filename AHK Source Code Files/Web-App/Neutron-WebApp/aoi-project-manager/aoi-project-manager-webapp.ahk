@@ -16,7 +16,7 @@ IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
     FileCreateDir C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
-Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"
+Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"    
 Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\app-settings.ini"
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
