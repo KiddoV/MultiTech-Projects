@@ -21,12 +21,12 @@ IfNotExist C:\V-Projects\RTIAuto-FinalConfig\caches
 IfNotExist C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui
     FileCreateDir C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui
     
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\rti_check_status.ttl, C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_check_status.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\rti_all-config-in-one.ttl, C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl, 1
+FileInstall C:\MultiTech-Projects\TTL-Files\rti_check_status.ttl, C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_check_status.ttl, 1
+FileInstall C:\MultiTech-Projects\TTL-Files\rti_all-config-in-one.ttl, C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl, 1
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check_mark.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\check_mark.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\x_mark.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\check_mark.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\check_mark.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\x_mark.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png, 1
 
 FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, 1
 FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\RT_Python_Deps.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_Python_Deps.tar.gz, 1
@@ -43,8 +43,8 @@ Global step0ErrMsg := "Unknown ERROR!!?"
 Global step1ErrMsg := "Unknown ERROR!!?"
 Global step2ErrMsg := "UnKnown ERROR!!?"
 ;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\CreateFormData.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\CreateFormData.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
 Gui, Add, GroupBox, xm+0 ym+0 w190 h155 Section

@@ -20,7 +20,7 @@ Global mainWndTitle := "XDot Controller (PC1)"
 Global startedIndex := 1
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\LIB_xDot_controller.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\LIB_xDot_controller.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv

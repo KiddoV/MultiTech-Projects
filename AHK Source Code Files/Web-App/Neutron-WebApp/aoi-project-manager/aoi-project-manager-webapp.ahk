@@ -6,6 +6,7 @@ SetTitleMatchMode, RegEx
 #SingleInstance Force
 #NoEnv
 SetBatchLines -1
+
 ;;;Include the Neutron library
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\Neutron.ahk
 ;;;Other library
@@ -14,6 +15,8 @@ SetBatchLines -1
 ;;;;;;;;;;Installs Folder Location and Files;;;;;;;;;;
 IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
     FileCreateDir C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
+
+FileInstall, C:\MultiTech-Projects\DLL-files\SQLite3.dll, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\SQLite3.dll
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
 Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"    
@@ -21,6 +24,7 @@ Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manag
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
+
 NeutronWebApp.Load("aoi_project_manager_index.html")
 
 NeutronWebApp.Gui("-Resize +LabelAOIProManager")
@@ -68,7 +72,7 @@ FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, fontawesome.js, fontawesome.js
 FileInstall, solid.js, solid.js
-FileInstall, SQLite3.dll, SQLite3.dll       ;Required to use Class_SQLiteDB.ahk
+;FileInstall, SQLite3.dll, SQLite3.dll       ;Required to use Class_SQLiteDB.ahk
 ;=======================================================================================;
 ^q::
 AOIProManagerClose:
