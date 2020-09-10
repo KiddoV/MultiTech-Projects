@@ -1,0 +1,174 @@
+;
+;	Author: 		Viet Ho
+;	CANNOT STAND-ALONE RUN!!!!
+;
+
+show 0
+
+step2SrcFile1 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\conduit-external-mlinux4-0.1.0.tar.gz'
+step2DesFile1 = '/var/volatile/conduit-external-mlinux4-0.1.0.tar.gz'
+step3SrcFile1 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\20_000_001_000_conduit_mlinux4_install'
+step3DesFile1 = '/external_flash_a/packages/unmod/20_000_001_000_conduit_mlinux4_install'
+step4SrcFile1 = 'C:\V-Projects\ACTRLAuto-FinalConfig\transfering-files\30_001_007_008_acutrol_mlinux4_install'
+step4DesFile1 = '/external_flash_a/packages/unmod/30_001_007_008_acutrol_mlinux4_install'
+
+errMsg = "UNKNOWN ERROR"
+whatStep = param2
+try = 1
+
+;;whatStep = 'STEP3' ;;;For debugging
+:CONNECTING
+flushrecv
+sprintf2 msg 'CONNECTING TO TERATERM...(%d)' try
+statusbox msg 'TERATERM CONNECTION'
+timeout = 55 ; connection timeout in seconds
+mpause 1000
+connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=Conduit$@20Password16 /nosecuritywarning"
+if result < 2 then
+    try=try +1
+    if try < 10 goto CONNECTING
+    messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
+    end
+endif
+try = 1
+
+flushrecv
+strcompare whatStep 'STEP2'
+if result=0 goto STEP2
+strcompare whatStep 'STEP3'
+if result=0 goto STEP3
+strcompare whatStep 'STEP4'
+if result=0 goto STEP4
+
+;;;;;;;;;;;;;;STEP 2
+:STEP2
+flushrecv
+statusbox 'RUNNING STEP 2' 'STEP 2'
+setsync 1
+send 13
+wait '$'
+sendln 'sudo -s'
+wait 'Password:'
+mpause 500
+sendln 'Conduit$@20Password16'
+wait '#'
+mpause 500
+
+flushrecv
+scpsend step2SrcFile1 step2DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/1...' 'STEP 2'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE COMPLETE!' 'STEP 2'
+mpause 2000
+
+timeout = 200
+statusbox 'PROCESSING CONFIGURATION FILE' 'STEP 2'
+flushrecv
+sendln 'cd /var/volatile'
+wait '#'
+mpause 500
+sendln 'tar xvf conduit-external-mlinux4-0.1.0.tar.gz'
+wait '#'
+mpause 500
+statusbox 'SETTING UP OTHER CONFIGURATION' 'STEP 2'
+sendln 'cd conduit-external-mlinux4-0.1.0'
+wait '#'
+mpause 500
+sendln './setupbasepackages_sdcard.sh'
+waitln 'Configuring conduit-database'
+statusbox 'INITIALIZING DATABASE' 'STEP 2'
+mpause 5000
+waitln 'The system is going down for reboot NOW!'
+statusbox 'STEP 2 IS FINISED. REBBOTING NOW' 'STEP 2 DONE'
+mpause 400
+
+end
+
+:step2_failed
+messagebox errMsg 'STEP 2 FAILED'
+disconnect
+end
+
+;;;;;;;;;;;;;;STEP 3
+:STEP3
+flushrecv
+statusbox 'RUNNING STEP 3' 'STEP 3'
+setsync 1
+send 13
+wait '$'
+sendln 'sudo -s'
+wait 'Password:'
+mpause 500
+sendln 'Conduit$@20Password16'
+wait '#'
+mpause 500
+
+flushrecv
+scpsend step3SrcFile1 step3DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/1...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE COMPLETE!' 'STEP 3'
+mpause 2000
+
+sendln 'reboot'
+statusbox 'STEP 3 IS FINISED. REBBOTING NOW' 'STEP 3 DONE'
+mpause 400
+wait '#'
+
+end
+
+:step3_failed
+messagebox '' 'STEP 3 FAILED'
+disconnect
+end
+
+;;;;;;;;;;;;;;STEP 4
+:STEP4
+flushrecv
+statusbox 'RUNNING STEP 4' 'STEP 4'
+setsync 1
+send 13
+wait '$'
+sendln 'sudo -s'
+wait 'Password:'
+mpause 500
+sendln 'Conduit$@20Password16'
+wait '#'
+mpause 500
+
+flushrecv
+scpsend step4SrcFile1 step4DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/1...' 'STEP 4'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE COMPLETE!' 'STEP 4'
+mpause 2000
+
+sendln 'reboot'
+statusbox 'STEP 3 IS FINISED. REBBOTING NOW' 'STEP 4 DONE'
+mpause 400
+wait '#'
+
+end
+
+:step4_failed
+messagebox '' 'STEP 4 FAILED'
+disconnect
+end

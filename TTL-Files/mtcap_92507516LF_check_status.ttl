@@ -10,7 +10,11 @@ filecreate fhandle 'C:\V-Projects\MTCAP-92507516LF-Auto-FinalConfig\caches\mtcap
 
 
 connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=admin /nosecuritywarning /timeout=1 /nossh"
-if result=0 filewrite fhandle 'FAILED'
-if result=1 filewrite fhandle 'FAILED'
 if result=2 filewrite fhandle 'SUCCESSED'
+if result<2 then
+    flushrecv
+    connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=Conduit$@20Password16 /nosecuritywarning /timeout=1 /nossh"
+    if result=2 filewrite fhandle 'SUCCESSED'
+    if result<2 filewrite fhandle 'FAILED'
+endif
 end

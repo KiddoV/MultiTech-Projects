@@ -13,16 +13,16 @@ IfNotExist C:\V-Projects\AMAuto-Tester\TTL-Files
 IfNotExist C:\DEVICE_TEST_RECORDS
     FileCreateDir C:\DEVICE_TEST_RECORDS
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_test-new.ttl, C:\V-Projects\AMAuto-Tester\TTL-Files\all_test-new.ttl, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_config-new.ttl, C:\V-Projects\AMAuto-Tester\TTL-Files\all_config-new.ttl, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\check.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\check.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\time.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\time.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\arrow.png, C:\V-Projects\AMAuto-Tester\Imgs-for-GUI\arrow.png, 1
+FileInstall C:\MultiTech-Projects\TTL-Files\all_test-new.ttl, C:\V-Projects\AMAuto-Tester\TTL-Files\all_test-new.ttl, 1
+FileInstall C:\MultiTech-Projects\TTL-Files\all_config-new.ttl, C:\V-Projects\AMAuto-Tester\TTL-Files\all_config-new.ttl, 1
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\version518.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\ffs.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\ffs.bmp, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\version518.bmp, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\1111.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\1111.bmp, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\at-cpin.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 
 Global 210_ItemNums := ["70001161L"]

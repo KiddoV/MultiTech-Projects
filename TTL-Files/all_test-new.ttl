@@ -1009,7 +1009,7 @@ if result = 0 then
 	try = 0
 	goto gps_faliure
 elseif result > 0 then
-	 timeout = 70
+	 timeout = 80
 	 wait '4505.' '4506.' 'could not connect'
 	 if result=0 || result=3 then
 	  	:gps_faliure

@@ -8,11 +8,28 @@ isStep1 = -1
 isStep2 = -1
 isStep3 = -1
 try = 1
-errMsg = ""
+errMsg = "UNKNOWN ERROR"
 step1SrcFile1 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\config_MTCAP-LNA3-915-001A_1_7_4_09_24_19.tar.gz'
 step1DesFile1 = '/tmp'
 step2SrcFile1 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\conduit-external-no-sdcard.tar.gz'
 step2DesFile1 = '/home/root/conduit-external-no-sdcard.tar.gz'
+
+step3SrcFile1 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\20_000_000_007_conduit_mlinux4_install'
+step3DesFile1 = '/external_flash_a/packages/unmod/20_000_000_007_conduit_mlinux4_install'
+step3SrcFile2 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\20_000_000_008_conduit_mlinux4_upgrade'
+step3DesFile2 = '/external_flash_a/packages/unmod/20_000_000_008_conduit_mlinux4_upgrade'
+step3SrcFile3 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\20_000_001_000_conduit_mlinux4_upgrade'
+step3DesFile3 = '/external_flash_a/packages/unmod/20_000_001_000_conduit_mlinux4_upgrade'
+step3SrcFile4 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\30_000_000_008_wirelessaggregator_mlinux4_install'
+step3DesFile4 = '/external_flash_a/packages/unmod/30_000_000_008_wirelessaggregator_mlinux4_install'
+step3SrcFile5 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\30_000_001_000_wirelessaggregator_mlinux4_upgrade'
+step3DesFile5 = '/external_flash_a/packages/unmod/30_000_001_000_wirelessaggregator_mlinux4_upgrade'
+step3SrcFile6 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\30_000_002_000_wirelessaggregator_mlinux4_upgrade'
+step3DesFile6 = '/external_flash_a/packages/unmod/30_000_002_000_wirelessaggregator_mlinux4_upgrade'
+step3SrcFile7 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\30_000_003_000_wirelessaggregator_mlinux4_upgrade'
+step3DesFile7 = '/external_flash_a/packages/unmod/30_000_003_000_wirelessaggregator_mlinux4_upgrade'
+step3SrcFile8 = 'C:\vbtest\MTCAP\MTCAP-LNA3-915-001A-MAR\30_000_004_000_wirelessaggregator_mlinux4_upgrade'
+step3DesFile8 = '/external_flash_a/packages/unmod/30_000_004_000_wirelessaggregator_mlinux4_upgrade'
 
 whatStep = param2
 strcompare whatStep 'STEP1'
@@ -22,7 +39,7 @@ isStep2 = result
 strcompare whatStep 'STEP3'
 isStep3 = result
 
-isStep2 = 0
+;;isStep3 = 0		;;;;;;FOR TESTING
 :CONNECTING
 flushrecv
 sprintf2 msg 'CONNECTING TO TERATERM...(%d)' try
@@ -123,13 +140,12 @@ mpause 2000
 closett
 end
 
-;;;goto STEP2
+;;;
 :step1_failed
 closesbox
 statusbox errMsg 'STEP 1 FAILED'
 mpause 400
 disconnect
-closett
 end
 
 ;;;;;;;;;;;;;;STEP 2
@@ -137,8 +153,9 @@ end
 flushrecv
 statusbox 'RUNNING STEP 2' 'STEP 2'
 setsync 1
+send 13
+wait '#'
 
-mpause 1000
 flushrecv
 scpsend step2SrcFile1 step2DesFile1
 do
@@ -152,11 +169,157 @@ mpause 1000
 statusbox 'TRANSFER CONFIGURATION FILE COMPLETE!' 'STEP 2'
 mpause 2000
 
+statusbox 'PROCESSING CONFIGURATION FILE' 'STEP 2'
+flushrecv
+sendln 'tar xvf conduit-external-no-sdcard.tar.gz'
+wait "#"
+mpause 500
+flushrecv
+sendln 'cd conduit-external'
+wait "#"
+mpause 500
+flushrecv
+sendln './setupbasepackages_nosdcard.sh'
+timeout = 200
+statusbox 'SETTING UP OTHER CONFIGURATION' 'STEP 2'
+wait 'Initializing database'
+statusbox 'INITIALIZING DATABASE...' 'STEP 2'
+waitln 'The system is going down for reboot NOW!'
+statusbox 'STEP 2 IS FINISED. REBBOTING NOW' 'STEP 2 DONE'
+mpause 400
+
+end
+
 ;;;;;;;;;
 :step2_failed
 closesbox
 statusbox errMsg 'STEP 2 FAILED'
 mpause 400
 disconnect
-closett
+end
+
+;;;;;;;;;;;;;;STEP 3
+:STEP3
+timeout = 30
+flushrecv
+statusbox 'RUNNING STEP 3' 'STEP 3'
+setsync 1
+
+send 13
+wait '#'
+sendln 'rm -fr conduit-external*'
+wait '#'
+
+scpsend step3SrcFile1 step3DesFile1
+do
+   statusbox 'TRANSFERING FILE 1/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 1/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile2 step3DesFile2
+do
+   statusbox 'TRANSFERING FILE 2/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 2/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile3 step3DesFile3
+do
+   statusbox 'TRANSFERING FILE 3/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 3/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile4 step3DesFile4
+do
+   statusbox 'TRANSFERING FILE 4/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 4/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile5 step3DesFile5
+do
+   statusbox 'TRANSFERING FILE 5/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 5/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile6 step3DesFile6
+do
+   statusbox 'TRANSFERING FILE 6/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 6/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile7 step3DesFile7
+do
+   statusbox 'TRANSFERING FILE 7/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 7/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+scpsend step3SrcFile8 step3DesFile8
+do
+   statusbox 'TRANSFERING FILE 8/8...' 'STEP 3'
+   mpause 10
+   sprintf2 str 'ps -ef |grep -v grep |grep -c scp'
+   sendln str
+   waitln '0' '1'
+loop while result != 1
+mpause 1000
+statusbox 'TRANSFER CONFIGURATION FILE 8/8 COMPLETE!' 'STEP 3'
+mpause 2000
+
+flushrecv
+sendln 'ls /external_flash_a/packages/unmod/*'
+wait '#'
+mpause 500
+statusbox 'STEP 3 IS FINISHED' 'STEP 3 DONE'
+mpause 1000
+sendln 'reboot'
+
+end
+
+;;;;;;;;;
+:step3_failed
+closesbox
+statusbox errMsg 'STEP 3 FAILED'
+mpause 400
+disconnect
 end
