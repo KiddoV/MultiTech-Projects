@@ -4,20 +4,23 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-	<!-- Boostrap CSS and JS -->
-	<script src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
-	<link href="bootstrap.min.css" rel="stylesheet">
-	<script defer src="bootstrap.bundle.min.js"></script>
+	<!-- Boostrap CSS and JS (MDB Version)-->
+	<script src="mdboostrap/jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
+	<link href="mdboostrap/bootstrap.min.css" rel="stylesheet">
+	<script src="mdboostrap/bootstrap.min.js"></script>
+	<link href="mdboostrap/font-googleapi.css" rel="stylesheet">
+	<link href="mdboostrap/mdb.min.css" rel="stylesheet">
+	<script src="mdboostrap/mdb.min.js"></script>
+	<script src="mdboostrap/popper.min.js"></script>
+
+	<!-- Font Awesome -->
+	<script src="fontawesome.js"></script>
+	<script src="solid.js"></script>
+
+	<!-- Boostrap Table -->
 	<link href="bootstrap-table.min.css" rel="stylesheet">
 	<script defer src="bootstrap-table.min.js"></script>
-	<!-- Font Awesome JS -->
-	<script defer src="solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
-	<script defer src="fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
 
-	<!-- styles needed by jScrollPane -->
-	<link type="text/css" href="style/jquery.jscrollpane.css" rel="stylesheet" media="all" />
-	<!-- the jScrollPane script -->
-	<script type="text/javascript" src="script/jquery.jscrollpane.min.js"></script>
 	<!-- Custom CSS and JS -->
 	<link href="aoi_pro_man_main.css" rel="stylesheet">
 	<script src="aoi_pro_man_main.js"></script>
@@ -30,7 +33,7 @@
 
 <!-- Top alert box -->
 <div class="position-fixed mt-2 alert-box-center default-mouse" style="width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word; text-align: center; z-index: -99">
-	<div id="alert-box" class="shadow alert alert-dismissible fade" role="alert">
+	<div id="alert-box" class="alert alert-dismissible fade" role="alert">
 		<p id="alert-box-content" style="margin: 0;"><strong>Hello!</strong> This is an alert!</p>
 		<span id="close-alert-btn" type="button" class="close" data-toggle="collapse" href="#alert-box" style="padding: 2px 10px 0 0; display: none;"><i class="fas fa-xs fa-times"></i></span>
 	</div>
@@ -63,22 +66,22 @@
 
 		<!-- Main Content -->
 		<main class="flex-grow-1 overflow-auto bg-app-color" style="overflow: hidden;">
-			<div id="nav-all-tab-content" class="tab-content container p-1">
+			<div id="nav-all-tab-content" class="tab-content container p-0">
 
 				<!-- Task Tab Contents -->
 				<div id="task-tab" class="tab-pane fade show active">
-					<button type="button" class="btn btn-dark btn-sm rounded-circle position-fixed shadow-lg" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 97"><i class="fas fa-2x fa-plus"></i></button>
+					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 97"><i class="fas fa-2x fa-plus"></i></button>
 					<div class="mt-2">
 						<ul class="nav nav-pills justify-content-end">
 						  <li class="nav-item"><a class="nav-link task-nav-link active" data-toggle="pill" href="#pills-task-active">Active</a></li>
 						  <li class="nav-item"><a class="nav-link task-nav-link" data-toggle="pill" href="#pills-task-history">History</a></li>
 						</ul>
-						<div class="tab-content" id="pills-tabContent">
+						<div class="tab-content default-mouse" id="pills-tabContent">
 						  <div id="pills-task-active" class="tab-pane fade show active">
-								<h6>Active Tasks</h6>
-								<div style="height: 470px; overflow-y: auto;">
+								<h6 class="pl-2 text-muted">Active Tasks</h6>
+								<div class="" style="height: 470px; overflow-y: auto; overflow-x: hidden;">
 
-									<div class="card shadow-sm p-1 mb-2" style="max-width: 99%; height: 70px;">
+									<div type="button" class="card p-1 mb-2 ml-1 fast animated bounceInRight hoverable" style="max-width: 99%; height: 70px;">
 										<h6 class="mt-1 ml-1 task-title">ECO Update<span class="badge badge-warning ml-1">In Progress</span></h6>
 										<div class="d-flex justify-content-end" style="margin-top: -20px;">
 											<div class="progress float-left" style="height: 10px; width: 300px;"><div class="progress-bar progress-bar-striped bg-warning" style="width: 50%; height: 10px"></div></div>
@@ -88,7 +91,7 @@
 								</div>
 							</div>
 						  <div id="pills-task-history" class="tab-pane fade">
-								<h6>Task History</h6>
+								<h6 class="pl-2 text-muted">Task History</h6>
 								<div style="height: 470px; overflow-y: auto;">
 
 								</div>
@@ -99,28 +102,28 @@
 
 				<!-- Search Program Contents -->
 				<div id="prog-search-tab" class="tab-pane fade p-1" style="overflow: hidden;">
-					<div id="search-bar-container" class="" style="width: 99%;">
+					<div id="search-bar-container" class="pt-2" style="width: 99%;">
 						<div class="input-group mb-4">
 							<input id="prog-search-bar" type="search" placeholder="Enter PCB #, Build # or Program Name..." class="form-control allow-select-text" style="box-shadow: none;">
 							<div class="input-group-append">
-				  			<button id="prog-search-btn" type="submit" class="btn btn-info"><i class="fas fa-search"></i></button>
+				  			<button id="prog-search-btn" type="submit" class="btn aqua-gradient m-0" style="height: 38px; margin-top: -3px;" onclick="ahk.SearchProgram(event)"><i class="fas fa-2x fa-search" style="margin-top: -7px;"></i></button>
 							</div>
 				  	</div>
 						<span id="search-status-label" class="d-flex pb-1 pl-2" style="margin-top: -25px; font-size: 10px; color: #B0BEC5;">Enter value to search...</span>
 					</div>
 
-					<div id="search-result-container" class="" style="width: 100%; height: 470px; overflow-y: auto;">
+					<div id="search-result-container" class="" style="width: 100%; height: 470px; overflow-y: auto; overflow-x: hidden;">
 
-						<div class="card shadow-sm p-1 mb-2 pro-card-status-ready" style="max-width: 99%;  height: 60px;">
+						<div type="button" class="card p-1 mb-2 pro-card-status-ready fast animated bounceInDown hoverable" style="max-width: 99%;  height: 60px;">
 							<h6 class="prog-card-title">70001000L</h6>
 						</div>
-						<div class="card shadow-sm p-1 mb-2 pro-card-status-needupdate" style="max-width: 99%;  height: 60px;">
+						<div type="button" class="card p-1 mb-2 pro-card-status-needupdate fast animated bounceInDown hoverable" style="max-width: 99%;  height: 60px;">
 							<h6 class="prog-card-title">70001000L</h6>
 						</div>
-						<div class="card shadow-sm p-1 mb-2 pro-card-status-notready" style="max-width: 99%;  height: 60px;">
+						<div type="button" class="card p-1 mb-2 pro-card-status-notready fast animated bounceInDown hoverable" style="max-width: 99%;  height: 60px;">
 							<h6 class="prog-card-title">70001000L</h6>
 						</div>
-						<div class="card shadow-sm p-1 mb-2 pro-card-status-inprogress" style="max-width: 99%;  height: 60px;">
+						<div type="button" class="card p-1 mb-2 pro-card-status-inprogress fast animated bounceInDown hoverable" style="max-width: 99%;  height: 60px;">
 							<h6 class="prog-card-title">70001000L</h6>
 						</div>
 
@@ -129,15 +132,14 @@
 
 				<!-- Tool Tab Contents -->
 				<div id="tool-tab" class="tab-pane fade">
-					Tools
+					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test MsgBox</button>
 				</div>
 
 				<!-- Database Tab Contents -->
 				<div id="database-tab" class="tab-pane fade">
-					<div class="" style="height: 75px">
-
+					<div class="" style="">
 						<form class="form-inline">
-						  <div class="input-group mb-2 mr-sm-2">
+						  <div class="input-group mb-2 mr-sm-2 shadow-sm">
 						    <div class="input-group-prepend">
 						      <div class="input-group-text"><i class="fas fa-table"></i></div>
 						    </div>
@@ -146,14 +148,14 @@
 									<option value="users">Users</option>
 								</select>
 						  </div>
-						  <button type="button" class="btn btn-dark btn-sm mb-2">Get</button>
+						  <button type="button" class="btn btn-dark btn-sm" style="top: -4px; height: 30px;">Get</button>
 						</form>
-
 					</div>
-					<div class="" style="overflow: hidden; border: solid 1px;">
+
+					<div class="card" style="overflow: hidden;">
 						<table id="database-table" class="table-sm"
 						  data-toggle="table"
-						  data-height="460"
+						  data-height="495"
 						  data-custom-sort="customSort"
 						  data-url="">
 						  <thead>
@@ -180,7 +182,7 @@
 					        Settings here!!!
 					     </div>
 					     <div class="modal-footer">
-					       <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+					       <button type="button" class="btn btn-outline-primary btn-sm" data-dismiss="modal">Cancel</button>
 					       <button type="button" class="btn btn-primary btn-sm">Save</button>
 					     </div>
 					   </div>
@@ -198,20 +200,10 @@
 
 <!-- Inner Javascript -->
 <script>
-	// var alertBox =setInterval(function() {
-	//    if ($('#alert-box').is(":visible")) {
-	//       alert("Exists!");
-	//       clearInterval(alertBox);
-	//    }
-	// }, 100); // check every 100ms
-	// setInterval(function(){
-	// 	document.getElementById("close-alert-btn").click();
-	// 	// $("#alert-box").collapse()
-	// }, 2000);
-	// window.setTimeout(function() {
-	// 	$("#alert-box").hide();
-	// }, 2000);
+
 	$(document).ready(function() {
+		// Tooltips Initialization
+
 		// close the alert automatically
 		// setTimeout(function() {
 		// 		$("#alert-box").collapse();

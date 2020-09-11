@@ -67,7 +67,7 @@ mpause 1000
 statusbox 'TRANSFER CONFIGURATION FILE COMPLETE!' 'STEP 2'
 mpause 2000
 
-timeout = 200
+timeout = 999
 statusbox 'PROCESSING CONFIGURATION FILE' 'STEP 2'
 flushrecv
 sendln 'cd /var/volatile'
@@ -82,7 +82,7 @@ wait '#'
 mpause 500
 sendln './setupbasepackages_sdcard.sh'
 waitln 'Configuring conduit-database'
-statusbox 'INITIALIZING DATABASE' 'STEP 2'
+statusbox 'INITIALIZING DATABASE...' 'STEP 2'
 mpause 5000
 waitln 'The system is going down for reboot NOW!'
 statusbox 'STEP 2 IS FINISED. REBBOTING NOW' 'STEP 2 DONE'
@@ -97,6 +97,7 @@ end
 
 ;;;;;;;;;;;;;;STEP 3
 :STEP3
+timeout = 55
 flushrecv
 statusbox 'RUNNING STEP 3' 'STEP 3'
 setsync 1
@@ -136,6 +137,7 @@ end
 
 ;;;;;;;;;;;;;;STEP 4
 :STEP4
+timeout = 55
 flushrecv
 statusbox 'RUNNING STEP 4' 'STEP 4'
 setsync 1

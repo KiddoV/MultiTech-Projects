@@ -50,10 +50,10 @@ Global step5ErrMsg := "Unknown ERROR!!?"
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 Gui, Add, GroupBox, xm+0 ym+0 w255 h190 Section, ACUTROL-94557716LF
 Gui, Font, Bold
-Gui, Add, Text, xs+30 ys+20 vstep1Label, STEP 1. Commissioning
-Gui, Add, Text, xs+30 ys+45 vstep2Label, STEP 2. Upload External MLinux4
-Gui, Add, Text, xs+30 ys+70 vstep3Label, STEP 3. Upload 20_000_001_000
-Gui, Add, Text, xs+30 ys+95 vstep4Label, STEP 4. Upload 30_001_007_008
+Gui, Add, Text, xs+35 ys+20 vstep1Label, STEP 1. Commissioning
+Gui, Add, Text, xs+35 ys+45 vstep2Label, STEP 2. Upload External MLinux4
+Gui, Add, Text, xs+35 ys+70 vstep3Label, STEP 3. Upload 20_000_001_000
+Gui, Add, Text, xs+35 ys+95 vstep4Label, STEP 4. Upload 30_001_007_008
 Gui, Font
 
 Gui, Add, Picture, xs+7 ys+17 w18 h18 +BackgroundTrans vprocess1,
@@ -82,7 +82,8 @@ CloseSSLHelper:
     {
         ControlClick, Button1, Security Alert, , Left, 2
         Sleep 100
-        SetTimer, CloseSSLHelper, Off
+        IfWinNotExist, Security Alert
+            SetTimer, CloseSSLHelper, Off
     }
 Return
 
@@ -137,7 +138,7 @@ RunAll() {
             return
         }
         Progress, ZH0 M FS10, FINISHED STEP 3`nWAITING FOR CONDUIT TO REBOOT..., , STEP 3
-        Sleep 230000
+        Sleep 300000
         Loop,
         {
             if (checkActrlStatus()) {
@@ -153,7 +154,8 @@ RunAll() {
         }
         EndTime := A_TickCount - StartTime
         totalTimeInMin := (EndTime / 1000) / 60
-        RegExMatch(totalTimeInMin, "[1-9]*.[0-9]{2}", totalTimeInMin) 
+        ;RegExMatch(totalTimeInMin, "[1-9]*.[0-9]{2}", totalTimeInMin)
+        totalTimeInMin := Round(totalTimeInMin, 2)
         FormatTime, timeNow, , hh:mm:ss tt
         OnMessage(0x44, "CheckIcon") ;Add icon
         MsgBox 0x81, FINISHED, Finished auto-final configuration for ACUTROL.`nFinished at: %timeNow% -- Total run time: %totalTimeInMin% (Minutes)
@@ -212,7 +214,7 @@ RunStep2to4() {
                 return
             }
             Progress, ZH0 M FS10, FINISHED STEP 3`nWAITING FOR CONDUIT TO REBOOT..., , STEP 3
-            Sleep 230000
+            Sleep 300000
             Loop,
             {
                 if (checkActrlStatus()) {
@@ -252,6 +254,7 @@ Step1() {
     Sleep 1000
     SetTimer, CloseSSLHelper, 100
     Progress, ZH0 M FS10, CHECKING FOR CONNECTION..., , STEP 1
+    step1ErrMsg = Failed to connect to <https://192.168.2.1/commissioning>`nERR: TIMEOUT!!!
     url := "https://192.168.2.1/api/commissioning"
     req.open("GET", url, True)
     req.Send()
@@ -259,6 +262,7 @@ Step1() {
     {
         Sleep 1000
         if (A_Index = 50) {
+            ToolTip HERE! %A_Index%
             step1ErrMsg = Failed to connect to <https://192.168.2.1/commissioning>`nERR: TIMEOUT!!!
             return 0
         } else if (req.readyState = 4){
@@ -496,7 +500,7 @@ changeStepLabelStatus(ctrID := "", status := "") {
 resetStepLabelStatus() {
     Gui, 1: Default
     index := 0
-    Loop, 3
+    Loop, 6
     {
         Gui, Font, Bold
         GuiControl, Font, step%index%Label

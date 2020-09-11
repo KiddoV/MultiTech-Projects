@@ -64,9 +64,9 @@ Return
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
 FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
-FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, jquery.min.js, jquery.min.js
-FileInstall, bootstrap.bundle.min.js, bootstrap.bundle.min.js
+FileInstall, bootstrap.min.css, bootstrap.min.css
+FileInstall, bootstrap.min.js, bootstrap.min.js
 FileInstall, bootstrap-table.min.css, bootstrap-table.min.css
 FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
@@ -87,14 +87,20 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("", "Test MsgBox", "", "")
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
-    ;DisplayAlertMsg("You <strong>click</strong> the button!!!!", "alert-success")
-    SQL := "SELECT * FROM Users;"
-    If !AOI_Pro_DB.GetTable(SQL, Result)
-       MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
-    MsgBox % Result.ColumnCount
+    DisplayAlertMsg("You <strong>click</strong> the button!!!!", "alert-success")
+    ;SQL := "SELECT * FROM Users;"
+    ;If !AOI_Pro_DB.GetTable(SQL, Result)
+       ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    ;MsgBox % Result.ColumnCount
 }
 
-
+SearchProgram(neutron, event) {
+    ;;Get string from search bar
+    searchInput := NeutronWebApp.doc.getElementById("prog-search-bar").value
+    if (searchInput == "") {
+        DisplayAlertMsg("Input is empty!!!", "alert-warning")
+    }
+}
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;

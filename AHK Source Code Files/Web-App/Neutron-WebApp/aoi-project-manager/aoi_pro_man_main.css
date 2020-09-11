@@ -89,6 +89,7 @@ body{
 	scrollbar-3dlight-color:  #AAA;
 	scrollbar-darkshadow-color:  #AAA;
 	scrollbar-arrow-color:  #AAA;
+	-ms-overflow-style: none;		/* Hide the scrollbar */
 }
 
 /*============================================================*/
@@ -120,7 +121,7 @@ body{
 /* Task Card */
 .task-title {
 	font-weight: bold;
-	font-size: 14px;
+	font-size: 15px;
 }
 
 /*=================================================================*/
@@ -185,4 +186,8 @@ body{
 }
 .modal-dialog {
 	margin-top: 5px;
+}
+
+.badge {
+	top: 0;
 }
