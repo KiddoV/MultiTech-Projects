@@ -101,8 +101,12 @@ body{
 	font-weight: bold;
 	font-family: sans-serif;
 }
+.prog-card-subtitle {
+	font-weight: bold;
+	font-size: 12px;
+}
 
-.pro-card-status-ready {
+.pro-card-status-useable {
 	border-left: 7px solid #64DD17;
 }
 

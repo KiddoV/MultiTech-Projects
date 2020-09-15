@@ -56,7 +56,7 @@ Return
 AutoCloseAlertBox:
     ;NeutronWebApp.doc.getElementById("close-alert-btn").click()
     NeutronWebApp.doc.getElementById("alert-box").classList.remove("show")
-    NeutronWebApp.doc.getElementById("alert-box").style.zIndex := "-99"
+    NeutronWebApp.doc.getElementById("alert-box-container").style.zIndex := "-99"
     SetTimer, AutoCloseAlertBox, Off
 Return
 
@@ -87,7 +87,7 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("", "Test MsgBox", "", "")
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
-    DisplayAlertMsg("You <strong>click</strong> the button!!!!", "alert-success")
+    DisplayAlertMsg("You click the button!!!!", "alert-success")
     ;SQL := "SELECT * FROM Users;"
     ;If !AOI_Pro_DB.GetTable(SQL, Result)
        ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
@@ -95,10 +95,33 @@ TestBttn(neutron, event) {
 }
 
 SearchProgram(neutron, event) {
+    Local RowCount := 0
     ;;Get string from search bar
     searchInput := NeutronWebApp.doc.getElementById("prog-search-bar").value
     if (searchInput == "") {
-        DisplayAlertMsg("Input is empty!!!", "alert-warning")
+        DisplayAlertMsg("Search field is empty!!!", "alert-warning")
+        Return
+    }
+    
+    ;;Get data from DB
+    NeutronWebApp.doc.getElementById("search-status-label").innerHTML := "Searching..."
+    SQL := "SELECT * FROM aoi_programs WHERE prog_build_number LIKE '%" . searchInput . "%'"
+    
+    If !AOI_Pro_DB.GetTable(SQL, Result) {
+        DisplayAlertMsg("Execute SQL statement FAILED!!!", "alert-danger")
+        Return
+    }
+    
+    RowCount := Result.RowCount
+    NeutronWebApp.doc.getElementById("search-status-label").innerHTML := "Found " . RowCount . " result(s)"
+    
+    DisplayProgCard(Result)
+    
+}
+
+OnEnter(neutron, event) {
+    if (event.keyCode == 13 && event.srcElement.id == "prog-search-bar") {
+        SearchProgram(neutron, event)
     }
 }
 ;=======================================================================================;
@@ -119,11 +142,68 @@ HtmlMsgBox(Options := "", Title := "", Text := "", Timeout := 0) {
 DisplayAlertMsg(Text := "", Color := "", Timeout := 2500) {
     NeutronWebApp.doc.getElementById("alert-box-content").innerHTML := Text
     NeutronWebApp.doc.getElementById("alert-box").classList.add(Color)
-    NeutronWebApp.doc.getElementById("alert-box").style.zIndex := "99"
+    NeutronWebApp.doc.getElementById("alert-box-container").style.zIndex := "99"
     NeutronWebApp.doc.getElementById("close-alert-btn").style.display := "block"
     NeutronWebApp.doc.getElementById("alert-box").classList.add("show")
     
     SetTimer, AutoCloseAlertBox, %Timeout%
+}
+
+DisplayProgCard(Result) {
+    ;MsgBox % BuildJson(Result)
+    If (Result.HasNames) {
+        NeutronWebApp.doc.getElementById("search-result-container").innerHTML := ""     ;Delete all old result before display new result
+        If (Result.HasRows) {
+            Loop, % Result.RowCount {
+                Result.Next(Row)
+                Loop, % Result.ColumnCount 
+                {
+                    If (A_Index = 1)
+                        progDBId := Row[A_Index]
+                    If (A_Index = 2)
+                        progFullName := Row[A_Index]
+                    If (A_Index = 3)
+                        progStatus := Row[A_Index]
+                    If (A_Index = 4)
+                        buildNum := Row[A_Index]
+                    If (A_Index = 5)
+                        pcbNum := Row[A_Index]
+                    If (A_Index = 7)
+                        currentECO := Row[A_Index]
+                    If (A_Index = 8)
+                        currentECL := Row[A_Index]
+                    If (A_Index = 15)
+                        machineBrandName := Row[A_Index]
+                }
+                
+                
+                progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEEDUPDATE" ? "pro-card-status-needupdate" : progStatus = "NOTREADY" ? "pro-card-status-notready" : progStatus = "INPROGRESS" ? "pro-card-status-inprogress" : ""
+                brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : ""
+                html =
+                (Ltrim
+                <div id="%progDBId%" type="button" class="card p-1 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%;  height: 60px;">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <div class="row">
+                                <h6 class="col-sm pt-1 prog-card-title">%buildNum%</h6>
+                                <h6 class="col-sm pt-1 prog-card-title">%currentECL%</h6>
+								<h6 class="col-sm pt-1 prog-card-title">%currentECO%</h6>
+								<h6 class="col-sm pt-1 prog-card-title">%pcbNum%</h6>
+							</div>
+							<div class="row">
+								<p class="col-sm text-muted prog-card-subtitle">%progFullName%</p>
+							</div>
+						</div>
+						<div class="col-md-2" style="">
+                            <img src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px;" width="65" height="65">
+						</div>
+					</div>
+                </div>
+                )
+                NeutronWebApp.doc.getElementById("search-result-container").insertAdjacentHTML("beforeend", html)
+            }
+        }
+    }
 }
 
 ProcessIniFile() {
@@ -140,4 +220,28 @@ ProcessIniFile() {
         IniRead, out1, %MainSettingsFilePath%, Settings, MainDBFilePath
         MainDBFilePath := out1
     }
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;Function to print out JSON format!
+BuildJson(obj) 
+{
+    str := "" , array := true
+    for k in obj {
+        if (k == A_Index)
+            continue
+        array := false
+        break
+    }
+    for a, b in obj
+        str .= (array ? "" : """" a """: ") . (IsObject(b) ? BuildJson(b) : IsNumber(b) ? b : """" b """") . ", "	
+    str := RTrim(str, " ,")
+    return (array ? "[" str "]" : "{" str "}")
+}
+IsNumber(Num)
+{
+    if Num is number
+        return true
+    else
+        return false
 }
