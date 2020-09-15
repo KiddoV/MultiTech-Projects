@@ -181,7 +181,7 @@ DisplayProgCard(Result) {
                 brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : ""
                 html =
                 (Ltrim
-                <div id="%progDBId%" type="button" class="card p-1 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%;  height: 60px;">
+                <div id="%progDBId%" type="button" class="card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%;  height: 60px;">
                     <div class="row">
                         <div class="col-md-10">
                             <div class="row">

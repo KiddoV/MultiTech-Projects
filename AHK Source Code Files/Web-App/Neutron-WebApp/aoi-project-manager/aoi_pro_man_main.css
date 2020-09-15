@@ -39,7 +39,7 @@ button {
 }
 
 .bg-app-color {
-	background: #F5F5F5;
+	background: #eeeeee;
 }
 
 .bg-app-theme-dark {
@@ -107,19 +107,19 @@ body{
 }
 
 .pro-card-status-useable {
-	border-left: 7px solid #64DD17;
+	border-left: 10px solid #00c853;
 }
 
 .pro-card-status-needupdate {
-	border-left: 7px solid #AA00FF;
+	border-left: 10px solid #673ab7;
 }
 
 .pro-card-status-notready {
-	border-left: 7px solid #D50000;
+	border-left: 10px solid #ff3d00;
 }
 
 .pro-card-status-inprogress {
-	border-left: 7px solid #FFAB00;
+	border-left: 10px solid #fbc02d;
 }
 
 /* Task Card */
