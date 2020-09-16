@@ -35,6 +35,11 @@ NeutronWebApp.Gui("-Resize +LabelAOIProManager")
 NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ProcessIniFile()
 
+;;Create instance of Messagebox Gui
+Global NeutronMsgBox := new NeutronWindow()
+NeutronMsgBox.Load("html_msgbox.html")
+NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox")
+
 ;Display the Neutron main window
 NeutronWebApp.Show("w800 h600")
 
@@ -101,10 +106,10 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    ;HtmlMsgBox("", "Test MsgBox", "", "")
+    HtmlMsgBox( , , , "Test MsgBox", , 0)
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
-    DisplayAlertMsg("You click the button!!!!", "alert-success")
+    ;DisplayAlertMsg("You click the button!!!!", "alert-success")
     ;SQL := "SELECT * FROM Users;"
     ;If !AOI_Pro_DB.GetTable(SQL, Result)
        ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
@@ -144,15 +149,12 @@ OnEnter(neutron, event) {
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
-HtmlMsgBox(Options := "", Title := "", Text := "", Timeout := 0) {
-    NeutronMsgBox := new NeutronWindow()
-    NeutronMsgBox.Load("html_msgbox.html")
-    ;NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox")
-    NeutronMsgBox.doc.getElementById("title-label").innerHTML := %Title%    ;;;;Set MsgBox title
+HtmlMsgBox(Icon := "", Options := "", Size = "w300 h180", Title := "", MainText := "", Timeout := 0) {
     
-    NeutronMsgBox.Show("")
+    NeutronMsgBox.doc.getElementById("title-label").innerHTML := Title    ;;;;Set MsgBox title
     
-    Return
+    NeutronMsgBox.Show(Size)
+    
     
 }
 
