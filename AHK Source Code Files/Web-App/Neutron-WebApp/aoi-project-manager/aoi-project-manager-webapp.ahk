@@ -21,6 +21,8 @@ FileInstall, C:\MultiTech-Projects\DLL-files\SQLite3.dll, C:\V-Projects\WEB-APPL
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
 Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"    
 Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\app-settings.ini"
+
+Global DBStatus := ""
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
@@ -40,16 +42,18 @@ NeutronWebApp.Show("w800 h600")
 ;;Connecting to Database
 Global AOI_Pro_DB := new SQLiteDB()
 IfNotExist, %MainDBFilePath%
+    DisplayAlertMsg("SQLite Error, Could not find Database file!!", "alert-danger", 5000)
+IfExist, %MainDBFilePath% 
 {
-    MsgBox, 16, SQLite Error, Could not find Database file!!
-    Return
-}
-If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
-   MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
-   Return
+    If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
+       MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    }
 }
 
-Return
+#Persistent
+SetTimer, CheckDataBaseStatus, 400
+
+Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;=======================================================================================;
 ;;;Callback Functions
@@ -58,6 +62,19 @@ AutoCloseAlertBox:
     NeutronWebApp.doc.getElementById("alert-box").classList.remove("show")
     NeutronWebApp.doc.getElementById("alert-box-container").style.zIndex := "-99"
     SetTimer, AutoCloseAlertBox, Off
+Return
+
+CheckDataBaseStatus:
+    NeutronWebApp.doc.getElementById("icon-database-status").classList.remove("icon-working" , "icon-stopped")
+    IfNotExist, %MainDBFilePath%
+    {
+        DBStatus := "STOPPED - MISSING DATABASE MAIN FILE"
+        NeutronWebApp.doc.getElementById("icon-database-status").classList.add("icon-stopped")
+    }
+    IfExist, %MainDBFilePath%
+    {
+        NeutronWebApp.doc.getElementById("icon-database-status").classList.add("icon-working")
+    }  
 Return
 
 ;=======================================================================================;
@@ -105,7 +122,7 @@ SearchProgram(neutron, event) {
     
     ;;Get data from DB
     NeutronWebApp.doc.getElementById("search-status-label").innerHTML := "Searching..."
-    SQL := "SELECT * FROM aoi_programs WHERE prog_build_number LIKE '%" . searchInput . "%'"
+    SQL := "SELECT * FROM aoi_programs WHERE prog_build_number LIKE '%" . searchInput . "%' OR prog_full_name LIKE '%" . searchInput . "%' OR prog_pcb_number LIKE '%" . searchInput . "%' OR prog_current_eco LIKE '%" . searchInput . "%' OR prog_current_ecl LIKE '%" . searchInput . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
     
     If !AOI_Pro_DB.GetTable(SQL, Result) {
         DisplayAlertMsg("Execute SQL statement FAILED!!!", "alert-danger")
@@ -156,7 +173,7 @@ DisplayProgCard(Result) {
         If (Result.HasRows) {
             Loop, % Result.RowCount {
                 Result.Next(Row)
-                Loop, % Result.ColumnCount 
+                Loop, % Result.ColumnCount
                 {
                     If (A_Index = 1)
                         progDBId := Row[A_Index]
@@ -195,7 +212,7 @@ DisplayProgCard(Result) {
 							</div>
 						</div>
 						<div class="col-md-2" style="">
-                            <img src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px;" width="65" height="65">
+                            <img id="prog-card-brand-logo" src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="65" height="65">
 						</div>
 					</div>
                 </div>

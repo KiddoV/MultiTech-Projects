@@ -122,6 +122,27 @@ body{
 	border-left: 10px solid #fbc02d;
 }
 
+#prog-card-req-bttn:hover {
+	color: rgba(0, 0, 0, .3);
+}
+
+#prog-card-brand-logo:hover {
+	animation: rubberBand 1s linear .2s infinite;
+}
+
+/* Icon Status */
+.icon-working {
+	color: #00c853;
+}
+
+.icon-stopped {
+	color: #f44336;
+}
+
+.icon-problem {
+	color: #fbc02d;
+}
+
 /* Task Card */
 .task-title {
 	font-weight: bold;
