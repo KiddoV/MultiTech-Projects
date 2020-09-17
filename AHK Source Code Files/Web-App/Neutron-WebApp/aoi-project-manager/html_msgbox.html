@@ -27,7 +27,7 @@
 
 	<!-- Inner CSS -->
 	<style>
-		html { min-width: 200px !important; min-height: 150px !important;}
+		/* html { min-width: 300px !important; min-height: 180px !important; } */
 	</style>
 </head>
 
@@ -45,12 +45,17 @@
 		<!-- Main Content -->
 		<main class="overflow-auto p-3">
 
-			  <div class="row">
-			    <div class="col col-example">Column</div>
-			    <div class="col col-example">Column</div>
-			    <div class="w-100"></div>
-			    <div class="col col-example">Column</div>
-			    <div class="col col-example">Column</div>
+			  <div class="row" style="height: 100%;">
+			    <div class="col-3">
+						<span id="msgbox-icon-error" class="d-none"><i class="fas fa-3x fa-times-circle red-text"></i></span>
+						<span id="msgbox-icon-info" class="d-none"><i class="fas fa-3x fa-info-circle blue-text"></i></span>
+						<span id="msgbox-icon-check" class="d-none"><i class="fas fa-3x fa-check-circle green-text"></i></span>
+						<span id="msgbox-icon-question" class="d-none"><i class="fas fa-3x fa-question-circle deep-purple-text"></i></span>
+						<span id="msgbox-icon-warning" class="d-none"><i class="fas fa-3x fa-exclamation-triangle text-warning"></i></span>
+					</div>
+			    <div class="col-9 text-left">
+						<p id="msgbox-main-text" class="mt-2"></p>
+					</div>
 			  </div>
 
     </main>

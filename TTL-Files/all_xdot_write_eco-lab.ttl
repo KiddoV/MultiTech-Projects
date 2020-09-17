@@ -10,14 +10,17 @@ timeout = 5
 mpause 1000
 
 :GET_SET_VARS
-firmwareVers = 'Firmware : 3.0.2-mbed144'
+writeFirmwareVers = param9
+strcompare writeFirmwareVers 'v3.0.2'
+if result=0 firmwareVers = 'Firmware : 3.0.2-mbed144'
+
 debugFirmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
 xdotBreakPort = param4	;11
 sprintf2 xdotDriveLoc '%s:\' param5
 strcompare param6 'singleWrite'
 isSingleWrite = result
-freq = 'US915'
+freq = param7
 outDFreq = ''
 allID = param8
 outDeadNode = ''
@@ -28,7 +31,12 @@ fail = 0
 connFail = 0
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
-binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7.bin'
+
+strcompare writeFirmwareVers 'v3.0.2'
+if result=0 then
+    strcompare freq 'US915'
+    if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7.bin'
+endif
 
 ;;;Split data
 strsplit allID ','
@@ -52,13 +60,9 @@ if isFirstNode = 0 then
 endif
 
 :CONNECT
-strcompare param9 'newTTVersion'
-isTTNewVersion = result
-if isTTNewVersion = 0 then
-    sprintf2 cmdStr '/C=%s' param3
-    connect cmdStr
-    if result=1 goto connection_failed
-endif
+sprintf2 cmdStr '/C=%s' param3
+connect cmdStr
+if result=1 goto connection_failed
 
 :CHECK_CONNECTION
 mpause 500

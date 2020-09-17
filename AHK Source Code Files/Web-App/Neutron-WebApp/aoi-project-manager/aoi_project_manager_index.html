@@ -73,8 +73,8 @@
 					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 97"><i class="fas fa-2x fa-plus"></i></button>
 					<div class="mt-2">
 						<ul class="nav nav-pills justify-content-end">
-						  <li class="nav-item"><a class="nav-link task-nav-link active" data-toggle="pill" href="#pills-task-active">Active</a></li>
-						  <li class="nav-item"><a class="nav-link task-nav-link" data-toggle="pill" href="#pills-task-history">History</a></li>
+						  <li class="nav-item"><a class="nav-link task-nav-link active hoverable" data-toggle="pill" href="#pills-task-active">Active</a></li>
+						  <li class="nav-item"><a class="nav-link task-nav-link hoverable" data-toggle="pill" href="#pills-task-history">History</a></li>
 						</ul>
 						<div class="tab-content default-mouse" id="pills-tabContent">
 						  <div id="pills-task-active" class="tab-pane fade show active">
@@ -140,6 +140,7 @@
 				<!-- Tool Tab Contents -->
 				<div id="tool-tab" class="tab-pane fade">
 					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test MsgBox</button>
+					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button>
 					<div class="dropdown">
 					  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					    Dropdown button

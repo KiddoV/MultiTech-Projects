@@ -20,7 +20,7 @@ Global mainWndTitle := "XDot Controller (PC2)"
 Global startedIndex := 9
 
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\LIB_xDot_controller.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\LIB_xDot_controller.ahk
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 #SingleInstance Force
 #NoEnv
@@ -102,13 +102,20 @@ Loop, 8
 }
 
 Gui Add, Button, xs+182 ys+50 w15 h155 vgiveBackBttn ggiveBackToEdit, >
-Gui Add, Text, cgray xs+5 ys+225 vwfwLabel, FW: v3.2.1
-Gui Add, Text, cgray xs+140 ys+225 w40 vfreqLabel,
+
+;;For Eco Lab
+Gui Add, Text, xs+5 ys+204 vecoFwLabel Hidden, Firmware:
+For each, item in allEcoWriteFw
+    ecoFw .= (each == 1 ? "" : "|") . item
+Gui Add, DropDownList, AltSubmit xs+5 ys+217 w60 vchosenEcoWFw Hidden, %ecoFw%
+Gui Add, Text, xs+135 ys+204 vecoFreqLabel Hidden, Frequency:
+For each, item in allEcoFregs
+    ecoFreq .= (each == 1 ? "" : "|") . item
+Gui Add, DropDownList, AltSubmit xs+135 ys+217 w60 vchosenEcoFreq Hidden, %ecoFreq%
 Gui Font, Bold
 Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
 Gui Font
 
-;;For Eco Lab
 Gui Add, ListView, xs+5 ys+20 r9 w190 vidListView hWndhIdListView +Grid +NoSortHdr Hidden, P#|Node ID|Serial Number|App Key|UUID
 index := startedIndex
 Loop, 8

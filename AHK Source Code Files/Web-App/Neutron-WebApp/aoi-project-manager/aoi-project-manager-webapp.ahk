@@ -32,13 +32,13 @@ NeutronWebApp.Load("aoi_project_manager_index.html")
 NeutronWebApp.Gui("-Resize +LabelAOIProManager")
 
 ;;;Run BEFORE WebApp Started;;;
-NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
+NeutronWebApp.qs("#title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ProcessIniFile()
 
 ;;Create instance of Messagebox Gui
 Global NeutronMsgBox := new NeutronWindow()
 NeutronMsgBox.Load("html_msgbox.html")
-NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox")
+NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox +hWndHtmlMsgBox")
 
 ;Display the Neutron main window
 NeutronWebApp.Show("w800 h600")
@@ -64,22 +64,27 @@ Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;Callback Functions
 AutoCloseAlertBox:
     ;NeutronWebApp.doc.getElementById("close-alert-btn").click()
-    NeutronWebApp.doc.getElementById("alert-box").classList.remove("show")
-    NeutronWebApp.doc.getElementById("alert-box-container").style.zIndex := "-99"
+    NeutronWebApp.qs("#alert-box").classList.remove("show")
+    NeutronWebApp.qs("#alert-box-container").style.zIndex := "-99"
     SetTimer, AutoCloseAlertBox, Off
 Return
 
 CheckDataBaseStatus:
     NeutronWebApp.doc.getElementById("icon-database-status").classList.remove("icon-working" , "icon-stopped")
+    IfExist, %MainDBFilePath%
+    {
+        Check_DB := new SQLiteDB()
+        If !Check_DB.OpenDB(MainDBFilePath) {
+               NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
+            }
+        NeutronWebApp.qs("#icon-database-status").classList.add("icon-working")
+    }
+    
     IfNotExist, %MainDBFilePath%
     {
         DBStatus := "STOPPED - MISSING DATABASE MAIN FILE"
-        NeutronWebApp.doc.getElementById("icon-database-status").classList.add("icon-stopped")
+        NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
     }
-    IfExist, %MainDBFilePath%
-    {
-        NeutronWebApp.doc.getElementById("icon-database-status").classList.add("icon-working")
-    }  
 Return
 
 ;=======================================================================================;
@@ -106,7 +111,8 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    HtmlMsgBox( , , , "Test MsgBox", , 0)
+    HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
+    
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
     ;DisplayAlertMsg("You click the button!!!!", "alert-success")
@@ -114,6 +120,10 @@ TestBttn(neutron, event) {
     ;If !AOI_Pro_DB.GetTable(SQL, Result)
        ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
     ;MsgBox % Result.ColumnCount
+}
+
+TestBttn2(neutron, event) {
+    HtmlMsgBox("ERROR", , , "Test MsgBox", , 0)
 }
 
 SearchProgram(neutron, event) {
@@ -126,7 +136,7 @@ SearchProgram(neutron, event) {
     }
     
     ;;Get data from DB
-    NeutronWebApp.doc.getElementById("search-status-label").innerHTML := "Searching..."
+    NeutronWebApp.qs("#search-status-label").innerHTML := "Searching..."
     SQL := "SELECT * FROM aoi_programs WHERE prog_build_number LIKE '%" . searchInput . "%' OR prog_full_name LIKE '%" . searchInput . "%' OR prog_pcb_number LIKE '%" . searchInput . "%' OR prog_current_eco LIKE '%" . searchInput . "%' OR prog_current_ecl LIKE '%" . searchInput . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
     
     If !AOI_Pro_DB.GetTable(SQL, Result) {
@@ -135,7 +145,7 @@ SearchProgram(neutron, event) {
     }
     
     RowCount := Result.RowCount
-    NeutronWebApp.doc.getElementById("search-status-label").innerHTML := "Found " . RowCount . " result(s)"
+    NeutronWebApp.qs("#search-status-label").innerHTML := "Found " . RowCount . " result(s)"
     
     DisplayProgCard(Result)
     
@@ -149,13 +159,28 @@ OnEnter(neutron, event) {
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
-HtmlMsgBox(Icon := "", Options := "", Size = "w300 h180", Title := "", MainText := "", Timeout := 0) {
+HtmlMsgBox(Icon := "", Options := "", Size = "w300 h150", Title := "", MainText := "", Timeout := 0) {
     
-    NeutronMsgBox.doc.getElementById("title-label").innerHTML := Title    ;;;;Set MsgBox title
+    Global MsgboxIconElId := Icon = "ERROR" ? "#msgbox-icon-error" : Icon = "INFO" ? "#msgbox-icon-info" : Icon = "CHECK" ? "#msgbox-icon-check" : Icon = "QUESTION" ? "#msgbox-icon-question" : Icon = "WARNING" ? "#msgbox-icon-warning" : ""
     
-    NeutronMsgBox.Show(Size)
+    NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-none")
+    NeutronMsgBox.qs(MsgboxIconElId).classList.add("d-block")
     
+    NeutronMsgBox.qs("#title-label").innerHTML := Title     ;;;;Set MsgBox title
+    NeutronMsgBox.qs("#msgbox-main-text").innerHTML := MainText
     
+    HTMLMsgboxHWND := NeutronMsgBox.HWND
+    NeutronMsgBox.Gui("Cancel")
+    IfWinNotExist, ahk_id HtmlMsgBox
+        NeutronMsgBox.Show(Size)
+    
+    Return
+    
+    HtmlMsgBoxClose:
+        NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-block")
+        NeutronMsgBox.qs(MsgboxIconElId).classList.add("d-none")
+        NeutronMsgBox.Gui("Cancel")
+    Return
 }
 
 DisplayAlertMsg(Text := "", Color := "", Timeout := 2500) {
@@ -193,6 +218,8 @@ DisplayProgCard(Result) {
                         currentECL := Row[A_Index]
                     If (A_Index = 15)
                         machineBrandName := Row[A_Index]
+                    If (A_Index = 16)
+                        progAltType := Row[A_Index]
                 }
                 
                 
@@ -204,13 +231,14 @@ DisplayProgCard(Result) {
                     <div class="row">
                         <div class="col-md-10">
                             <div class="row">
-                                <h6 class="col-sm pt-1 prog-card-title">%buildNum%</h6>
+                                <h6 class="pt-1 prog-card-title">%buildNum%<span class="badge badge-default">Default</span></h6>
                                 <h6 class="col-sm pt-1 prog-card-title">%currentECL%</h6>
 								<h6 class="col-sm pt-1 prog-card-title">%currentECO%</h6>
 								<h6 class="col-sm pt-1 prog-card-title">%pcbNum%</h6>
 							</div>
 							<div class="row">
 								<p class="col-sm text-muted prog-card-subtitle">%progFullName%</p>
+                                <div class="col-sm"></div>
 							</div>
 						</div>
 						<div class="col-md-2" style="">
@@ -242,7 +270,7 @@ ProcessIniFile() {
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
-;;;Function to print out JSON format!
+;;;Function to print out JSON format From SQLite DB
 BuildJson(obj) 
 {
     str := "" , array := true

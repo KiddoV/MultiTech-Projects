@@ -78,8 +78,10 @@ Global isSyncMode := False
 Global ecoLabOn := False ;For auto open ECO LAB mode
 
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
+Global allEcoFregs := ["US915"]
 Global allReProgFw := ["v3.0.2-debug", "v3.2.1-debug"]
 Global allWriteFw := ["v3.2.1", "v3.1.0"]
+Global allEcoWriteFw := ["v3.0.2"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
 Global checkImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png"
@@ -385,7 +387,19 @@ writeAll() {
 
 writeEcoLab() {
     ;Global
+    GuiControlGet, chosenEcoFreq, , chosenEcoFreq, Text   ;Get value from DropDownList
+    GuiControlGet, chosenEcoWFw, , chosenEcoWFw, Text     ;Get value from DropDownList
+
+    if (chosenEcoFreq = "") {
+        MsgBox 4144, WARNING, Please select a FREQUENCY for ECO LAB!
+        return
+    }
     
+    if (chosenEcoWFw = "") {
+        MsgBox 4144, WARNING, Please select a FINAL FIRMWARE for ECO LAB!
+        return
+    }
+
     DriveGet, driveStatus, Status, %remotePath%
     if (driveStatus != "Ready") {
         MsgBox 16, ERROR, Server PC not responding. Please check before running!!
@@ -506,7 +520,7 @@ writeEcoLab() {
                     allIdStr .= idStr ","
                 }
                 
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 dummyParam7 %allIdStr% newTTVersion, , Hide, TTWinPID
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenEcoFreq% %allIdStr% %chosenEcoWFw%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 Sleep 3000
             }
@@ -929,7 +943,10 @@ toggleEcoLabMode() {
         ;;Show new gui controls
         GuiControl, Show, idListView
         GuiControl, , writeLabel, EUID Write (ECO LAB)
-        GuiControl, , freqLabel, US915
+        GuiControl, Show, ecoFwLabel
+        GuiControl, Show, ecoFreqLabel
+        GuiControl, Show, chosenEcoWFw
+        GuiControl, Show, chosenEcoFreq
         GuiControl, +gwriteEcoLab, writeAllBttn
         
         toggleState := 0
@@ -949,7 +966,10 @@ toggleEcoLabMode() {
         
         GuiControl, Hide, idListView
         GuiControl, , writeLabel, EUID Write
-        GuiControl, , freqLabel,
+        GuiControl, Hide, ecoFwLabel
+        GuiControl, Hide, ecoFreqLabel
+        GuiControl, Hide, chosenEcoWFw
+        GuiControl, Hide, chosenEcoFreq
         GuiControl, +gwriteAll, writeAllBttn
         
         toggleState := 1
@@ -1407,19 +1427,19 @@ GetXDot() {
             }
             
             if (HasValue(allWriteFW, inFw) = 0) {
-                MsgBox 16 , ERROR ,INPUT INVALID FIRMWARE VERSION. RETRY!
+                MsgBox 16 , ERROR , INPUT INVALID FIRMWARE VERSION. RETRY!
                 return
             }
             
             if (!isEcoLabMode)
                 if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) <> 16) {
-                    MsgBox 16 , ERROR ,INPUT INVALID EUID. RETRY!
+                    MsgBox 16 , ERROR , INPUT INVALID EUID. RETRY!
                     return
                 }
             
             if (isEcoLabMode)
                 if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) < 18) {
-                    MsgBox 16 , ERROR ,INPUT INVALID IDs FOR ECO LAB. RETRY!
+                    MsgBox 16 , ERROR , INPUT INVALID IDs FOR ECO LAB. RETRY!
                     return
                 }
             
