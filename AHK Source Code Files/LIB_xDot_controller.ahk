@@ -986,7 +986,9 @@ syncModeActive() {
     IfExist, %syncModeFilePath%
     {
         Static oldFreqDropPos
+        Static oldFreqEcoDropPos
         Static oldWFwDropPos
+        Static oldWFwEcoDropPos
         Static oldPFwDropPos
          
         ;;Update lot code label
@@ -1001,18 +1003,30 @@ syncModeActive() {
             isSyncMode := True
             Menu, OptionMenu, Check, Enable Sync Mode
             
+            ;;Auto choose Writing Frequency
             IniRead, freqDropPos, %syncModeFilePath%, Sync, FrequencyDropPos
+            IniRead, freqEcoDropPos, %syncModeFilePath%, Sync, FrequencyEcoDropPos
             if (freqDropPos != oldFreqDropPos) {
                 oldFreqDropPos := freqDropPos
                 GuiControl, Choose, chosenFreq, %freqDropPos%
             }
+            if (freqEcoDropPos != oldFreqEcoDropPos) {
+                oldFreqEcoDropPos := freqEcoDropPos
+                GuiControl, Choose, chosenEcoFreq, %freqEcoDropPos%
+            }
+            
             ;;Auto choose Writing Firmware
             IniRead, wFwDropPos, %syncModeFilePath%, Sync, WriteFirmwareDropPos
+            IniRead, wFwEcoDropPos, %syncModeFilePath%,  Sync, WriteFirmwareEcoDropPos
             if (wFwDropPos != oldWFwDropPos) {
                 oldWFwDropPos := wFwDropPos
                 GuiControl, Choose, chosenWFw, %wFwDropPos%
                 GuiControlGet, chosenWFw, , chosenWFw, Text
                 GuiControl, , wfwLabel, FW: %chosenWFw%
+            }
+            if (wFwEcoDropPos != oldWFwEcoDropPos) {    ;;for ECO LAB
+                oldWFwEcoDropPos := wFwEcoDropPos
+                GuiControl, Choose, chosenEcoWFw, %wFwEcoDropPos%
             }
             
             ;;Auto choose Programming Firmware
@@ -1068,17 +1082,22 @@ resetSyncDataFile() {
 
 onChosenFreq() {
     GuiControlGet, chosenFreqPos, , chosenFreq
+    GuiControlGet, chosenEcoFreqPos, , chosenEcoFreq
+    
     if (isSyncMode) {
         syncModeWriteIni("FrequencyDropPos", chosenFreqPos)
+        syncModeWriteIni("FrequencyEcoDropPos", chosenEcoFreqPos)
     }
 }
 
 onChosenWFw() {
     GuiControlGet, chosenWFw, , chosenWFw, Text
     GuiControlGet, chosenWFwPos, , chosenWFw
-    GuiControl, , wfwLabel, FW: %chosenWFw%
+    ;GuiControl, , wfwLabel, FW: %chosenWFw%
+    GuiControlGet, chosenEcoWFwPos, , chosenEcoWFw
     if (isSyncMode) {
         syncModeWriteIni("WriteFirmwareDropPos", chosenWFwPos)
+        syncModeWriteIni("WriteFirmwareEcoDropPos", chosenEcoWFwPos)
     }
 }
 
@@ -1314,6 +1333,9 @@ GetXDot() {
             Gui 1: Default
             GuiControlGet, chosenFreq, , chosenFreq, Text   ;Get value from DropDownList
             GuiControlGet, chosenWFw, , chosenWFw, Text     ;Get value from DropDownList
+            GuiControlGet, chosenEcoFreq, , chosenEcoFreq, Text   ;Get value from DropDownList
+            GuiControlGet, chosenEcoWFw, , chosenEcoWFw, Text     ;Get value from DropDownList
+            
             RegExMatch(A_GuiControl, "\d+$", num)
             node := readNodeLine(num)
             
@@ -1344,9 +1366,9 @@ GetXDot() {
         }        
         ;;Modify GUI for ECO LAB MODE!!!
         if (isEcoLabMode) {
-            GuiControl, Text, xFreq, US915  ;Change text
+            GuiControl, Text, xFreq, %chosenEcoFreq%  ;Change text
             GuiControl, Disable, xFreq
-            GuiControl, Text, xFw, v3.0.2  ;Change text
+            GuiControl, Text, xFw, %chosenEcoWFw%  ;Change text
             GuiControl, Disable, xFw
         }
         
@@ -1426,9 +1448,18 @@ GetXDot() {
                 return
             }
             
-            if (HasValue(allWriteFW, inFw) = 0) {
-                MsgBox 16 , ERROR , INPUT INVALID FIRMWARE VERSION. RETRY!
-                return
+            if (!isEcoLabMode) {
+                if (HasValue(allWriteFW, inFw) = 0) {
+                    MsgBox 16 , ERROR , INPUT INVALID FIRMWARE VERSION. RETRY!
+                    return
+                }
+            }
+            
+            if (isEcoLabMode) {
+                if (HasValue(allEcoWriteFw, inFw) = 0) {
+                    MsgBox 16 , ERROR , INPUT INVALID FIRMWARE VERSION. RETRY!
+                    return
+                }
             }
             
             if (!isEcoLabMode)

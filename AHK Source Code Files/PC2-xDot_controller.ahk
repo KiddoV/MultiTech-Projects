@@ -107,11 +107,11 @@ Gui Add, Button, xs+182 ys+50 w15 h155 vgiveBackBttn ggiveBackToEdit, >
 Gui Add, Text, xs+5 ys+204 vecoFwLabel Hidden, Firmware:
 For each, item in allEcoWriteFw
     ecoFw .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, AltSubmit xs+5 ys+217 w60 vchosenEcoWFw Hidden, %ecoFw%
+Gui Add, DropDownList, AltSubmit xs+5 ys+217 w60 vchosenEcoWFw gonChosenWFw Hidden, %ecoFw%
 Gui Add, Text, xs+135 ys+204 vecoFreqLabel Hidden, Frequency:
 For each, item in allEcoFregs
     ecoFreq .= (each == 1 ? "" : "|") . item
-Gui Add, DropDownList, AltSubmit xs+135 ys+217 w60 vchosenEcoFreq Hidden, %ecoFreq%
+Gui Add, DropDownList, AltSubmit xs+135 ys+217 w60 vchosenEcoFreq gonChosenFreq Hidden, %ecoFreq%
 Gui Font, Bold
 Gui Add, Button, xs+73 ys+211 w55 h28 vwriteAllBttn gwriteAll, START
 Gui Font

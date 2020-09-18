@@ -156,6 +156,16 @@ OnEnter(neutron, event) {
         SearchProgram(neutron, event)
     }
 }
+
+OnConText(neutron, event) {
+    progCardId := event.id
+    MouseGetPos, xpos, ypos 
+    NeutronWebApp.qs("#prog-card-dropdown-" . progCardId).classList.add("d-block")
+}
+
+OnLeftClick(neutron, event) {
+    
+}
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
@@ -216,38 +226,46 @@ DisplayProgCard(Result) {
                         currentECO := Row[A_Index]
                     If (A_Index = 8)
                         currentECL := Row[A_Index]
+                    If (A_Index = 11)
+                        dateTimeCreated := Row[A_Index]
                     If (A_Index = 15)
                         machineBrandName := Row[A_Index]
                     If (A_Index = 16)
                         progAltType := Row[A_Index]
                 }
                 
-                
                 progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEEDUPDATE" ? "pro-card-status-needupdate" : progStatus = "NOTREADY" ? "pro-card-status-notready" : progStatus = "INPROGRESS" ? "pro-card-status-inprogress" : ""
                 brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : ""
+                FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
+                FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
+                
                 html =
                 (Ltrim
-                <div id="%progDBId%" type="button" class="card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%;  height: 60px;">
+                <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%; height: 60px;">
                     <div class="row">
                         <div class="col-md-10">
                             <div class="row">
-                                <h6 class="pt-1 prog-card-title">%buildNum%<span class="badge badge-default">Default</span></h6>
+                                <h6 class="col-sm pt-1 prog-card-title">%buildNum%</h6>
+                                <div class="col-sm">
+                                    <span class="badge badge-dark">%progAltType%</span>
+                                </div>
                                 <h6 class="col-sm pt-1 prog-card-title">%currentECL%</h6>
 								<h6 class="col-sm pt-1 prog-card-title">%currentECO%</h6>
 								<h6 class="col-sm pt-1 prog-card-title">%pcbNum%</h6>
 							</div>
 							<div class="row">
 								<p class="col-sm text-muted prog-card-subtitle">%progFullName%</p>
-                                <div class="col-sm"></div>
+                                <p class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %dateCreated%</p>
 							</div>
 						</div>
 						<div class="col-md-2" style="">
                             <img id="prog-card-brand-logo" src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="65" height="65">
 						</div>
 					</div>
+                    
                 </div>
                 )
-                NeutronWebApp.doc.getElementById("search-result-container").insertAdjacentHTML("beforeend", html)
+                NeutronWebApp.qs("#search-result-container").insertAdjacentHTML("beforeend", html)
             }
         }
     }

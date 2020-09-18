@@ -106,3 +106,23 @@ $(function () {
     });
     console.log(mydata);
 });
+
+
+// For program card dropdown menu
+$('.prog-card-id').on('contextmenu', function(e) {
+  alert('hi');
+  var top = e.pageY - 10;
+  var left = e.pageX - 90;
+  $("#prog-card-dropdown").css({
+    display: "block",
+    top: top,
+    left: left
+  }).addClass("show");
+  return false; //blocks default Webbrowser right click menu
+}).on("click", function() {
+  $("#prog-card-dropdown").removeClass("show").hide();
+});
+
+$("#prog-card-dropdown a").on("click", function() {
+  $(this).parent().removeClass("show").hide();
+});

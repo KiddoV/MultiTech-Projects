@@ -6,12 +6,12 @@
 
 	<!-- Boostrap CSS and JS (MDB Version)-->
 	<script src="mdboostrap/jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
+	<script src="mdboostrap/popper.min.js"></script>
 	<script src="mdboostrap/bootstrap.min.js"></script>
 	<script src="mdboostrap/mdb.min.js"></script>
 	<link href="mdboostrap/bootstrap.min.css" rel="stylesheet">
 	<link href="mdboostrap/mdb.min.css" rel="stylesheet">
 	<link href="mdboostrap/font-googleapi.css" rel="stylesheet">
-	<script src="mdboostrap/popper.min.js"></script>
 
 	<!-- Font Awesome -->
 	<script src="fontawesome.js"></script>
@@ -132,7 +132,11 @@
 									<img id="prog-card-brand-logo" src="yestech-logo.png" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -8px; z-index: 80;" width="65" height="65">
 								</div>
 							</div>
-							<span id="prog-card-req-bttn" type="button" class="btn z-depth-0 px-1" style="position: absolute; top: 0; right: -6px;"><i class="fas fa-2x fa-ellipsis-v"></i><span>
+							<button id="prog-card-req-bttn" type="button" data-toggle="dropdown" class="btn z-depth-0 px-1" style="position: absolute; top: 0; right: -6px;"><i class="fas fa-2x fa-ellipsis-v"></i></button>
+							<div class="dropdown-menu z-depth-2 p-0" style="position: relative; margin-top: -30px; margin-right: 20px; z-index: 99">
+								<a class="dropdown-item" href="#">Request ECO Update</a>
+								<a class="dropdown-item" href="#">Request Program Debug</a>
+							</div>
 						</div> -->
 
 					</div>
@@ -141,16 +145,23 @@
 				<div id="tool-tab" class="tab-pane fade">
 					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test MsgBox</button>
 					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button>
-					<div class="dropdown">
-					  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					<!-- <div class="dropdown">
+					  <button class="btn btn-secondary" type="button" data-toggle="dropdown">
 					    Dropdown button
 					  </button>
-					  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+					  <div class="dropdown-menu dropdown-menu-sm" >
 					    <a class="dropdown-item" href="#">Action</a>
 					    <a class="dropdown-item" href="#">Another action</a>
 					    <a class="dropdown-item" href="#">Something else here</a>
 					  </div>
+					</div> -->
+
+					<button id="prog-card-req-bttn" type="button" data-toggle="dropdown" class="btn z-depth-0 px-1" style=""><i class="fas fa-2x fa-ellipsis-v"></i><button>
+					<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+						<a class="dropdown-item" href="">Request ECO Update</a>
+						<a class="dropdown-item" href="">Request Program Debug</a>
 					</div>
+
 				</div>
 
 				<!-- Database Tab Contents -->
@@ -197,7 +208,24 @@
 								<span type="button" class="close" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
 					     </div>
 					     <div class="modal-body" style="word-wrap: break-word;">
-					        Settings here!!!
+
+								 <ul class="nav nav-tabs">
+									 <li class="nav-item">
+								     <a class="nav-link active" id="sett-tab-general" data-toggle="tab" href="#tab-general" role="tab">General</a>
+								   </li>
+								   <li class="nav-item">
+								     <a class="nav-link" id="sett-tab-connection" data-toggle="tab" href="#tab-connection" role="tab">Connection</a>
+								   </li>
+								 </ul>
+								 <div class="tab-content">
+									 <div class="tab-pane fade pt-2 show active" id="tab-general">
+										 General Tab
+							  	 </div>
+									 <div class="tab-pane fade pt-2" id="tab-connection">
+										 Connection Tab
+							  	 </div>
+								</div>
+
 					     </div>
 					     <div class="modal-footer">
 					       <button type="button" class="btn btn-outline-primary btn-sm" data-dismiss="modal">Cancel</button>
