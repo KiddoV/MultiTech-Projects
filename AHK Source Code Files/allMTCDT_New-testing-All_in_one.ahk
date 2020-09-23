@@ -28,7 +28,7 @@ FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\at-cpin.bmp, C:\V-Project
 Global 210_ItemNums := ["70001161L"]
 Global 240_ItemNums := ["70000035L", "70000037L", "70000039L", "70000041L", "70000049L"]
 Global 246_ItemNums := ["70000005L", "70000006L", "70000007L", "70000009L", "70000012L", "70000021L", "70000024L", "70000025L", "70000026L", "70000032L", "70000043L", "70000054L"]
-Global 247_ItemNums := ["70000044L", "70000045L", "70000048L", "70000053L", "70001174L"]
+Global 247_ItemNums := ["70000044L", "70000045L", "70000048L", "70000060L", "70000053L", "70001174L"]
 
 ;;;Paths and Links
 ;GUI images
@@ -587,8 +587,9 @@ getRadioType(itemN) {
     LVW2 := ["70000039L", "70000009L"]
     LSB3 := ["70000026L"]
     LDC3 := ["70000012L", "70000025L", "70000032L"]
+    L4G1 := ["70000060L"]
     
-   allRadioType := "NONE,H5,LAT1,LAT3,LEU1,L4E1,LAP3,L4N1,LVW2,LSB3,LDC3"
+   allRadioType := "NONE,H5,LAT1,LAT3,LEU1,L4E1,LAP3,L4N1,LVW2,LSB3,LDC3,L4G1"
     
     getRadioLoop:
     Loop Parse, allRadioType, `,

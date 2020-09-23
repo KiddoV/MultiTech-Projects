@@ -25,6 +25,7 @@ isLVW2 = -1
 isLSB3 = -1
 isLDC3 = -1
 isLAP3 = -1
+isL4G1 = -1
 try = 0
 
 :CHECK_MTCDT_TYPE
@@ -75,6 +76,9 @@ if isLDC3=0 goto START
 strcompare param3 'LAP3'
 isLAP3 = result
 if isLAP3=0 goto START
+strcompare param3 'L4G1'
+isL4G1 = result
+if isL4G1=0 goto START
 
 :START
 if isLAT1=0 then 
@@ -112,6 +116,10 @@ elseif isLSB3=0 then
 elseif isLDC3=0 then
 	radioVersion = '20.00.203'
 	telModuleVer = 'LE910-JN1'
+	fwBuild = '#CFVR: 4'
+elseif isLAP3=0 then
+	radioVersion = '20.00.203'
+	telModuleVer = 'LE910C1-AP'
 	fwBuild = '#CFVR: 4'
 elseif isLAP3=0 then
 	radioVersion = '20.00.203'

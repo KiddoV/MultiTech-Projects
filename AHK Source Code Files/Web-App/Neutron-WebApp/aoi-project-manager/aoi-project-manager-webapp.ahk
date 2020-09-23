@@ -78,6 +78,7 @@ CheckDataBaseStatus:
                NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
             }
         NeutronWebApp.qs("#icon-database-status").classList.add("icon-working")
+        Check_DB.CloseDB()
     }
     
     IfNotExist, %MainDBFilePath%
@@ -103,6 +104,7 @@ FileInstall, solid.js, solid.js
 ;=======================================================================================;
 ^q::
 AOIProManagerClose:
+    AOI_Pro_DB.CloseDB()
     NeutronWebApp.Destroy()     ;Free memory  
     Gui, Destroy
     ExitApp
@@ -241,7 +243,7 @@ DisplayProgCard(Result) {
                 
                 html =
                 (Ltrim
-                <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%; height: 60px;">
+                <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%; height: 60px;" data-toggle="modal" data-target="#prog-card-modal" onclick="ahk.DisplayProgCardModal(this)">
                     <div class="row">
                         <div class="col-md-10">
                             <div class="row">
@@ -261,14 +263,29 @@ DisplayProgCard(Result) {
 						<div class="col-md-2" style="">
                             <img id="prog-card-brand-logo" src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="65" height="65">
 						</div>
-					</div>
-                    
+					</div> 
                 </div>
                 )
                 NeutronWebApp.qs("#search-result-container").insertAdjacentHTML("beforeend", html)
             }
         }
     }
+}
+
+DisplayProgCardModal(neutron, event) {
+    ;NeutronWebApp.qs("#prog-card-modal-title").innerHTML := event.id
+    ;;Get data from DB
+    SQL := "SELECT * FROM aoi_programs WHERE prog_id = " . event.id
+    If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
+        DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
+        Return
+    }
+    
+    progStatusColor := ProgCardData.Rows[1][3] = "USABLE" ? "#00c853" : ProgCardData.Rows[1][3] = "NEEDUPDATE" ? "#673ab7" : ProgCardData.Rows[1][3] = "NOTREADY" ? "#ff3d00" : ProgCardData.Rows[1][3] = "INPROGRESS" ? "#fbc02d" : "???"
+    
+    ;;Display Data
+    NeutronWebApp.qs("#prog-card-modal-title").innerHTML := ProgCardData.Rows[1][2]
+    NeutronWebApp.qs("#prog-card-modal-header").style.backgroundColor := progStatusColor
 }
 
 ProcessIniFile() {

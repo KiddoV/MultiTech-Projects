@@ -73,7 +73,7 @@
 					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 97"><i class="fas fa-2x fa-plus"></i></button>
 					<div class="mt-2">
 						<ul class="nav nav-pills justify-content-end">
-						  <li class="nav-item"><a class="nav-link task-nav-link active hoverable" data-toggle="pill" href="#pills-task-active">Active</a></li>
+						  <li class="nav-item"><a class="nav-link task-nav-link active hoverable mr-1" data-toggle="pill" href="#pills-task-active">Active</a></li>
 						  <li class="nav-item"><a class="nav-link task-nav-link hoverable" data-toggle="pill" href="#pills-task-history">History</a></li>
 						</ul>
 						<div class="tab-content default-mouse" id="pills-tabContent">
@@ -140,11 +140,36 @@
 						</div> -->
 
 					</div>
+
+					<!-- Modal for Prog-Card -->
+					<div id="prog-card-modal" class="modal animated bounceIn" tabindex="-1" role="dialog">
+						<div class="modal-dialog modal-notify modal-success modal-dialog-centered" style="max-width: 700px;">
+							<div class="modal-content">
+								<div id="prog-card-modal-header" class="modal-header">
+										<h6 id="prog-card-modal-title" class="modal-title heading lead p-0" style="font-weight: bold;">?????????</h6>
+										<span type="button" class="close p-3 text-white" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
+								</div>
+								<div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+
+									<section class="box">
+									    <div class="" style="width: 50px; height: 100px;">
+									     Hi <br><br>
+									    </div>
+									</section>
+
+								</div>
+								<div class="modal-footer">
+									<button type="button" class="btn btn-sm" data-dismiss="modal">Close</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
 				</div>
 				<!-- Tool Tab Contents -->
 				<div id="tool-tab" class="tab-pane fade">
-					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test MsgBox</button>
-					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button>
+					<!-- <button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test MsgBox</button>
+					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button> -->
 					<!-- <div class="dropdown">
 					  <button class="btn btn-secondary" type="button" data-toggle="dropdown">
 					    Dropdown button
@@ -156,11 +181,17 @@
 					  </div>
 					</div> -->
 
-					<button id="prog-card-req-bttn" type="button" data-toggle="dropdown" class="btn z-depth-0 px-1" style=""><i class="fas fa-2x fa-ellipsis-v"></i><button>
+					<!-- <button id="prog-card-req-bttn" type="button" data-toggle="dropdown" class="btn z-depth-0 px-1" style=""><i class="fas fa-2x fa-ellipsis-v"></i><button>
 					<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
 						<a class="dropdown-item" href="">Request ECO Update</a>
 						<a class="dropdown-item" href="">Request Program Debug</a>
-					</div>
+					</div> -->
+
+					<section class="box">
+					    <div class="" style="width: 50px; height: 100px;">
+					     Hi <br><br>
+					    </div>
+					</section>
 
 				</div>
 
@@ -205,7 +236,7 @@
 						<div class="modal-content">
 					     <div class="modal-header">
 					      <h6 class="modal-title">Application Settings</h6>
-								<span type="button" class="close" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
+								<span type="button" class="close p-3" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
 					     </div>
 					     <div class="modal-body" style="word-wrap: break-word;">
 
@@ -229,7 +260,7 @@
 					     </div>
 					     <div class="modal-footer">
 					       <button type="button" class="btn btn-outline-primary btn-sm" data-dismiss="modal">Cancel</button>
-					       <button type="button" class="btn btn-primary btn-sm">Save</button>
+					       <button type="button" class="btn bg-app-theme-dark btn-sm text-white">Save</button>
 					     </div>
 					   </div>
 					 </div>
@@ -241,6 +272,7 @@
 		<div id="icon-status-bar" class="ml-2" style="margin-top: 2px;">
 			<span class="mr-1"><i class="fas fa-server"></i></span>
 			<span id="icon-database-status" class="mr-1"><i class="fas fa-database"></i></span>
+			<span><i class="fas fa-globe"></i></span>
 		</div>
 		<span class="flex-grow-1"></span>
 		<span class="footer-btn" data-toggle="modal" data-target="#modal-settings"><i class="fas fa-cog"></i></span>

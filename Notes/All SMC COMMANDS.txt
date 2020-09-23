@@ -182,3 +182,12 @@ at+cgdcont? =>	+CGDCONT: 1,"IPV4V6","TELSTRA.WAP","",0,0,0,0
 at#servinfo =>	#SERVINFO: 1007,-83,"AT&T","310410",235,7F03,128,1,-93,"II",01,4294967295
 AT+CSQ => 	+CSQ: ##,#
 at+csq => 	+CSQ: ##,#
+
+-----L4G1 (70000060L)------------------------
+USE:    microcom /dev/ttyUSB3
+at
+at+cpin? =>	+CPIN: READY	--- If Error: +CME ERROR: 10 --- then at+cfun=0 --- wait OK
+at+cfun=1
+at+QCCID =>	+QCCID: 89011704258163616224 (Wait for OK only)
+at+cgsn (print imei)	
+at+gmi =>	
