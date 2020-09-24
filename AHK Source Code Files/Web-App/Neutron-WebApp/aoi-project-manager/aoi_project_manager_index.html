@@ -143,19 +143,20 @@
 
 					<!-- Modal for Prog-Card -->
 					<div id="prog-card-modal" class="modal animated bounceIn" tabindex="-1" role="dialog">
-						<div class="modal-dialog modal-notify modal-success modal-dialog-centered" style="max-width: 700px;">
+						<div class="modal-dialog modal-notify modal-success modal-dialog-centered" style="max-width: 750px;">
 							<div class="modal-content">
 								<div id="prog-card-modal-header" class="modal-header">
 										<h6 id="prog-card-modal-title" class="modal-title heading lead p-0" style="font-weight: bold;">?????????</h6>
 										<span type="button" class="close p-3 text-white" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
 								</div>
-								<div class="modal-body" style="max-height: 400px; overflow-y: auto;">
+								<div class="modal-body p-2 pt-3" style="max-height: 400px; overflow-y: auto;">
 
-									<section class="box">
-									    <div class="" style="width: 50px; height: 100px;">
-									     Hi <br><br>
-									    </div>
-									</section>
+									<div class="row">
+										<h6 class="col-sm prog-card-title">Build #: <var id="prog-card-modal-buildnum" class="text-muted">?????????</var></h6>
+										<h6 class="col-sm prog-card-title">Current ECL: <var id="prog-card-modal-eclnum" class="text-muted">???</var></h6>
+										<h6 class="col-sm prog-card-title">Current ECO: <var id="prog-card-modal-econum" class="text-muted">?????</var></h6>
+										<h6 class="col-sm prog-card-title">PCB #: <var id="prog-card-modal-pcbnum" class="text-muted">?????</var></h6>
+									</div>
 
 								</div>
 								<div class="modal-footer">
@@ -232,7 +233,7 @@
 
 				<!-- Settings Contents -->
 				<div id="modal-settings" class="modal fade">
-					<div class="modal-dialog" style="max-width: 700px;">
+					<div class="modal-dialog" style="max-width: 790px;">
 						<div class="modal-content">
 					     <div class="modal-header">
 					      <h6 class="modal-title">Application Settings</h6>
@@ -271,8 +272,8 @@
 	<footer class="d-flex align-items-stretch fixed-bottom bg-app-theme-dark text-white">
 		<div id="icon-status-bar" class="ml-2" style="margin-top: 2px;">
 			<span class="mr-1"><i class="fas fa-server"></i></span>
-			<span id="icon-database-status" class="mr-1"><i class="fas fa-database"></i></span>
-			<span><i class="fas fa-globe"></i></span>
+			<span id="icon-database-status" class="mr-1 icon-problem"><i class="fas fa-database"></i></span>
+			<span id="icon-web-status" class="icon-problem"><i class="fas fa-globe"></i></span>
 		</div>
 		<span class="flex-grow-1"></span>
 		<span class="footer-btn" data-toggle="modal" data-target="#modal-settings"><i class="fas fa-cog"></i></span>

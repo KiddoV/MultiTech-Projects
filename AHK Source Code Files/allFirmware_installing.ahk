@@ -7,8 +7,8 @@ SetTitleMatchMode, RegEx
 IfNotExist C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
     FileCreateDir C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\u-boot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\Imgs-for-Search-Func\romBoot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\romBoot.BMP, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\u-boot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\romBoot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\romBoot.BMP, 1
 
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global isMTCDT := True
@@ -16,7 +16,7 @@ Global isMTCAP := False
 Global productName := ""
 
 ;Firmware list
-Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6", "AEP 5.2.1"]
+Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "AEP 1.4.3", "AEP 1.6.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6", "AEP 5.2.1", "Actility 2.2.9"]
 Global allMtcapFirmwares := ["mLinux 5.1.8", "AEP 5.1.6", "AEP 5.2.1"]
 
 ;;Paths and Links
@@ -33,6 +33,7 @@ Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
 Global aep515Path := "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"
 Global aep516Path := "C:\vbtest\MTCDT\AEP-5_1_6\mtcdt-flash-full-AEP.tcl"
 Global aep521Path := "C:\vbtest\MTCDT\AEP-5_2_1\mtcdt-flash-full-AEP.tcl"
+Global acti229Path := "C:\vbtest\MTCDT\v2.2.9-LoRa-H\Generic-915\mtcdt-flash-Generic-915-v2_2_9-LoRa-H.production.tcl"
 
 Global mtcapMLinux518Path := "C:\vbtest\MTCAP\mLinux_v5_1_8\mtcap-flash-full-5.1.8.tcl"
 Global mtcapAep516Path := "C:\vbtest\MTCAP\AEP_v5_1_6\mtcap-flash-full-AEP.tcl"
@@ -272,6 +273,8 @@ install_firmware(fw, chk) {
                 ControlSetText, Edit1, %aep516Path%, Select Script File.*
             If (fw = "AEP 5.2.1")
                 ControlSetText, Edit1, %aep521Path%, Select Script File.*
+            If (fw = "Actility 2.2.9")
+                ControlSetText, Edit1, %acti229Path%, Select Script File.*
         }
         
         If (isMTCAP) {

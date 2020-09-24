@@ -57,6 +57,7 @@ IfExist, %MainDBFilePath%
 
 #Persistent
 SetTimer, CheckDataBaseStatus, 400
+SetTimer, CheckWebSourceStatus, 400
 
 Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -70,13 +71,15 @@ AutoCloseAlertBox:
 Return
 
 CheckDataBaseStatus:
-    NeutronWebApp.doc.getElementById("icon-database-status").classList.remove("icon-working" , "icon-stopped")
+    ;ToolTip % NeutronWebApp.qs("#icon-database-status").className
     IfExist, %MainDBFilePath%
-    {
+    {   
         Check_DB := new SQLiteDB()
         If !Check_DB.OpenDB(MainDBFilePath) {
-               NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
-            }
+            NeutronWebApp.qs("#icon-database-status").classList.remove("icon-problem", "icon-working")    
+            NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
+        }
+        NeutronWebApp.qs("#icon-database-status").classList.remove("icon-problem", "icon-stopped")
         NeutronWebApp.qs("#icon-database-status").classList.add("icon-working")
         Check_DB.CloseDB()
     }
@@ -84,7 +87,21 @@ CheckDataBaseStatus:
     IfNotExist, %MainDBFilePath%
     {
         DBStatus := "STOPPED - MISSING DATABASE MAIN FILE"
+        NeutronWebApp.qs("#icon-database-status").classList.remove("icon-working" , "icon-problem")
         NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
+    }
+Return
+
+CheckWebSourceStatus:
+    ;ToolTip, % NeutronWebApp.qs("#icon-web-status").className
+    if (checkAnURLStatus("192.168.11.62")) {    ;;URL: virtu.multitech.prv
+        NeutronWebApp.qs("#icon-web-status").classList.remove("icon-problem")
+        NeutronWebApp.qs("#icon-web-status").classList.remove("icon-stopped")
+        NeutronWebApp.qs("#icon-web-status").classList.add("icon-working")
+    } else {
+        NeutronWebApp.qs("#icon-web-status").classList.remove("icon-working")
+        NeutronWebApp.qs("#icon-web-status").classList.remove("icon-problem")
+        NeutronWebApp.qs("#icon-web-status").classList.add("icon-stopped")
     }
 Return
 
@@ -286,6 +303,10 @@ DisplayProgCardModal(neutron, event) {
     ;;Display Data
     NeutronWebApp.qs("#prog-card-modal-title").innerHTML := ProgCardData.Rows[1][2]
     NeutronWebApp.qs("#prog-card-modal-header").style.backgroundColor := progStatusColor
+    NeutronWebApp.qs("#prog-card-modal-buildnum").innerHTML := ProgCardData.Rows[1][4]
+    NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := ProgCardData.Rows[1][8]
+    NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := ProgCardData.Rows[1][7]
+    NeutronWebApp.qs("#prog-card-modal-pcbnum").innerHTML := ProgCardData.Rows[1][5]
 }
 
 ProcessIniFile() {
@@ -301,6 +322,37 @@ ProcessIniFile() {
     {
         IniRead, out1, %MainSettingsFilePath%, Settings, MainDBFilePath
         MainDBFilePath := out1
+    }
+}
+
+checkAnURLStatus(url, timeout := 1000) {
+    cmd := "ping " . url . " -n 1 -w " . timeout
+    RunWait, %cmd%,, Hide
+    if (ErrorLevel = 1) {
+        return False
+    }
+    if (ErrorLevel = 0) {
+        return True
+    }
+}
+
+GetWebComponentInfo(PartNum) {
+    req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;For http request
+    
+    url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . PartNum
+    
+    req.open("GET", url, False)
+    req.Send()
+    
+    Loop, 50
+    {
+        Sleep 1000
+        if (A_Index = 50) {
+            MsgBox Failed!
+            return
+        } else if (req.readyState = 4){
+            Break
+        }
     }
 }
 

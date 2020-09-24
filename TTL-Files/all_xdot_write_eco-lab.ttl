@@ -13,6 +13,8 @@ mpause 1000
 writeFirmwareVers = param9
 strcompare writeFirmwareVers 'v3.0.2'
 if result=0 firmwareVers = 'Firmware : 3.0.2-mbed144'
+strcompare writeFirmwareVers 'v3.2.1'
+if result=0 firmwareVers = 'Firmware : 3.2.1-mbed51101'
 
 debugFirmwareVers = '3.0.2-debug-mbed144'
 xdotMainPort = param3	;101
@@ -32,10 +34,16 @@ connFail = 0
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
 
+flushrecv
 strcompare writeFirmwareVers 'v3.0.2'
 if result=0 then
     strcompare freq 'US915'
     if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7.bin'
+endif
+strcompare writeFirmwareVers 'v3.2.1'
+if result=0 then
+    strcompare freq 'EU868'
+    if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.2.1-EU868-mbed-os-5.11.1.bin'
 endif
 
 ;;;Split data
