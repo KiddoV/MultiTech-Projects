@@ -58,7 +58,7 @@ IfExist, %MainDBFilePath%
 #Persistent
 SetTimer, CheckDataBaseStatus, 400
 SetTimer, CheckWebSourceStatus, 400
-
+autoUpdatePcbDBTable("13580620L")   ;;;DELETE ME!!!
 Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;=======================================================================================;
@@ -336,10 +336,35 @@ checkAnURLStatus(url, timeout := 1000) {
     }
 }
 
-GetWebComponentInfo(PartNum) {
-    req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;For http request
-    
-    url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . PartNum
+;autoGetPCBInfo(pcbNum) {
+    ;;;RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
+    ;wb := ComObjCreate("InternetExplorer.Application")
+    ;wb.Visible := False
+    ;url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . pcbNum
+    ;wb.Navigate(url)
+    ;IELoad(wb)
+    ;
+    ;Try 
+        ;While (el := wb.document.getElementsByTagName("td")[A_Index]) 
+        ;{
+            ;if (A_Index = 4)
+                ;pcbFullName :=  el.innerHTML
+            ;if (A_Index = 10)
+                ;pcbPartStatus :=  el.innerHTML
+            ;if (A_Index = 16)
+                ;pcbQuantity :=  el.innerHTML
+            ;if (A_Index = 51) {
+                ;pcbInsFileName := RegExReplace(el.innerHTML, "<.+?>")
+            ;}
+        ;}
+    ;wb.Quit
+    ;return pcbInfoList := {pcbFullName: pcbFullName, pcbPartStatus: pcbPartStatus, pcbQuantity: pcbQuantity, pcbInsFileName: pcbInsFileName}
+;}
+
+autoUpdatePcbDBTable(pcbNum) {
+    ;;Get data from the web
+    req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;Create request object for http request
+    url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . pcbNum
     
     req.open("GET", url, False)
     req.Send()
@@ -348,18 +373,56 @@ GetWebComponentInfo(PartNum) {
     {
         Sleep 1000
         if (A_Index = 50) {
-            MsgBox Failed!
-            return
+            MsgBox Failed to connect to CompFinder!!
+            Return 0
         } else if (req.readyState = 4){
             Break
         }
+    }
+    
+    response := RegExReplace(req.responseText, "<.+?>", "")
+    response := RegExReplace(response, "`am)^\s+|\h+$|\R\z")    ;Remove all blank lines
+    req.Abort()     ;;Close the request object
+    
+    Loop, Parse, response, `n
+    {
+        If (RegExMatch(A_LoopField, "Component Finder cannot find any manufacturer parts") = 1) {
+            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>ERR: Not found or Wrong PCB number parameter!", "alert-danger")
+            Return 0
+        }
+        
+        If (RegExMatch(A_LoopField, ".*Rev..*") = 1)
+            pcbFullName :=  A_LoopField
+        If (A_Index = 15)
+            pcbPartStatus := Format("{:U}", A_LoopField)
+        If (A_Index = 21)
+            pcbQuantity :=  RegExReplace(A_LoopField, ",", "")
+        If (RegExMatch(A_LoopField, ".*_INS.TXT") = 1)  
+            pcbInsFileName :=  A_LoopField
+    }
+    
+    ;;;Update or Insert to Database
+    SQL := "SELECT * FROM aoi_pcb WHERE pcb_number = '" . pcbNum . "'"
+    If !AOI_Pro_DB.Query(SQL, ResultSet) {
+        DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Execute SQL statement FAILED!!!", "alert-danger")
+        Return
+    }
+    
+    If (!ResultSet.HasRows) {    ;If cannot find record in Database then Insert new record
+        SQL := "INSERT INTO aoi_pcb VALUES('" . pcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ")"
+        If !AOI_Pro_DB.Exec(SQL)
+            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to INSERT record!", "alert-danger")
+    } Else {
+        SQL := "UPDATE aoi_pcb SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . pcbNum . "'"
+        Clipboard := SQL
+        If !AOI_Pro_DB.Exec(SQL)
+            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg, "alert-danger", 5000)
     }
 }
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;Function to print out JSON format From SQLite DB
-BuildJson(obj) 
-{
+BuildJson(obj) {
     str := "" , array := true
     for k in obj {
         if (k == A_Index)
@@ -372,10 +435,25 @@ BuildJson(obj)
     str := RTrim(str, " ,")
     return (array ? "[" str "]" : "{" str "}")
 }
-IsNumber(Num)
-{
+IsNumber(Num) {
     if Num is number
         return true
     else
         return false
 }
+
+;IELoad(wb) {  ;You need to send the IE handle to the function unless you define it as global.
+    ;If !wb    ;If wb is not a valid pointer then quit
+        ;Return False
+    ;Loop    ;Otherwise sleep for .1 seconds untill the page starts loading
+        ;Sleep,100
+    ;Until (wb.busy)
+    ;Loop    ;Once it starts loading wait until completes
+        ;Sleep,100
+    ;Until (!wb.busy)
+    ;Loop    ;optional check to wait for the page to completely load
+        ;Sleep,100
+    ;Until (wb.Document.Readystate = "Complete")
+    ;
+    ;Return True
+;}
