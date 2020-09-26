@@ -63,12 +63,9 @@ Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;=======================================================================================;
 ;;;Callback Functions
-AutoCloseAlertBox:
-    ;NeutronWebApp.doc.getElementById("close-alert-btn").click()
-    NeutronWebApp.qs("#alert-box").classList.remove("show")
-    NeutronWebApp.qs("#alert-box-container").style.zIndex := "-99"
-    SetTimer, AutoCloseAlertBox, Off
-Return
+AutoCloseAlertMsg(elId) {
+    NeutronWebApp.doc.getElementById(elId).click()
+}
 
 CheckDataBaseStatus:
     ;ToolTip % NeutronWebApp.qs("#icon-database-status").className
@@ -94,7 +91,7 @@ Return
 
 CheckWebSourceStatus:
     ;ToolTip, % NeutronWebApp.qs("#icon-web-status").className
-    if (checkAnURLStatus("192.168.11.62")) {    ;;URL: virtu.multitech.prv
+    if (checkAnURLStatus("virtu.multitech.prv")) {    ;;URL: virtu.multitech.prv  | IP: 192.168.11.62
         NeutronWebApp.qs("#icon-web-status").classList.remove("icon-problem")
         NeutronWebApp.qs("#icon-web-status").classList.remove("icon-stopped")
         NeutronWebApp.qs("#icon-web-status").classList.add("icon-working")
@@ -212,14 +209,22 @@ HtmlMsgBox(Icon := "", Options := "", Size = "w300 h150", Title := "", MainText 
     Return
 }
 
-DisplayAlertMsg(Text := "", Color := "", Timeout := 2500) {
-    NeutronWebApp.doc.getElementById("alert-box-content").innerHTML := Text
-    NeutronWebApp.doc.getElementById("alert-box").classList.add(Color)
-    NeutronWebApp.doc.getElementById("alert-box-container").style.zIndex := "99"
-    NeutronWebApp.doc.getElementById("close-alert-btn").style.display := "block"
-    NeutronWebApp.doc.getElementById("alert-box").classList.add("show")
+DisplayAlertMsg(Text := "", ColorClass := "", Timeout := 2500) {
+    randId := "close-alert-btn-" . A_TickCount
     
-    SetTimer, AutoCloseAlertBox, %Timeout%
+    html =
+    (LTrim
+    <div class="row justify-content-md-center">
+        <div id="alert-box" class="alert alert-dismissible %ColorClass% z-depth-2 fade show" role="alert" auto-close="5000">
+            <p id="alert-box-content" style="margin: 0;">%Text%</p>
+            <span id="%randId%" type="button" class="close" data-dismiss="alert" style="padding: 2px 10px 0 0;"><i class="fas fa-xs fa-times"></i></span>
+        </div>
+    </div>
+    )
+    NeutronWebApp.qs("#alert-box-container").insertAdjacentHTML("afterbegin", html)
+    
+    Fn := Func("AutoCloseAlertMsg").Bind(randId)
+    SetTimer, %Fn%, -%Timeout%
 }
 
 DisplayProgCard(Result) {
@@ -363,11 +368,15 @@ checkAnURLStatus(url, timeout := 1000) {
 
 autoUpdatePcbDBTable(pcbNum) {
     ;;Get data from the web
-    req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;Create request object for http request
-    url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . pcbNum
-    
-    req.open("GET", url, False)
-    req.Send()
+    Try {
+        req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;Create request object for http request
+        url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . pcbNum
+        
+        req.open("GET", url, False)
+        req.Send()
+    } Catch {
+        DisplayAlertMsg("Could not connect to CompFind!" . AOI_Pro_DB.ErrorMsg, "alert-danger", 4000)
+    }
     
     Loop, 50
     {

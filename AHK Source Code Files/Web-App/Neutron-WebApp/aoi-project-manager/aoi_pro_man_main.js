@@ -126,3 +126,15 @@ $('.prog-card-id').on('contextmenu', function(e) {
 $("#prog-card-dropdown a").on("click", function() {
   $(this).parent().removeClass("show").hide();
 });
+
+//  //Auto close boostrap alert message with auto-close="time" attribute
+// $(function() {
+// 	var alert = $('div.alert[auto-close]');
+// 	alert.each(function() {
+// 		var that = $(this);
+// 		var timeout = that.attr('auto-close');
+// 		setTimeout(function() {
+// 			that.alert('close');
+// 		}, timeout);
+// 	});
+// });

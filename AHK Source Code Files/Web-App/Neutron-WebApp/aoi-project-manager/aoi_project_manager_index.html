@@ -32,15 +32,23 @@
 </head>
 
 <!-- Top alert box -->
-<div id="alert-box-container" class="position-fixed mt-2 alert-box-center default-mouse" style="width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word; text-align: center; z-index: -99;">
-	<div id="alert-box" class="alert alert-dismissible alert-secondary z-depth-2 fade show" role="alert">
+<div class="ml-5 default-mouse" style="width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word;">
+	<div id="alert-box-container" class="mt-4">
+		<!-- <div class="row justify-content-md-center">
+				<div id="alert-box" class="alert alert-dismissible alert-info z-depth-2 fade show" role="alert" auto-close="5000">
+						<p id="alert-box-content" style="margin: 0;">HELLO!</p>
+						<span id="close-alert-btn" type="button" class="close" data-dismiss="alert" style="padding: 2px 10px 0 0;"><i class="fas fa-xs fa-times"></i></span>
+				</div>
+		</div> -->
+	<!-- <div id="alert-box" class="alert alert-dismissible alert-secondary z-depth-2 fade show" role="alert">
 	  <p id="alert-box-content" style="margin: 0;">Hello! This is an alert!</p>
 		<span id="close-alert-btn" type="button" class="close" data-toggle="collapse" href="#alert-box" aria-controls="alert-box" style="padding: 2px 10px 0 0; display: none;"><i class="fas fa-xs fa-times"></i></span>
+	</div> -->
 	</div>
 </div>
 
 <body class="d-flex flex-column bg-app-color no-select-text" oncontextmenu="return false;">
-	<header class=""><!------------------------------------------------>
+	<header class="position-sticky"><!------------------------------------------------>
 		<!-- Title Bar -->
 		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm" style="z-index: 100;">
 			<span class="flex-grow-1 ml-2 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
@@ -56,7 +64,7 @@
 
 	<div class="flex-grow-1 d-flex"><!------------------------------------------------>
 		<!-- Left nav bar -->
-		<div class="nav flex-column nav-pills bg-app-theme-light text-light" id="nav-tab" role="tablist" aria-orientation="vertical" ondragstart="return false;">
+		<div class="nav flex-column nav-pills bg-app-theme-light text-light" id="nav-tab" role="tablist" ondragstart="return false;">
 			<span class="pt-5" id="spacer"></span>
 			<a class="nav-link text-light left-nav-link active" id="nav-task-tab" data-toggle="tab" href="#task-tab" role="tab" data-toggle="tooltip" title="AOI Tasks"><i class="fas fa-lg fa-project-diagram" style="margin-left: 1.4px;"></i></a>
 			<a class="nav-link text-light left-nav-link" id="nav-search-tab" data-toggle="tab" href="#prog-search-tab" role="tab" data-toggle="tooltip" title="Search for Program"><i class="fas fa-lg fa-search" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
