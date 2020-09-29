@@ -230,3 +230,13 @@ body{
 		#465298 10px
 	);
 }
+
+.nav-pills .prog-card-nav-link .nav-link:not(.active) {
+	background-color: rgba(0, 0, 0, 0.2);
+	font-weight: bold;
+}
+.nav-pills .prog-card-nav-link .nav-link {
+	background-color: rgba(0, 0, 0, 0.5);
+	font-weight: bold;
+	color: white;
+}

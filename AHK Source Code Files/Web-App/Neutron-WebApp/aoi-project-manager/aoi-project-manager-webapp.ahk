@@ -58,7 +58,6 @@ IfExist, %MainDBFilePath%
 #Persistent
 SetTimer, CheckDataBaseStatus, 400
 SetTimer, CheckWebSourceStatus, 400
-autoUpdatePcbDBTable("13580620L")   ;;;DELETE ME!!!
 Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;=======================================================================================;
@@ -127,8 +126,10 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
-    
+    ;HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
+    ;fn := Func("autoUpdatePcbDBTable").Bind("13580620L")
+    ;SetTimer, %fn%, -0
+    autoUpdatePcbDBTable("13580620L")   ;;;DELETE ME!!!
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
     ;DisplayAlertMsg("You click the button!!!!", "alert-success")
@@ -304,14 +305,18 @@ DisplayProgCardModal(neutron, event) {
     }
     
     progStatusColor := ProgCardData.Rows[1][3] = "USABLE" ? "#00c853" : ProgCardData.Rows[1][3] = "NEEDUPDATE" ? "#673ab7" : ProgCardData.Rows[1][3] = "NOTREADY" ? "#ff3d00" : ProgCardData.Rows[1][3] = "INPROGRESS" ? "#fbc02d" : "???"
+    brandLogoPath := ProgCardData.Rows[1][15] = "YesTech" ? "yestech-logo.png" : ProgCardData.Rows[1][15] = "TRI" ? "rti-logo.png" : ""
     
     ;;Display Data
     NeutronWebApp.qs("#prog-card-modal-title").innerHTML := ProgCardData.Rows[1][2]
     NeutronWebApp.qs("#prog-card-modal-header").style.backgroundColor := progStatusColor
+    ;NeutronWebApp.qs(".prog-card-nav-link").style.backgroundColor := progStatusColor
     NeutronWebApp.qs("#prog-card-modal-buildnum").innerHTML := ProgCardData.Rows[1][4]
     NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := ProgCardData.Rows[1][8]
     NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := ProgCardData.Rows[1][7]
     NeutronWebApp.qs("#prog-card-modal-pcbnum").innerHTML := ProgCardData.Rows[1][5]
+    NeutronWebApp.qs("#prog-card-modal-pcb-btn").innerHTML := ProgCardData.Rows[1][5]
+    NeutronWebApp.qs("#prog-card-modal-brand-logo").src := brandLogoPath
 }
 
 ProcessIniFile() {
@@ -422,10 +427,11 @@ autoUpdatePcbDBTable(pcbNum) {
         If !AOI_Pro_DB.Exec(SQL)
             DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to INSERT record!", "alert-danger")
     } Else {
+        ;AOI_Pro_DB.Exec("BEGIN TRANSACTION;")
         SQL := "UPDATE aoi_pcb SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . pcbNum . "'"
-        Clipboard := SQL
         If !AOI_Pro_DB.Exec(SQL)
-            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg, "alert-danger", 5000)
+            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger", 5000)
+        ;AOI_Pro_DB.Exec("COMMIT TRANSACTION;")
     }
 }
 
