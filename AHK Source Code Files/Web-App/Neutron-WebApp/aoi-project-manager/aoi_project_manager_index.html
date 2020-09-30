@@ -157,7 +157,7 @@
 										<h6 id="prog-card-modal-title" class="modal-title heading lead p-0" style="font-weight: bold;">?????????</h6>
 										<span type="button" class="close p-3 text-white" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
 								</div>
-								<div class="modal-body p-2 pt-3" style="max-height: 400px; overflow-y: auto;">
+								<div class="modal-body p-2 pt-3" style="height: 400px; overflow-y: auto;">
 									<div class="tab-content">
 										<div id="pills-basic-info" class="tab-pane fade show active">
 											<div class="row">
@@ -169,29 +169,37 @@
 											<hr class="m-2"/>
 											<div class="row">
 												<div class="col-md-8">
+													<h6 class="prog-card-title">Program Status: <var id="prog-card-stat-label" class="text-muted"></var></h6>
 													<h6 class="prog-card-title">Program Location: <var id="" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Recipe Note: <var id="" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Label: <var id="" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Label: <var id="" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Label: <var id="" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Label: <var id="" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Label: <var id="" class="text-muted">?????????</var></h6>
+													<h6 class="prog-card-title">Rtf Note: <var id="prog-card-rtf-note" class="text-muted">?????????</var></h6>
+													<h6 class="prog-card-title">Date Created: <var id="prog-card-date-created" class="text-muted">?????????</var></h6>
+													<h6 class="prog-card-title">Created By: <var id="" class="text-muted">????</var></h6>
+													<h6 class="prog-card-title">ECO Last Update On: <var id="" class="text-muted">???????</var></h6>
+													<h6 class="prog-card-title">Alternate Type: <var id="prog-card-alt-type" class="text-muted">?????????</var></h6>
+													<h6 class="prog-card-title">Program Library: <var id="" class="text-muted">????</var></h6>
 												</div>
 												<div class="col-md-4">
-													<img id="prog-card-modal-brand-logo" src="" class="rounded mx-auto d-block img-fluid z-depth-2" style="margin-top: -7px; z-index: 80;" width="" height="">
+													<img id="prog-card-modal-brand-logo" src="" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="" height="">
 												</div>
 											</div>
 											<hr class="m-2"/>
 											<div class="row">
 												<div class="col-sm form-group shadow-textarea">
-												  <h6 class="prog-card-title">Program Notes:</h6>
-												  <textarea class="form-control z-depth-1" id="exampleFormControlTextarea6" rows="3" placeholder="Write something here..."></textarea>
+												  <h6 class="prog-card-title">Program Comments:</h6>
+												  <textarea class="form-control z-depth-1" id="exampleFormControlTextarea6" rows="3" placeholder="..." readonly></textarea>
 												</div>
 											</div>
 										</div>
 										<div id="pills-pcb" class="tab-pane fade">
 											<div class="row">
-												<h6 class="col-sm prog-card-title">PCB #: <var id="" class="text-muted">?????</var></h6>
+												<h5 class="col-md-12" id="prog-card-modal-pcb-name" style="font-weight: bold;">???????????????????</h5>
+											</div>
+											<hr class="m-2"/>
+											<div class="row">
+												<h6 class="col-sm prog-card-title">PCB #: <var id="prog-card-modal-pcb" class="text-muted">?????????</var></h6>
+												<h6 id="prog-card-modal-pcb-status" class="col-sm prog-card-title">Status: </h6>
+												<h6 class="col-sm prog-card-title">DWG #: <var id="prog-card-modal-pcb-dwg" class="text-muted">???</var></h6>
+												<h6 class="col-sm prog-card-title">In Stock: <var id="prog-card-modal-pcb-quant" class="text-muted">?????</var></h6>
 											</div>
 										</div>
 									</div>
@@ -213,8 +221,20 @@
 
 				</div>
 				<!-- Tool Tab Contents -->
-				<div id="tool-tab" class="tab-pane fade">
+				<div id="tool-tab" class="tab-pane fade" style="overflow-y: scroll;">
 					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test Database</button>
+					<hr class="m-2"/>
+					<div class="row">
+						<div class="col-md-6">
+						<!-- <h6 class="col-sm prog-card-title">ECO Update History:</h6> -->
+							<img src="E:\Temp\MapBG_Top.bmp" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80; filter: brightness(70%) contrast(200%) saturate(160%);">
+						</div>
+						<div class="col-md-6">
+						<!-- <h6 class="col-sm prog-card-title">ECO Update History:</h6> -->
+							<img src="E:\Temp\MapBG_Top.bmp" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80; filter: brightness(50%);">
+						</div>
+					</div>
+					<marquee behavior="scroll" bgcolor="yellow" loop="-1" width="30%"><i><font color="blue"><strong>Today's date is :<span id="time"></span></strong>  </font></i></marquee>
 					<!-- <button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button> -->
 					<!-- <div class="dropdown">
 					  <button class="btn btn-secondary" type="button" data-toggle="dropdown">

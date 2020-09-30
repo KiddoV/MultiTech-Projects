@@ -129,7 +129,7 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
     ;fn := Func("autoUpdatePcbDBTable").Bind("13580620L")
     ;SetTimer, %fn%, -0
-    autoUpdatePcbDBTable("13580620L")   ;;;DELETE ME!!!
+    autoUpdatePcbDBTable("13580252L")   ;;;DELETE ME!!!
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
     ;DisplayAlertMsg("You click the button!!!!", "alert-success")
@@ -247,19 +247,19 @@ DisplayProgCard(Result) {
                         buildNum := Row[A_Index]
                     If (A_Index = 5)
                         pcbNum := Row[A_Index]
-                    If (A_Index = 7)
+                    If (A_Index = 6)
                         currentECO := Row[A_Index]
-                    If (A_Index = 8)
+                    If (A_Index = 7)
                         currentECL := Row[A_Index]
-                    If (A_Index = 11)
+                    If (A_Index = 10)
                         dateTimeCreated := Row[A_Index]
-                    If (A_Index = 15)
+                    If (A_Index = 14)
                         machineBrandName := Row[A_Index]
-                    If (A_Index = 16)
+                    If (A_Index = 15)
                         progAltType := Row[A_Index]
                 }
                 
-                progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEEDUPDATE" ? "pro-card-status-needupdate" : progStatus = "NOTREADY" ? "pro-card-status-notready" : progStatus = "INPROGRESS" ? "pro-card-status-inprogress" : ""
+                progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : ""
                 brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : ""
                 FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
                 FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
@@ -298,25 +298,42 @@ DisplayProgCard(Result) {
 DisplayProgCardModal(neutron, event) {
     ;NeutronWebApp.qs("#prog-card-modal-title").innerHTML := event.id
     ;;Get data from DB
-    SQL := "SELECT * FROM aoi_programs WHERE prog_id = " . event.id
+    SQL := "SELECT * FROM aoi_programs CROSS JOIN aoi_pcb ON aoi_pcb.pcb_number = aoi_programs.prog_pcb_number WHERE prog_id=" . event.id
     If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
         Return
     }
     
-    progStatusColor := ProgCardData.Rows[1][3] = "USABLE" ? "#00c853" : ProgCardData.Rows[1][3] = "NEEDUPDATE" ? "#673ab7" : ProgCardData.Rows[1][3] = "NOTREADY" ? "#ff3d00" : ProgCardData.Rows[1][3] = "INPROGRESS" ? "#fbc02d" : "???"
-    brandLogoPath := ProgCardData.Rows[1][15] = "YesTech" ? "yestech-logo.png" : ProgCardData.Rows[1][15] = "TRI" ? "rti-logo.png" : ""
+    progStatusColor := ProgCardData.Rows[1][3] = "USABLE" ? "#00c853" : ProgCardData.Rows[1][3] = "NEED UPDATE" ? "#673ab7" : ProgCardData.Rows[1][3] = "NOT READY" ? "#ff3d00" : ProgCardData.Rows[1][3] = "IN PROGRESS" ? "#fbc02d" : "???"
+    brandLogoPath := ProgCardData.Rows[1][14] = "YesTech" ? "yestech-logo.png" : ProgCardData.Rows[1][14] = "TRI" ? "rti-logo.png" : ""
+    FormatTime, dateCreated, % ProgCardData.Rows[1][10] , MMMM dd, yyyy
+    isAlternate := ProgCardData.Rows[1][15] = "" ? "" : " <span class='badge black'>Alternative</span>"
     
-    ;;Display Data
-    NeutronWebApp.qs("#prog-card-modal-title").innerHTML := ProgCardData.Rows[1][2]
+    ;;Display Data on First Tab
+    NeutronWebApp.qs("#prog-card-modal-title").innerHTML := ProgCardData.Rows[1][2] . isAlternate
     NeutronWebApp.qs("#prog-card-modal-header").style.backgroundColor := progStatusColor
-    ;NeutronWebApp.qs(".prog-card-nav-link").style.backgroundColor := progStatusColor
     NeutronWebApp.qs("#prog-card-modal-buildnum").innerHTML := ProgCardData.Rows[1][4]
-    NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := ProgCardData.Rows[1][8]
-    NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := ProgCardData.Rows[1][7]
+    NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := ProgCardData.Rows[1][7]
+    NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := ProgCardData.Rows[1][6]
     NeutronWebApp.qs("#prog-card-modal-pcbnum").innerHTML := ProgCardData.Rows[1][5]
     NeutronWebApp.qs("#prog-card-modal-pcb-btn").innerHTML := ProgCardData.Rows[1][5]
+    NeutronWebApp.qs("#prog-card-stat-label").innerHTML := "<span class='badge " . progStatusColor . "'>" . ProgCardData.Rows[1][3] . "</span>"
     NeutronWebApp.qs("#prog-card-modal-brand-logo").src := brandLogoPath
+    NeutronWebApp.qs("#prog-card-rtf-note").innerHTML := "<a href='#' onclick='ahk.OpenRTFNote(event)'>Notes.rtf</a>"
+    NeutronWebApp.qs("#prog-card-date-created").innerHTML := dateCreated
+    
+    ;;Display Data on Second Tab
+    pcbStatusColor := ProgCardData.Rows[1][17] = "ACTIVE" ? "green" : ProgCardData.Rows[1][17] = "BETA" ? "blue" : "black"
+    NeutronWebApp.qs("#prog-card-modal-pcb-name").innerHTML := ProgCardData.Rows[1][18] " | " ProgCardData.Rows[1][16]
+    NeutronWebApp.qs("#prog-card-modal-pcb").innerHTML := ProgCardData.Rows[1][16]
+    NeutronWebApp.qs("#prog-card-modal-pcb-status").innerHTML := "Status: <span class='badge %pcbStatusColor%'>" . ProgCardData.Rows[1][17] . "</span>"
+    NeutronWebApp.qs("#prog-card-modal-pcb-dwg").innerHTML := ProgCardData.Rows[1][22]
+    NeutronWebApp.qs("#prog-card-modal-pcb-quant").innerHTML := ProgCardData.Rows[1][21] . " (pcs)"
+    NeutronWebApp.qs("#prog-card-alt-type").innerHTML := isAlternate := ProgCardData.Rows[1][15] = "" ? "<span class='badge mdb-color'>ORIGINAL</span>" : "<span class='badge black'>" . ProgCardData.Rows[1][15] . "</span>"
+}
+
+OpenRTFNote(neutron, event) {
+    MsgBox OPENNING FILE!
 }
 
 ProcessIniFile() {
@@ -411,8 +428,11 @@ autoUpdatePcbDBTable(pcbNum) {
             pcbPartStatus := Format("{:U}", A_LoopField)
         If (A_Index = 21)
             pcbQuantity :=  RegExReplace(A_LoopField, ",", "")
-        If (RegExMatch(A_LoopField, ".*_INS.TXT") = 1)  
+        If (RegExMatch(A_LoopField, ".*_INS.TXT") = 1) {
             pcbInsFileName :=  A_LoopField
+            RegExMatch(pcbInsFileName, "\d{3}", pcbDwgNum)
+        }
+            
     }
     
     ;;;Update or Insert to Database
@@ -423,9 +443,10 @@ autoUpdatePcbDBTable(pcbNum) {
     }
     
     If (!ResultSet.HasRows) {    ;If cannot find record in Database then Insert new record
-        SQL := "INSERT INTO aoi_pcb VALUES('" . pcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ")"
+        SQL := "INSERT INTO aoi_pcb VALUES('" . pcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ", " . pcbDwgNum . ")"
+        
         If !AOI_Pro_DB.Exec(SQL)
-            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to INSERT record!", "alert-danger")
+            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to INSERT record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger")
     } Else {
         ;AOI_Pro_DB.Exec("BEGIN TRANSACTION;")
         SQL := "UPDATE aoi_pcb SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . pcbNum . "'"
