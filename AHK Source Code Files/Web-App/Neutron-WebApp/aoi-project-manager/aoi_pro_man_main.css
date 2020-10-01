@@ -217,7 +217,7 @@ body{
 	top: 0;
 }
 
-.box::before {
+.box:before {
 	left: 0;
   content: '';
   display: block;

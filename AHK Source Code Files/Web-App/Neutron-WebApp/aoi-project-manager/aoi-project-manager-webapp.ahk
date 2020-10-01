@@ -45,7 +45,8 @@ NeutronWebApp.Show("w800 h600")
 
 ;;;Run AFTER WebApp Started;;;
 ;;Connecting to Database
-Global AOI_Pro_DB := new SQLiteDB()
+Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
+
 IfNotExist, %MainDBFilePath%
     DisplayAlertMsg("SQLite Error, Could not find Database file!!", "alert-danger", 5000)
 IfExist, %MainDBFilePath% 
@@ -70,7 +71,7 @@ CheckDataBaseStatus:
     ;ToolTip % NeutronWebApp.qs("#icon-database-status").className
     IfExist, %MainDBFilePath%
     {   
-        Check_DB := new SQLiteDB()
+        Check_DB := new SQLiteDB(MainSettingsFilePath)
         If !Check_DB.OpenDB(MainDBFilePath) {
             NeutronWebApp.qs("#icon-database-status").classList.remove("icon-problem", "icon-working")    
             NeutronWebApp.qs("#icon-database-status").classList.add("icon-stopped")
@@ -105,15 +106,25 @@ Return
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
 FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
+;;Boostrap components for GUI
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, bootstrap.min.js, bootstrap.min.js
+FileInstall, mdb.min.css, mdb.min.css
+FileInstall, mdb.min.js, mdb.min.js
+FileInstall, popper.min.js, popper.min.js
 FileInstall, bootstrap-table.min.css, bootstrap-table.min.css
 FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
-FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, fontawesome.js, fontawesome.js
 FileInstall, solid.js, solid.js
-;FileInstall, SQLite3.dll, SQLite3.dll       ;Required to use Class_SQLiteDB.ahk
+FileInstall, font-googleapi.css, font-googleapi.css
+
+FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
+FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
+;;Buit-in Images
+FileInstall, default-brand-logo.png, default-brand-logo.png
+FileInstall, yestech-logo.png, yestech-logo.png
+FileInstall, rti-logo.png, rti-logo.png
 ;=======================================================================================;
 ^q::
 AOIProManagerClose:
@@ -164,6 +175,8 @@ SearchProgram(neutron, event) {
     RowCount := Result.RowCount
     NeutronWebApp.qs("#search-status-label").innerHTML := "Found " . RowCount . " result(s)"
     
+    If (!Result.HasRows)
+        DisplayAlertMsg("Not found any result!", "alert-warning")
     DisplayProgCard(Result)
     
 }
@@ -260,7 +273,7 @@ DisplayProgCard(Result) {
                 }
                 
                 progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : ""
-                brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : ""
+                brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : "default-brand-icon.png"
                 FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
                 FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
                 
@@ -296,40 +309,67 @@ DisplayProgCard(Result) {
 }
 
 DisplayProgCardModal(neutron, event) {
+    NeutronWebApp.wnd.activateProgCardFirstTab()
     ;NeutronWebApp.qs("#prog-card-modal-title").innerHTML := event.id
     ;;Get data from DB
-    SQL := "SELECT * FROM aoi_programs CROSS JOIN aoi_pcb ON aoi_pcb.pcb_number = aoi_programs.prog_pcb_number WHERE prog_id=" . event.id
+    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcb ON aoi_pcb.pcb_number = aoi_programs.prog_pcb_number LEFT JOIN users ON users.user_id = aoi_programs.prog_created_by WHERE prog_id=" . event.id
     If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
         Return
     }
     
-    progStatusColor := ProgCardData.Rows[1][3] = "USABLE" ? "#00c853" : ProgCardData.Rows[1][3] = "NEED UPDATE" ? "#673ab7" : ProgCardData.Rows[1][3] = "NOT READY" ? "#ff3d00" : ProgCardData.Rows[1][3] = "IN PROGRESS" ? "#fbc02d" : "???"
-    brandLogoPath := ProgCardData.Rows[1][14] = "YesTech" ? "yestech-logo.png" : ProgCardData.Rows[1][14] = "TRI" ? "rti-logo.png" : ""
-    FormatTime, dateCreated, % ProgCardData.Rows[1][10] , MMMM dd, yyyy
-    isAlternate := ProgCardData.Rows[1][15] = "" ? "" : " <span class='badge black'>Alternative</span>"
+    If (!ProgCardData.HasRows) {
+        DisplayAlertMsg("Display failed! Got empty Result Set.", "alert-danger")
+    }
+    
+    ;;;Save data to var
+    ;;Table 1
+    pcmProgName := ProgCardData.Rows[1][2]
+    pcmProgStatus := ProgCardData.Rows[1][3]
+    pcmProgBuildNum := ProgCardData.Rows[1][4]
+    pcmProgPcbNum := ProgCardData.Rows[1][5]
+    pcmProgCurntEco := ProgCardData.Rows[1][6]
+    pcmProgCurntEcl := ProgCardData.Rows[1][7]
+    pcmProgDateCre := ProgCardData.Rows[1][10]
+    pcmProgAoiMa := ProgCardData.Rows[1][14]
+    pcmProgAltType := ProgCardData.Rows[1][15]
+    ;;Table 2
+    pcmPcbStatus := ProgCardData.Rows[1][19]
+    pcmPcbFullName := ProgCardData.Rows[1][20] = "" ? "*No Info In Database*" : ProgCardData.Rows[1][20]
+    pcmPcbQty := ProgCardData.Rows[1][23]
+    pcmPcbDwg := ProgCardData.Rows[1][24]
+    ;;Table 3
+    pcmUserFn := ProgCardData.Rows[1][26]
+    pcmUserLn := ProgCardData.Rows[1][27]
+    
+    progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : "black"
+    brandLogoPath := pcmProgAoiMa = "YesTech" ? "yestech-logo.png" : pcmProgAoiMa = "TRI" ? "rti-logo.png" : "default-brand-logo.png"
+    If (pcmProgDateCre != "")
+        FormatTime, dateCreated, % pcmProgDateCre , MMMM dd, yyyy
+    isAlternate := pcmProgAltType = "" ? "" : " <span class='badge black'>Alternative</span>"
     
     ;;Display Data on First Tab
-    NeutronWebApp.qs("#prog-card-modal-title").innerHTML := ProgCardData.Rows[1][2] . isAlternate
+    NeutronWebApp.qs("#prog-card-modal-title").innerHTML := pcmProgName . isAlternate
     NeutronWebApp.qs("#prog-card-modal-header").style.backgroundColor := progStatusColor
-    NeutronWebApp.qs("#prog-card-modal-buildnum").innerHTML := ProgCardData.Rows[1][4]
-    NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := ProgCardData.Rows[1][7]
-    NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := ProgCardData.Rows[1][6]
-    NeutronWebApp.qs("#prog-card-modal-pcbnum").innerHTML := ProgCardData.Rows[1][5]
-    NeutronWebApp.qs("#prog-card-modal-pcb-btn").innerHTML := ProgCardData.Rows[1][5]
-    NeutronWebApp.qs("#prog-card-stat-label").innerHTML := "<span class='badge " . progStatusColor . "'>" . ProgCardData.Rows[1][3] . "</span>"
+    NeutronWebApp.qs("#prog-card-modal-buildnum").innerHTML := pcmProgBuildNum
+    NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := pcmProgCurntEcl
+    NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := pcmProgCurntEco
+    NeutronWebApp.qs("#prog-card-modal-pcbnum").innerHTML := pcmProgPcbNum
+    NeutronWebApp.qs("#prog-card-modal-pcb-btn").innerHTML := pcmProgPcbNum = "" ? "????????" : pcmProgPcbNum
+    NeutronWebApp.qs("#prog-card-stat-label").innerHTML := "<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgStatus . "</span>"
     NeutronWebApp.qs("#prog-card-modal-brand-logo").src := brandLogoPath
     NeutronWebApp.qs("#prog-card-rtf-note").innerHTML := "<a href='#' onclick='ahk.OpenRTFNote(event)'>Notes.rtf</a>"
     NeutronWebApp.qs("#prog-card-date-created").innerHTML := dateCreated
+    NeutronWebApp.qs("#prog-card-alt-type").innerHTML := isAlternate := pcmProgAltType = "" ? "<span class='badge mdb-color'>ORIGINAL</span>" : "<span class='badge black'>" . pcmProgAltType . "</span>"
+    NeutronWebApp.qs("#prog-card-created-by").innerHTML := pcmUserFn . " " . pcmUserLn
     
     ;;Display Data on Second Tab
-    pcbStatusColor := ProgCardData.Rows[1][17] = "ACTIVE" ? "green" : ProgCardData.Rows[1][17] = "BETA" ? "blue" : "black"
-    NeutronWebApp.qs("#prog-card-modal-pcb-name").innerHTML := ProgCardData.Rows[1][18] " | " ProgCardData.Rows[1][16]
-    NeutronWebApp.qs("#prog-card-modal-pcb").innerHTML := ProgCardData.Rows[1][16]
-    NeutronWebApp.qs("#prog-card-modal-pcb-status").innerHTML := "Status: <span class='badge %pcbStatusColor%'>" . ProgCardData.Rows[1][17] . "</span>"
-    NeutronWebApp.qs("#prog-card-modal-pcb-dwg").innerHTML := ProgCardData.Rows[1][22]
-    NeutronWebApp.qs("#prog-card-modal-pcb-quant").innerHTML := ProgCardData.Rows[1][21] . " (pcs)"
-    NeutronWebApp.qs("#prog-card-alt-type").innerHTML := isAlternate := ProgCardData.Rows[1][15] = "" ? "<span class='badge mdb-color'>ORIGINAL</span>" : "<span class='badge black'>" . ProgCardData.Rows[1][15] . "</span>"
+    pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : "black"
+    NeutronWebApp.qs("#prog-card-modal-pcb-name").innerHTML := pcmPcbFullName " | " pcmProgPcbNum
+    NeutronWebApp.qs("#prog-card-modal-pcb").innerHTML := pcmProgPcbNum
+    NeutronWebApp.qs("#prog-card-modal-pcb-status").innerHTML := "Status: <span class='badge " . pcbStatusColor . "'>" . pcmPcbStatus . "</span>"
+    NeutronWebApp.qs("#prog-card-modal-pcb-dwg").innerHTML := pcmPcbDwg
+    NeutronWebApp.qs("#prog-card-modal-pcb-quant").innerHTML := pcmPcbQty . " (pcs)"
 }
 
 OpenRTFNote(neutron, event) {
@@ -343,6 +383,8 @@ ProcessIniFile() {
         (LTrim
          [Settings]
          MainDBFilePath=%MainDBFilePath%
+         [Main]
+         DllPath=C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\SQLite3.dll
         ), %MainSettingsFilePath%
     }
     IfExist, %MainSettingsFilePath%
@@ -394,7 +436,7 @@ autoUpdatePcbDBTable(pcbNum) {
         req := ComObjCreate("MSXML2.XMLHTTP.6.0")   ;Create request object for http request
         url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . pcbNum
         
-        req.open("GET", url, False)
+        req.open("GET", url, True)
         req.Send()
     } Catch {
         DisplayAlertMsg("Could not connect to CompFind!" . AOI_Pro_DB.ErrorMsg, "alert-danger", 4000)
@@ -424,8 +466,11 @@ autoUpdatePcbDBTable(pcbNum) {
         
         If (RegExMatch(A_LoopField, ".*Rev..*") = 1)
             pcbFullName :=  A_LoopField
-        If (A_Index = 15)
+        If (A_Index = 15) {
             pcbPartStatus := Format("{:U}", A_LoopField)
+            StringReplace, pcbPartStatus, pcbPartStatus, `r,, All   ;;;Get rid of the newline character
+        }
+            
         If (A_Index = 21)
             pcbQuantity :=  RegExReplace(A_LoopField, ",", "")
         If (RegExMatch(A_LoopField, ".*_INS.TXT") = 1) {
@@ -434,7 +479,7 @@ autoUpdatePcbDBTable(pcbNum) {
         }
             
     }
-    
+    MsgBox % pcbPartStatus "--> " StrLen(pcbPartStatus)
     ;;;Update or Insert to Database
     SQL := "SELECT * FROM aoi_pcb WHERE pcb_number = '" . pcbNum . "'"
     If !AOI_Pro_DB.Query(SQL, ResultSet) {

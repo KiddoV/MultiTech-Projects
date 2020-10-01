@@ -5,13 +5,13 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 
 	<!-- Boostrap CSS and JS (MDB Version)-->
-	<script src="mdboostrap/jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
-	<script src="mdboostrap/popper.min.js"></script>
-	<script src="mdboostrap/bootstrap.min.js"></script>
-	<script src="mdboostrap/mdb.min.js"></script>
-	<link href="mdboostrap/bootstrap.min.css" rel="stylesheet">
-	<link href="mdboostrap/mdb.min.css" rel="stylesheet">
-	<link href="mdboostrap/font-googleapi.css" rel="stylesheet">
+	<script src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
+	<script src="popper.min.js"></script>
+	<script src="bootstrap.min.js"></script>
+	<script src="mdb.min.js"></script>
+	<link href="bootstrap.min.css" rel="stylesheet">
+	<link href="mdb.min.css" rel="stylesheet">
+	<link href="font-googleapi.css" rel="stylesheet">
 
 	<!-- Font Awesome -->
 	<script src="fontawesome.js"></script>
@@ -150,7 +150,7 @@
 					</div>
 
 					<!-- Modal for Prog-Card -->
-					<div id="prog-card-modal" class="modal animated bounceIn" tabindex="-1" role="dialog">
+					<div id="prog-card-modal" class="modal faster animated bounceIn" tabindex="-1" role="dialog">
 						<div class="modal-dialog modal-notify modal-success modal-dialog-centered" style="max-width: 750px;">
 							<div class="modal-content">
 								<div id="prog-card-modal-header" class="modal-header">
@@ -173,10 +173,9 @@
 													<h6 class="prog-card-title">Program Location: <var id="" class="text-muted">?????????</var></h6>
 													<h6 class="prog-card-title">Rtf Note: <var id="prog-card-rtf-note" class="text-muted">?????????</var></h6>
 													<h6 class="prog-card-title">Date Created: <var id="prog-card-date-created" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Created By: <var id="" class="text-muted">????</var></h6>
+													<h6 class="prog-card-title">Created By: <var id="prog-card-created-by" class="text-muted">????</var></h6>
 													<h6 class="prog-card-title">ECO Last Update On: <var id="" class="text-muted">???????</var></h6>
 													<h6 class="prog-card-title">Alternate Type: <var id="prog-card-alt-type" class="text-muted">?????????</var></h6>
-													<h6 class="prog-card-title">Program Library: <var id="" class="text-muted">????</var></h6>
 												</div>
 												<div class="col-md-4">
 													<img id="prog-card-modal-brand-logo" src="" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="" height="">
@@ -206,9 +205,9 @@
 
 								</div>
 								<div id="prog-card-modal-footer" class="modal-footer justify-content-start">
-									<ul class="nav nav-pills">
+									<ul id="prog-card-modal-tabs" class="nav nav-pills">
 										<li class="nav-item mr-1 prog-card-nav-link">
-											<a class="nav-link active" data-toggle="pill" href="#pills-basic-info">Basic Info</a>
+											<a id="prog-card-modal-basicInfo-btn" class="nav-link active" data-toggle="pill" href="#pills-basic-info">Basic Info</a>
 										</li>
 										<li class="nav-item prog-card-nav-link">
 											<a id="prog-card-modal-pcb-btn" class="nav-link" data-toggle="pill" href="#pills-pcb">???????</a>
@@ -253,11 +252,11 @@
 						<a class="dropdown-item" href="">Request Program Debug</a>
 					</div> -->
 
-					<section class="box">
+					<div class="box">
 					    <div class="" style="width: 50px; height: 100px;">
 					     Hi <br><br>
 					    </div>
-					</section>
+					</div>
 
 				</div>
 
@@ -348,6 +347,10 @@
 
 <!-- Inner Javascript -->
 <script>
+	function activateProgCardFirstTab() {
+		$('#prog-card-modal-tabs li:first-child a').tab('show');
+	}
+
 	$(document).ready(function() {
 		// Tooltips Initialization
 

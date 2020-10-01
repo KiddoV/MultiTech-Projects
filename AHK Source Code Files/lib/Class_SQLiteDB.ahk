@@ -515,7 +515,8 @@ Class SQLiteDB {
    ; ===================================================================================================================
    ; CONSTRUCTOR __New
    ; ===================================================================================================================
-   __New() {
+   ;;;;Mod by VH
+   __New(iniFilePath := "") {
       This._Path := ""                  ; Database path                                 (String)
       This._Handle := 0                 ; Database handle                               (Pointer)
       This._Queries := {}               ; Valid queries                                 (Object)
@@ -523,8 +524,8 @@ Class SQLiteDB {
       If (This.Base._RefCount = 0) {
          SQLiteDLL := This.Base._SQLiteDLL
          If !FileExist(SQLiteDLL)
-            If FileExist(A_ScriptDir . "\SQLiteDB.ini") {
-               IniRead, SQLiteDLL, %A_ScriptDir%\SQLiteDB.ini, Main, DllPath, %SQLiteDLL%
+            If FileExist(iniFilePath) {
+               IniRead, SQLiteDLL, %iniFilePath%, Main, DllPath, %SQLiteDLL%
                This.Base._SQLiteDLL := SQLiteDLL
          }
          If !(DLL := DllCall("LoadLibrary", "Str", This.Base._SQLiteDLL, "UPtr")) {
@@ -543,6 +544,34 @@ Class SQLiteDB {
       }
       This.Base._RefCount += 1
    }
+   ;__New() {
+      ;This._Path := ""                  ; Database path                                 (String)
+      ;This._Handle := 0                 ; Database handle                               (Pointer)
+      ;This._Queries := {}               ; Valid queries                                 (Object)
+      ;This._Stmts := {}                 ; Valid prepared statements                     (Object)
+      ;If (This.Base._RefCount = 0) {
+         ;SQLiteDLL := This.Base._SQLiteDLL
+         ;If !FileExist(SQLiteDLL)
+            ;If FileExist(A_ScriptDir . "\SQLiteDB.ini") {
+               ;IniRead, SQLiteDLL, %A_ScriptDir%\SQLiteDB.ini, Main, DllPath, %SQLiteDLL%
+               ;This.Base._SQLiteDLL := SQLiteDLL
+         ;}
+         ;If !(DLL := DllCall("LoadLibrary", "Str", This.Base._SQLiteDLL, "UPtr")) {
+            ;MsgBox, 16, SQLiteDB Error, % "DLL " . SQLiteDLL . " does not exist!"
+            ;ExitApp
+         ;}
+         ;This.Base.Version := StrGet(DllCall("SQlite3.dll\sqlite3_libversion", "Cdecl UPtr"), "UTF-8")
+         ;SQLVersion := StrSplit(This.Base.Version, ".")
+         ;MinVersion := StrSplit(This.Base._MinVersion, ".")
+         ;If (SQLVersion[1] < MinVersion[1]) || ((SQLVersion[1] = MinVersion[1]) && (SQLVersion[2] < MinVersion[2])){
+            ;DllCall("FreeLibrary", "Ptr", DLL)
+            ;MsgBox, 16, SQLite ERROR, % "Version " . This.Base.Version .  " of SQLite3.dll is not supported!`n`n"
+                                      ;. "You can download the current version from www.sqlite.org!"
+            ;ExitApp
+         ;}
+      ;}
+      ;This.Base._RefCount += 1
+   ;}
    ; ===================================================================================================================
    ; DESTRUCTOR __Delete
    ; ===================================================================================================================
