@@ -16,11 +16,13 @@ SetBatchLines -1
 IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
     FileCreateDir C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
 
-FileInstall, C:\MultiTech-Projects\DLL-files\SQLite3.dll, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\SQLite3.dll
+FileInstall, C:\MultiTech-Projects\DLL-files\SQLite3.dll, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\SQLite3.dll, 1
+FileInstall, C:\MultiTech-Projects\EXE-Files\aoi-pro-man_autoUpdateDBTable.exe, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
-Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"    
+Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"
 Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\app-settings.ini"
+Global CompFindUrl := "virtu.multitech.prv"
 
 Global DBStatus := ""
 ;=======================================================================================;
@@ -91,7 +93,7 @@ Return
 
 CheckWebSourceStatus:
     ;ToolTip, % NeutronWebApp.qs("#icon-web-status").className
-    if (checkAnURLStatus("virtu.multitech.prv")) {    ;;URL: virtu.multitech.prv  | IP: 192.168.11.62
+    if (checkAnURLStatus(CompFindUrl)) {    ;;URL: virtu.multitech.prv  | IP: 192.168.11.62
         NeutronWebApp.qs("#icon-web-status").classList.remove("icon-problem")
         NeutronWebApp.qs("#icon-web-status").classList.remove("icon-stopped")
         NeutronWebApp.qs("#icon-web-status").classList.add("icon-working")
@@ -140,7 +142,7 @@ TestBttn(neutron, event) {
     ;HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
     ;fn := Func("autoUpdatePcbDBTable").Bind("13580620L")
     ;SetTimer, %fn%, -0
-    autoUpdatePcbDBTable("13580252L")   ;;;DELETE ME!!!
+    ;autoUpdatePcbDBTable("13580252L")   ;;;DELETE ME!!!
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
     ;DisplayAlertMsg("You click the button!!!!", "alert-success")
@@ -148,6 +150,7 @@ TestBttn(neutron, event) {
     ;If !AOI_Pro_DB.GetTable(SQL, Result)
        ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
     ;MsgBox % Result.ColumnCount
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcb" %MainDBFilePath% %MainSettingsFilePath%, , Hide
 }
 
 TestBttn2(neutron, event) {
@@ -270,12 +273,20 @@ DisplayProgCard(Result) {
                         machineBrandName := Row[A_Index]
                     If (A_Index = 15)
                         progAltType := Row[A_Index]
+                    If (A_Index = 18)
+                        progSubsName := Row[A_Index]
                 }
                 
-                progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : ""
+                progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : progStatus = "SUBSTITUTE" ? "pro-card-status-substitute" : ""
                 brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : "default-brand-icon.png"
-                FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
-                FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
+                If (dateTimeCreated != "") {
+                    FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
+                    FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
+                } Else {
+                    dateCreated := "N/A"
+                }
+                If (progSubsName != "")
+                    progFullName := progFullName . "<span class='red-text'> (USE => " . progSubsName . ")</span>"
                 
                 html =
                 (Ltrim
@@ -309,13 +320,13 @@ DisplayProgCard(Result) {
 }
 
 DisplayProgCardModal(neutron, event) {
-    NeutronWebApp.wnd.activateProgCardFirstTab()
+    NeutronWebApp.wnd.activateProgCardFirstTab()    ;JS function
     ;NeutronWebApp.qs("#prog-card-modal-title").innerHTML := event.id
+    
     ;;Get data from DB
     SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcb ON aoi_pcb.pcb_number = aoi_programs.prog_pcb_number LEFT JOIN users ON users.user_id = aoi_programs.prog_created_by WHERE prog_id=" . event.id
     If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
-        Return
     }
     
     If (!ProgCardData.HasRows) {
@@ -333,23 +344,33 @@ DisplayProgCardModal(neutron, event) {
     pcmProgDateCre := ProgCardData.Rows[1][10]
     pcmProgAoiMa := ProgCardData.Rows[1][14]
     pcmProgAltType := ProgCardData.Rows[1][15]
+    pcmProgSubsName := ProgCardData.Rows[1][18]
     ;;Table 2
-    pcmPcbStatus := ProgCardData.Rows[1][19]
-    pcmPcbFullName := ProgCardData.Rows[1][20] = "" ? "*No Info In Database*" : ProgCardData.Rows[1][20]
-    pcmPcbQty := ProgCardData.Rows[1][23]
-    pcmPcbDwg := ProgCardData.Rows[1][24]
+    pcmPcbStatus := ProgCardData.Rows[1][20]
+    pcmPcbFullName := ProgCardData.Rows[1][21] = "" ? "*No Info In Database*" : ProgCardData.Rows[1][21]
+    pcmPcbQty := ProgCardData.Rows[1][24]
+    pcmPcbDwg := ProgCardData.Rows[1][25]
     ;;Table 3
-    pcmUserFn := ProgCardData.Rows[1][26]
-    pcmUserLn := ProgCardData.Rows[1][27]
+    pcmUserFn := ProgCardData.Rows[1][27]
+    pcmUserLn := ProgCardData.Rows[1][28]
     
-    progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : "black"
+    ;;Auto Update Table aoi_pcb
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcb" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    
+    progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"
     brandLogoPath := pcmProgAoiMa = "YesTech" ? "yestech-logo.png" : pcmProgAoiMa = "TRI" ? "rti-logo.png" : "default-brand-logo.png"
     If (pcmProgDateCre != "")
         FormatTime, dateCreated, % pcmProgDateCre , MMMM dd, yyyy
     isAlternate := pcmProgAltType = "" ? "" : " <span class='badge black'>Alternative</span>"
     
     ;;Display Data on First Tab
-    NeutronWebApp.qs("#prog-card-modal-title").innerHTML := pcmProgName . isAlternate
+    If (pcmProgSubsName = "") {
+        NeutronWebApp.qs("#prog-card-modal-title").innerHTML := pcmProgName . isAlternate
+        NeutronWebApp.wnd.getBackOldModalCardProgInfoContent()      ;JS function
+    } Else {
+        NeutronWebApp.qs("#prog-card-modal-title").innerHTML := pcmProgName . isAlternate . " <span class='red-text'>(USE => " . pcmProgSubsName . ")</span>"
+        NeutronWebApp.qs("#prog-card-main-info-group").innerHTML := "<h6 class='prog-card-title red-text'>This program is the same with " . pcmProgSubsName . "<br>So ...Use it instead!</h6> <h6 class='prog-card-title'>Noted that program <span class='red-text'>" . pcmProgSubsName . "</span> might need ECO updates.<br>Make sure to verify that before you use!</h6>"
+    }  
     NeutronWebApp.qs("#prog-card-modal-header").style.backgroundColor := progStatusColor
     NeutronWebApp.qs("#prog-card-modal-buildnum").innerHTML := pcmProgBuildNum
     NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := pcmProgCurntEcl
@@ -404,31 +425,6 @@ checkAnURLStatus(url, timeout := 1000) {
         return True
     }
 }
-
-;autoGetPCBInfo(pcbNum) {
-    ;;;RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
-    ;wb := ComObjCreate("InternetExplorer.Application")
-    ;wb.Visible := False
-    ;url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . pcbNum
-    ;wb.Navigate(url)
-    ;IELoad(wb)
-    ;
-    ;Try 
-        ;While (el := wb.document.getElementsByTagName("td")[A_Index]) 
-        ;{
-            ;if (A_Index = 4)
-                ;pcbFullName :=  el.innerHTML
-            ;if (A_Index = 10)
-                ;pcbPartStatus :=  el.innerHTML
-            ;if (A_Index = 16)
-                ;pcbQuantity :=  el.innerHTML
-            ;if (A_Index = 51) {
-                ;pcbInsFileName := RegExReplace(el.innerHTML, "<.+?>")
-            ;}
-        ;}
-    ;wb.Quit
-    ;return pcbInfoList := {pcbFullName: pcbFullName, pcbPartStatus: pcbPartStatus, pcbQuantity: pcbQuantity, pcbInsFileName: pcbInsFileName}
-;}
 
 autoUpdatePcbDBTable(pcbNum) {
     ;;Get data from the web

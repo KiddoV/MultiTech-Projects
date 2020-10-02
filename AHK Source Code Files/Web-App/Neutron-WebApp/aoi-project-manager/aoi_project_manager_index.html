@@ -170,12 +170,14 @@
 											<div class="row">
 												<div class="col-md-8">
 													<h6 class="prog-card-title">Program Status: <var id="prog-card-stat-label" class="text-muted"></var></h6>
+													<span id="prog-card-main-info-group">
 													<h6 class="prog-card-title">Program Location: <var id="" class="text-muted">?????????</var></h6>
 													<h6 class="prog-card-title">Rtf Note: <var id="prog-card-rtf-note" class="text-muted">?????????</var></h6>
 													<h6 class="prog-card-title">Date Created: <var id="prog-card-date-created" class="text-muted">?????????</var></h6>
 													<h6 class="prog-card-title">Created By: <var id="prog-card-created-by" class="text-muted">????</var></h6>
 													<h6 class="prog-card-title">ECO Last Update On: <var id="" class="text-muted">???????</var></h6>
 													<h6 class="prog-card-title">Alternate Type: <var id="prog-card-alt-type" class="text-muted">?????????</var></h6>
+													</span>
 												</div>
 												<div class="col-md-4">
 													<img id="prog-card-modal-brand-logo" src="" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="" height="">
@@ -347,26 +349,16 @@
 
 <!-- Inner Javascript -->
 <script>
+	//============================================================================//
+	////  FUNCTIONs TO BE USED BY AHK ////
+	var origModalCardProgInfoContent = document.getElementById("prog-card-main-info-group").innerHTML;
+
 	function activateProgCardFirstTab() {
-		$('#prog-card-modal-tabs li:first-child a').tab('show');
+	  $('#prog-card-modal-tabs li:first-child a').tab('show');
 	}
 
-	$(document).ready(function() {
-		// Tooltips Initialization
-
-		// close the alert automatically
-		// setTimeout(function() {
-		// 		$("#alert-box").collapse();
-		// }, 2000);
-
-		// click to close alert
-	  // $(".close").click(function(){
-	  //   $("#alert-box").alert("close");
-	  // });
-		//
-		// $("#test-btn").click(function(){
-		// 	$("#alert-box").alert("show");
-		// })
-	});
+	function getBackOldModalCardProgInfoContent() {
+	  document.getElementById("prog-card-main-info-group").innerHTML = origModalCardProgInfoContent;
+	}
 </script>
 </html>
