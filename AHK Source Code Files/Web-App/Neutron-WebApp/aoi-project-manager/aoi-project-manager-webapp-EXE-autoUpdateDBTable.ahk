@@ -2,7 +2,7 @@
     This script to create additional EXE file for AOI Project Manager app!
     Execute to EXE file to use it!
 */
-#NoTrayIcon
+;#NoTrayIcon
 SetTitleMatchMode, RegEx
 
 ;;;;;Libraries
@@ -11,12 +11,16 @@ SetTitleMatchMode, RegEx
 
 
 ;;;;;Get var by parsing using command
-Global ColumnVar = % A_Args[1]
-Global TableName = % A_Args[2]
-Global MainDBFilePath = % A_Args[3]
-Global MainSettingsFilePath = % A_Args[4]
-;Global ColumnVar := "10000791L"
-;Global TableName := "aoi_pcb"
+;Global ColumnVar = % A_Args[1]
+;Global TableName = % A_Args[2]
+;Global MainDBFilePath = % A_Args[3]
+;Global MainSettingsFilePath = % A_Args[4]
+
+;;Debugging
+Global ColumnVar := "10000791L"
+Global TableName := "aoi_pcbs"
+Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"
+Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\app-settings.ini"
 
 ;;;;;Main Logic
 If(ColumnVar = "" || TableName = "") {
@@ -31,7 +35,7 @@ If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
     Return
 }
 
-If (TableName = "aoi_pcb")
+If (TableName = "aoi_pcbs")
     autoUpdatePcbDBTable(ColumnVar)
 
 Return
@@ -67,8 +71,9 @@ autoUpdatePcbDBTable(PcbNum) {
     
     Loop, Parse, response, `n
     {
+        MsgBox % A_Index "--> " A_LoopField
         If (RegExMatch(A_LoopField, "Component Finder cannot find any manufacturer parts") = 1) {
-            ;DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>ERR: Not found or Wrong PCB number parameter!", "alert-danger")
+            ;DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>ERR: Not found or Wrong PCB number parameter!", "alert-danger")
             Return 0
         }
         
@@ -89,50 +94,25 @@ autoUpdatePcbDBTable(PcbNum) {
     }
     ;MsgBox % pcbPartStatus "--> " StrLen(pcbPartStatus)
     ;;;Update or Insert to Database
-    SQL := "SELECT * FROM aoi_pcb WHERE pcb_number = '" . PcbNum . "'"
+    SQL := "SELECT * FROM aoi_pcbs WHERE pcb_number = '" . PcbNum . "'"
     If !AOI_Pro_DB.Query(SQL, ResultSet) {
         MsgBox % "FAILED DOING DB QUERY!!! Msg: " . AOI_Pro_DB.ErrorMsg . " Code:" . AOI_Pro_DB.ErrorCode
-        ;DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Execute SQL statement FAILED!!!", "alert-danger")
+        ;DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>Execute SQL statement FAILED!!!", "alert-danger")
         Return
     }
     
     If (!ResultSet.HasRows) {    ;If cannot find record in Database then Insert new record
-        SQL := "INSERT INTO aoi_pcb VALUES('" . PcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ", " . pcbDwgNum . ")"
+        SQL := "INSERT INTO aoi_pcbs VALUES('" . PcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ", " . pcbDwgNum . ")"
         
         If !AOI_Pro_DB.Exec(SQL)
             Return
-            ;DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to INSERT record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger")
+            ;DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>Failed to INSERT record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger")
     } Else {
         ;AOI_Pro_DB.Exec("BEGIN TRANSACTION;")
-        SQL := "UPDATE aoi_pcb SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . PcbNum . "'"
+        SQL := "UPDATE aoi_pcbs SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . PcbNum . "'"
         If !AOI_Pro_DB.Exec(SQL)
             Return
-            ;DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger", 5000)
+            ;DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger", 5000)
         ;AOI_Pro_DB.Exec("COMMIT TRANSACTION;")
     }
 }
-
-;autoGetPCBInfo(PcbNum) {
-    ;;;RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
-    ;wb := ComObjCreate("InternetExplorer.Application")
-    ;wb.Visible := False
-    ;url := "http://virtu.multitech.prv:4080/compfind/partdetails.asp?MTSPN=" . PcbNum
-    ;wb.Navigate(url)
-    ;IELoad(wb)
-    ;
-    ;Try 
-        ;While (el := wb.document.getElementsByTagName("td")[A_Index]) 
-        ;{
-            ;if (A_Index = 4)
-                ;pcbFullName :=  el.innerHTML
-            ;if (A_Index = 10)
-                ;pcbPartStatus :=  el.innerHTML
-            ;if (A_Index = 16)
-                ;pcbQuantity :=  el.innerHTML
-            ;if (A_Index = 51) {
-                ;pcbInsFileName := RegExReplace(el.innerHTML, "<.+?>")
-            ;}
-        ;}
-    ;wb.Quit
-    ;return pcbInfoList := {pcbFullName: pcbFullName, pcbPartStatus: pcbPartStatus, pcbQuantity: pcbQuantity, pcbInsFileName: pcbInsFileName}
-;}

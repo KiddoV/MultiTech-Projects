@@ -150,7 +150,7 @@ TestBttn(neutron, event) {
     ;If !AOI_Pro_DB.GetTable(SQL, Result)
        ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
     ;MsgBox % Result.ColumnCount
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcb" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
 }
 
 TestBttn2(neutron, event) {
@@ -324,7 +324,7 @@ DisplayProgCardModal(neutron, event) {
     ;NeutronWebApp.qs("#prog-card-modal-title").innerHTML := event.id
     
     ;;Get data from DB
-    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcb ON aoi_pcb.pcb_number = aoi_programs.prog_pcb_number LEFT JOIN users ON users.user_id = aoi_programs.prog_created_by WHERE prog_id=" . event.id
+    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON aoi_pcbs.pcb_number = aoi_programs.prog_pcb_number LEFT JOIN users ON users.user_id = aoi_programs.prog_created_by WHERE prog_id=" . event.id
     If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
     }
@@ -354,8 +354,8 @@ DisplayProgCardModal(neutron, event) {
     pcmUserFn := ProgCardData.Rows[1][27]
     pcmUserLn := ProgCardData.Rows[1][28]
     
-    ;;Auto Update Table aoi_pcb
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcb" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    ;;Auto Update Table aoi_pcbs
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
     
     progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"
     brandLogoPath := pcmProgAoiMa = "YesTech" ? "yestech-logo.png" : pcmProgAoiMa = "TRI" ? "rti-logo.png" : "default-brand-logo.png"
@@ -456,7 +456,7 @@ autoUpdatePcbDBTable(pcbNum) {
     Loop, Parse, response, `n
     {
         If (RegExMatch(A_LoopField, "Component Finder cannot find any manufacturer parts") = 1) {
-            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>ERR: Not found or Wrong PCB number parameter!", "alert-danger")
+            DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>ERR: Not found or Wrong PCB number parameter!", "alert-danger")
             Return 0
         }
         
@@ -477,22 +477,22 @@ autoUpdatePcbDBTable(pcbNum) {
     }
     MsgBox % pcbPartStatus "--> " StrLen(pcbPartStatus)
     ;;;Update or Insert to Database
-    SQL := "SELECT * FROM aoi_pcb WHERE pcb_number = '" . pcbNum . "'"
+    SQL := "SELECT * FROM aoi_pcbs WHERE pcb_number = '" . pcbNum . "'"
     If !AOI_Pro_DB.Query(SQL, ResultSet) {
-        DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Execute SQL statement FAILED!!!", "alert-danger")
+        DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>Execute SQL statement FAILED!!!", "alert-danger")
         Return
     }
     
     If (!ResultSet.HasRows) {    ;If cannot find record in Database then Insert new record
-        SQL := "INSERT INTO aoi_pcb VALUES('" . pcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ", " . pcbDwgNum . ")"
+        SQL := "INSERT INTO aoi_pcbs VALUES('" . pcbNum . "', '" . pcbPartStatus . "', '" . pcbFullName . "', '', '" . pcbInsFileName . "', " . pcbQuantity . ", " . pcbDwgNum . ")"
         
         If !AOI_Pro_DB.Exec(SQL)
-            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to INSERT record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger")
+            DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>Failed to INSERT record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger")
     } Else {
         ;AOI_Pro_DB.Exec("BEGIN TRANSACTION;")
-        SQL := "UPDATE aoi_pcb SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . pcbNum . "'"
+        SQL := "UPDATE aoi_pcbs SET pcb_part_status = '" . pcbPartStatus . "', pcb_quantity_onhand = " . pcbQuantity . " WHERE pcb_number = '" . pcbNum . "'"
         If !AOI_Pro_DB.Exec(SQL)
-            DisplayAlertMsg("SYS: Update aoi_pcb table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger", 5000)
+            DisplayAlertMsg("SYS: Update aoi_pcbs table Failed!<br>Failed to UPDATE record!<br>ErrMsg: " . AOI_Pro_DB.ErrorMsg . " (ErrCODE: " . AOI_Pro_DB.ErrorCode . ")", "alert-danger", 5000)
         ;AOI_Pro_DB.Exec("COMMIT TRANSACTION;")
     }
 }
