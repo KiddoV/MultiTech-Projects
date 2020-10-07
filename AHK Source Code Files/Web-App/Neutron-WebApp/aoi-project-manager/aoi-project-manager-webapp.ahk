@@ -354,8 +354,12 @@ DisplayProgCardModal(neutron, event) {
     pcmUserFn := ProgCardData.Rows[1][27]
     pcmUserLn := ProgCardData.Rows[1][28]
     
+    RegExMatch(pcmProgCurntEcl, "^\w{1}", fstCharEcl)
+    pcmProgBuildNumWEcl .= pcmProgBuildNum "" fstCharEcl
     ;;Auto Update Table aoi_pcbs
     Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    ;;Auto Update Table aoi_builds
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgBuildNumWEcl% "aoi_builds" %MainDBFilePath% %MainSettingsFilePath%, , Hide
     
     progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"
     brandLogoPath := pcmProgAoiMa = "YesTech" ? "yestech-logo.png" : pcmProgAoiMa = "TRI" ? "rti-logo.png" : "default-brand-logo.png"
@@ -376,7 +380,7 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-modal-eclnum").innerHTML := pcmProgCurntEcl
     NeutronWebApp.qs("#prog-card-modal-econum").innerHTML := pcmProgCurntEco
     NeutronWebApp.qs("#prog-card-modal-pcbnum").innerHTML := pcmProgPcbNum
-    NeutronWebApp.qs("#prog-card-modal-pcb-btn").innerHTML := pcmProgPcbNum = "" ? "????????" : pcmProgPcbNum
+    ;NeutronWebApp.qs("#prog-card-modal-pcb-btn").innerHTML := pcmProgPcbNum = "" ? "????????" : pcmProgPcbNum
     NeutronWebApp.qs("#prog-card-stat-label").innerHTML := "<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgStatus . "</span>"
     NeutronWebApp.qs("#prog-card-modal-brand-logo").src := brandLogoPath
     NeutronWebApp.qs("#prog-card-rtf-note").innerHTML := "<a href='#' onclick='ahk.OpenRTFNote(event)'>Notes.rtf</a>"
