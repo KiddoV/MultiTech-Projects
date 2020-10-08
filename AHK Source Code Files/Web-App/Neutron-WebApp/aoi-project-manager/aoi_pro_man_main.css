@@ -149,6 +149,39 @@ body{
 	font-size: 15px;
 }
 
+/* Price Tag */
+.pricetag{
+    white-space:nowrap;
+    position:relative;
+    margin:0 5px 0 10px;
+    displaY:inline-block;
+    height:25px;
+    border-radius: 0 3px 3px 0;
+    padding: 0 8px 0 15px;
+    background: #ffcc80;
+    border: 1px solid #C7D2D4;
+    color: #757575;
+    line-height:23px;
+}
+.pricetag:before{
+    position:absolute;
+		border-radius: 2px;
+    background: #ffcc80;
+    content:"\25CF";
+    color: white;
+    text-shadow: 0 0 2px #aaa;
+    font-size: 20px;
+    line-height: 10px;
+    text-indent: 6px;
+    top: 1.7px;
+    left: -10px;
+    width: 18px;
+    height: 19px;
+    transform: rotate(45deg);
+    border-left:1px solid #C7D2D4;
+    border-bottom:1px solid #C7D2D4;
+}
+
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
 /***Boostrap CSS***/

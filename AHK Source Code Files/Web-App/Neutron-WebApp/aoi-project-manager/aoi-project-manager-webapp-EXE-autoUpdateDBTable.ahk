@@ -231,11 +231,11 @@ autoUpdateBuildDBTable(BuildNumWEcl) {
     }
     
     If (!ResultSet.HasRows) {    ;If cannot find record in Database then INSERT new record to <aoi_builds> table
-        SQL := "INSERT INTO aoi_builds VALUES('" . BuildNum . "', " . buildEcoList[1].eco . ", '" . buildEcoList[1].ecl . "', '" . buildName . "', '" . buildPartStatus . "', " . buildCost . ")"
+        SQL := "INSERT INTO aoi_builds VALUES('" . BuildNum . "', " . buildEcoList[1].eco . ", '" . buildEcoList[1].ecl . "', '" . buildName . "', '" . buildPartStatus . "', '" . buildCost . "')"
         If !AOI_Pro_DB.Exec(SQL)
             Return
     } Else {        ;If record found then UPDATE nessesary data
-        SQL := "UPDATE aoi_builds SET build_part_status ='" . buildPartStatus . "', build_current_eco= " . buildEcoList[1].eco . ", build_current_ecl='" . buildEcoList[1].ecl . "', build_cost=" . buildCost . " WHERE build_number='" . BuildNum . "'"
+        SQL := "UPDATE aoi_builds SET build_part_status ='" . buildPartStatus . "', build_current_eco= " . buildEcoList[1].eco . ", build_current_ecl='" . buildEcoList[1].ecl . "', build_cost='" . buildCost . "' WHERE build_number='" . BuildNum . "'"
         Clipboard := SQL
         If !AOI_Pro_DB.Exec(SQL)
             Return

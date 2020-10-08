@@ -324,7 +324,7 @@ DisplayProgCardModal(neutron, event) {
     ;NeutronWebApp.qs("#prog-card-modal-title").innerHTML := event.id
     
     ;;Get data from DB
-    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON aoi_pcbs.pcb_number = aoi_programs.prog_pcb_number LEFT JOIN users ON users.user_id = aoi_programs.prog_created_by WHERE prog_id=" . event.id
+    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON aoi_pcbs.pcb_number = aoi_programs.prog_pcb_number LEFT JOIN users ON users.user_id = aoi_programs.prog_created_by  LEFT JOIN aoi_builds ON aoi_builds.build_number = aoi_programs.prog_build_number WHERE prog_id=" . event.id
     If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
     }
@@ -353,7 +353,17 @@ DisplayProgCardModal(neutron, event) {
     ;;Table 3
     pcmUserFn := ProgCardData.Rows[1][27]
     pcmUserLn := ProgCardData.Rows[1][28]
+    ;;Table 4
+    pcmBuildName := ProgCardData.Rows[1][35]
+    pcmBuildCost := ProgCardData.Rows[1][37]
+    pcmBuildStatus := ProgCardData.Rows[1][36]
     
+    ;;Get data from _build_eco_history
+    SQL := "SELECT * FROM _build_eco_history WHERE build_number='" . pcmProgBuildNum . "' ORDER BY ecl, date_effect ASC"
+    If !AOI_Pro_DB.GetTable(SQL, ProgCardBuildECOHistData) {
+        DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data from <_build_eco_history>!", "alert-danger")
+    }
+    MsgBox % ProgCardBuildECOHistData.RowCount
     RegExMatch(pcmProgCurntEcl, "^\w{1}", fstCharEcl)
     pcmProgBuildNumWEcl .= pcmProgBuildNum "" fstCharEcl
     ;;Auto Update Table aoi_pcbs
@@ -389,6 +399,13 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-created-by").innerHTML := pcmUserFn . " " . pcmUserLn
     
     ;;Display Data on Second Tab
+    buildStatusColor := pcmBuildStatus = "ACTIVE" ? "green" : pcmBuildStatus = "BETA" ? "indigo" : "black"
+    NeutronWebApp.qs("#prog-card-modal-build-name").innerHTML := pcmBuildName . "  <span class='pricetag z-depth-1 default-mouse'>$" . pcmBuildCost . "</span>"
+    NeutronWebApp.qs("#prog-card-modal-build").innerHTML := pcmProgBuildNum
+    NeutronWebApp.qs("#prog-card-modal-build-status").innerHTML := "Status: <span class='badge " . buildStatusColor . "'>" . pcmBuildStatus . "</span>"
+    
+    
+    ;;Display Data on Third Tab
     pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : "black"
     NeutronWebApp.qs("#prog-card-modal-pcb-name").innerHTML := pcmPcbFullName " | " pcmProgPcbNum
     NeutronWebApp.qs("#prog-card-modal-pcb").innerHTML := pcmProgPcbNum
