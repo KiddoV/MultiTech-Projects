@@ -249,7 +249,8 @@ DisplayProgCard(Result) {
     If (Result.HasNames) {
         NeutronWebApp.doc.getElementById("search-result-container").innerHTML := ""     ;Delete all old result before display new result
         If (Result.HasRows) {
-            Loop, % Result.RowCount {
+            Loop, % Result.RowCount 
+            {
                 Result.Next(Row)
                 Loop, % Result.ColumnCount
                 {
@@ -359,11 +360,11 @@ DisplayProgCardModal(neutron, event) {
     pcmBuildStatus := ProgCardData.Rows[1][36]
     
     ;;Get data from _build_eco_history
-    SQL := "SELECT * FROM _build_eco_history WHERE build_number='" . pcmProgBuildNum . "' ORDER BY ecl, date_effect ASC"
+    SQL := "SELECT * FROM _build_eco_history WHERE build_number='" . pcmProgBuildNum . "' ORDER BY date_effect DESC"
     If !AOI_Pro_DB.GetTable(SQL, ProgCardBuildECOHistData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data from <_build_eco_history>!", "alert-danger")
     }
-    MsgBox % ProgCardBuildECOHistData.RowCount
+    
     RegExMatch(pcmProgCurntEcl, "^\w{1}", fstCharEcl)
     pcmProgBuildNumWEcl .= pcmProgBuildNum "" fstCharEcl
     ;;Auto Update Table aoi_pcbs
@@ -403,7 +404,41 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-modal-build-name").innerHTML := pcmBuildName . "  <span class='pricetag z-depth-1 default-mouse'>$" . pcmBuildCost . "</span>"
     NeutronWebApp.qs("#prog-card-modal-build").innerHTML := pcmProgBuildNum
     NeutronWebApp.qs("#prog-card-modal-build-status").innerHTML := "Status: <span class='badge " . buildStatusColor . "'>" . pcmBuildStatus . "</span>"
+    NeutronWebApp.qs("#prog-card-modal-build-eco-hist").innerHTML := ""     ;Delete all old result before display new result
     
+    If (ProgCardBuildECOHistData.HasRows) {
+        Loop, % ProgCardBuildECOHistData.RowCount
+        {
+            progHere := "<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgName . "</span>"
+            ProgCardBuildECOHistData.Next(Row)
+            Loop, % ProgCardBuildECOHistData.ColumnCount
+            {
+                If (A_Index = 2)
+                    eco := Row[A_Index]
+                If (A_Index = 3)
+                    ecl := Row[A_Index]
+                If (A_Index = 4)
+                    dateTimeEfft := Row[A_Index]
+            }
+            If (eco != pcmProgCurntEco)
+                progHere := ""
+            If (dateTimeEfft != "") {
+                FormatTime, dateEfft, %dateTimeEfft%, MMMM dd, yyyy
+                FormatTime, timeEfft, %dateTimeEfft%, hh:mm:ss tt
+            } Else {
+                dateEfft := "N/A"
+            }
+            html = 
+            (LTrim
+            <div class='row no-gutters' style='margin-left: 0.5px; height: 23px;'>
+                <p class='col-sm-4 text-muted'>%dateEfft% - %timeEfft%</p>
+                <p class='col-sm-3 text-muted'>Added ECO: <span id='eco-%eco%'><a href='#' onclick='ahk.OpenPdfEco(event)'>%eco%</a></span></p>
+                <p class='col-sm-5 text-muted'>ECL: <strong>%ecl%</strong> %progHere%</p>
+            </div>
+            )
+            NeutronWebApp.qs("#prog-card-modal-build-eco-hist").insertAdjacentHTML("beforeend", html)
+        }
+    }
     
     ;;Display Data on Third Tab
     pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : "black"
@@ -416,6 +451,25 @@ DisplayProgCardModal(neutron, event) {
 
 OpenRTFNote(neutron, event) {
     MsgBox OPENNING FILE!
+}
+
+OpenPdfEco(neutron, event) {
+    ecoToOpen := event.target.innerHTML
+    ecoUrl := "http://virtu.multitech.prv:4080/eco/" . ecoToOpen . "/" . ecoToOpen . ".pdf"
+    ecoUrlOld := "http://virtu.multitech.prv:4080/eco/ECO'S Prior to 8-16-19/" . ecoToOpen . ".pdf"
+    NeutronWebApp.qs("#eco-" . ecoToOpen).innerHTML := "Openning..."
+    If checkIfUrlAvailable(ecoUrl) {
+        UrlDownloadToFile, %ecoUrl%, C:\temp.pdf
+        Run, C:\temp.pdf, , Hide
+    } Else {
+        If checkIfUrlAvailable(ecoUrlOld) {
+            UrlDownloadToFile, %ecoUrlOld%, C:\temp.pdf
+            Run, C:\temp.pdf, , Hide
+        } Else {
+            DisplayAlertMsg("Could not open ECO file! FILE NOT FOUND!", "alert-danger")
+        }
+    }
+    NeutronWebApp.qs("#eco-" . ecoToOpen).innerHTML := "<a href='#' onclick='ahk.OpenPdfEco(event)'>" . ecoToOpen . "</a>"
 }
 
 ProcessIniFile() {
@@ -445,6 +499,15 @@ checkAnURLStatus(url, timeout := 1000) {
     if (ErrorLevel = 0) {
         return True
     }
+}
+
+checkIfUrlAvailable(url) {
+    UrlDownloadToFile, %url%, C:\checkHtml.html
+    FileRead, outVar, C:\checkHtml.html
+    IfInString, outVar, 404 - File or Directory not found
+        Return False
+    Else
+        Return True
 }
 
 autoUpdatePcbDBTable(pcbNum) {
