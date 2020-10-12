@@ -459,12 +459,18 @@ OpenPdfEco(neutron, event) {
     ecoUrlOld := "http://virtu.multitech.prv:4080/eco/ECO'S Prior to 8-16-19/" . ecoToOpen . ".pdf"
     NeutronWebApp.qs("#eco-" . ecoToOpen).innerHTML := "Openning..."
     If checkIfUrlAvailable(ecoUrl) {
-        UrlDownloadToFile, %ecoUrl%, C:\temp.pdf
-        Run, C:\temp.pdf, , Hide
+        UrlDownloadToFile, %ecoUrl%, C:\ecoTemp.pdf
+        If (ErrorLevel = 0)
+            Run, C:\ecoTemp.pdf, , Hide
+        Else
+            DisplayAlertMsg("Could not open ECO file! COMPFIND not connected!", "alert-danger")
     } Else {
         If checkIfUrlAvailable(ecoUrlOld) {
-            UrlDownloadToFile, %ecoUrlOld%, C:\temp.pdf
-            Run, C:\temp.pdf, , Hide
+            UrlDownloadToFile, %ecoUrlOld%, C:\ecoTemp.pdf
+            If (ErrorLevel = 0)
+                Run, C:\ecoTemp.pdf, , Hide
+            Else
+                DisplayAlertMsg("Could not open ECO file! COMPFIND not connected!", "alert-danger")
         } Else {
             DisplayAlertMsg("Could not open ECO file! FILE NOT FOUND!", "alert-danger")
         }
