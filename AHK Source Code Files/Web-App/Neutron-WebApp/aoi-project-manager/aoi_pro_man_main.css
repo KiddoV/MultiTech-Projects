@@ -182,6 +182,21 @@ body{
     border-bottom:1px solid #C7D2D4;
 }
 
+/* Authentication */
+.login-overlay {
+	position: fixed;
+	margin-top: -8px;
+	width: 100%;
+	height: 100%;
+	background-color: #90a4ae;
+	z-index: 98;
+}
+.login-form {
+	width: 350px;
+	margin-left: 24%;
+	margin-top: 10%;
+}
+
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
 /***Boostrap CSS***/
@@ -248,20 +263,6 @@ body{
 
 .badge {
 	top: 0;
-}
-
-.box:before {
-	left: 0;
-  content: '';
-  display: block;
-  height: 12px;
-  background: repeating-linear-gradient(
-		45deg,
-		#606dbc,
-		#606dbc 5px,
-		#465298 5px,
-		#465298 10px
-	);
 }
 
 .nav-pills .prog-card-nav-link .nav-link:not(.active) {

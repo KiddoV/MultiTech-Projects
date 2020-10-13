@@ -1067,7 +1067,7 @@ wait '#'
 flushrecv
 mpause 500
 sendln "ifconfig |grep -i wifi1 |awk '{print $5}'"
-waitln '00:' '88:'
+waitln '00:' '88:' '80:'
 strlen inputstr
 if result <>17 goto start_wifi
 strconcat wifiAddr inputstr
@@ -1098,7 +1098,7 @@ wait '#'
 flushrecv
 mpause 500
 sendln "hcitool dev |grep -i hci0 |awk '{print $2}'"
-waitln '00:' '88:'
+waitln '00:' '88:' '80:'
 strlen inputstr
 if result <>17 goto start_bt
 strconcat bluetoothAddr inputstr

@@ -74,10 +74,27 @@
 
 		<!-- Main Content -->
 		<main class="flex-grow-1 overflow-auto bg-app-color" style="overflow: hidden;">
-			<div id="nav-all-tab-content" class="tab-content container p-0">
+			<div id="nav-all-tab-content" class="tab-content container p-0 m-0">
 
 				<!-- Task Tab Contents -->
 				<div id="task-tab" class="tab-pane fade show active">
+
+					<div id='auth-container' class='login-overlay'>
+						<div class="card login-form">
+							<div class="card-header p-1">
+								<h2 class="card-header-title d-flex align-items-center justify-content-center">Login</h2>
+							</div>
+							<div class="card-body">
+								<div class="text-center">
+								    <p>Please login to use this feature!</p>
+								    <input type="text" id="defaultSubscriptionFormPassword" class="form-control mb-4" placeholder="Username">
+								    <input type="email" id="defaultSubscriptionFormEmail" class="form-control mb-4" placeholder="Password">
+								    <button class="btn btn-info btn-block">Sign in</button>
+								</div>
+							</div>
+						</div>
+					</div>
+
 					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 97"><i class="fas fa-2x fa-plus"></i></button>
 					<div class="mt-2">
 						<ul class="nav nav-pills justify-content-end">
@@ -109,7 +126,7 @@
 				</div>
 
 				<!-- Search Program Contents -->
-				<div id="prog-search-tab" class="tab-pane fade" style="overflow: hidden;">
+				<div id="prog-search-tab" class="tab-pane pl-3 fade" style="overflow: hidden;">
 					<div id="search-bar-container" class="pt-3 pl-1" style="width: 99%;">
 						<div class="input-group mb-4">
 							<input id="prog-search-bar" type="search" placeholder="Enter PCB #, Build # or Program Name..." class="form-control allow-select-text" style="box-shadow: none;" onkeydown="ahk.OnEnter(event)">
@@ -204,7 +221,7 @@
 											<div class="row">
 												<div class="col-sm form-group shadow-textarea">
 												  <h6 class="prog-card-title">Build ECO History:</h6>
-												  <div id="prog-card-modal-build-eco-hist" class="mt-2" style="font-size: 14px;">
+												  <div id="prog-card-modal-build-eco-hist" class="mt-2 ml-3" style="font-size: 14px;">
 														<!-- <ul id="prog-card-modal-build-eco-hist" class="pl-3" style="list-style-type: none;"> -->
 														  <!-- <li class="">Cras justo odio</li> -->
 															<!-- Generate by AHK -->
@@ -223,6 +240,13 @@
 												<h6 id="prog-card-modal-pcb-status" class="col-sm prog-card-title">Status: </h6>
 												<h6 class="col-sm prog-card-title">DWG #: <var id="prog-card-modal-pcb-dwg" class="text-muted">???</var></h6>
 												<h6 class="col-sm prog-card-title">In Stock: <var id="prog-card-modal-pcb-quant" class="text-muted">?????</var></h6>
+											</div>
+											<hr class="m-2"/>
+											<div class="row">
+												<div class="col-sm-12">
+													<h6 class="prog-card-title">Insert File: <var id="prog-card-ins-file" class="text-muted">?????????</var></h6>
+													<h6 class="prog-card-title">Assembly Drawing File: <var id="prog-card-assem-draw" class="text-muted">?????????</var></h6>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -247,7 +271,7 @@
 
 				</div>
 				<!-- Tool Tab Contents -->
-				<div id="tool-tab" class="tab-pane fade" style="overflow-y: scroll;">
+				<div id="tool-tab" class="tab-pane pl-1 fade" style="overflow-y: scroll;">
 					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test Database</button>
 					<hr class="m-2"/>
 					<div class="row">
@@ -288,7 +312,7 @@
 				</div>
 
 				<!-- Database Tab Contents -->
-				<div id="database-tab" class="tab-pane fade">
+				<div id="database-tab" class="tab-pane pl-3 fade">
 					<div class="" style="">
 						<form class="form-inline">
 						  <div class="input-group mb-2 mr-sm-2 shadow-sm">

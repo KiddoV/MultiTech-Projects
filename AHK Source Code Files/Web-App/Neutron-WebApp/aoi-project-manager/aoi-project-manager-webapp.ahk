@@ -349,15 +349,16 @@ DisplayProgCardModal(neutron, event) {
     ;;Table 2
     pcmPcbStatus := ProgCardData.Rows[1][20]
     pcmPcbFullName := ProgCardData.Rows[1][21] = "" ? "*No Info In Database*" : ProgCardData.Rows[1][21]
+    pcmPcbInsFileName := ProgCardData.Rows[1][23]
     pcmPcbQty := ProgCardData.Rows[1][24]
     pcmPcbDwg := ProgCardData.Rows[1][25]
     ;;Table 3
     pcmUserFn := ProgCardData.Rows[1][27]
     pcmUserLn := ProgCardData.Rows[1][28]
     ;;Table 4
-    pcmBuildName := ProgCardData.Rows[1][35]
-    pcmBuildCost := ProgCardData.Rows[1][37]
-    pcmBuildStatus := ProgCardData.Rows[1][36]
+    pcmBuildName := ProgCardData.Rows[1][36]
+    pcmBuildCost := ProgCardData.Rows[1][38]
+    pcmBuildStatus := ProgCardData.Rows[1][37]
     
     ;;Get data from _build_eco_history
     SQL := "SELECT * FROM _build_eco_history WHERE build_number='" . pcmProgBuildNum . "' ORDER BY date_effect DESC"
@@ -447,10 +448,16 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-modal-pcb-status").innerHTML := "Status: <span class='badge " . pcbStatusColor . "'>" . pcmPcbStatus . "</span>"
     NeutronWebApp.qs("#prog-card-modal-pcb-dwg").innerHTML := pcmPcbDwg
     NeutronWebApp.qs("#prog-card-modal-pcb-quant").innerHTML := pcmPcbQty . " (pcs)"
+    NeutronWebApp.qs("#prog-card-ins-file").innerHTML := "<a href='http://virtu.multitech.prv:4080/Data/PCB_Assembly_Data/" . pcmPcbInsFileName . "' target='_blank'>" . pcmPcbInsFileName . "</a>"
+    NeutronWebApp.qs("#prog-card-assem-draw").innerHTML := "<a href='#' onclick='ahk.OpenAssemDraw(event)'>" . pcmProgPcbNum . "_AssemblyDrawing.PDF</a>"
 }
 
 OpenRTFNote(neutron, event) {
     MsgBox OPENNING FILE!
+}
+
+OpenAssemDraw(neutron, event) {
+    MsgBox OPENNING ASSEMBLY DRAWING!
 }
 
 OpenPdfEco(neutron, event) {
