@@ -189,12 +189,26 @@ body{
 	width: 100%;
 	height: 100%;
 	background-color: #90a4ae;
-	z-index: 98;
+	z-index: 97;
 }
 .login-form {
 	width: 350px;
 	margin-left: 24%;
 	margin-top: 10%;
+}
+
+
+/* Icon inside INPUT box */
+.input-icon-right {
+  position: absolute;
+  right: 10px;
+  top: calc(50% - 1em); /* Keep icon in center of input, regardless of the input height */
+}
+.input-wrapper {
+  position: relative;
+}
+.input-wrapper input {
+  padding-right: 30px;
 }
 
 /*=================================================================*/
@@ -227,6 +241,13 @@ body{
 	background: #eeeeee !important;
 	color: black !important;
 	border-left: 5px solid coral;
+	padding-left: 20px;
+}
+
+.left-nav-link-lock.active {
+	background: #90a4ae !important;
+	color: white !important;
+	border-left: 5px solid red;
 	padding-left: 20px;
 }
 
@@ -273,4 +294,9 @@ body{
 	background-color: rgba(0, 0, 0, 0.5);
 	font-weight: bold;
 	color: white;
+}
+
+/* Disable form control icons */
+.form-control.is-invalid, .form-control.is-valid{
+    background-image: none;
 }

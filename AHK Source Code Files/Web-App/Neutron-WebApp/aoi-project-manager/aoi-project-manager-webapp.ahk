@@ -25,6 +25,9 @@ Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manag
 Global CompFindUrl := "virtu.multitech.prv"
 
 Global DBStatus := ""
+
+Global IsUserLogin := False
+Global UserRole := "N/A"
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
@@ -483,6 +486,75 @@ OpenPdfEco(neutron, event) {
         }
     }
     NeutronWebApp.qs("#eco-" . ecoToOpen).innerHTML := "<a href='#' onclick='ahk.OpenPdfEco(event)'>" . ecoToOpen . "</a>"
+}
+
+UserLogin(neutron, event) {
+    ;NeutronWebApp.qs("#loginBttn").innerHTML := "<i class='fas fa-2x fa-spinner fa-pulse'></i>"
+    event.preventDefault()  ;Prevent form redirected page!
+    formData := NeutronWebApp.GetFormData(event.target)
+    
+    For elId, value in formData
+    {
+        If (elId == "inputUserN")
+            inputUserName := value
+        If (elId == "inputPw")
+            inputPassword := value
+    }
+    
+    If (inputUserName = "" || inputPassword = "") {
+        If (inputUserName = "") {
+            NeutronWebApp.qs("#inputUserN").classList.add("is-invalid")
+            NeutronWebApp.qs("#inputUserNFbIn").innerHTML := "Please type username!"
+        }
+        If (inputPassword = "") {
+            NeutronWebApp.qs("#inputPw").classList.add("is-invalid")
+            NeutronWebApp.qs("#inputPwFbIn").innerHTML := "Please type password!"
+        }
+        Return
+    }
+    
+    If (validateUserLogin(inputUserName, inputPassword) == "USER NOT EXIST") {
+        NeutronWebApp.qs("#inputUserN").classList.add("is-invalid")
+        NeutronWebApp.qs("#inputUserNFbIn").innerHTML := "User is not exist!"
+        Return
+    }
+    If (validateUserLogin(inputUserName, inputPassword) == "WRONG PASSWORD") {
+        NeutronWebApp.qs("#inputPw").classList.add("is-invalid")
+        NeutronWebApp.qs("#inputPwFbIn").innerHTML := "Wrong password!"
+        Return
+    }
+    If (ResultSet := validateUserLogin(inputUserName, inputPassword)) {
+        IsUserLogin := True
+        UserRole := ResultSet.Rows[1][7]
+    }
+    
+    DisplayAlertMsg("Welcome " . ResultSet.Rows[1][2] . "!", "alert-success")
+    changeUserLoginDisplay()
+}
+
+validateUserLogin(username, password) {
+    ;;Get User from database
+    SQL := "SELECT * FROM users WHERE user_username='" . username . "'"
+    If !AOI_Pro_DB.Query(SQL, RS)
+        DisplayAlertMsg("Failed to connect to Database!", "alert-danger")
+    
+    If !RS.HasRows
+        Return "USER NOT EXIST"
+    Else {
+        SQL := "SELECT * FROM users WHERE user_username='" . username . "' AND user_password='" . password . "'"
+        If !AOI_Pro_DB.GetTable(SQL, RS)
+            DisplayAlertMsg("Failed to connect to Database!", "alert-danger")
+        If !RS.HasRows
+            Return "WRONG PASSWORD"
+    }
+    Return RS
+}
+
+changeUserLoginDisplay() {
+    If (IsUserLogin) {
+        NeutronWebApp.qs("#auth-container").innerHTML := ""
+        NeutronWebApp.qs("#nav-task-tab").classList.remove("left-nav-link-lock")
+    }
 }
 
 ProcessIniFile() {

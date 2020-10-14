@@ -50,7 +50,7 @@
 <body class="d-flex flex-column bg-app-color no-select-text" oncontextmenu="return false;">
 	<header class="position-sticky"><!------------------------------------------------>
 		<!-- Title Bar -->
-		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm" style="z-index: 100;">
+		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm sticky-top" style="z-index: 100;">
 			<span class="flex-grow-1 ml-2 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
 			<span class="title-btn" onclick="neutron.Minimize()"><i class="fas fa-xs fa-window-minimize"></i></span>
 			<span class="title-btn title-btn-disable" onclick="" disabled><i class="fas fa-xs fa-window-maximize"></i></span>
@@ -66,7 +66,7 @@
 		<!-- Left nav bar -->
 		<div class="nav flex-column nav-pills bg-app-theme-light text-light" id="nav-tab" role="tablist" ondragstart="return false;">
 			<span class="pt-5" id="spacer"></span>
-			<a class="nav-link text-light left-nav-link active" id="nav-task-tab" data-toggle="tab" href="#task-tab" role="tab" data-toggle="tooltip" title="AOI Tasks"><i class="fas fa-lg fa-project-diagram" style="margin-left: 1.4px;"></i></a>
+			<a class="nav-link text-light left-nav-link left-nav-link-lock active" id="nav-task-tab" data-toggle="tab" href="#task-tab" role="tab" data-toggle="tooltip" title="AOI Tasks"><i class="fas fa-lg fa-project-diagram" style="margin-left: 1.4px;"></i></a>
 			<a class="nav-link text-light left-nav-link" id="nav-search-tab" data-toggle="tab" href="#prog-search-tab" role="tab" data-toggle="tooltip" title="Search for Program"><i class="fas fa-lg fa-search" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
 			<a class="nav-link text-light left-nav-link" id="nav-tool-tab" data-toggle="tab" href="#tool-tab" role="tab" data-toggle="tooltip" title="More Tools"><i class="fas fa-lg fa-toolbox" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
 			<a class="nav-link text-light left-nav-link" id="nav-database-tool-tab" data-toggle="tab" href="#database-tab" role="tab" data-toggle="tooltip" title="Database Viewer"><i class="fas fa-lg fa-database" style="font-size: 1.5rem; margin-top: -4px; margin-left: 1.3px;"></i></a>
@@ -79,23 +79,33 @@
 				<!-- Task Tab Contents -->
 				<div id="task-tab" class="tab-pane fade show active">
 
-					<div id='auth-container' class='login-overlay'>
-						<div class="card login-form">
-							<div class="card-header p-1">
-								<h2 class="card-header-title d-flex align-items-center justify-content-center">Login</h2>
-							</div>
-							<div class="card-body">
-								<div class="text-center">
-								    <p>Please login to use this feature!</p>
-								    <input type="text" id="defaultSubscriptionFormPassword" class="form-control mb-4" placeholder="Username">
-								    <input type="email" id="defaultSubscriptionFormEmail" class="form-control mb-4" placeholder="Password">
-								    <button class="btn btn-info btn-block">Sign in</button>
+					<!-- Authentication -->
+					<div id='auth-container'>
+						<form class='login-overlay' onsubmit="ahk.UserLogin(event)">
+							<div id="auth-main-form" class="card login-form">
+								<div class="card-header p-1">
+									<h2 class="card-header-title d-flex align-items-center justify-content-center"><i class="fas fa-lock"></i>&nbsp;Authentication</h2>
+								</div>
+								<div class="card-body">
+									<div class="">
+									    <p class="d-flex justify-content-center">Please login to use this feature!</p>
+											<div class="form-group pb-2">
+										    <input type="text" id="inputUserN" class="form-control" placeholder="Username" onkeypress="onInputKeyPress(this)"/>
+												<div id="inputUserNFbIn" class="invalid-feedback position-absolute">Wrong Username!</div>
+											</div>
+											<div class="form-group pb-3 input-wrapper">
+									    	<input type="password" id="inputPw" class="form-control" placeholder="Password" onkeypress="onInputKeyPress(this)"/>
+												<span type="button" onclick="return showPassword('inputPw', this)"><i class="fas fa-eye input-icon-right"></i></span>
+												<div id="inputPwFbIn" class="invalid-feedback position-absolute">Wrong password</div>
+											</div>
+											<button id="loginBttn" class="btn btn-info btn-block" style="height: 50px;">Sign In</button>
+									</div>
 								</div>
 							</div>
-						</div>
+						</form>
 					</div>
 
-					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 97"><i class="fas fa-2x fa-plus"></i></button>
+					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 96"><i class="fas fa-2x fa-plus"></i></button>
 					<div class="mt-2">
 						<ul class="nav nav-pills justify-content-end">
 						  <li class="nav-item"><a class="nav-link task-nav-link active hoverable mr-1" data-toggle="pill" href="#pills-task-active">Active</a></li>
@@ -274,17 +284,23 @@
 				<div id="tool-tab" class="tab-pane pl-1 fade" style="overflow-y: scroll;">
 					<button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn(event)">Test Database</button>
 					<hr class="m-2"/>
-					<div class="row">
+
+					    <div class="form-group">
+					        <label for="inputSuccess1">Input with success and valid-feedback (is-valid)</label>
+					        <input type="text" class="form-control is-invalid" id="inputSuccess1">
+					        <div class="invalid-feedback">Oh-nooooo Mr. Bill!</div>
+					        <div class="valid-feedback">Success! You've done it.</div>
+					    </div>
+
+					<!-- <div class="row">
 						<div class="col-md-6">
-						<!-- <h6 class="col-sm prog-card-title">ECO Update History:</h6> -->
 							<img src="E:\Temp\MapBG_Top.bmp" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80; filter: brightness(70%) contrast(200%) saturate(160%);">
 						</div>
 						<div class="col-md-6">
-						<!-- <h6 class="col-sm prog-card-title">ECO Update History:</h6> -->
 							<img src="E:\Temp\MapBG_Top.bmp" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80; filter: brightness(50%);">
 						</div>
 					</div>
-					<marquee behavior="scroll" bgcolor="yellow" loop="-1" width="30%"><i><font color="blue"><strong>Today's date is :<span id="time"></span></strong>  </font></i></marquee>
+					<marquee behavior="scroll" bgcolor="yellow" loop="-1" width="30%"><i><font color="blue"><strong>Today's date is :<span id="time"></span></strong>  </font></i></marquee> -->
 					<!-- <button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button> -->
 					<!-- <div class="dropdown">
 					  <button class="btn btn-secondary" type="button" data-toggle="dropdown">
@@ -303,47 +319,44 @@
 						<a class="dropdown-item" href="">Request Program Debug</a>
 					</div> -->
 
-					<div class="box">
-					    <div class="" style="width: 50px; height: 100px;">
-					     Hi <br><br>
-					    </div>
-					</div>
-
 				</div>
 
 				<!-- Database Tab Contents -->
-				<div id="database-tab" class="tab-pane pl-3 fade">
-					<div class="" style="">
-						<form class="form-inline">
-						  <div class="input-group mb-2 mr-sm-2 shadow-sm">
-						    <div class="input-group-prepend">
-						      <div class="input-group-text"><i class="fas fa-table"></i></div>
-						    </div>
-								<select class="custom-select custom-select-sm" style="width: 100px; box-shadow: none;">
-									<option disabled selected value>----------</option>
-									<option value="users">Users</option>
-								</select>
-						  </div>
-						  <button type="button" class="btn btn-dark btn-sm" style="top: -4px; height: 30px;">Get</button>
-						</form>
+				<div id="database-tab" class="tab-pane fade">
+					<div class="pl-3">
+						<div class="" style="">
+							<form class="form-inline">
+							  <div class="input-group mb-2 mr-sm-2 shadow-sm">
+							    <div class="input-group-prepend">
+							      <div class="input-group-text"><i class="fas fa-table"></i></div>
+							    </div>
+									<select class="custom-select custom-select-sm" style="width: 100px; box-shadow: none;">
+										<option disabled selected value>----------</option>
+										<option value="users">Users</option>
+									</select>
+							  </div>
+							  <button type="button" class="btn btn-dark btn-sm" style="top: -4px; height: 30px;">Get</button>
+							</form>
+						</div>
+
+						<div class="card" style="overflow: hidden;">
+							<table id="database-table" class="table-sm"
+							  data-toggle="table"
+							  data-height="495"
+							  data-custom-sort="customSort"
+							  data-url="">
+							  <thead>
+							    <tr>
+							      <th data-field="id" data-sortable="true">ID</th>
+							      <th data-field="name" data-sortable="true">Name</th>
+							      <th data-field="price" data-sortable="true">Item Price</th>
+							    </tr>
+							  </thead>
+							</table>
+
+						</div>
 					</div>
 
-					<div class="card" style="overflow: hidden;">
-						<table id="database-table" class="table-sm"
-						  data-toggle="table"
-						  data-height="495"
-						  data-custom-sort="customSort"
-						  data-url="">
-						  <thead>
-						    <tr>
-						      <th data-field="id" data-sortable="true">ID</th>
-						      <th data-field="name" data-sortable="true">Name</th>
-						      <th data-field="price" data-sortable="true">Item Price</th>
-						    </tr>
-						  </thead>
-						</table>
-
-					</div>
 				</div>
 
 				<!-- Settings Contents -->
@@ -408,6 +421,23 @@
 
 	function getBackOldModalCardProgInfoContent() {
 	  document.getElementById("prog-card-main-info-group").innerHTML = origModalCardProgInfoContent;
+	}
+	//============================================================================//
+	////  FUNCTIONs AS NORMAL FOR HTML USED ////
+	function showPassword(elId, x) {
+		var el = document.getElementById(elId);
+		if (el.type === "password") {
+			x.innerHTML = "<i class='fas fa-eye-slash input-icon-right fast animated rotateIn'></i>"
+			el.type = "text";
+		} else {
+			x.innerHTML = "<i class='fas fa-eye input-icon-right fast animated rotateIn'></i>"
+			el.type = "password";
+		}
+	}
+
+	function onInputKeyPress(x) {
+		x.classList.remove("is-invalid");
+		x.classList.remove("is-valid");
 	}
 </script>
 </html>
