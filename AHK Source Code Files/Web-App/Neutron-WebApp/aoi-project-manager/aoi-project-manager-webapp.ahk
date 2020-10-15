@@ -27,7 +27,7 @@ Global CompFindUrl := "virtu.multitech.prv"
 Global DBStatus := ""
 
 Global IsUserLogin := False
-Global UserRole := "N/A"
+Global UserInfo := {userId: "???", userFirstName: "???", userLastName: "???", userInitial: "???", userUserName: "???", userPassword: "???", userRole: "N/A"}
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
@@ -39,6 +39,7 @@ NeutronWebApp.Gui("-Resize +LabelAOIProManager")
 ;;;Run BEFORE WebApp Started;;;
 NeutronWebApp.qs("#title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ProcessIniFile()
+changeUserLoginDisplay("LOCKED")
 
 ;;Create instance of Messagebox Gui
 Global NeutronMsgBox := new NeutronWindow()
@@ -525,11 +526,19 @@ UserLogin(neutron, event) {
     }
     If (ResultSet := validateUserLogin(inputUserName, inputPassword)) {
         IsUserLogin := True
-        UserRole := ResultSet.Rows[1][7]
+        UserInfo.userFirstName := ResultSet.Rows[1][2]
+        UserInfo.userRole := ResultSet.Rows[1][7]
     }
     
-    DisplayAlertMsg("Welcome " . ResultSet.Rows[1][2] . "!", "alert-success")
-    changeUserLoginDisplay()
+    DisplayAlertMsg("Welcome " . UserInfo.userFirstName . "!", "alert-success")
+    changeUserLoginDisplay("UNLOCKED")
+}
+
+UserLogout(neutron, event) {
+    IsUserLogin := False
+    UserInfo := {userId: "???", userFirstName: "???", userLastName: "???", userInitial: "???", userUserName: "???", userPassword: "???", userRole: "N/A"}
+    changeUserLoginDisplay("LOCKED")
+    DisplayAlertMsg("You've been logged out. Bye!", "alert-success")
 }
 
 validateUserLogin(username, password) {
@@ -550,10 +559,86 @@ validateUserLogin(username, password) {
     Return RS
 }
 
-changeUserLoginDisplay() {
-    If (IsUserLogin) {
-        NeutronWebApp.qs("#auth-container").innerHTML := ""
-        NeutronWebApp.qs("#nav-task-tab").classList.remove("left-nav-link-lock")
+changeUserLoginDisplay(status) {
+    If (status = "UNLOCKED") {
+        If (IsUserLogin) {
+            NeutronWebApp.qs("#auth-container").classList.add("d-none")
+            loginDivs := NeutronWebApp.qsa(".auth-container")
+            for index, loginDiv in NeutronWebApp.Each(loginDivs)
+                loginDiv.innerText := ""
+            
+            NeutronWebApp.qs("#nav-task-tab").classList.remove("left-nav-link-lock")
+            NeutronWebApp.qs("#nav-database-tool-tab").classList.remove("left-nav-link-lock")
+            
+            userRole := UserInfo.userRole
+            
+            html = 
+            (LTrim
+			<div class="mr-3" type="button" data-toggle="dropdown"><a class="badge badge-pill badge-default"><i id="userTopBtnLabel" class="fas fa-user mr-1"></i>%userRole%</a></div>
+			<div class="dropdown-menu">
+			  <a class="dropdown-item pt-0 pb-0" href="#"><i class="fas fa-user-cog"></i> User Settings</a>
+			  <div class="dropdown-divider"></div>
+			  <a class="dropdown-item pt-0 pb-0" href="#" onclick='ahk.UserLogout(event)'><i class="fas fa-sign-out-alt"></i> Logout</a>
+			</div>
+            )
+            NeutronWebApp.qs("#userTopBtn").innerHTML := ""
+            NeutronWebApp.qs("#userTopBtn").insertAdjacentHTML("beforeend", html)
+        }
+    }
+    
+    If (status = "LOCKED") {
+        If (!IsUserLogin) {
+            html = 
+            (LTrim
+			<div class="mr-3" type="button"><a class="badge badge-pill bg-app-theme-light"><i id="userTopBtnLabel" class="fas fa-lock mr-1"></i>Login</a></div>
+            )
+            NeutronWebApp.qs("#userTopBtn").innerHTML := ""
+            NeutronWebApp.qs("#userTopBtn").insertAdjacentHTML("beforeend", html)
+        
+        
+            NeutronWebApp.qs("#nav-task-tab").classList.add("left-nav-link-lock")
+            NeutronWebApp.qs("#nav-database-tool-tab").classList.add("left-nav-link-lock")
+            html =
+            (LTrim
+            <div class='auth-container'>
+                <div class='login-overlay text-center'>
+                    <h2>Please Login</h2>
+                <div>
+            </div>
+            )
+            ;html =
+            ;(LTrim
+            ;<!-- Authentication -->
+            ;<div class='auth-container'>
+				;<form class='login-overlay' onsubmit="ahk.UserLogin(event)">
+					;<div id="auth-main-form" class="card login-form">
+						;<div class="card-header p-1">
+							;<h2 class="card-header-title d-flex align-items-center justify-content-center"><i class="fas fa-lock"></i>&nbsp;Authentication</h2>
+						;</div>
+						;<div class="card-body">
+							;<div class="">
+							    ;<p class="d-flex justify-content-center">Please login to use this feature!</p>
+									;<div class="form-group pb-2">
+								    ;<input type="text" id="inputUserN" class="form-control" placeholder="Username" onkeypress="onInputKeyPress(this)"/>
+										;<div id="inputUserNFbIn" class="invalid-feedback position-absolute">Wrong Username!</div>
+									;</div>
+									;<div class="form-group pb-3 input-wrapper">
+							    	;<input type="password" id="inputPw" class="form-control" placeholder="Password" onkeypress="onInputKeyPress(this)"/>
+										;<span type="button" onclick="return showPassword('inputPw', this)"><i class="fas fa-eye input-icon-right"></i></span>
+										;<div id="inputPwFbIn" class="invalid-feedback position-absolute">Wrong password</div>
+									;</div>
+									;<button type="submit" id="loginBttn" class="btn btn-info btn-block" style="height: 50px;">Sign In</button>
+							;</div>
+						;</div>
+					;</div>
+				;</form>
+			;</div>          
+            ;)
+            
+            NeutronWebApp.qs("#task-tab").insertAdjacentHTML("afterbegin", html)
+            NeutronWebApp.qs("#database-tab").insertAdjacentHTML("afterbegin", html)
+        }
+        
     }
 }
 

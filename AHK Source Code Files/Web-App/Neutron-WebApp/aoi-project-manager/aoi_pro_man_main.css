@@ -193,8 +193,10 @@ body{
 }
 .login-form {
 	width: 350px;
-	margin-left: 24%;
-	margin-top: 10%;
+	position: fixed;
+	top: 2em;
+	right: 0.5em;
+	z-index: 100;
 }
 
 

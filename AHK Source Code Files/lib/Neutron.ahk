@@ -405,19 +405,21 @@ class NeutronWindow
 		hWnd := this
 		this := Object(A_EventInfo)
 		
-		if (Msg == this.WM_NCHITTEST)
+        goto SkipResizeIcon       ;;Add this line if u don't want the resize icon cursor
+		
+        if (Msg == this.WM_NCHITTEST)
 		{
-			; Check to see if the cursor is near the window border, which
-			; should be treated as the "non-client" drag-to-resize area.
-			; https://autohotkey.com/board/topic/23969-/#entry155480
+			 ;Check to see if the cursor is near the window border, which
+			 ;should be treated as the "non-client" drag-to-resize area.
+			 ;https://autohotkey.com/board/topic/23969-/#entry155480
 			
-			; Extract coordinates from LOWORD and HIWORD (preserving sign)
+			 ;Extract coordinates from LOWORD and HIWORD (preserving sign)
 			x := lParam<<48>>48, y := lParam<<32>>48
 			
-			; Get the window position for comparison
+			 ;Get the window position for comparison
 			WinGetPos, wX, wY, wW, wH, % "ahk_id" this.hWnd
 			
-			; Calculate positions in the lookup tables
+			 ;Calculate positions in the lookup tables
 			row := (x < wX + this.BORDER_SIZE) ? 1 : (x >= wX + wW - this.BORDER_SIZE) ? 3 : 2
 			col := (y < wY + this.BORDER_SIZE) ? 1 : (y >= wY + wH - this.BORDER_SIZE) ? 3 : 2
 			
@@ -425,12 +427,14 @@ class NeutronWindow
 		}
 		else if (Msg == this.WM_NCLBUTTONDOWN)
 		{
-			; Hoist nonclient clicks to main window
+			 ;Hoist nonclient clicks to main window
 			return DllCall("SendMessage", "Ptr", this.hWnd, "UInt", Msg, "UPtr", wParam, "Ptr", lParam, "Ptr")
 		}
-		
+        SkipResizeIcon:
+        
 		; Otherwise (since above didn't return), pass all unhandled events to the original WindowProc.
-		return DllCall("CallWindowProc"
+		Critical, Off       ;;Fix deadlock when making multiple Neutron windows (10/15/20)
+        return DllCall("CallWindowProc"
 		, "Ptr", this.pWndProcOld ; WNDPROC lpPrevWndFunc
 		, "Ptr", hWnd             ; HWND    hWnd
 		, "UInt", Msg             ; UINT    Msg
