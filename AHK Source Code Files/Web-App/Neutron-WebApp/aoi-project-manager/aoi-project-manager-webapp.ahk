@@ -34,7 +34,7 @@ Global NeutronWebApp := new NeutronWindow()
 
 NeutronWebApp.Load("aoi_project_manager_index.html")
 
-NeutronWebApp.Gui("-Resize +LabelAOIProManager")
+NeutronWebApp.Gui("+MinSize800x600 +MaxSize1200x1000 +LabelAOIProManager")
 
 ;;;Run BEFORE WebApp Started;;;
 NeutronWebApp.qs("#title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
@@ -112,7 +112,7 @@ Return
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
 FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
-;;Boostrap components for GUI
+;;Boostrap components for GUI (All CSS and JS required!)
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, bootstrap.min.js, bootstrap.min.js
@@ -122,8 +122,9 @@ FileInstall, popper.min.js, popper.min.js
 FileInstall, bootstrap-table.min.css, bootstrap-table.min.css
 FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
 FileInstall, fontawesome.js, fontawesome.js
-FileInstall, solid.js, solid.js
+FileInstall, fa-all.js, fa-all.js
 FileInstall, font-googleapi.css, font-googleapi.css
+FileInstall, circle-prog-bar.css, circle-prog-bar.css
 
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
@@ -522,6 +523,7 @@ UserLogin(neutron, event) {
     If (validateUserLogin(inputUserName, inputPassword) == "WRONG PASSWORD") {
         NeutronWebApp.qs("#inputPw").classList.add("is-invalid")
         NeutronWebApp.qs("#inputPwFbIn").innerHTML := "Wrong password!"
+        NeutronWebApp.qs("#inputPw").value := ""
         Return
     }
     If (ResultSet := validateUserLogin(inputUserName, inputPassword)) {
@@ -531,6 +533,8 @@ UserLogin(neutron, event) {
     }
     
     DisplayAlertMsg("Welcome " . UserInfo.userFirstName . "!", "alert-success")
+    NeutronWebApp.qs("#inputUserN").value := ""
+    NeutronWebApp.qs("#inputPw").value := ""
     changeUserLoginDisplay("UNLOCKED")
 }
 
@@ -562,7 +566,7 @@ validateUserLogin(username, password) {
 changeUserLoginDisplay(status) {
     If (status = "UNLOCKED") {
         If (IsUserLogin) {
-            NeutronWebApp.qs("#auth-container").classList.add("d-none")
+            NeutronWebApp.qs("#auth-container").style.display := "none"
             loginDivs := NeutronWebApp.qsa(".auth-container")
             for index, loginDiv in NeutronWebApp.Each(loginDivs)
                 loginDiv.innerText := ""
@@ -575,7 +579,7 @@ changeUserLoginDisplay(status) {
             html = 
             (LTrim
 			<div class="mr-3" type="button" data-toggle="dropdown"><a class="badge badge-pill badge-default"><i id="userTopBtnLabel" class="fas fa-user mr-1"></i>%userRole%</a></div>
-			<div class="dropdown-menu">
+			<div class="dropdown-menu" style='font-size: 14px;'>
 			  <a class="dropdown-item pt-0 pb-0" href="#"><i class="fas fa-user-cog"></i> User Settings</a>
 			  <div class="dropdown-divider"></div>
 			  <a class="dropdown-item pt-0 pb-0" href="#" onclick='ahk.UserLogout(event)'><i class="fas fa-sign-out-alt"></i> Logout</a>
@@ -590,7 +594,7 @@ changeUserLoginDisplay(status) {
         If (!IsUserLogin) {
             html = 
             (LTrim
-			<div class="mr-3" type="button"><a class="badge badge-pill bg-app-theme-light"><i id="userTopBtnLabel" class="fas fa-lock mr-1"></i>Login</a></div>
+			<div class="mr-3" type="button"><a class="badge badge-pill bg-app-theme-light" onclick="toggleLoginForm()"><i id="userTopBtnLabel" class="fas fa-lock mr-1"></i>Login</a></div>
             )
             NeutronWebApp.qs("#userTopBtn").innerHTML := ""
             NeutronWebApp.qs("#userTopBtn").insertAdjacentHTML("beforeend", html)
@@ -598,44 +602,18 @@ changeUserLoginDisplay(status) {
         
             NeutronWebApp.qs("#nav-task-tab").classList.add("left-nav-link-lock")
             NeutronWebApp.qs("#nav-database-tool-tab").classList.add("left-nav-link-lock")
+            NeutronWebApp.qs("#auth-container").style.display := "none"
+            
             html =
             (LTrim
             <div class='auth-container'>
-                <div class='login-overlay text-center'>
-                    <h2>Please Login</h2>
+                <div class='login-overlay'>
+                    <h2 class='text-white pl-3 pt-4'><i class="fas fa-lock"></i> You must login to use this feature!</h2>
                 <div>
             </div>
             )
-            ;html =
-            ;(LTrim
-            ;<!-- Authentication -->
-            ;<div class='auth-container'>
-				;<form class='login-overlay' onsubmit="ahk.UserLogin(event)">
-					;<div id="auth-main-form" class="card login-form">
-						;<div class="card-header p-1">
-							;<h2 class="card-header-title d-flex align-items-center justify-content-center"><i class="fas fa-lock"></i>&nbsp;Authentication</h2>
-						;</div>
-						;<div class="card-body">
-							;<div class="">
-							    ;<p class="d-flex justify-content-center">Please login to use this feature!</p>
-									;<div class="form-group pb-2">
-								    ;<input type="text" id="inputUserN" class="form-control" placeholder="Username" onkeypress="onInputKeyPress(this)"/>
-										;<div id="inputUserNFbIn" class="invalid-feedback position-absolute">Wrong Username!</div>
-									;</div>
-									;<div class="form-group pb-3 input-wrapper">
-							    	;<input type="password" id="inputPw" class="form-control" placeholder="Password" onkeypress="onInputKeyPress(this)"/>
-										;<span type="button" onclick="return showPassword('inputPw', this)"><i class="fas fa-eye input-icon-right"></i></span>
-										;<div id="inputPwFbIn" class="invalid-feedback position-absolute">Wrong password</div>
-									;</div>
-									;<button type="submit" id="loginBttn" class="btn btn-info btn-block" style="height: 50px;">Sign In</button>
-							;</div>
-						;</div>
-					;</div>
-				;</form>
-			;</div>          
-            ;)
             
-            NeutronWebApp.qs("#task-tab").insertAdjacentHTML("afterbegin", html)
+            ;NeutronWebApp.qs("#task-tab").insertAdjacentHTML("afterbegin", html)
             NeutronWebApp.qs("#database-tab").insertAdjacentHTML("afterbegin", html)
         }
         

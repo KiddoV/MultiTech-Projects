@@ -15,11 +15,14 @@
 
 	<!-- Font Awesome -->
 	<script src="fontawesome.js"></script>
-	<script src="solid.js"></script>
+	<script src="fa-all.js"></script>
 
 	<!-- Boostrap Table -->
 	<link href="bootstrap-table.min.css" rel="stylesheet">
 	<script defer src="bootstrap-table.min.js"></script>
+
+	<!-- Other CSS and JS lib -->
+	<link href="circle-prog-bar.css" rel="stylesheet">
 
 	<!-- Custom CSS and JS -->
 	<link href="aoi_pro_man_main.css" rel="stylesheet">
@@ -33,7 +36,7 @@
 
 <!-- Top alert box -->
 <div class="ml-5 default-mouse" style="width: 90%; height: 0%; left: 6%; top: 3%; word-wrap: break-word;">
-	<div id="alert-box-container" class="mt-4">
+	<div id="alert-box-container" class="mt-4 animated">
 		<!-- <div class="row justify-content-md-center">
 				<div id="alert-box" class="alert alert-dismissible alert-info z-depth-2 fade show" role="alert" auto-close="5000">
 						<p id="alert-box-content" style="margin: 0;">HELLO!</p>
@@ -105,32 +108,63 @@
 
 				<!-- Task Tab Contents -->
 				<div id="task-tab" class="tab-pane fade show active">
+					<div class="pl-1">
+						<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 96"><i class="fas fa-2x fa-plus"></i></button>
+						<div class="mt-2">
+							<ul class="nav nav-pills justify-content-end">
+							  <li class="nav-item"><a class="nav-link task-nav-link active hoverable mr-1" data-toggle="pill" href="#pills-task-active">Active</a></li>
+							  <li class="nav-item"><a class="nav-link task-nav-link hoverable" data-toggle="pill" href="#pills-task-history">History</a></li>
+							</ul>
 
-					<button type="button" class="btn btn-dark position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 96"><i class="fas fa-2x fa-plus"></i></button>
-					<div class="mt-2">
-						<ul class="nav nav-pills justify-content-end">
-						  <li class="nav-item"><a class="nav-link task-nav-link active hoverable mr-1" data-toggle="pill" href="#pills-task-active">Active</a></li>
-						  <li class="nav-item"><a class="nav-link task-nav-link hoverable" data-toggle="pill" href="#pills-task-history">History</a></li>
-						</ul>
-						<div class="tab-content default-mouse" id="pills-tabContent">
-						  <div id="pills-task-active" class="tab-pane fade show active">
-								<h6 class="pl-2 text-muted">Active Tasks</h6>
-								<div class="" style="height: 470px; overflow-y: auto; overflow-x: hidden;">
+							<div class="tab-content default-mouse" id="pills-tabContent">
+							  <div id="pills-task-active" class="tab-pane fade show active">
+									<h6 class="pl-2 text-muted">Active Tasks</h6>
+									<div class="pl-2" style="height: calc(100vh - 115px); overflow-y: auto; overflow-x: hidden;">
 
-									<div type="button" class="card p-1 mb-2 ml-1 fast animated bounceInRight hoverable" style="max-width: 99%; height: 70px;">
-										<h6 class="mt-1 ml-1 task-title">ECO Update<span class="badge badge-warning ml-1">In Progress</span></h6>
-										<div class="d-flex justify-content-end" style="margin-top: -20px;">
-											<div class="progress float-left" style="height: 10px; width: 300px;"><div class="progress-bar progress-bar-striped bg-warning" style="width: 50%; height: 10px"></div></div>
+										<div type="button" class="card pt-1 pl-2 fast animated bounceInRight hoverable" style="max-width: 99%; border-top: 12px solid #673ab7;">
+											<div class="row">
+												<div class="col-md-10 pl-4">
+													<div class="row">
+														<h6 class="col-sm task-card-title">ECO Update</h6>
+														<div class="col-sm">
+																<span class="badge badge-warning">INPROGRESS</span>
+														</div>
+														<h6 class="col-sm task-card-title">75582934L_B01</h6>
+													</div>
+													<div class="row">
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> Oct 16, 2020</h6>
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-day"></i> N/A</h6>
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-user-plus"></i> Viet Ho</h6>
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-chalkboard"></i> YesTech</h6>
+													</div>
+													<div class="row">
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-users"></i> <span class="badge badge-pill info-color-dark">VH</span></h6>
+														<!-- <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-alt"></i> </h6>
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-check"></i> </h6> -->
+													</div>
+												</div>
+												<div class="col-md-2">
+													<div class="c100 p50 x-small">
+					                    <span>50%</span>
+					                    <div class="slice">
+					                        <div class="bar"></div>
+					                        <div class="fill"></div>
+					                    </div>
+					                </div>
+												</div>
+											</div>
 										</div>
+
 									</div>
-
 								</div>
-							</div>
-						  <div id="pills-task-history" class="tab-pane fade">
-								<h6 class="pl-2 text-muted">Task History</h6>
-								<div style="height: 470px; overflow-y: auto;">
 
+							  <div id="pills-task-history" class="tab-pane fade">
+									<h6 class="pl-2 text-muted">Task History</h6>
+									<div style="height: 470px; overflow-y: auto;">
+
+									</div>
 								</div>
+
 							</div>
 						</div>
 					</div>
@@ -148,7 +182,7 @@
 						<span id="search-status-label" class="d-flex pb-1 pl-2" style="margin-top: -25px; font-size: 10px; color: #B0BEC5;">Enter value to search...</span>
 					</div>
 
-					<div id="search-result-container" class="pl-3 pt-1" style="width: 100%; height: 470px; overflow-y: auto; overflow-x: hidden;">
+					<div id="search-result-container" class="pl-3 pt-1" style="width: 100%; height: calc(100vh - 115px); overflow-y: auto; overflow-x: hidden;">
 
 						<!-- <div type="button" class="card p-1 pl-2 mb-2 pro-card-status-useable fast animated bounceInDown hoverable" style="max-width: 99%;  height: 60px;">
 							<div class="row">
@@ -296,6 +330,26 @@
 								<button type="button" class="btn btn-primary" data-toggle="popover" data-placement="bottom" title="Login"
 								  data-content="Login Here!">popover
 								  on bottom</button>
+									<div class="c100 p50 big">
+	                    <span>50%</span>
+	                    <div class="slice">
+	                        <div class="bar"></div>
+	                        <div class="fill"></div>
+	                    </div>
+	                </div>
+									<div class="c100 p50 big green">
+	                    <span>50%</span>
+	                    <div class="slice">
+	                        <div class="bar"></div>
+	                        <div class="fill"></div>
+	                    </div>
+	                </div>
+
+									<div class="box">
+								    <div class="box_inner">
+								       Hi
+								    </div>
+								  </div>
 								<!-- Basic dropdown -->
 						<!-- <div class="row">
 							<div class="col-md-6">
@@ -449,8 +503,14 @@
 		x.classList.remove("is-valid");
 	}
 
-	function showLoginForm() {
-		$("#auth-container").classList.remove("d-none");
+	function toggleLoginForm() {
+		el = document.getElementById("auth-container");
+		if (el.style.display === "none") {
+			el.style.display = "block";
+			//$('#auth-container').addClass('animated slideInLeft');
+		} else {
+			el.style.display = "none";
+		}
 	}
 </script>
 </html>

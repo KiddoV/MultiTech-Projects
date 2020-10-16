@@ -405,7 +405,7 @@ class NeutronWindow
 		hWnd := this
 		this := Object(A_EventInfo)
 		
-        goto SkipResizeIcon       ;;Add this line if u don't want the resize icon cursor
+        ;goto SkipResizeIcon       ;;Add this line if u don't want the resize icon cursor
 		
         if (Msg == this.WM_NCHITTEST)
 		{
@@ -430,7 +430,7 @@ class NeutronWindow
 			 ;Hoist nonclient clicks to main window
 			return DllCall("SendMessage", "Ptr", this.hWnd, "UInt", Msg, "UPtr", wParam, "Ptr", lParam, "Ptr")
 		}
-        SkipResizeIcon:
+        ;SkipResizeIcon:
         
 		; Otherwise (since above didn't return), pass all unhandled events to the original WindowProc.
 		Critical, Off       ;;Fix deadlock when making multiple Neutron windows (10/15/20)

@@ -144,9 +144,9 @@ body{
 }
 
 /* Task Card */
-.task-title {
+.task-card-title {
 	font-weight: bold;
-	font-size: 15px;
+	font-size: 17px;
 }
 
 /* Price Tag */
@@ -196,7 +196,7 @@ body{
 	position: fixed;
 	top: 2em;
 	right: 0.5em;
-	z-index: 100;
+	z-index: 98;
 }
 
 
@@ -211,6 +211,29 @@ body{
 }
 .input-wrapper input {
   padding-right: 30px;
+}
+
+.box {
+  &_inner {
+    &:before {
+      content: '';
+      position: absolute;
+      display: block;
+      height: 12px;
+      width: 100%;
+      background: #cb5a5e;
+      background: repeating-linear-gradient(
+        -45deg,
+        #cb5a5e,
+        #cb5a5e 12px,
+        transparent 10px,
+        transparent 23px
+      );
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-bottom: 0;
+    }
+  }
 }
 
 /*=================================================================*/
