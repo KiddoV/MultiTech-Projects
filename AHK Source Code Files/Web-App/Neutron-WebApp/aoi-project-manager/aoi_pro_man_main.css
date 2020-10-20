@@ -192,7 +192,7 @@ body{
 	z-index: 97;
 }
 .login-form {
-	width: 350px;
+	width: 300px;
 	position: fixed;
 	top: 2em;
 	right: 0.5em;
@@ -204,7 +204,7 @@ body{
 .input-icon-right {
   position: absolute;
   right: 10px;
-  top: calc(50% - 1em); /* Keep icon in center of input, regardless of the input height */
+  top: calc(50% - 0.6em); /* Keep icon in center of input, regardless of the input height */
 }
 .input-wrapper {
   position: relative;
@@ -325,3 +325,9 @@ body{
 .form-control.is-invalid, .form-control.is-valid{
     background-image: none;
 }
+
+/* Tooltip mods */
+.red-tooltip + .tooltip > .tooltip-inner {background-color: #f00;}
+.red-tooltip + .tooltip > .tooltip-arrow { border-bottom-color:#f00; }
+.grey-tooltip + .tooltip > .tooltip-inner {background-color: #e0e0e0;}
+.grey-tooltip + .tooltip > .tooltip-arrow { border-bottom-color: #e0e0e0; }

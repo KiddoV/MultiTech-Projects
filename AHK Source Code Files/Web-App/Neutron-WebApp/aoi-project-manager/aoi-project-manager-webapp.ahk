@@ -503,6 +503,7 @@ UserLogin(neutron, event) {
             inputPassword := value
     }
     
+    
     If (inputUserName = "" || inputPassword = "") {
         If (inputUserName = "") {
             NeutronWebApp.qs("#inputUserN").classList.add("is-invalid")
