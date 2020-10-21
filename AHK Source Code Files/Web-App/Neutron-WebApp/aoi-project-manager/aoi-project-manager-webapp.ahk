@@ -41,11 +41,6 @@ NeutronWebApp.qs("#title-label").innerHTML := "AOI Project Manager"    ;;;;Set a
 ProcessIniFile()
 changeUserLoginDisplay("LOCKED")
 
-;;Create instance of Messagebox Gui
-Global NeutronMsgBox := new NeutronWindow()
-NeutronMsgBox.Load("html_msgbox.html")
-NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox +hWndHtmlMsgBox")
-
 ;Display the Neutron main window
 NeutronWebApp.Show("w800 h600")
 
@@ -125,6 +120,8 @@ FileInstall, fontawesome.js, fontawesome.js
 FileInstall, fa-all.js, fa-all.js
 FileInstall, font-googleapi.css, font-googleapi.css
 FileInstall, circle-prog-bar.css, circle-prog-bar.css
+FileInstall, boostrap-select.min.css, boostrap-select.min.css
+FileInstall, boostrap-select.min.js, boostrap-select.min.js
 
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
@@ -144,7 +141,7 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    ;HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
+    HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
     ;fn := Func("autoUpdatePcbDBTable").Bind("13580620L")
     ;SetTimer, %fn%, -0
     ;autoUpdatePcbDBTable("13580252L")   ;;;DELETE ME!!!
@@ -155,11 +152,11 @@ TestBttn(neutron, event) {
     ;If !AOI_Pro_DB.GetTable(SQL, Result)
        ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
     ;MsgBox % Result.ColumnCount
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    ;Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
 }
 
 TestBttn2(neutron, event) {
-    HtmlMsgBox("ERROR", , , "Test MsgBox", , 0)
+    HtmlMsgBox("ERROR", , , "Test MsgBox", "HELLO! This is a message 2", 0)
 }
 
 SearchProgram(neutron, event) {
@@ -208,10 +205,16 @@ OnLeftClick(neutron, event) {
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 HtmlMsgBox(Icon := "", Options := "", Size = "w300 h150", Title := "", MainText := "", Timeout := 0) {
+    ;;Create instance of Messagebox Gui
+    Random, randId, 1, 10
+    NeutronMsgBox := new NeutronWindow()
     
-    Global MsgboxIconElId := Icon = "ERROR" ? "#msgbox-icon-error" : Icon = "INFO" ? "#msgbox-icon-info" : Icon = "CHECK" ? "#msgbox-icon-check" : Icon = "QUESTION" ? "#msgbox-icon-question" : Icon = "WARNING" ? "#msgbox-icon-warning" : ""
+    NeutronMsgBox.Load("html_msgbox.html")
+    NeutronMsgBox.Gui("-Resize +LabelHtmlMsgBox +hWndHtmlMsgBox")
     
-    NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-none")
+    MsgboxIconElId := Icon = "ERROR" ? "#msgbox-icon-error" : Icon = "INFO" ? "#msgbox-icon-info" : Icon = "CHECK" ? "#msgbox-icon-check" : Icon = "QUESTION" ? "#msgbox-icon-question" : Icon = "WARNING" ? "#msgbox-icon-warning" : ""
+    
+    ;NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-none")
     NeutronMsgBox.qs(MsgboxIconElId).classList.add("d-block")
     
     NeutronMsgBox.qs("#title-label").innerHTML := Title     ;;;;Set MsgBox title
@@ -225,9 +228,11 @@ HtmlMsgBox(Icon := "", Options := "", Size = "w300 h150", Title := "", MainText 
     Return
     
     HtmlMsgBoxClose:
-        NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-block")
-        NeutronMsgBox.qs(MsgboxIconElId).classList.add("d-none")
-        NeutronMsgBox.Gui("Cancel")
+        ;NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-block")
+        ;NeutronMsgBox.qs(MsgboxIconElId).classList.add("d-none")
+        ;NeutronMsgBox.Gui("Cancel")
+        NeutronMsgBox.Destroy()     ;Free memory  
+        Gui, Destroy
     Return
 }
 
@@ -490,6 +495,28 @@ OpenPdfEco(neutron, event) {
     NeutronWebApp.qs("#eco-" . ecoToOpen).innerHTML := "<a href='#' onclick='ahk.OpenPdfEco(event)'>" . ecoToOpen . "</a>"
 }
 
+DisplayTaskCard(Data) {
+    If (Data.HasNames) {
+        NeutronWebApp.doc.getElementById("task-card-container").innerHTML := ""     ;Delete all old result before display new result
+        If (Data.HasRows) {
+            Loop, % Data.RowCount 
+            {
+                Data.Next(Row)
+                Loop, % Data.ColumnCount
+                {
+                    
+                }
+            }
+        }
+    }
+}
+
+GetTaskCard(neutron, event) {
+    event.preventDefault()  ;Prevent form redirected page!
+    NeutronWebApp.doc.getElementById("sort-icon-label").innerHTML := event.srcElement.name
+    ;MsgBox % event.srcElement.name
+}
+
 UserLogin(neutron, event) {
     ;NeutronWebApp.qs("#loginBttn").innerHTML := "<i class='fas fa-2x fa-spinner fa-pulse'></i>"
     event.preventDefault()  ;Prevent form redirected page!
@@ -734,36 +761,15 @@ autoUpdatePcbDBTable(pcbNum) {
 ;;;Function to print out JSON format From SQLite DB
 BuildJson(obj) {
     str := "" , array := true
-    for k in obj {
+    For k in obj 
+    {
         if (k == A_Index)
             continue
         array := false
         break
     }
-    for a, b in obj
-        str .= (array ? "" : """" a """: ") . (IsObject(b) ? BuildJson(b) : IsNumber(b) ? b : """" b """") . ", "	
+    For a, b in obj
+        str .= (array ? "" : """" a """: ") . (IsObject(b) ? BuildJson(b) : (0 * b == 0) ? b : """" b """") . ", "	
     str := RTrim(str, " ,")
-    return (array ? "[" str "]" : "{" str "}")
+    Return (array ? "[" str "]" : "{" str "}")
 }
-IsNumber(Num) {
-    if Num is number
-        return true
-    else
-        return false
-}
-
-;IELoad(wb) {  ;You need to send the IE handle to the function unless you define it as global.
-    ;If !wb    ;If wb is not a valid pointer then quit
-        ;Return False
-    ;Loop    ;Otherwise sleep for .1 seconds untill the page starts loading
-        ;Sleep,100
-    ;Until (wb.busy)
-    ;Loop    ;Once it starts loading wait until completes
-        ;Sleep,100
-    ;Until (!wb.busy)
-    ;Loop    ;optional check to wait for the page to completely load
-        ;Sleep,100
-    ;Until (wb.Document.Readystate = "Complete")
-    ;
-    ;Return True
-;}
