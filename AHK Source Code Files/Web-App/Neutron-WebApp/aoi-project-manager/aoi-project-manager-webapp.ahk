@@ -11,6 +11,7 @@ SetBatchLines -1
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\Neutron.ahk
 ;;;Other library
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\Class_SQLiteDB.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\JSON.ahk
 ;=======================================================================================;
 ;;;;;;;;;;Installs Folder Location and Files;;;;;;;;;;
 IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
@@ -20,6 +21,8 @@ FileInstall, C:\MultiTech-Projects\DLL-files\SQLite3.dll, C:\V-Projects\WEB-APPL
 FileInstall, C:\MultiTech-Projects\EXE-Files\aoi-pro-man_autoUpdateDBTable.exe, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
+Global JSON := new JSON()
+
 Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"
 Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\app-settings.ini"
 Global CompFindUrl := "virtu.multitech.prv"
@@ -141,16 +144,18 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
+    ;HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
     ;fn := Func("autoUpdatePcbDBTable").Bind("13580620L")
     ;SetTimer, %fn%, -0
     ;autoUpdatePcbDBTable("13580252L")   ;;;DELETE ME!!!
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
     ;DisplayAlertMsg("You click the button!!!!", "alert-success")
-    ;SQL := "SELECT * FROM Users;"
-    ;If !AOI_Pro_DB.GetTable(SQL, Result)
-       ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    SQL := "SELECT * FROM user_tasks;"
+    If !AOI_Pro_DB.GetTable(SQL, Result)
+       MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    
+    DataBaseTableToObject(Result)
     ;MsgBox % Result.ColumnCount
     ;Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
 }
@@ -498,23 +503,81 @@ OpenPdfEco(neutron, event) {
 DisplayTaskCard(Data) {
     If (Data.HasNames) {
         NeutronWebApp.doc.getElementById("task-card-container").innerHTML := ""     ;Delete all old result before display new result
-        If (Data.HasRows) {
-            Loop, % Data.RowCount 
-            {
-                Data.Next(Row)
-                Loop, % Data.ColumnCount
-                {
-                    
-                }
-            }
+        
+        taskData := DataBaseTableToObject(Data)
+        
+        Loop, % taskData.Length()
+        {
+            taskId := taskData[A_Index].task_id
+            taskType := taskData[A_Index].task_type
+            taskStatus := taskData[A_Index].task_status
+            taskCreatedBy := taskData[A_Index].task_created_by
+            taskDateTimeCreated := taskData[A_Index].task_date_created
+            taskDateTimeDue := taskData[A_Index].task_due_date
+            
+            cardBorderColor := (taskType = "ECO Update") ? "#673ab7" : (taskType = "Create New Program") ? "#ff3d00" : "black"
+            taskStatusColorClass := (taskStatus = "IN PROGRESS") ? "yellow darken-2" : (taskStatus = "NOT STARTED") ? "brown lighten-2" : (taskStatus = "FINISHED") ? "green darken-2" : "black"
+            taskDateCreated := changeFormatDateTime(taskDateTimeCreated, "Date")
+            taskDateDue := changeFormatDateTime(taskDateTimeDue, "Date")
+            
+            ;;;;Display in HTML
+            html =
+            (LTrim
+            <div type="button" class="card pt-1 pl-2 mb-2 fast animated bounceInRight hoverable" style="max-width: 99`%; border-top: 12px solid %cardBorderColor%;">
+                <div class="row">
+                    <div class="col-md-10 pl-4">
+                        <div class="row">
+                            <h6 class="col-sm task-card-title">%taskType%</h6>
+                            <div class="col-sm">
+                                <span class="badge %taskStatusColorClass%">%taskStatus%</span>
+                            </div>
+                            <h6 class="col-sm task-card-title">75582934L_B01</h6>
+                        </div>
+                        <div class="row">
+                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %taskDateCreated%</h6>
+                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-day"></i> %taskDateDue%</h6>
+                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-user-plus"></i> %taskCreatedBy%</h6>
+                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-chalkboard"></i> YesTech</h6>
+                        </div>
+                        <div class="row">
+                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-users"></i> <span class="badge badge-pill info-color-dark">VH</span></h6>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="c100 p50 x-small">
+                            <span>50<span>`%</span></span>
+                            <div class="slice">
+                                <div class="bar"></div>
+                                <div class="fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            )
+            
+            NeutronWebApp.doc.getElementById("task-card-container").insertAdjacentHTML("beforeend", html)
         }
     }
 }
 
-GetTaskCard(neutron, event) {
-    event.preventDefault()  ;Prevent form redirected page!
+GetTaskCard(neutron, event, cardType, defaultNum := 0) {
+    If (defaultNum != 0)
+        numOfTaskCards := defaultNum
+    Else
+        numOfTaskCards := (event.srcElement.name == "All") ? -1 : event.srcElement.name    ;Number of task cards to be displayed
     NeutronWebApp.doc.getElementById("sort-icon-label").innerHTML := event.srcElement.name
-    ;MsgBox % event.srcElement.name
+    
+    ;;Get data from DB
+    If (cardType == "Active")
+        SQL := "SELECT * FROM user_tasks LEFT JOIN users ON task_assigned_by=user_id WHERE task_status IN ('NOT STARTED','IN PROGRESS') LIMIT " . numOfTaskCards
+    
+    If !AOI_Pro_DB.GetTable(SQL, ResultSet) {
+        DisplayAlertMsg("Execute SQL statement FAILED!!!", "alert-danger")
+        Return
+    }
+    
+    DisplayTaskCard(ResultSet)
 }
 
 UserLogin(neutron, event) {
@@ -686,6 +749,17 @@ checkIfUrlAvailable(url) {
         Return True
 }
 
+changeFormatDateTime(dateTime, type := "") {
+    returnVar := "N/A"
+    If (type = "Date" && (dateTime != "" || dateTime != 0) ) {
+        FormatTime, returnVar, %dateTime%, MMM dd, yyyy
+    } Else If (type = "Time" && (dateTime != "" || dateTime != 0)) {
+        FormatTime, returnVar, %dateTime%, hh:mm:ss tt
+    }
+    MsgBox % returnVar
+    Return returnVar
+}
+
 autoUpdatePcbDBTable(pcbNum) {
     ;;Get data from the web
     Try {
@@ -772,4 +846,24 @@ BuildJson(obj) {
         str .= (array ? "" : """" a """: ") . (IsObject(b) ? BuildJson(b) : (0 * b == 0) ? b : """" b """") . ", "	
     str := RTrim(str, " ,")
     Return (array ? "[" str "]" : "{" str "}")
+}
+
+DataBaseTableToObject(ResultSet) {
+    dataObject := [{}]
+    If (ResultSet.HasNames) {
+        If (ResultSet.HasRows) {
+            Loop, % ResultSet.RowCount 
+            {
+                colIndex := A_Index
+                ResultSet.Next(Row)
+                Loop, % ResultSet.ColumnCount
+                {
+                    colName := ResultSet.ColumnNames[A_Index]
+                    dataObject[colIndex](colName) := Row[A_Index]
+                }
+            }
+        }
+    }
+    
+    Return dataObject
 }

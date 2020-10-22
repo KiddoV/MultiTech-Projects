@@ -115,25 +115,28 @@
 						<button type="button" class="btn peach-gradient position-fixed rounded-circle" style="bottom: 30px; right: 10px; padding: 4px 7px; z-index: 96" data-toggle="modal" data-target="#task-creater-modal"><i class="fas fa-2x fa-plus"></i></button>
 						<div class="mt-2">
 							<ul class="nav nav-pills justify-content-end">
-							  <li class="nav-item"><a class="nav-link task-nav-link active hoverable mr-1" data-toggle="pill" href="#pills-task-active">Active</a></li>
-							  <li class="nav-item"><a class="nav-link task-nav-link hoverable" data-toggle="pill" href="#pills-task-history">History</a></li>
+							  <li class="nav-item"><a class="nav-link task-nav-link active hoverable mr-1" data-toggle="pill" href="#pills-task-active" name="active" onclick="toggleSubTabTask(this)">Active</a></li>
+							  <li class="nav-item"><a class="nav-link task-nav-link hoverable" data-toggle="pill" href="#pills-task-history" name="history" onclick="toggleSubTabTask(this)">History</a></li>
 							</ul>
-
+							<div id="sub-tab-header-active" class="pb-1">
+								<h6 class="d-inline pl-2 text-muted">Active Tasks</h6>
+								<span type="button" data-toggle="dropdown" class="d-inline ml-5" aria-haspopup="true" aria-expanded="false" style="font-weight: bold;"><i class="fas fa-sort-amount-down-alt"></i> <span id="sort-icon-label">10</span></span>
+								<div class="dropdown-menu" style="font-size: 12px;">
+									<a name="10" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display 10 Results</a>
+									<a name="30" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display 30 Results</a>
+									<a name="100" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display 100 Results</a>
+									<a name="All" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display All Results</a>
+								</div>
+							</div>
+							<div id="sub-tab-header-history" class="pb-1" style="display: none;">
+								<h6 class="d-inline pl-2 text-muted">Tasks History</h6>
+							</div>
 							<div class="tab-content default-mouse" id="pills-tabContent">
 							  <div id="pills-task-active" class="tab-pane fade show active">
-									<h6 class="d-inline pl-2 text-muted">Active Tasks</h6>
-									<span type="button" data-toggle="dropdown" class="d-inline ml-5" style="font-weight: bold;"><i class="fas fa-sort-amount-down-alt"></i> <span id="sort-icon-label">10</span></span>
-									<div class="dropdown-menu" style="font-size: 12px;">
-									  <a name="10" class="dropdown-item" onclick="ahk.GetTaskCard(event)">Display 10 Results</a>
-										<a name="30" class="dropdown-item" onclick="ahk.GetTaskCard(event)">Display 30 Results</a>
-										<a name="100" class="dropdown-item" onclick="ahk.GetTaskCard(event)">Display 100 Results</a>
-										<a name="All" class="dropdown-item" onclick="ahk.GetTaskCard(event)">Display All Results</a>
-									</div>
-
 									<div id="task-card-container" class="pl-2" style="height: calc(100vh - 115px); overflow-y: auto; overflow-x: hidden;">
 
 										<!-- Task cards -->
-										<div type="button" class="card pt-1 pl-2 fast animated bounceInRight hoverable" style="max-width: 99%; border-top: 12px solid #673ab7;">
+										<!-- <div type="button" class="card pt-1 pl-2 fast animated bounceInRight hoverable" style="max-width: 99%; border-top: 12px solid #673ab7;">
 											<div class="row">
 												<div class="col-md-10 pl-4">
 													<div class="row">
@@ -150,10 +153,10 @@
 														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-chalkboard"></i> YesTech</h6>
 													</div>
 													<div class="row">
-														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-users"></i> <span class="badge badge-pill info-color-dark">VH</span></h6>
+														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-users"></i> <span class="badge badge-pill info-color-dark">VH</span></h6> -->
 														<!-- <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-alt"></i> </h6>
 														<h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-check"></i> </h6> -->
-													</div>
+													<!-- </div>
 												</div>
 												<div class="col-md-2">
 													<div class="c100 p50 x-small">
@@ -165,14 +168,15 @@
 					                </div>
 												</div>
 											</div>
-										</div>
+										</div> -->
 
 									</div>
 								</div>
 
 							  <div id="pills-task-history" class="tab-pane fade">
-									<h6 class="pl-2 text-muted">Task History</h6>
-									<div style="height: 470px; overflow-y: auto;">
+									<div class="pl-2" style="height: calc(100vh - 115px); overflow-y: auto; overflow-x: hidden;">
+
+										<!--  -->
 
 									</div>
 								</div>
@@ -375,9 +379,22 @@
 									  Tooltip on right
 									</button>
 
-									<div class="" style="width: 200px; height: 50px;">
+									<!-- <div class="" style="width: 200px; height: 50px;">
 						        <select class="selectpicker form-control-sm" id="number" data-container="body" data-live-search="true" title="Select a number" data-hide-disabled="true"></select>
-						      </div>
+						      </div> -->
+									<!-- Basic dropdown -->
+									<button class="btn btn-primary dropdown-toggle mr-4" type="button" data-toggle="dropdown"
+									  aria-haspopup="true" aria-expanded="false">Basic dropdown</button>
+
+									<div class="dropdown-menu">
+									  <a class="dropdown-item" href="#">Action</a>
+									  <a class="dropdown-item" href="#">Another action</a>
+									  <a class="dropdown-item" href="#">Something else here</a>
+									  <div class="dropdown-divider"></div>
+									  <a class="dropdown-item" href="#">Separated link</a>
+									</div>
+									<!-- Basic dropdown -->
+									<!-- Basic dropdown -->
 								<!-- Basic dropdown -->
 						<!-- <div class="row">
 							<div class="col-md-6">
@@ -538,6 +555,16 @@
 			//$('#auth-container').addClass('animated slideInLeft');
 		} else {
 			el.style.display = "none";
+		}
+	}
+
+	function toggleSubTabTask(el) {
+		if (el.name === "active") {
+			document.getElementById("sub-tab-header-active").style.display = "block";
+			document.getElementById("sub-tab-header-history").style.display = "none";
+		} else {
+			document.getElementById("sub-tab-header-active").style.display = "none";
+			document.getElementById("sub-tab-header-history").style.display = "block";
 		}
 	}
 
