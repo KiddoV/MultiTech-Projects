@@ -6,12 +6,17 @@ body {
 	height: 100%;
 }
 
-html,#title-label {
+html, #title-label {
 	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 
-header {
+#title-label {
+	font-weight: bold;
 	font-size: 10pt;
+}
+
+header {
+	font-size: 11pt;
 }
 
 body {
@@ -301,7 +306,7 @@ body{
 	z-index: 98;
 }
 .modal-backdrop, .modal {
-	margin-top: 20px;
+	margin-top: 23px;
 }
 .modal-dialog {
 	margin-top: 5px;

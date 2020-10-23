@@ -57,7 +57,7 @@
 	<header class="position-sticky"><!------------------------------------------------>
 		<!-- Title Bar -->
 		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm sticky-top" style="z-index: 100;">
-			<span class="flex-grow-1 ml-2 default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
+			<span class="flex-grow-1 ml-2	default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">????????</span>
 			<div id="userTopBtn"></div>
 			<span class="title-btn" onclick="neutron.Minimize()"><i class="fas fa-xs fa-window-minimize"></i></span>
 			<span class="title-btn title-btn-disable" onclick="" disabled><i class="fas fa-xs fa-window-maximize"></i></span>
@@ -120,12 +120,30 @@
 							</ul>
 							<div id="sub-tab-header-active" class="pb-1">
 								<h6 class="d-inline pl-2 text-muted">Active Tasks</h6>
-								<span type="button" data-toggle="dropdown" class="d-inline ml-5" aria-haspopup="true" aria-expanded="false" style="font-weight: bold;"><i class="fas fa-sort-amount-down-alt"></i> <span id="sort-icon-label">10</span></span>
-								<div class="dropdown-menu" style="font-size: 12px;">
-									<a name="10" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display 10 Results</a>
-									<a name="30" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display 30 Results</a>
-									<a name="100" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display 100 Results</a>
-									<a name="All" class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active')">Display All Results</a>
+								<div class="d-inline ml-5">
+									<span type="button" data-toggle="dropdown" class="ml-5" style="font-weight: bold;"><i class="fas fa-layer-group"></i> <span id="amount-icon-label">10</span></span>
+									<div class="dropdown-menu" style="font-size: 12px;">
+										<a class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active', 10)">Display <b>10</b> Results</a>
+										<a class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active', 30)">Display <b>30</b> Results</a>
+										<a class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active', 100)">Display <b>100</b> Results</a>
+										<a class="dropdown-item" onclick="ahk.GetTaskCard(event, 'Active', 'All')">Display <b>All</b> Results</a>
+									</div>
+								</div>
+								<h6 class="d-inline pl-2 pr-2">|</h6>
+								<div class="d-inline ml-1">
+									<span type="button" data-toggle="dropdown" style="font-weight: bold;"><i class="fas fa-sort-amount-down-alt"></i> <span id="sort-icon-label">Latest</span></span>
+									<div class="dropdown-menu" style="font-size: 12px;">
+										<a class="dropdown-item" onclick="ahk.SortTaskCard(event, 'sort', 'Latest')">Sort by <b>Latest</b> Task</a>
+										<a class="dropdown-item" onclick="ahk.SortTaskCard(event, 'sort', 'Oldest')">Sort by <b>Oldest</b> Task</a>
+									</div>
+								</div>
+								<div class="d-inline ml-2">
+									<span type="button" data-toggle="dropdown" style="font-weight: bold;"><i class="fas fa-filter"></i> <span id="filter-icon-label" class="badge-pill grey text-white">All</span></span>
+									<div class="dropdown-menu" style="font-size: 12px;">
+										<a class="dropdown-item" onclick="">Filter by <span class="badge-pill grey text-white">All</span></a>
+										<a class="dropdown-item" onclick="">Filter by <span class="badge-pill deep-purple">&nbsp;&nbsp;&nbsp;&nbsp;</span></a>
+										<a class="dropdown-item" onclick="">Filter by <span class="badge-pill deep-orange darken-3">&nbsp;&nbsp;&nbsp;&nbsp;</span></a>
+									</div>
 								</div>
 							</div>
 							<div id="sub-tab-header-history" class="pb-1" style="display: none;">
@@ -179,6 +197,23 @@
 										<!--  -->
 
 									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+					<!-- Modal for Task-Card -->
+					<div id="task-card-modal" class="modal faster animated flipInX" tabindex="-1" role="dialog">
+						<div class="modal-dialog modal-notify modal-success modal-dialog-centered" style="max-width: 750px;">
+							<div class="modal-content">
+								<div id="task-card-modal-header" class="modal-header">
+										<h6 id="task-card-modal-title" class="modal-title heading lead p-0" style="font-weight: bold;">?????????</h6>
+										<span type="button" class="close p-3 text-white" data-dismiss="modal"><i class="fas fa-xs fa-times"></i></span>
+								</div>
+
+								<div class="modal-body p-2 pt-3" style="height: 400px; overflow-y: auto;">
+									Hi
 								</div>
 
 							</div>
@@ -382,16 +417,30 @@
 									<!-- <div class="" style="width: 200px; height: 50px;">
 						        <select class="selectpicker form-control-sm" id="number" data-container="body" data-live-search="true" title="Select a number" data-hide-disabled="true"></select>
 						      </div> -->
-									<!-- Basic dropdown -->
-									<button class="btn btn-primary dropdown-toggle mr-4" type="button" data-toggle="dropdown"
-									  aria-haspopup="true" aria-expanded="false">Basic dropdown</button>
+									<div>
+										<div class="">
+								      <span type="button" class=" dropdown-toggle" data-toggle="dropdown">
+								        <i class="glyphicon glyphicon-plus-sign"></i> <span class="caret"></span>
+								      </span>
+								      <ul class="dropdown-menu" role="menu">
+								        <li><a href="#">Action</a></li>
+								        <li><a href="#">Another action</a></li>
+								        <li><a href="#">Something else here</a></li>
+								        <li class="divider"></li>
+								        <li><a href="#">Separated link</a></li>
+								      </ul>
+								  	</div>
 
-									<div class="dropdown-menu">
-									  <a class="dropdown-item" href="#">Action</a>
-									  <a class="dropdown-item" href="#">Another action</a>
-									  <a class="dropdown-item" href="#">Something else here</a>
-									  <div class="dropdown-divider"></div>
-									  <a class="dropdown-item" href="#">Separated link</a>
+								    <div class="">
+								      <span type="button" class=" dropdown-toggle" data-toggle="dropdown">
+								        <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
+								      </span>
+								      <span class="dropdown-menu" role="menu">
+								        <a href="#">Action 2</a>
+								        <a href="#">Another action 2</a>
+								        <a href="#">Something else here 2</a>
+								      </span>
+								    </div>
 									</div>
 									<!-- Basic dropdown -->
 									<!-- Basic dropdown -->

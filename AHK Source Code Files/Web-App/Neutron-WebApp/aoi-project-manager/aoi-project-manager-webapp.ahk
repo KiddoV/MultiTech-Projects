@@ -192,12 +192,13 @@ SearchProgram(neutron, event) {
 }
 
 OnEnter(neutron, event) {
+    ;;Enter key event for Program Search Bar
     if (event.keyCode == 13 && event.srcElement.id == "prog-search-bar") {
         SearchProgram(neutron, event)
     }
 }
 
-OnConText(neutron, event) {
+OnRightClick(neutron, event) {
     progCardId := event.id
     MouseGetPos, xpos, ypos 
     NeutronWebApp.qs("#prog-card-dropdown-" . progCardId).classList.add("d-block")
@@ -514,16 +515,21 @@ DisplayTaskCard(Data) {
             taskCreatedBy := taskData[A_Index].task_created_by
             taskDateTimeCreated := taskData[A_Index].task_date_created
             taskDateTimeDue := taskData[A_Index].task_due_date
+            taskProgrsJson := taskData[A_Index].task_progress
+            progName := taskData[A_Index].prog_full_name
+            progAoiMachine := taskData[A_Index].prog_aoi_machine
             
             cardBorderColor := (taskType = "ECO Update") ? "#673ab7" : (taskType = "Create New Program") ? "#ff3d00" : "black"
             taskStatusColorClass := (taskStatus = "IN PROGRESS") ? "yellow darken-2" : (taskStatus = "NOT STARTED") ? "brown lighten-2" : (taskStatus = "FINISHED") ? "green darken-2" : "black"
             taskDateCreated := changeFormatDateTime(taskDateTimeCreated, "Date")
             taskDateDue := changeFormatDateTime(taskDateTimeDue, "Date")
+            taskProgrsObj := JSON.Load(taskProgrsJson)
+            taskProgrPercentage := calculateTaskProgrPercentage(taskProgrsObj)
             
             ;;;;Display in HTML
             html =
             (LTrim
-            <div type="button" class="card pt-1 pl-2 mb-2 fast animated bounceInRight hoverable" style="max-width: 99`%; border-top: 12px solid %cardBorderColor%;">
+            <div id="%taskId%" type="button" class="task-card card pt-1 pl-2 mb-2 fast animated bounceInRight hoverable" style="max-width: 99`%; border-top: 12px solid %cardBorderColor%;" data-toggle="modal" data-target="#task-card-modal" onclick="ahk.DisplayTaskCardModal(this)">
                 <div class="row">
                     <div class="col-md-10 pl-4">
                         <div class="row">
@@ -531,21 +537,21 @@ DisplayTaskCard(Data) {
                             <div class="col-sm">
                                 <span class="badge %taskStatusColorClass%">%taskStatus%</span>
                             </div>
-                            <h6 class="col-sm task-card-title">75582934L_B01</h6>
+                            <h6 class="col-sm task-card-title">%progName%</h6>
                         </div>
                         <div class="row">
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %taskDateCreated%</h6>
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-day"></i> %taskDateDue%</h6>
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-user-plus"></i> %taskCreatedBy%</h6>
-                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-chalkboard"></i> YesTech</h6>
+                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-chalkboard"></i> %progAoiMachine%</h6>
                         </div>
                         <div class="row">
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-users"></i> <span class="badge badge-pill info-color-dark">VH</span></h6>
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <div class="c100 p50 x-small">
-                            <span>50<span>`%</span></span>
+                        <div class="c100 p%taskProgrPercentage% x-small">
+                            <span>%taskProgrPercentage%`%</span>
                             <div class="slice">
                                 <div class="bar"></div>
                                 <div class="fill"></div>
@@ -556,21 +562,18 @@ DisplayTaskCard(Data) {
             </div>
             )
             
-            NeutronWebApp.doc.getElementById("task-card-container").insertAdjacentHTML("beforeend", html)
+            NeutronWebApp.qs("#task-card-container").insertAdjacentHTML("beforeend", html)
         }
     }
 }
 
-GetTaskCard(neutron, event, cardType, defaultNum := 0) {
-    If (defaultNum != 0)
-        numOfTaskCards := defaultNum
-    Else
-        numOfTaskCards := (event.srcElement.name == "All") ? -1 : event.srcElement.name    ;Number of task cards to be displayed
-    NeutronWebApp.doc.getElementById("sort-icon-label").innerHTML := event.srcElement.name
+GetTaskCard(neutron, event, cardType, amountNum := 0) {
+    numOfTaskCards := (amountNum == "All") ? -1 : amountNum    ;Number of task cards to be displayed
+    NeutronWebApp.qs("#amount-icon-label").innerHTML := amountNum
     
     ;;Get data from DB
     If (cardType == "Active")
-        SQL := "SELECT * FROM user_tasks LEFT JOIN users ON task_assigned_by=user_id WHERE task_status IN ('NOT STARTED','IN PROGRESS') LIMIT " . numOfTaskCards
+        SQL := "SELECT * FROM user_tasks LEFT JOIN users ON task_assigned_by=user_id LEFT JOIN aoi_programs ON task_aoi_program=prog_id WHERE task_status IN ('NOT STARTED','IN PROGRESS') LIMIT " . numOfTaskCards
     
     If !AOI_Pro_DB.GetTable(SQL, ResultSet) {
         DisplayAlertMsg("Execute SQL statement FAILED!!!", "alert-danger")
@@ -578,6 +581,38 @@ GetTaskCard(neutron, event, cardType, defaultNum := 0) {
     }
     
     DisplayTaskCard(ResultSet)
+}
+
+SortTaskCard(neutron, event, action := "", item := "") {
+    If (action == "sort") {
+        NeutronWebApp.qs("#sort-icon-label").innerHTML := item
+        taskCardListEl := NeutronWebApp.doc.getElementById("task-card-container")
+        card := taskCardListEl.getElementsByClassName("task-card")
+        MsgBox % card[1].innerHTML
+    }
+}
+
+DisplayTaskCardModal(neutron, event) {
+    ;;Get data from DB
+    SQL := "SELECT * FROM user_tasks LEFT JOIN users ON task_assigned_by=user_id LEFT JOIN aoi_programs ON task_aoi_program=prog_id WHERE task_id=" . event.id
+    If !AOI_Pro_DB.GetTable(SQL, TaskCardData) {
+        DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
+    }
+    
+    If (!TaskCardData.HasRows) {
+        DisplayAlertMsg("Display failed! Got empty Result Set.", "alert-danger")
+    }
+    
+    taskTableData := DataBaseTableToObject(TaskCardData)
+    
+    ;;Save data to variable
+    
+    ;;Processing data
+    titleBarColor := (taskTableData[1].task_type = "ECO Update") ? "#673ab7" : (taskTableData[1].task_type = "Create New Program") ? "#ff3d00" : "black"
+    
+    ;;Display data in HTML
+    NeutronWebApp.qs("#task-card-modal-header").style.backgroundColor := titleBarColor
+    NeutronWebApp.qs("#task-card-modal-title").innerHTML := taskTableData[1].task_type
 }
 
 UserLogin(neutron, event) {
@@ -627,6 +662,7 @@ UserLogin(neutron, event) {
     NeutronWebApp.qs("#inputUserN").value := ""
     NeutronWebApp.qs("#inputPw").value := ""
     changeUserLoginDisplay("UNLOCKED")
+    GetTaskCard("", "", "Active", 10)
 }
 
 UserLogout(neutron, event) {
@@ -749,15 +785,29 @@ checkIfUrlAvailable(url) {
         Return True
 }
 
-changeFormatDateTime(dateTime, type := "") {
+changeFormatDateTime(InDateTime, type := "") {
     returnVar := "N/A"
-    If (type = "Date" && (dateTime != "" || dateTime != 0) ) {
-        FormatTime, returnVar, %dateTime%, MMM dd, yyyy
-    } Else If (type = "Time" && (dateTime != "" || dateTime != 0)) {
-        FormatTime, returnVar, %dateTime%, hh:mm:ss tt
+    if (type == "Date" && InDateTime != 0 && InDateTime != "") {
+        FormatTime, returnVar, %InDateTime%, MMM dd, yyyy
+    } else if (type == "Time" && InDateTime != "" && InDateTime != 0) {
+        FormatTime, returnVar, %InDateTime%, hh:mm:ss tt
     }
-    MsgBox % returnVar
-    Return returnVar
+    
+    return returnVar
+}
+
+calculateTaskProgrPercentage(JsonObj) {
+    totalItem := JsonObj.items.Length()
+    totalItemDone := 0
+    
+    Loop, % totalItem
+    {
+        If (JsonObj.items[A_Index].done)
+            totalItemDone++
+    }
+    percentage := (totalItemDone / totalItem) * 100
+    
+    return Round(percentage)
 }
 
 autoUpdatePcbDBTable(pcbNum) {
