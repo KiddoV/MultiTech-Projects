@@ -540,7 +540,7 @@ DisplayTaskCard(Data) {
                             <h6 class="col-sm task-card-title">%progName%</h6>
                         </div>
                         <div class="row">
-                            <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %taskDateCreated%</h6>
+                            <h6 class="task-date-created col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %taskDateCreated%</h6>
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-day"></i> %taskDateDue%</h6>
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-user-plus"></i> %taskCreatedBy%</h6>
                             <h6 class="col-sm text-muted prog-card-subtitle"><i class="fas fa-chalkboard"></i> %progAoiMachine%</h6>
@@ -587,8 +587,14 @@ SortTaskCard(neutron, event, action := "", item := "") {
     If (action == "sort") {
         NeutronWebApp.qs("#sort-icon-label").innerHTML := item
         taskCardListEl := NeutronWebApp.doc.getElementById("task-card-container")
-        card := taskCardListEl.getElementsByClassName("task-card")
-        MsgBox % card[1].innerHTML
+        cardList := taskCardListEl.getElementsByClassName("task-card")
+        nodeIndex := 0
+        Loop, % cardList.length
+        {
+            MsgBox % cardList[nodeIndex].getElementsByClassName("task-date-created")[0].innerText
+            nodeIndex++
+        }
+        ;NeutronWebApp.qs("#task-card-container").insertAdjacentHTML("beforeend", cardList[0].outerHTML)
     }
 }
 
