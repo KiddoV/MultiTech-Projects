@@ -133,8 +133,8 @@
 								<div class="d-inline ml-1">
 									<span type="button" data-toggle="dropdown" style="font-weight: bold;"><i class="fas fa-sort-amount-down-alt"></i> <span id="sort-icon-label">Latest</span></span>
 									<div class="dropdown-menu" style="font-size: 12px;">
-										<a class="dropdown-item" onclick="ahk.SortTaskCard(event, 'sort', 'Latest')">Sort by <b>Latest</b> Task</a>
-										<a class="dropdown-item" onclick="ahk.SortTaskCard(event, 'sort', 'Oldest')">Sort by <b>Oldest</b> Task</a>
+										<a id="drop-item-latest" class="dropdown-item d-none" onclick="ahk.SortTaskCard(event, 'sort', 'Latest')">Sort by <b>Latest</b> Task</a>
+										<a id="drop-item-oldest" class="dropdown-item" onclick="ahk.SortTaskCard(event, 'sort', 'Oldest')">Sort by <b>Oldest</b> Task</a>
 									</div>
 								</div>
 								<div class="d-inline ml-2">
@@ -238,7 +238,8 @@
 										</select>
 									</div>
 									<hr class="mt-3 m-2"/>
-									<div class="row">
+									<div id="task-creater-modal-sub-content" class="row">
+										<!-- <div class="col-sm">HEHE</div> -->
 										<!--  -->
 									</div>
 								</div>

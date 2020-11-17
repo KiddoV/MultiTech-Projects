@@ -426,7 +426,7 @@ DisplayProgCardModal(neutron, event) {
     If (ProgCardBuildECOHistData.HasRows) {
         Loop, % ProgCardBuildECOHistData.RowCount
         {
-            progHere := "<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgName . "</span>"
+            progHere := "<i class='pt-1 fas fa-lg fa-caret-left'></i>&nbsp;<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgName . "</span>"
             ProgCardBuildECOHistData.Next(Row)
             Loop, % ProgCardBuildECOHistData.ColumnCount
             {
@@ -570,10 +570,11 @@ DisplayTaskCard(Data) {
 GetTaskCard(neutron, event, cardType, amountNum := 0) {
     numOfTaskCards := (amountNum == "All") ? -1 : amountNum    ;Number of task cards to be displayed
     NeutronWebApp.qs("#amount-icon-label").innerHTML := amountNum
+    sortIconLabel := NeutronWebApp.qs("#sort-icon-label").innerHTML = "Latest" ? "DESC" : NeutronWebApp.qs("#sort-icon-label").innerHTML = "Oldest" ? "ASC" : "DESC"
     
     ;;Get data from DB
     If (cardType == "Active")
-        SQL := "SELECT * FROM user_tasks LEFT JOIN users ON task_assigned_by=user_id LEFT JOIN aoi_programs ON task_aoi_program=prog_id WHERE task_status IN ('NOT STARTED','IN PROGRESS') LIMIT " . numOfTaskCards
+        SQL := "SELECT * FROM user_tasks LEFT JOIN users ON task_assigned_by=user_id LEFT JOIN aoi_programs ON task_aoi_program=prog_id WHERE task_status IN ('NOT STARTED','IN PROGRESS') ORDER BY task_date_created " . sortIconLabel . " LIMIT " . numOfTaskCards
     
     If !AOI_Pro_DB.GetTable(SQL, ResultSet) {
         DisplayAlertMsg("Execute SQL statement FAILED!!!", "alert-danger")
@@ -584,18 +585,34 @@ GetTaskCard(neutron, event, cardType, amountNum := 0) {
 }
 
 SortTaskCard(neutron, event, action := "", item := "") {
+    taskCardListEl := NeutronWebApp.doc.getElementById("task-card-container")
+    cardList := taskCardListEl.getElementsByClassName("task-card")
+    
     If (action == "sort") {
         NeutronWebApp.qs("#sort-icon-label").innerHTML := item
-        taskCardListEl := NeutronWebApp.doc.getElementById("task-card-container")
-        cardList := taskCardListEl.getElementsByClassName("task-card")
-        nodeIndex := 0
+        cardListArray := []
         Loop, % cardList.length
-        {
-            taskDateCreated := cardList[nodeIndex].getElementsByClassName("task-date-created")[0].innerText     ;;Cannot get by id!!!
-            MsgBox % DateParse(taskDateCreated)
-            nodeIndex++
+        {   
+            ;cardList[A_Index - 1].classList.remove("animated")
+            cardListArray.Push(cardList[A_Index - 1].outerHTML)     ;;Convert JS NodeList to AHK Array
         }
-        ;NeutronWebApp.qs("#task-card-container").insertAdjacentHTML("beforeend", cardList[0].outerHTML)
+        
+        If (item == "Latest") {
+            reverseArray(cardListArray)
+            NeutronWebApp.qs("#task-card-container").innerHTML := ""
+            Loop, % cardListArray.length()
+                NeutronWebApp.qs("#task-card-container").insertAdjacentHTML("beforeend", cardListArray[A_Index])
+            NeutronWebApp.qs("#drop-item-latest").classList.add("d-none")
+            NeutronWebApp.qs("#drop-item-oldest").classList.remove("d-none")
+            
+        } Else If (item == "Oldest") {
+            reverseArray(cardListArray)
+            NeutronWebApp.qs("#task-card-container").innerHTML := ""
+            Loop, % cardListArray.length()
+                NeutronWebApp.qs("#task-card-container").insertAdjacentHTML("beforeend", cardListArray[A_Index])
+            NeutronWebApp.qs("#drop-item-latest").classList.remove("d-none")
+            NeutronWebApp.qs("#drop-item-oldest").classList.add("d-none")
+        }
     }
 }
 
@@ -944,4 +961,17 @@ DataBaseTableToObject(ResultSet) {
     }
     
     Return dataObject
+}
+
+reverseArray(array)
+{
+	arrayC := array.Clone()
+	tempObj := {}
+	for vKey in array
+		tempObj.Push(vKey)
+	vIndex := tempObj.Length()
+	for vKey in array
+		array[vKey] := arrayC[tempObj[vIndex--]]
+	arrayC := tempObj := ""
+    return array
 }
