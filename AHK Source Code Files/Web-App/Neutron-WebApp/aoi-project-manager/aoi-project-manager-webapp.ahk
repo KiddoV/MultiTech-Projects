@@ -417,7 +417,7 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-created-by").innerHTML := pcmUserFn . " " . pcmUserLn
     
     ;;Display Data on Second Tab
-    buildStatusColor := pcmBuildStatus = "ACTIVE" ? "green" : pcmBuildStatus = "BETA" ? "indigo" : "black"
+    buildStatusColor := pcmBuildStatus = "ACTIVE" ? "green" : pcmBuildStatus = "BETA" ? "indigo" : pcmBuildStatus = "OBSOLETE" ? "deep-orange" :"black"
     NeutronWebApp.qs("#prog-card-modal-build-name").innerHTML := pcmBuildName . "  <span class='pricetag z-depth-1 default-mouse'>$" . pcmBuildCost . "</span>"
     NeutronWebApp.qs("#prog-card-modal-build").innerHTML := pcmProgBuildNum
     NeutronWebApp.qs("#prog-card-modal-build-status").innerHTML := "Status: <span class='badge " . buildStatusColor . "'>" . pcmBuildStatus . "</span>"
@@ -458,7 +458,7 @@ DisplayProgCardModal(neutron, event) {
     }
     
     ;;Display Data on Third Tab
-    pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : "black"
+    pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : pcmPcbStatus = "OBSOLETE" ? "deep-orange" : "black"
     NeutronWebApp.qs("#prog-card-modal-pcb-name").innerHTML := pcmPcbFullName " | " pcmProgPcbNum
     NeutronWebApp.qs("#prog-card-modal-pcb").innerHTML := pcmProgPcbNum
     NeutronWebApp.qs("#prog-card-modal-pcb-status").innerHTML := "Status: <span class='badge " . pcbStatusColor . "'>" . pcmPcbStatus . "</span>"
