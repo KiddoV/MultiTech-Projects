@@ -481,17 +481,18 @@ OpenPdfEco(neutron, event) {
     ecoUrl := "http://virtu.multitech.prv:4080/eco/" . ecoToOpen . "/" . ecoToOpen . ".pdf"
     ecoUrlOld := "http://virtu.multitech.prv:4080/eco/ECO'S Prior to 8-16-19/" . ecoToOpen . ".pdf"
     NeutronWebApp.qs("#eco-" . ecoToOpen).innerHTML := "Openning..."
+    ecoTempFilePath := A_MyDocuments . "\ecoTemp.pdf"
     If checkIfUrlAvailable(ecoUrl) {
-        UrlDownloadToFile, %ecoUrl%, C:\ecoTemp.pdf
+        UrlDownloadToFile, %ecoUrl%, %ecoTempFilePath%
         If (ErrorLevel = 0)
-            Run, C:\ecoTemp.pdf, , Hide
+            Run, %ecoTempFilePath%, , Hide
         Else
             DisplayAlertMsg("Could not open ECO file! COMPFIND not connected!", "alert-danger")
     } Else {
         If checkIfUrlAvailable(ecoUrlOld) {
-            UrlDownloadToFile, %ecoUrlOld%, C:\ecoTemp.pdf
+            UrlDownloadToFile, %ecoUrlOld%, %ecoTempFilePath%
             If (ErrorLevel = 0)
-                Run, C:\ecoTemp.pdf, , Hide
+                Run, %ecoTempFilePath%, , Hide
             Else
                 DisplayAlertMsg("Could not open ECO file! COMPFIND not connected!", "alert-danger")
         } Else {
@@ -801,8 +802,9 @@ checkAnURLStatus(url, timeout := 1000) {
 }
 
 checkIfUrlAvailable(url) {
-    UrlDownloadToFile, %url%, C:\checkHtml.html
-    FileRead, outVar, C:\checkHtml.html
+    tempCheckHtmlFilePath := A_MyDocuments . "\checkHtml.html"
+    UrlDownloadToFile, %url%, %tempCheckHtmlFilePath%
+    FileRead, outVar, %tempCheckHtmlFilePath%
     IfInString, outVar, 404 - File or Directory not found
         Return False
     Else

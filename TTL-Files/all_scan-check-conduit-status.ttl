@@ -1,0 +1,10 @@
+;
+;	Author: 		Viet Ho
+;
+showtt -1
+show -1
+
+flushrecv
+filecreate fhandle 'C:\V-Projects\AMAuto-Scanner\caches\conduit_status.dat'
+
+

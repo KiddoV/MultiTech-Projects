@@ -6,21 +6,20 @@ timeout = 10
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :LOGIN
 timeout = 1
-send 03
-:waitLogin
+sendln 03
 wait '#' 'login' 'word' '$'
-until result = 1
-	if result = 2 then
-	   	sendln 'mtadm'
-		goto waitLogin
-	elseif result = 3 then
-	    sendln 'root'
-		goto waitLogin
-	elseif result = 4 then
-	   	sendln 'sudo -s'
-		goto waitLogin
+while result!=1
+	if result=2 then
+	    sendln 'mtadm'
+		wait '#' 'login' 'word' '$'
+	elseif result=3 then
+		sendln 'root'
+		wait '#' 'login' 'word' '$'
+	elseif result=4 then
+		sendln 'sudo -s'
+		wait '#' 'login' 'word' '$'
 	endif
-enduntil
+endwhile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :GET_DATA
 timeout = 2
@@ -117,14 +116,18 @@ if isType3 = 0 goto START_EEPROM
 flushrecv
 wait '#'
 sendln '/media/sda1/wifiscan2-check.sh'
+waitln 'No such file or directory' '#'
+if result=1 then
+    messagebox 'Could not open WIFI module. Please check!' 'WIFI ERROR'
+    end
+endif
 :recheck_wifi
 wait '#'
 sendln 'ifconfig wifi0'
 timeout = 8
-waitln 'HWaddr' '88:'
-strremove inputstr 1 38
-strtrim inputstr ' \t' ;clear the whitespace
-strcompare inputstr nodeWifiNum
+waitregex 'HWaddr'
+strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+strcompare matchstr nodeWifiNum
 if result <> 0 then
     yesnobox 'NODE WIFI MISMATCH!! DO YOU WANT TO RESCAN?' 'WIFI MISMATCH'
     if result = 1 then
@@ -152,10 +155,9 @@ mpause 1000
 timeout = 2
 eepromstr = ''
 flushrecv
-send 'date "'
 gettime pctime "%Y-%m-%d %H:%M"
-send pctime
-sendln '"'
+sprintf2 cmd 'date "%s"' pctime
+sendln cmd
 wait '#'
 sendln '/etc/init.d/hwclock.sh stop'
 :check_thumbdrive
@@ -174,21 +176,8 @@ if result = 1 then
     endif
 endif
 
-strconcat eepromstr './'
-strconcat eepromstr skuNum
-strconcat eepromstr '.sh'
-strconcat eepromstr ' '
-strconcat eepromstr serialNum
-strconcat eepromstr ' '
-strconcat eepromstr nodeIDNum
-strconcat eepromstr ' '
-strconcat eepromstr nodeWifiNum
-strconcat eepromstr ' '
-strconcat eepromstr nodeBTNum
-strconcat eepromstr ' '
-strconcat eepromstr imeiNum
-strconcat eepromstr ' '
-strconcat eepromstr uuidNum
+sprintf2 eepromstr './%s.sh %s %s %s %s %s %s' skuNum serialNum nodeIDNum nodeWifiNum nodeBTNum imeiNum uuidNum
+
 wait '#'
 sendln eepromstr
 wait '#' 'invalid mac-addr' 'ERROR'

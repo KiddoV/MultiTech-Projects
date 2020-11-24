@@ -208,9 +208,12 @@ if result=0 then
 endif
 mpause 500
 wait '#'
-sendln 'ls /media/card'
-wait 'No such file' 'mmcblk0p1'
-if result>1 then
+;sendln 'ls /media/card'
+;wait 'No such file' 'mmcblk0p1'
+;if result>1 then
+sendln 'df'
+wait 'mmcblk0p1'
+if result=0 then
    beep
    messagebox 'SD CARD NOT DETECTED' 'SD CARD FAILURE'
    disconnect

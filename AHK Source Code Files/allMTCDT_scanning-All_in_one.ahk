@@ -5,11 +5,18 @@
 SetTitleMatchMode, RegEx
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\AMAuto-Scanner\TTL-Files
-    FileCreateDir C:\V-Projects\AMAuto-Scanner\TTL-Files
+    FileCreateDir C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func
+IfNotExist C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func
+    FileCreateDir C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func
+IfNotExist C:\V-Projects\AMAuto-Scanner\TTL-Files
+    FileCreateDir C:\V-Projects\AMAuto-Scanner\caches
+    
 IfNotExist C:\DEVICE_EEPROM_RECORDS
     FileCreateDir C:\DEVICE_EEPROM_RECORDS
     
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-Scanner\TTL-Files\all_scan.ttl, 1
+FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-Scanner\TTL-Files\all_scan.ttl, 1
+
+FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["", ""]
 Global 246_SKUNums := ["94557252LF", "94557574LF", "94557576LF"]
@@ -130,9 +137,8 @@ mainStart() {
     WinActivate COM.*
     Send ^c
     Sleep 100
-    If (searchForFirmwareVersion() = 0) {
-        SB_SetText("Your device need to reboot first!")
-        MsgBox  Please reboot device first!
+    If (searchForFirmwareVersion(2, 500) = 0) {
+        MsgBox 48, Not Ready or Wrong Port, MTCDT is not ready!`nPlease check PORT or reboot device first!
         return
     }
     
@@ -288,7 +294,7 @@ checkInput() {
     } Else If (StrLen(imeiN) < 15 && isImeiEnabled = 1) {
         MsgBox Invalid IMEI NUMBER! Rescan!
         return 0
-    } Else If (StrLen(uuidN) < 32) {
+    } Else If (StrLen(uuidN) <> 32) {
         MsgBox Invalid UUID! Rescan!
         return 0
     } Else If (StrLen(loraN) < 23 && isLoraEnabled = 1) {
@@ -383,13 +389,17 @@ SetEditCueBanner(HWND, Cue) {  ; requires AHL_L
 }
 
 ;;;;Search Images Functions;;;;
-searchForFirmwareVersion() {
-        WinActivate COM.*
+searchForFirmwareVersion(loopCount, sleepTime) {
+    Loop, %loopCount%
+    {
+        WinActivate ^COM
         CoordMode, Pixel, Window
-        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Tester\Imgs-for-Search-Func\mli419.bmp
+        ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp
         If ErrorLevel = 0
             return 1 ;Return true if found
-        If ErrorLevel
+        Sleep, %sleepTime%
+    }
+    If ErrorLevel
             return 0 ;Return false if NOT found
 }
 
