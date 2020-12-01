@@ -20,7 +20,7 @@ FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Proj
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["", ""]
 Global 246_SKUNums := ["94557252LF", "94557574LF", "94557576LF"]
-Global 247_SKUNums := ["94557550LF", ""]
+Global 247_SKUNums := ["94557291LF", "94557550LF"]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
 
@@ -54,6 +54,7 @@ Gui Add, DropDownList, x25 y59 w190 vskuNum3 gchangeValueDropdown Choose1, %skuN
 Gui Tab
 
 Gui Add, GroupBox, x9 y101 w222 h190, Enter Values
+Gui Add, Button, x180 y100 w40 h15 gclearCtrlVar, &Clear
 Gui Font, s10
 Gui Add, Text, x17 y125 w55 h21 vserialLabel, Serial #:
 Gui Add, Text, x17 y150 w60 h21 vnodeidLabel, NodeID #:
@@ -91,6 +92,7 @@ GuiClose:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
+~^s:: mainStart()
 ~Enter::    Send {Tab}
 ^q::    ExitApp
 ;;;;;;;;;;;;;;;;;;;;;;;;
@@ -100,12 +102,13 @@ mainStart() {
     GuiControlGet, skuNum2 ;Get value from DropDownList
     GuiControlGet, skuNum3 ;Get value from DropDownList
     GuiControlGet, whichTab ;Get value from Tab Title
-    GuiControlGet, serialN
-    GuiControlGet, nodeIdN
-    GuiControlGet, imeiN
-    GuiControlGet, uuidN
-    GuiControlGet, loraN
-    GuiControlGet, wifiN
+    allScanVar := "serialN,nodeIdN,imeiN,uuidN,loraN,wifiN"
+    Loop, Parse, allScanVar, `,
+    {
+        GuiControlGet, isEnabled, Enabled, %A_LoopField%
+        If (isEnabled)
+            GuiControlGet, %A_LoopField%
+    }
     
     Global skuNum
     If (whichTab = "240L")
@@ -161,15 +164,37 @@ mainStart() {
     ControlClick, Button1, ALL DATAS, , Left, 3 ;Do this if ControlSend not working
     
     ;Wait for Teraterm
+    WaitForResponse:
     SB_SetText("Waiting for processes")
-    WinWait SCAN COMPLETE|INVALID|FAILURE|ERROR
-    If WinExist("SCAN COMPLETE") {
+    WinWait SCAN COMPLETED|INVALID|FAILURE|ERROR|MISMATCH|RESCAN
+    
+    If WinExist("SCAN COMPLETED") {
         FormatTime, localTime, %A_Now%, hh:mm:ss tt
         SB_SetText("You just finished a scan at " localTime)
-    } Else {
+    } Else If WinExist("MISMATCH|RESCAN") {
+        SB_SetText("Scan value missmatched!")
+        WinWait RESCAN IMEI|RESCAN NODE LORA|RESCAN NODE WIFI
+        If WinExist("RESCAN IMEI") {
+            WinGetText, rescanImei, RESCAN IMEI
+            Guicontrol, Text, imeiN, %rescanImei%
+        } Else If WinExist("RESCAN NODE LORA") {
+            WinGetText, rescanNodeLora, RESCAN NODE LORA
+            Guicontrol, Text, loraN, %rescanNodeLora%
+        } Else If WinExist("RESCAN NODE WIFI") {
+            WinGetText, rescanNodeWifi, RESCAN NODE WIFI
+            Guicontrol, Text, wifiN, %rescanNodeWifi%
+        }
+        
+        Sleep 300
+        Goto WaitForResponse
+    } Else If WinExist("INVALID|FAILURE|ERROR"){
         SB_SetText("Failed to scan!")
         Return
+    } Else {
+        MsgBox, 16, ERROR, UNKNOWN ERROR!
+        Return
     }
+    Return
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;Additional GUIs;;;;;;;;;;;;;;;;;;
@@ -286,22 +311,22 @@ checkInput() {
     GuiControlGet, isWifiEnabled, Enabled, wifiN
     
     If (StrLen(serialN) < 8) {
-        MsgBox Invalid SERIAL NUMBER! Rescan!
+        MsgBox, 48, INVALID INPUT, Invalid SERIAL NUMBER! Rescan!
         return 0
     } Else If (StrLen(nodeIdN) < 17) {
-        MsgBox Invalid NODE ID! Rescan!
+        MsgBox, 48, INVALID INPUT, Invalid NODE ID! Rescan!
         return 0
     } Else If (StrLen(imeiN) < 15 && isImeiEnabled = 1) {
-        MsgBox Invalid IMEI NUMBER! Rescan!
+        MsgBox, 48, INVALID INPUT, Invalid IMEI NUMBER! Rescan!
         return 0
     } Else If (StrLen(uuidN) <> 32) {
-        MsgBox Invalid UUID! Rescan!
+        MsgBox, 48, INVALID INPUT, Invalid UUID! Rescan!
         return 0
     } Else If (StrLen(loraN) < 23 && isLoraEnabled = 1) {
-        MsgBox Invalid Lora Number! Rescan!
+        MsgBox, 48, INVALID INPUT, Invalid Lora Number! Rescan!
         return 0
-    } Else If (StrLen(wifiN) < 23 && isWifiEnabled = 1) {
-        MsgBox Invalid Wifi ID Number! Rescan!
+    } Else If (StrLen(wifiN) < 17 && isWifiEnabled = 1) {
+        MsgBox, 48, INVALID INPUT, Invalid Wifi ID Number! Rescan!
         return 0
     }
 }
@@ -318,11 +343,12 @@ changeValueDropdown() {
 ;LABELTYPE2 -- Serial, NodeID, UUID, IMEI
 ;LABELTYPE3 -- Serial, NodeID, UUID, IMEI, LORA
 ;LABELTYPE4 -- Serial, NodeID, UUID, IMEI, LORA, WIFI
+;LABELTYPE5 -- Serial, NodeID, UUID, LORA, WIFI
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
     LABELTYPE2 := ["94557574LF"]
     LABELTYPE3 := ["94557576LF"]
-    LABELTYPE4 := []
+    LABELTYPE4 := ["94557291LF"]
     LABELTYPE5 := ["94557550LF"]
     
     allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4,LABELTYPE5"
@@ -380,6 +406,14 @@ changeDisplayWithSKUNum() {
     } else {
         Loop Parse, allValueScan, `,
             GuiControl Disable, %A_LoopField%
+    }
+}
+    
+clearCtrlVar() {
+    allScanVar := "serialN,nodeIdN,imeiN,uuidN,loraN,wifiN"
+    Loop, Parse, allScanVar, `,
+    {
+        GuiControl, Text, %A_LoopField%, 
     }
 }
 

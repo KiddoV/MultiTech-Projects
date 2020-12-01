@@ -21,6 +21,16 @@ while result!=1
 	endif
 endwhile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+:SET_DATA
+promProductID = 'N/A'
+promSerialNum = 'N/A'
+promNodeID = 'N/A'
+promImeiNum = 'N/A'
+promNodeBT = 'N/A'
+promNodeWiFi = 'N/A'
+promUuid = 'N/A'
+promNodeLora = 'N/A'
+
 :GET_DATA
 timeout = 2
 labelType = ''
@@ -74,47 +84,56 @@ sendln 'at+cgsn'
 waitln '2' '3' '4' '5'
 strcompare inputstr imeiNum
 if result <> 0 then
+    closesbox
     yesnobox 'IMEI MISMATCH!! CHECK LABEL AND RESCAN?' 'IMEI MISMATCH'
     if result = 1 then
-        inputbox 'NEW SERIAL #:' 'SERIAL NUMBER'
+        inputbox 'RE-SCAN IMEI #:' 'IMEI NUMBER RESCAN'
 		imeiNum = inputstr
+		statusbox imeiNum 'RESCAN IMEI'
+		mpause 400
 		goto recheck_imei
     else
     	send 24
+    	wait '#'
     	end
     endif
 else
 	send 24
+	wait '#'
 endif
+closesbox
 
 if isType2 = 0 goto START_EEPROM
 	 
 :check_lora
 flushrecv
-wait '#'
 sendln 'mts-io-sysfs show ap*/*'
 waitln 'No such file' '00:' '80:'
 if result = 1 then
     messagebox 'PLEASE REBOOT DEVICE WITH LORA INSTALLED' 'LORA FAILURE'
     end
 endif
-strcompare inputstr nodeLoraNum
+promNodeLora = inputstr
+strcompare promNodeLora nodeLoraNum
 if result <> 0 then
+    closesbox
     yesnobox 'NODE LORA MISMATCH!! CHECK LABEL AND RESCAN?' 'LORA MISMATCH'
     if result = 1 then
-        inputbox 'NEW NODE LORA #:' 'NODE LORA NUMBER'
+        inputbox 'RE-SCAN NODE LORA #:' 'NODE LORA NUMBER RESCAN'
 		nodeLoraNum = inputstr
+		statusbox nodeLoraNum 'RESCAN NODE LORA'
+		mpause 400
 		goto check_lora
 	else
 		end
 	endif
 endif
+closesbox
 
 if isType3 = 0 goto START_EEPROM
 	 
 :check_wifi_bt
 flushrecv
-wait '#'
 sendln '/media/sda1/wifiscan2-check.sh'
 waitln 'No such file or directory' '#'
 if result=1 then
@@ -124,28 +143,33 @@ endif
 :recheck_wifi
 wait '#'
 sendln 'ifconfig wifi0'
-timeout = 8
+timeout = 30
 waitregex 'HWaddr'
 strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
-strcompare matchstr nodeWifiNum
+promNodeWiFi = matchstr
+strcompare promNodeWiFi nodeWifiNum
 if result <> 0 then
+    closesbox
     yesnobox 'NODE WIFI MISMATCH!! DO YOU WANT TO RESCAN?' 'WIFI MISMATCH'
     if result = 1 then
-        inputbox 'NEW NODE WIFI #:' 'NODE WIFI NUMBER'
+        inputbox 'RE-SCAN NODE WIFI #:' 'NODE WIFI NUMBER RESCAN'
 		nodeWifiNum = inputstr
+		statusbox nodeWifiNum 'RESCAN NODE WIFI'
+		mpause 400
 		goto recheck_wifi
 	else
 		end
 	endif
 endif
+closesbox
 :get_bt
 pause 1
 flushrecv
 sendln 'hcitool dev'
-waitln 'hci0' 
-strconcat nodeBTNum inputstr
-strremove nodeBTNum 1 6
-pause 1
+waitregex 'hci0'
+strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
+nodeBTNum = matchstr
+
 send 13
 wait '#'
 mpause 1000
@@ -177,28 +201,25 @@ if result = 1 then
 endif
 
 sprintf2 eepromstr './%s.sh %s %s %s %s %s %s' skuNum serialNum nodeIDNum nodeWifiNum nodeBTNum imeiNum uuidNum
-
-wait '#'
 sendln eepromstr
-wait '#' 'invalid mac-addr' 'ERROR'
+
+wait '#' 'invalid mac-addr' 'ERROR' 'No such file or directory' 'Usage' 'Example'
 if result = 2 then
     messagebox 'NODE ID/MAC ADDRESS IS INVALID. PLEASE CHECK YOUR SCAN!' 'NODE ID/MAC ADDRESS INVALID'
 	end
 elseif result = 3 then
 	messagebox 'SOMETHING WENT WRONG. CHECK YOUR SCANS!' 'ERROR'
 	end
+elseif result = 4 then
+	sprintf2 msg 'FILE <%s.sh> NOT FOUND IN THUMB DRIVE. PLEASE CHECK!' skuNum
+	messagebox msg 'FILE ERROR'
+	end
+elseif result > 4 then
+	messagebox 'SYNTAX ERROR IN *.SH FILE' 'FILE ERROR'
+	end
 endif
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_EEPROM_WRITE
-promProductID = 'N/A'
-promSerialNum = 'N/A'
-promNodeID = 'N/A'
-promImeiNum = 'N/A'
-promNodeBT = 'N/A'
-promNodeWiFi = 'N/A'
-promUuid = 'N/A'
-promNodeLora = 'N/A'
-
 timeout = 3
 flushrecv
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
@@ -211,10 +232,22 @@ waitregex '^device-id.*'
 strmatch inputstr '[\d+]{8}'
 promSerialNum = matchstr
 wait '#'
+strcompare promSerialNum serialNum
+if result <> 0 then
+    messagebox 'SERIAL NUMBER MISSMATCH. CHECK JUMPPER AND RESCAN!' 'EEPROM FAILURE'
+    end
+endif
+
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
-waitregex '^mac-addr.*'
+waitregex 'mac-addr:.*'
 strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
 promNodeID = matchstr
+strcompare promNodeID nodeIDNum
+if result <> 0 then
+    messagebox 'NODE ID MISSMATCH. CHECK JUMPPER AND RESCAN!' 'EEPROM FAILURE'
+    end
+endif
+
 if isType1 != 0 && isType5 != 0 then
     wait '#'
 	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
@@ -235,19 +268,27 @@ if isType4 = 0 || isType5 = 0 then
 	promNodeWiFi = matchstr
 endif
 wait '#'
+flushrecv
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^uuid.*'
 strmatch inputstr '[0-9A-F+]{32}'
 promUuid = matchstr
-if isType1 != 0 && isType2 != 0 then
+toupper uuidNum uuidNum
+strcompare promUuid uuidNum
+if result <> 0 then
+    messagebox 'UUID MISSMATCH. CHECK JUMPPER AND RESCAN!' 'EEPROM FAILURE'
+    end
+endif
+
+;if isType1 != 0 && isType2 != 0 then
     ;wait '#'
 	;sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 	;waitregex '^lora-eui.*'
 	;strmatch inputstr '([0-9A-F]{2}[:-]){7}([0-9A-F]{2})'
-    promNodeLora = nodeLoraNum
-endif
+    ;promNodeLora = nodeLoraNum
+;endif
 
-sprintf2 msg '----INFORMATION----\nProduct ID: %s \nSerial Number: %s \nNode ID: %s \nIMEI: %s \nNode Bluetooth: %s \nNode WiFi: %s \nUUID: %s \nNode Lora: %s\n----------0o0----------\n\nMTCDT EEPROM CONFIGURATION COMPLETE\nPLEASE CONFIRM EEPROM CONFIGURATION ABOVE!' promProductID promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
+sprintf2 msg '----INFORMATION----\nProduct ID: %s \nSerial Number: %s \nNode ID: %s \nIMEI: %s \nNode Bluetooth: %s \nNode WiFi: %s \nUUID: %s \nNode Lora: %s\n----------0o0----------\n\nMTCDT EEPROM CONFIGURATION COMPLETE\nPLEASE CONFIRM EEPROM CONFIGURATION ABOVE!\nREMEMBER TO REPROGRAM THIS DEVICE IF NEEDED!' promProductID promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
 strspecial msg
 
 :RESULT_LOGGING
@@ -255,37 +296,18 @@ getdate date "%Y/%m/%d"
 getdate time "%H:%M:%S"
 fileopen fhandle 'C:\DEVICE_EEPROM_RECORDS\all-scan-records.txt' 1
 
+sprintf2 record '%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s' date time skuNum promProductID promSerialNum promNodeID promImeiNum promNodeLora promUuid promNodeWiFi promNodeBT
+
 filewrite fhandle #13#10
-filewrite fhandle date
-filewrite fhandle ",,"
-filewrite fhandle time
-filewrite fhandle ",,"
-filewrite fhandle skuNum
-filewrite fhandle ",,"
-filewrite fhandle promProductID
-filewrite fhandle ",,"
-filewrite fhandle promSerialNum
-filewrite fhandle ",,"
-filewrite fhandle promNodeID
-filewrite fhandle ",,"
-filewrite fhandle promImeiNum
-filewrite fhandle ",,"
-filewrite fhandle promNodeLora
-filewrite fhandle ",,"
-filewrite fhandle promUuid
-filewrite fhandle ",,"
-filewrite fhandle promNodeWiFi
-filewrite fhandle ",,"
-filewrite fhandle promNodeBT
+filewrite fhandle record
 
 fileclose fhandle 
 
 :DONE
-statusbox 'REMEMBER TO REPROGRAM THIS DEVICE IF NEEDED!' 'REMINDER'
 mpause 1000
 ;sendln 'halt'
 ;wait "Power down"
 closesbox
-messagebox msg 'SCAN COMPLETE'
+messagebox msg 'SCAN COMPLETED'
 disconnect
 end

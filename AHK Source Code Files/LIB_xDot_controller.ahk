@@ -80,7 +80,7 @@ Global ecoLabOn := False ;For auto open ECO LAB mode
 Global allFregs := ["AS923", "AS923-JAPAN", "AU915", "EU868", "IN865", "KR920", "RU864", "US915"]
 Global allEcoFregs := ["US915", "EU868"]
 Global allReProgFw := ["v3.0.2-debug", "v3.2.1-debug"]
-Global allWriteFw := ["v3.2.1", "v3.1.0"]
+Global allWriteFw := ["v3.2.1", "v3.1.0", "-Skip-"]
 Global allEcoWriteFw := ["v3.0.2", "v3.2.1"]
 
 Global xImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png"
