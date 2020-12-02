@@ -5,10 +5,10 @@
 SetTitleMatchMode, RegEx
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\AMAuto-Scanner\TTL-Files
-    FileCreateDir C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func
+    FileCreateDir C:\V-Projects\AMAuto-Scanner\TTL-Files
 IfNotExist C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func
     FileCreateDir C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func
-IfNotExist C:\V-Projects\AMAuto-Scanner\TTL-Files
+IfNotExist C:\V-Projects\AMAuto-Scanner\caches
     FileCreateDir C:\V-Projects\AMAuto-Scanner\caches
     
 IfNotExist C:\DEVICE_EEPROM_RECORDS
@@ -18,9 +18,9 @@ FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-S
 
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
-Global 240_SKUNums := ["", ""]
-Global 246_SKUNums := ["94557252LF", "94557574LF", "94557576LF"]
-Global 247_SKUNums := ["94557291LF", "94557550LF"]
+Global 240_SKUNums := ["94557673LF"]
+Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557576LF"]
+Global 247_SKUNums := ["94557291LF", "94557550LF", "94557593LF"]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
 
@@ -208,7 +208,7 @@ showScanHist() {
     Gui -MinimizeBox -MaximizeBox
     Gui, 2: Add, Text, x8 y11, Search:
     Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
-    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|SKU Number|Product ID|Serial Number|Node ID|IMEI|Node Lora ID|UUID|Wifi Addr|Bluetooth Addr
+    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|SKU Number|Product ID|Hardware Version|Serial Number|Node ID|IMEI|Node Lora ID|UUID|Wifi Addr|Bluetooth Addr
     Gui, 2: Add, StatusBar
     SB_SetParts(200, 200)
     Loop Read, C:\DEVICE_EEPROM_RECORDS\all-scan-records.txt
@@ -221,8 +221,8 @@ showScanHist() {
         if (foundToday > 0)
             totalToday++
         StringSplit, item, itemLine, `,
-        LV_Add("",item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11)
-        itemList.Push({1:item1, 2:item2, 3:item3, 4:item4, 5:item5, 6:item6, 7:item7, 8:item8, 9:item9, 10:item10, 11:item11})
+        LV_Add("",item1,item2,item3,item4,item5,item6,item7,item8,item9,item10,item11,item12)
+        itemList.Push({1:item1, 2:item2, 3:item3, 4:item4, 5:item5, 6:item6, 7:item7, 8:item8, 9:item9, 10:item10, 11:item11, 12:item12})
     }
     totalLine := LV_GetCount()
     LV_ModifyCol()
@@ -344,14 +344,18 @@ changeValueDropdown() {
 ;LABELTYPE3 -- Serial, NodeID, UUID, IMEI, LORA
 ;LABELTYPE4 -- Serial, NodeID, UUID, IMEI, LORA, WIFI
 ;LABELTYPE5 -- Serial, NodeID, UUID, LORA, WIFI
+;LABELTYPE6 -- Serial, NodeID, UUID, IMEI, WIFI
+;LABELTYPE7 -- Serial, NodeID, UUID, LORA
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
     LABELTYPE2 := ["94557574LF"]
-    LABELTYPE3 := ["94557576LF"]
+    LABELTYPE3 := ["94557576LF", "94557673LF"]
     LABELTYPE4 := ["94557291LF"]
     LABELTYPE5 := ["94557550LF"]
+    LABELTYPE6 := ["94557593LF"]
+    LABELTYPE7 := ["94557543LF"]
     
-    allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4,LABELTYPE5"
+    allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4,LABELTYPE5,LABELTYPE6,LABELTYPE7"
     
     GuiControlGet, skuNum1 ;Get value from DropDownList
     GuiControlGet, skuNum2 ;Get value from DropDownList
@@ -403,6 +407,14 @@ changeDisplayWithSKUNum() {
     } else if (labelType = "LABELTYPE5") {
         GuiControl Disable, imeiLabel
         GuiControl Disable, imeiN
+    } else if (labelType = "LABELTYPE6") {
+        GuiControl Disable, loraLabel
+        GuiControl Disable, loraN
+    } else if (labelType = "LABELTYPE7") {
+        GuiControl Disable, imeiLabel
+        GuiControl Disable, imeiN
+        GuiControl Disable, wifiLabel
+        GuiControl Disable, wifiN
     } else {
         Loop Parse, allValueScan, `,
             GuiControl Disable, %A_LoopField%

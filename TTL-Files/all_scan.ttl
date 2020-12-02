@@ -30,6 +30,7 @@ promNodeBT = 'N/A'
 promNodeWiFi = 'N/A'
 promUuid = 'N/A'
 promNodeLora = 'N/A'
+promHWVers = 'N/A'
 
 :GET_DATA
 timeout = 2
@@ -47,6 +48,8 @@ isType2 = -1
 isType3 = -1
 isType4 = -1
 isType5 = -1
+isType6 = -1
+isType7 = -1
 
 inputbox '' 'ALL DATAS'
 strsplit inputstr ','
@@ -70,9 +73,13 @@ strcompare labelType 'LABELTYPE4'
 isType4 = result
 strcompare labelType 'LABELTYPE5'
 isType5 = result
+strcompare labelType 'LABELTYPE6'
+isType6 = result
+strcompare labelType 'LABELTYPE7'
+isType7 = result
 
 if isType1 = 0 goto START_EEPROM
-if isType5 = 0 goto check_lora
+if isType5 = 0 || isType7 = 0 goto check_lora
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_DATA
 :check_imei
@@ -95,6 +102,7 @@ if result <> 0 then
     else
     	send 24
     	wait '#'
+    	messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
     	end
     endif
 else
@@ -104,7 +112,8 @@ endif
 closesbox
 
 if isType2 = 0 goto START_EEPROM
-	 
+if isType6 = 0 goto check_wifi_bt
+
 :check_lora
 flushrecv
 sendln 'mts-io-sysfs show ap*/*'
@@ -125,12 +134,13 @@ if result <> 0 then
 		mpause 400
 		goto check_lora
 	else
+		messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
 		end
 	endif
 endif
 closesbox
 
-if isType3 = 0 goto START_EEPROM
+if isType3 = 0 || isType7 = 0 goto START_EEPROM
 	 
 :check_wifi_bt
 flushrecv
@@ -158,6 +168,7 @@ if result <> 0 then
 		mpause 400
 		goto recheck_wifi
 	else
+		messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
 		end
 	endif
 endif
@@ -224,8 +235,14 @@ timeout = 3
 flushrecv
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^product.*'
-strmatch inputstr 'MTCDT.*.[AL067]'
-promProductID = matchstr
+strmatch inputstr '(product-id)+.*(MTCDT.*.[AL067])'
+promProductID = groupmatchstr2
+
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+waitregex '^hw-version.*'
+strmatch inputstr '(^hw-version)+.*("(.*?)")'
+promHWVers = groupmatchstr3
+
 wait '#'
 sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 waitregex '^device-id.*'
@@ -248,24 +265,34 @@ if result <> 0 then
     end
 endif
 
-if isType1 != 0 && isType5 != 0 then
+if isType1 != 0 && isType5 != 0 && isType7 != 0 then
     wait '#'
 	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 	waitregex '^imei.*'
 	strmatch inputstr '[\d+]{15}'
     promImeiNum = matchstr
 endif
-if isType4 = 0 || isType5 = 0 then
+if isType4 = 0 || isType5 = 0 || isType6 = 0 then
     wait '#'
 	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 	waitregex '^mac-bluetooth.*'
 	strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
 	promNodeBT = matchstr
+	strcompare promNodeBT nodeBTNum
+	if result <> 0 then
+       messagebox 'NODE BLUETOOTH MISSMATCH!. REBOOT DEVICE' 'EEPROM FAILURE'
+       end
+	endif
 	wait '#'
 	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 	waitregex '^mac-wifi.*'
 	strmatch inputstr '([0-9A-F]{2}[:-]){5}([0-9A-F]{2})'
 	promNodeWiFi = matchstr
+	strcompare promNodeWiFi nodeWifiNum
+	if result <> 0 then
+       messagebox 'NODE WIFI MISSMATCH! REBOOT DEVICE' 'EEPROM FAILURE'
+       end
+	endif
 endif
 wait '#'
 flushrecv
@@ -288,7 +315,7 @@ endif
     ;promNodeLora = nodeLoraNum
 ;endif
 
-sprintf2 msg '----INFORMATION----\nProduct ID: %s \nSerial Number: %s \nNode ID: %s \nIMEI: %s \nNode Bluetooth: %s \nNode WiFi: %s \nUUID: %s \nNode Lora: %s\n----------0o0----------\n\nMTCDT EEPROM CONFIGURATION COMPLETE\nPLEASE CONFIRM EEPROM CONFIGURATION ABOVE!\nREMEMBER TO REPROGRAM THIS DEVICE IF NEEDED!' promProductID promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
+sprintf2 msg '----INFORMATION----\nProduct ID: %s \nHardware Version: %s \nSerial Number: %s \nNode ID: %s \nIMEI: %s \nNode Bluetooth: %s \nNode WiFi: %s \nUUID: %s \nNode Lora: %s\n----------0o0----------\n\nMTCDT EEPROM CONFIGURATION COMPLETE\nPLEASE CONFIRM EEPROM CONFIGURATION ABOVE!\nREMEMBER TO REPROGRAM THIS DEVICE IF NEEDED!' promProductID promHWVers promSerialNum promNodeID promImeiNum promNodeBT promNodeWiFi promUuid promNodeLora
 strspecial msg
 
 :RESULT_LOGGING
@@ -296,7 +323,7 @@ getdate date "%Y/%m/%d"
 getdate time "%H:%M:%S"
 fileopen fhandle 'C:\DEVICE_EEPROM_RECORDS\all-scan-records.txt' 1
 
-sprintf2 record '%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s' date time skuNum promProductID promSerialNum promNodeID promImeiNum promNodeLora promUuid promNodeWiFi promNodeBT
+sprintf2 record '%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s,,%s' date time skuNum promProductID promHWVers promSerialNum promNodeID promImeiNum promNodeLora promUuid promNodeWiFi promNodeBT
 
 filewrite fhandle #13#10
 filewrite fhandle record
