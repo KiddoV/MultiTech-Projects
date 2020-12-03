@@ -1,0 +1,1 @@
+$ cat /etc/issue.net		--Print out mLinux firmware version and a version screen

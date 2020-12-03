@@ -18,7 +18,7 @@ FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-S
 
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
-Global 240_SKUNums := ["94557673LF"]
+Global 240_SKUNums := ["94557673LF", "94557700LF"]
 Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557576LF"]
 Global 247_SKUNums := ["94557291LF", "94557550LF", "94557593LF"]
     
@@ -171,6 +171,9 @@ mainStart() {
     If WinExist("SCAN COMPLETED") {
         FormatTime, localTime, %A_Now%, hh:mm:ss tt
         SB_SetText("You just finished a scan at " localTime)
+        WinWaitClose, SCAN COMPLETED
+            clearCtrlVar()
+        Return
     } Else If WinExist("MISMATCH|RESCAN") {
         SB_SetText("Scan value missmatched!")
         WinWait RESCAN IMEI|RESCAN NODE LORA|RESCAN NODE WIFI
@@ -348,7 +351,7 @@ changeValueDropdown() {
 ;LABELTYPE7 -- Serial, NodeID, UUID, LORA
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
-    LABELTYPE2 := ["94557574LF"]
+    LABELTYPE2 := ["94557574LF", "94557700LF"]
     LABELTYPE3 := ["94557576LF", "94557673LF"]
     LABELTYPE4 := ["94557291LF"]
     LABELTYPE5 := ["94557550LF"]
