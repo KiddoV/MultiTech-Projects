@@ -1,0 +1,158 @@
+/*
+  Author: Viet Ho
+*/
+show 0
+;=====================================;
+:INIT
+try = 1
+mtcdtipType = param2
+itemNumber = param3
+isRunConfig = param4
+radioType = param5
+
+:CHECK_MTCDTIP_TYPE
+is266L = -1
+is267L = -1
+strmatch mtcdtipType '266L'
+is266L = result
+if is266L=1 goto CHECK_RADIO_TYPE
+strmatch mtcdtipType '267L'
+is267L = result
+if is267L=1 goto CHECK_RADIO_TYPE
+
+strlen radioType
+if result < 1 goto CONNECTING
+:CHECK_RADIO_TYPE
+
+
+;=====================================;
+:CONNECTING
+flushrecv
+sprintf2 msg 'CONNECTING TO TERATERM...(%d)' try
+statusbox msg 'TERATERM CONNECTION'
+timeout = 70 ; connection timeout in seconds
+mpause 1000
+connect "192.168.2.1 /ssh /2 /auth=password /user=mtadm /passwd=root /nosecuritywarning"
+if result < 2 then
+    try=try +1
+    if try < 10 goto CONNECTING
+    messagebox 'FAILED TO CONNECT TO TERATERM' 'CONNECTION ERROR'
+    end
+endif
+try = 1
+testlink
+if result > 2 then
+    messagebox 'LINK TO TERATERM HAS NOT BEEN MADE' 'CONNECTION ERROR'
+	end
+endif
+closesbox
+mpause 1500
+
+:CHECK_FIRMWARE_VERS
+call CONDUIT_LOGIN
+sendln 'cat /etc/issue.net'
+wait 'mLinux 5.1.8'
+if result = 0 then
+    messagebox 'WRONG FIRMWARE VERSION. EXPECTED: mLinux 5.1.8' 'FIRMWARE FAILURE'
+    end
+endif
+
+:CONFIG_STEP
+statusbox 'RUNNING CONFIGURATION STEP...' 'CONFIGURATION CONDUIT'
+config_vendor = 'Multi-Tech Systems'
+sprintf2 config_productId 'MTCDTIP-%s' itemNumber
+;config_productId = 'MTCDTIP-XXXX-XXXX'
+config_deviceId = '12345678'
+config_hwVers = 'MTCDTIP-0.0'
+config_macAddr = 'AA:08:00:AA:F1:F1'
+config_imei = '358942053416591'
+config_uuid = '6c7a6a18ccf0a5cbffbd1cc495bc0c43'
+send 13
+wait '#'
+sprintf2 cmd 'mts-id-eeprom --out-file /sys/bus/i2c/devices/0-0056/eeprom --out-format bin --vendor-id "%s" --product-id "%s" --device-id "%s" --hw-version "%s" --mac-addr "%s" --imei "%s" --uuid "%s" ' config_vendor config_productId config_deviceId config_hwVers config_macAddr config_imei config_uuid
+if is266L=1 strconcat cmd ' --capa-gps'
+if is267L=1 strconcat cmd ' --capa-gps --capa-wifi'
+sendln cmd
+wait '#'
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+flushrecv
+timeout = 2
+waitregex '^product-id:'
+strmatch inputstr '(^product-id:)+.*("(.*?)")'
+promProductID = groupmatchstr3
+strmatch config_productId promProductID
+if result = 0 then
+    closesbox
+    messagebox 'FAILED TO RUNNING CONFIGURATION. CHECK IF JUMPPER IS INSTALLED' 'CONFIGURATION FAILURE'
+	closett
+	end
+endif
+statusbox 'SUCCESSFULLY CONFIGURATION MTCDTIP!' 'CONFIGURATION FINISHED'
+mpause 1000
+
+;;;FUNCTIONAL_TEST
+:LED_TEST
+timeout = 3
+statusbox 'CHECKING LED. PLEASE DO A VISUAL CHECK ON LED' 'CHECK LED'
+bringupbox
+for i 1 2
+	mpause 300
+	sendln 'mts-io-sysfs store led-a 1'
+	wait "#"
+	sendln 'mts-io-sysfs store led-b 1'
+	wait "#"
+	sendln 'mts-io-sysfs store led-c 1'
+	wait "#"
+	sendln 'mts-io-sysfs store led-d 1'
+	wait "#"
+	sendln 'mts-io-sysfs store led-a 0'
+	wait "#"
+	sendln 'mts-io-sysfs store led-b 0'
+	wait "#"
+	sendln 'mts-io-sysfs store led-c 0'
+	wait "#"
+	sendln 'mts-io-sysfs store led-d 0'
+	wait "#"
+next
+:turn_all_leds_on
+send 13
+wait '#'
+sendln 'mts-io-sysfs store led-a 1'
+wait "#"
+sendln 'mts-io-sysfs store led-b 1'
+wait "#"
+sendln 'mts-io-sysfs store led-c 1'
+wait "#"
+sendln 'mts-io-sysfs store led-d 1'
+
+:TEMPERATURE_TEST
+timeout = 5
+flushrecv
+statusbox 'CHECKING TEMPERATURE...' 'CHECK TEMP'
+sendln 'cat /sys/class/hwmon/hwmon0/temp1_input'
+waitln '5' '4' '3' '2'
+
+
+
+
+closesbox
+
+end
+;=====================================;
+;;;Additional Sub-Labels
+:CONDUIT_LOGIN
+send 13
+wait '#' 'mtcdt login:' 'Password:' '$'
+while result != 1
+	if result = 2 then
+	    sendln 'mtadm'
+		wait '#' 'login' 'word' '$'
+	elseif result = 3 then
+		sendln 'root'
+		wait '#' 'login' 'word' '$'
+	elseif result = 4 then
+		sendln 'sudo -s'
+		wait '#' 'login' 'word' '$'
+	endif
+endwhile
+return	;;;;;;
