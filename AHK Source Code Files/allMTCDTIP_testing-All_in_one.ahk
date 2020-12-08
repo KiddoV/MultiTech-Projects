@@ -11,9 +11,16 @@ SetTitleMatchMode, RegEx
 ;;;;;;;;;;INSTALL REQUIRE FILES
 IfNotExist C:\V-Projects\AMIPAuto-Tester\TTL-Files
     FileCreateDir C:\V-Projects\AMIPAuto-Tester\TTL-Files
+IfNotExist C:\V-Projects\AMIPAuto-Tester\imgs-for-gui
+    FileCreateDir C:\V-Projects\AMIPAuto-Tester\imgs-for-gui
+IfNotExist C:\DEVICE_TEST_RECORDS
+    FileCreateDir C:\DEVICE_TEST_RECORDS
 
 FileInstall C:\MultiTech-Projects\TTL-Files\all_mtcdtip_test.TTL, C:\V-Projects\AMIPAuto-Tester\TTL-Files\all_mtcdtip_test.ttl, 1
 
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\check_mark.png, C:\V-Projects\AMIPAuto-Tester\imgs-for-gui\check_mark.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\AMIPAuto-Tester\imgs-for-gui\x_mark.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\AMIPAuto-Tester\imgs-for-gui\play_orange.png, 1
 ;===============================================;
 ;;;;;;;;;;;;;VARIABLEs DEFINITION
 Global 266_ItemNums := ["63120927L", "63120928L"]
@@ -22,6 +29,10 @@ Global 267_ItemNums := ["63120925L", "63120926L"]
 Global SMC_Items := ["L4E1"]
 
 Global MainTestFilePath := "C:\V-Projects\AMIPAuto-Tester\TTL-Files\all_mtcdtip_test.ttl"
+
+Global checkImg := "C:\V-Projects\AMIPAuto-Tester\imgs-for-gui\check_mark.png"
+Global xImg := "C:\V-Projects\AMIPAuto-Tester\imgs-for-gui\x_mark.png"
+Global playImg := "C:\V-Projects\AMIPAuto-Tester\imgs-for-gui\play_orange.png" 
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;MAIN GUI
 ;;;Menu bar
@@ -54,13 +65,28 @@ For each, item in SMC_Items
 Gui, Add, DropDownList, xs+14 ys+15 w176 +Disabled vsmcDrop, %smcItem%
 
 Gui Add, Text, x40 y180 w150 h2 +0x10
-Gui, Add, GroupBox, x10 y185 Section w202 h150, Processes
-Gui Font,, Consolas
-Gui, Add, Text, xs+45 ys+15 vloadConfig, Load Configuration
-
+Gui, Add, GroupBox, x10 y185 Section w202 h185, Processes
+Gui Font, s9 Bold, Consolas
+Gui, Add, Text, xs+40 ys+20 v1LoadConfig, Load Configuration
+Gui, Add, Text, xs+40 ys+40 v2CheckLeds, Check LEDs
+Gui, Add, Text, xs+40 ys+60 v3CheckTemp, Check Temperature
+Gui, Add, Text, xs+40 ys+80 v4CheckSdCard, Check SD Card
+Gui, Add, Text, xs+40 ys+100 v5CheckLorMta, Check LORA/MTAC
+Gui, Add, Text, xs+40 ys+120 v6CheckSmc +Disabled, Check SMC/SIM Card
+Gui, Add, Text, xs+40 ys+140 v7CheckGps, Check GPS
+Gui, Add, Text, xs+40 ys+160 v8CheckWfBt +Disabled, Check WIFI/BLUETOOTH
 Gui, Font
 
-Gui Add, Button, x70 y340 w80 h23 gRunTest, S&TART
+Gui Add, Picture, xs+10 ys+17 w20 h20 +BackgroundTrans vprocess1,
+Gui Add, Picture, xs+10 ys+37 w20 h20 +BackgroundTrans vprocess2,
+Gui Add, Picture, xs+10 ys+57 w20 h20 +BackgroundTrans vprocess3,
+Gui Add, Picture, xs+10 ys+77 w20 h20 +BackgroundTrans vprocess4,
+Gui Add, Picture, xs+10 ys+97 w20 h20 +BackgroundTrans vprocess5,
+Gui Add, Picture, xs+10 ys+117 w20 h20 +BackgroundTrans vprocess6,
+Gui Add, Picture, xs+10 ys+137 w20 h20 +BackgroundTrans vprocess7,
+Gui Add, Picture, xs+10 ys+157 w20 h20 +BackgroundTrans vprocess8,
+
+Gui Add, Button, x70 y375 w80 h23 gRunTest, S&TART
 
 ;;;;;;;
 posX := A_ScreenWidth - 400
@@ -115,30 +141,219 @@ RunTest() {
     }
     
     ;;Start running
-    runFuncTest(mType, itemNum, isRunConfig, radioType)
+    OnMessage(0x44, "PlayInCircleIcon")
+    If (isRunSMCTest)
+        MsgBox 0x81, Functional Test, Begin Auto-Full Test for %itemNum% with Radio: %radioType%?
+    Else
+        MsgBox 0x81, Functional Test, Begin Auto-Full Test for %itemNum%?
+    OnMessage(0x44, "")
+    IfMsgBox Cancel
+        return
+    IfMsgBox OK
+    {
+        If (runFuncTest(mType, itemNum, isRunConfig, radioType) = 0) {
+            return
+        }
+    }
+    
+    WinWait TEST FINISED
+    OnMessage(0x44, "CheckIcon") ;Add icon
+    MsgBox 0x80, DONE, FINISHED Auto-Testing for MTCDTIP - Item Number: %itemNum%!
+    OnMessage(0x44, "") ;Clear icon
 }
 
 runFuncTest(mtcdtipType, itemNumber, isRunConfig, radioType) {
+    WinKill, 192.168.2.1
+    ControlClick, Button1, Tera Term, , Left, 1
+    resetProcessStatus()
     Run, %ComSpec% /c cd C:\teraterm && TTPMACRO %MainTestFilePath% %mtcdtipType% %itemNumber% %isRunConfig% %radioType%, ,Hide
     
+    WinWaitClose, SSH
+    
+    ;;;Config Step
+    If (isRunConfig) {
+        WinWait, CONFIGURATION CONDUIT
+        changeProcessStatus("1LoadConfig", "PLAY")
+        WinWait, CONFIGURATION FAILURE|CONFIGURATION FINISHED
+        IfWinExist, CONFIGURATION FAILURE
+        {
+            changeProcessStatus("1LoadConfig", "FAIL")
+            return 0
+        }
+        IfWinExist, CONFIGURATION FINISHED
+            changeProcessStatus("1LoadConfig", "DONE")
+    }
+    
+    ;;;Functional Step
+    ;;Check LED
+    WinWait, CHECK LED
+    changeProcessStatus("2CheckLeds", "PLAY")
+    WinWait, LED PASSED
+    IfWinExist, LED PASSED
+        changeProcessStatus("2CheckLeds", "DONE")
+    
+    ;;Check Temp
+    WinWait, CHECK TEMP
+    changeProcessStatus("3CheckTemp", "PLAY")
+    WinWait, TEMPARETURE FAILURE|TEMPERATURE PASSED
+    IfWinExist, TEMPARETURE FAILURE
+    {
+        changeProcessStatus("3CheckTemp", "FAIL")
+        return 0
+    }
+    IfWinExist, TEMPERATURE PASSED
+        changeProcessStatus("3CheckTemp", "DONE")
+    
+    ;;Check Drive
+    WinWait, SD CARD CHECK
+    changeProcessStatus("4CheckSdCard", "PLAY")
+    WinWait, SD CARD FAILURE|SD CARD PASSED
+    IfWinExist, SD CARD FAILURE
+    {
+        changeProcessStatus("4CheckSdCard", "FAIL")
+        return 0
+    }
+    IfWinExist, SD CARD PASSED
+        changeProcessStatus("4CheckSdCard", "DONE")
+        
+    ;;Check Lora/Mtac
+    WinWait, LORA CHECK
+    changeProcessStatus("5CheckLorMta", "PLAY")
+    WinWait, LORA AP1 FAILURE|LORA AP2 FAILURE|LORA AP2 PASSED
+    IfWinExist, LORA AP1 FAILURE|LORA AP2 FAILURE
+    {
+        changeProcessStatus("5CheckLorMta", "FAIL")
+        return 0
+    }
+    IfWinExist, LORA AP2 PASSED
+        changeProcessStatus("5CheckLorMta", "DONE")
+    
+    ;;Check SMC/SIM Card
+    If (radioType != "") {
+        WinWait, SIM CHECK|SMC CHECK
+        changeProcessStatus("6CheckSmc", "PLAY")
+        WinWait, FAILURE|SMC PASSED
+        IfWinExist, FAILURE
+        {
+            changeProcessStatus("6CheckSmc", "FAIL")
+            return 0
+        }
+        IfWinExist, SMC PASSED
+        changeProcessStatus("6CheckSmc", "DONE")
+    }
+    
+    ;;Check GPS
+    If (mtcdtipType == "266L" || mtcdtipType == "267L") {
+        WinWait, GPS CHECK
+        changeProcessStatus("7CheckGps", "PLAY")
+        WinWait, GPS FAILURE|GPS PASSED
+        IfWinExist, GPS FAILURE
+        {
+            changeProcessStatus("7CheckGps", "FAIL")
+            return 0
+        }
+        IfWinExist, GPS PASSED
+            changeProcessStatus("7CheckGps", "DONE")
+    }
+    
+    ;;Check WIFI/BT
+    If (mtcdtipType == "267L") {
+        WinWait, CHECK
+        changeProcessStatus("8CheckWfBt", "PLAY")
+        WinWait, FAILURE|BT PASSED
+        IfWinExist, FAILURE
+        {
+            changeProcessStatus("8CheckWfBt", "FAIL")
+            return 0
+        }
+        IfWinExist, BT PASSED
+        changeProcessStatus("8CheckWfBt", "DONE")
+    }
 }
 
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;ADDITIONAL FUNTIONs
 ChangeTab() {
+    GuiControlGet, mType, , whichTab
+    resetProcessStatus()
     
+    If (mType = "266L") {
+        GuiControl, Enable, 7CheckGps
+        GuiControl, Disable, 8CheckWfBt
+    } Else If (mType = "267L") {
+        GuiControl, Enable, 7CheckGps
+        GuiControl, Enable, 8CheckWfBt
+    }
 }
 
 ConfigChecked() {
-    
+    GuiControlGet, isCheck, , configCheckBox
+    If (isCheck) {
+        GuiControl, Enable, 1LoadConfig    
+    } Else {
+        GuiControl, Disable, 1LoadConfig
+    }
 }
 
 SCMTestChecked() {
     GuiControlGet, isCheck, , smcCheckBox
-    If (isCheck)
+    If (isCheck) {
         GuiControl, Enable, smcDrop
-    Else
+        GuiControl, Enable, 6CheckSmc
+        
+    } Else {
         GuiControl, Disable, smcDrop
+        GuiControl, Disable, 6CheckSmc
+    }
+}
+
+changeProcessStatus(ctrlID = "", status := "") {
+    Gui, 1: Default
+    RegExMatch(ctrlID, "\d", num)    ;Get button number in variable
+    
+    if (status = "PLAY") {
+        GuiControl, , process%num%, %playImg%
+    } else if (status = "FAIL") {
+        GuiControl, , process%num%, %xImg%
+    } else if (status = "DONE") {
+        GuiControl, , process%num%, %checkImg%
+    } else {
+        GuiControl, , process%num%,
+    }
+}
+
+resetProcessStatus() {
+    Gui, 1: Default
+    index := 0
+    Loop, 9
+    {
+        GuiControl, , process%index%,
+        GuiControl, Move, process%index%, w18 h18
+        index++
+    }
+}
+
+;;;Icon for MsgBox
+/*Usage Sample
+OnMessage(0x44, "CheckIcon") ;Add icon
+MsgBox 0x80, DONE, FINISHED Auto-reprogram %fw%!
+OnMessage(0x44, "") ;Clear icon
+*/
+CheckIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("ieframe.dll", "w32 Icon57", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
+}
+PlayInCircleIcon() {
+    DetectHiddenWindows, On
+    Process, Exist
+    If (WinExist("ahk_class #32770 ahk_pid " . ErrorLevel)) {
+        hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
+        SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
+    }
 }
 
 ;===============================================;
