@@ -90,7 +90,7 @@ Gui Add, Button, x70 y375 w80 h23 gRunTest, S&TART
 
 ;;;;;;;
 posX := A_ScreenWidth - 400
-Gui, Show, x%posX% y100, All MTCDT Auto-Tester
+Gui, Show, x%posX% y100, All MTCDTIP Auto-Tester
 Return
 
 ;;;;;;;;;All menu handlers
@@ -359,5 +359,98 @@ PlayInCircleIcon() {
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;ADDITIONAL GUIs
 ShowTestHist() {
+    Global
+    FormatTime, localToday,, yyyy/MM/dd
+    itemList := {}
+    totalToday := 0
     
+    Gui, 2: Default
+    Gui -MinimizeBox -MaximizeBox
+    Gui, 2: Add, Text, x8 y11, Search:
+    Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
+    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|Item Number|Temp|IMEI|Radio Version|Module Version|Firmware Build|Wifi Address|Bluetooth Address
+    Gui, 2: Add, StatusBar
+    SB_SetParts(200, 200)
+    Loop Read, C:\DEVICE_TEST_RECORDS\all-mtcdtip-test-records.txt
+    {
+        If A_LoopReadLine =     ;Skip the blank lines
+            Continue
+        StringReplace, itemLine, A_LoopReadLine, `,`,, `,, All  ;Replace 2 commas to 1
+        StringReplace, itemLine, itemLine, %localToday%, Today, All ;Replace today format to "Today"
+        foundToday := InStr(itemLine, "Today")
+        if (foundToday > 0)
+            totalToday++
+        StringSplit, item, itemLine, `,
+        LV_Add("",item1,item2,item3,item4,item5,item6,item7,item8,item9,item10)
+        itemList.Push({1:item1, 2:item2, 3:item3, 4:item4, 5:item5, 6:item6, 7:item7, 8:item8, 9:item9, 10:item10})
+    }
+    totalLine := LV_GetCount()
+    LV_ModifyCol()
+    LV_ModifyCol(2, "SortDesc")
+    LV_ModifyCol(1, "SortDesc")
+    
+    SB_SetText("Total Today Passed-Tests: " totalToday, 1)
+    SB_SetText("Total Passed-Tests: " totalLine, 2)
+    Gui, 2: Show, , ALL MTCDTIP PASSED-TEST RECORDS (LOCAL COMPUTER)
+    Return
+    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Search:
+    GuiControlGet, searchTerm
+    GuiControl, -Redraw, listView
+    LV_Delete()
+    For each, item in itemList
+    {
+        If (searchTerm != "") {
+            If (Instr(item.1, searchTerm) > 0 || Instr(item.2, searchTerm) > 0 || Instr(item.3, searchTerm) > 0 || Instr(item.4, searchTerm) > 0 || Instr(item.5, searchTerm) > 0 || Instr(item.6, searchTerm) > 0 || Instr(item.7, searchTerm) > 0 || Instr(item.8, searchTerm) > 0 || Instr(item.9, searchTerm) > 0 || Instr(item.10, searchTerm) > 0 || Instr(item.11, searchTerm) > 0) {
+                LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+            }
+        } Else {
+            LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+        }
+    }
+    totalFound := LV_GetCount()
+    SB_SetText("Total Found: " totalFound " of " totalLine, 3)
+    GuiControl, +Redraw, listView
+    LV_ModifyCol()
+    LV_ModifyCol(2, "SortDesc")
+    LV_ModifyCol(1, "SortDesc")
+    Return ;Search label returned
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    MoreDetail:
+    rowNum := LV_GetNext("C")
+    
+    LV_GetText(c1, rowNum, 1)
+    LV_GetText(c2, rowNum, 2)
+    LV_GetText(c3, rowNum, 3)
+    LV_GetText(c4, rowNum, 4)
+    LV_GetText(c5, rowNum, 5)
+    LV_GetText(c6, rowNum, 6)
+    LV_GetText(c7, rowNum, 7)
+    LV_GetText(c8, rowNum, 8)
+    LV_GetText(c9, rowNum, 9)
+    LV_GetText(c10, rowNum, 10)
+    
+    If (rowNum != 0) {
+        MsgBox 4160, More Details, 
+        (LTrim
+            Test Date:`t`t%c1%
+            Test Time:`t`t%c2%
+            Item Number:`t%c3%
+            Tested Temperature:`t%c4% (mCelsius)
+            IMEI Number:`t%c5%
+            SMC Radio Vers:`t%c6%
+            Telit Module Vers:`t%c7%
+            Firmware Build:`t%c8%
+            Wifi Address:`t%c9%
+            Bluetooth Address:`t%c10%
+        )
+    }
+    Return ;MoreDetail label returned
+    
+    2GuiEscape:
+    2GuiClose:
+        Gui, 2: Cancel
+        Gui, 2: Destroy
+    Return
 }

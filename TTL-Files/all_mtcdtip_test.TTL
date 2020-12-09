@@ -10,6 +10,12 @@ itemNumber = param3
 str2int isRunConfig param4
 radioType = param5
 mtcdtipTemp = 0
+radioVersion = 'N/A'
+telModuleVer = 'N/A'
+fwBuild = 'N/A'
+wifiAddr = 'N/A'
+bluetoothAddr = 'N/A'
+isCSQCheck = -1
 
 :CHECK_MTCDTIP_TYPE
 is266L = -1
@@ -44,13 +50,15 @@ if isL4E1=1 then
 	telModuleVer = 'LE910C4-EU'
 	tempSett = '-273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 	rxdivVar = '1,1'
-	fwBuild = '#CFVR: 2'
+	fwBuild = '#CFVR: 1'
+	isCSQCheck = 0
 else
     radioVersion = 'N/A'
 	telModuleVer = 'N/A'
 	tempSett = 'N/A'
 	rxdivVar = 'N/A'
-	fwBuild = 'N/A'	
+	fwBuild = 'N/A'
+	isCSQCheck = 0
 endif
 
 ;=====================================;
@@ -89,6 +97,7 @@ if isRunConfig=1 call CONFIG_STEP
 
 ;;;FUNCTIONAL_TEST
 :LED_TEST
+flushrecv
 timeout = 3
 statusbox 'CHECKING LED. PLEASE DO A VISUAL CHECK ON LED' 'CHECK LED'
 bringupbox
@@ -162,6 +171,7 @@ mpause 1000
 timeout = 5
 :check_sd_card
 statusbox 'CHECKING SD CARD...' 'SD CARD CHECK'
+mpause 300
 send 13
 sendln 'fdisk -l'
 wait 'mmcblk0'
@@ -171,6 +181,49 @@ if result = 0 then
     closett
     end
 endif
+:read_write_sd_test
+flushrecv
+mpause 500
+sendln 'ls /media/card'
+wait 'bash' '#'
+if result = 1 then
+    sendln 'rm /media/card/bash'
+ 	wait "#"
+endif
+send 13
+sendln 'cp /bin/bash /media/card/'
+wait '#' 'not'
+if result=2 then
+    closesbox
+    messagebox 'COULD NOT COPY FILE TO SD CARD' 'SD CARD FAILURE'
+    closett
+    end    
+endif
+sendln 'ls /media/card'
+waitln 'bash'
+if result=0 then
+    closesbox
+    messagebox 'SD CARD READ-WRITE FAILED' 'SD CARD FAILURE'
+    closett
+    end
+endif
+mpause 500
+sendln "md5sum /bin/bash |awk '{print $1}'"
+strconcat cksum1 inputstr
+pause 1
+sendln "md5sum /media/card/bash |awk '{print $1}'"
+strconcat cksum2 inputstr
+pause 1
+strcompare cksum1 cksum2
+if result<>0 then
+    closesbox
+    messagebox 'SD READ-WRITE TEST FAILURE' 'SD CARD FAILURE'
+    closett
+    end
+endif
+mpause 1000
+sendln 'rm /media/card/bash'
+wait "#"
 statusbox 'SD CARD CHECK PASSED' 'SD CARD PASSED'
 mpause 1000
 
@@ -185,10 +238,11 @@ if result=1 then
 	mpause 400
 else
 	closesbox
-	messagebox 'MTCDT LORA PORT AP1 READ FAILURE!' 'LORA AP1 FAILURE'
+	messagebox 'MTAC LORA PORT AP1 READ FAILURE!' 'LORA AP1 FAILURE'
   	closett
   	end
 endif
+flushrecv
 mpause 1000
 sendln 'mts-io-sysfs show ap2/*'
 wait 'MTAC' 'No such file'
@@ -197,7 +251,7 @@ if result=1 then
 	mpause 400
 else
 	closesbox
-	messagebox 'MTCDT LORA PORT AP2 READ FAILURE!' 'LORA AP2 FAILURE'
+	messagebox 'MTAC LORA PORT AP2 READ FAILURE!' 'LORA AP2 FAILURE'
   	closett
   	end
 endif
@@ -339,19 +393,50 @@ if result=0 then
    	closett
    	end
 endif
+
+if isCSQCheck != 1 goto smc_test_pass
+
+try = 1
+timeout = 30
+:csq_check
+expectedRSSI = 7
+mpause 500
+sendln 'at+csq'
+wait '99'
+try = try + 1
+if try > 10 goto csq_fail
+if result = 1 goto csq_check
+mpause 500
+sendln 'at+csq'
+waitrecv '+CSQ: ' 10 1
+strconcat rssi3 inputstr
+strremove rssi3 1 6
+strremove rssi3 3 2
+str2int strvar rssi3
+strtrim rssi3 ','
+statusbox rssi3 'RSSI'
+if strvar >= expectedRSSI then
+    mpause 1000
+else
+	:csq_fail
+	closesbox
+    messagebox 'LOW RSSI. CSQ SIGNAL STRENGTH FAILURE!' 'CSQ CHECK FAILURE'
+    closett
+    end
+endif
+
+:smc_test_pass
 statusbox 'SMC TEST PASSED' 'SMC PASSED'
 mpause 500
 send 24 ;Exit 'at' command promt
 closesbox
-
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDTIP
 
 
 :GPS_TEST
-timeout = 5
+timeout = 20
 flushrecv
 statusbox 'CHECKING GPS...' 'GPS CHECK'
 mpause 500
@@ -359,18 +444,16 @@ sendln 'gpspipe -r'
 wait '$GPGGA' '$GPZDA' '$GPRMC' '$GPGSA' '$GNGLL' '$GPGSV' '$GNGSA'
 if result = 0 then
     try = try + 1
-    if try < 2 then
+    if try < 4 then
    	   send 3
 	   wait '#'
-	   sendln '/etc/init.d/gpsd stop'
-	   wait '#'
-	   sendln '/etc/init.d/gpsd start'
+	   sendln '/etc/init.d/gpsd restart'
 	   wait 'pps pps1: source "/dev/ttyXRUSB2" added' '#'
 	   send 3
 	   wait '#'
 	   goto GPS_TEST
 	endif
-	try = 0
+	try = 1
 	goto gps_faliure
 elseif result > 0 then
 	 timeout = 80
@@ -392,10 +475,10 @@ if is267L != 1 goto RESULT_LOGGING
 
 :WIFI_BT_TEST
 flushrecv
-statusbox 'CHECKING WIFI/BLUETOOTH...' 'WIFI/BLUETOOTH CHECK'
+statusbox 'CHECKING WIFI...' 'WIFI/BLUETOOTH CHECK'
 timeout = 15
 if isNONE = 1 then
-    imei = 'NO'
+    promImei = 'NO'
 endif
 wifiAddr = ''
 bluetoothAddr = ''
@@ -437,6 +520,16 @@ elseif result = 0 then
 endif
 mpause 1000
 closesbox
+
+:start_bt
+flushrecv
+statusbox 'CHECKING BLUETOOTH...' 'WIFI/BLUETOOTH CHECK'
+send 13
+wait '#'
+sendln '/etc/init.d/rs9113 restart >/dev/null 2>&1'
+wait '#'
+sendln 'hciconfig hci0 up'
+wait '#'
 :bt_addr_check
 flushrecv
 mpause 500
@@ -445,7 +538,6 @@ waitln '00:' '88:' '80:'
 strlen inputstr
 if result <>17 goto start_bt
 strconcat bluetoothAddr inputstr
-
 timeout=50
 :bt_scan
 mpause 500
@@ -464,7 +556,7 @@ send 13
 mpause 500
 fileopen fhandle 'C:\temp\wifimacinfo.txt' 1
 filewrite fhandle #13#10
-sprintf2 dataStr '%s,,%s,,%s' imei wifiAddr bluetoothAddr
+sprintf2 dataStr '%s,,%s,,%s' promImei wifiAddr bluetoothAddr
 filewrite fhandle dataStr
 fileclose fhandle
 pause 1
@@ -476,6 +568,14 @@ exec 'notepad c:\temp\wifimacinfo.txt'
 
 
 :RESULT_LOGGING
+getdate date "%Y/%m/%d"
+getdate time "%H:%M:%S"
+
+fileopen fhandle 'C:\DEVICE_TEST_RECORDS\all-mtcdtip-test-records.txt' 1
+filewrite fhandle #13#10
+sprintf2 logStr '%s,,%s,,%s,,%d,,%s,,%s,,%s,,%s,,%s,,%s' date time itemNumber mtcdtipTemp promImei radioVersion telModuleVer fwBuild wifiAddr bluetoothAddr
+filewrite fhandle logStr
+fileclose fhandle 
 
 :TEST_DONE
 closesbox
@@ -519,9 +619,9 @@ if is266L=1 strconcat cmd ' --capa-gps'
 if is267L=1 strconcat cmd ' --capa-gps --capa-wifi --capa-bluetooth'
 sendln cmd
 wait '#'
-sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 flushrecv
-timeout = 2
+sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+timeout = 5
 waitregex '^product-id:'
 strmatch inputstr '(^product-id:)+.*("(.*?)")'
 promProductID = groupmatchstr3
@@ -532,6 +632,10 @@ if result = 0 then
 	closett
 	end
 endif
+timeout = 20
+sendln '/etc/init.d/mts-io restart'
+mpause 5000
+wait '#'
 statusbox 'SUCCESSFULLY CONFIGURATION MTCDTIP!' 'CONFIGURATION FINISHED'
 mpause 1000
 return ;;;;;;
@@ -539,5 +643,11 @@ return ;;;;;;
 :WIFI_FAILURE
 closesbox
 messagebox 'UNABLE TO START WIFI SERVICE!' 'WIFI TEST FAILURE'
+closett
+end
+
+:BT_FAILURE
+closesbox
+messagebox 'UNABLE TO GET BLUETOOTH SERVICE!' "BLUETOOTH TEST FAILURE'
 closett
 end

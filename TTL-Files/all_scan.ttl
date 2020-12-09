@@ -144,7 +144,10 @@ if isType3 = 0 || isType7 = 0 goto START_EEPROM
 	 
 :check_wifi_bt
 flushrecv
-sendln '/media/sda1/wifiscan2-check.sh'
+sendln 'df'
+wait 'sda1' 'sdb1'
+if result=1 sendln '/media/sda1/wifiscan2-check.sh'
+if result=2 sendln '/media/sdb1/wifiscan2-check.sh'
 waitln 'No such file or directory' '#'
 if result=1 then
     messagebox 'Could not open WIFI module. Please check!' 'WIFI ERROR'
@@ -197,9 +200,14 @@ wait '#'
 sendln '/etc/init.d/hwclock.sh stop'
 :check_thumbdrive
 wait '#'
-sendln 'cd /media/sda1/MTCDT'
+sendln 'df'
+wait 'sda1' 'sdb1'
+if result=0 goto thumbdrive_not_detect
+if result=1 sendln 'cd /media/sda1/MTCDT'
+if result=2 sendln 'cd /media/sdb1/MTCDT'
 wait 'No such file or directory'
 if result = 1 then
+    :thumbdrive_not_detect
     yesnobox 'ARE YOU SURE THUMBDRIVE IS INSTALLED?' 'THUMBDRIVE FAILURE'
     if result = 1 then
         send 03
