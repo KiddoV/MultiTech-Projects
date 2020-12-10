@@ -1,0 +1,98 @@
+/*=========================================================*/
+/***********************Default CSS*************************/
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+
+html, #title-label {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+#title-label {
+	font-weight: bold;
+	font-size: 11.5pt;
+}
+
+header {
+	font-size: 11pt;
+}
+
+body {
+	font-size: 10pt;
+	overflow: hidden !important; /* Hide scrollbars */
+}
+
+button {
+	outline: none;
+	border: none;
+	box-shadow: none;
+}
+
+/* Prevent user from select text */
+.no-select-text {
+	-ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+.allow-select-text {
+	-ms-user-select: text; /* Internet Explorer/Edge */
+}
+
+.default-mouse {
+	cursor: default;
+}
+
+.bg-app-color {
+	background: #eeeeee;
+}
+
+.bg-app-theme-dark {
+	background: #37474F;
+}
+
+.bg-app-theme-light {
+	background: #546E7A;
+}
+
+.title-btn {
+	padding: 0.05em 1.30em;
+	cursor: pointer;
+}
+
+.title-btn-disable {
+	pointer-events: none;
+	cursor: default;
+	background: #dadada;
+}
+
+.title-btn:hover, .footer-btn:hover {
+	background: rgba(0, 0, 0, .3);
+}
+
+.title-btn-close:hover {
+	background: #dc3545;
+}
+
+.footer-btn {
+	padding: 0.05em 0.90em;
+	cursor: pointer;
+}
+
+.menu-btn {
+	cursor: pointer;
+	padding: 0px 10px 0px;
+	font-size: 12px;
+}
+
+/* Scrollbar display */
+body {
+	scrollbar-track-color:  #AAA;
+	scrollbar-3dlight-color:  #AAA;
+	scrollbar-darkshadow-color:  #AAA;
+	scrollbar-arrow-color:  #AAA;
+	/* -ms-overflow-style: none; */
+}
+
+/*============================================================*/
+/***********************Additional CSS*************************/
