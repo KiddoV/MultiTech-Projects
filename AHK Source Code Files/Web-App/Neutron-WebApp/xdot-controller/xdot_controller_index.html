@@ -17,9 +17,9 @@
   <script src="fontawesome.js"></script>
   <script src="fa-all.js"></script>
 
-	<!-- XTerm -->
-	<link href="xterm.css" rel="stylesheet">
-  <script src="xterm.js"></script>
+	<!-- JQuery Terminal -->
+	<script src="jquery.terminal.min.js"></script>
+	<link href="jquery.terminal.min.css" rel="stylesheet"/>
 
   <!-- Custom CSS and JS -->
   <link href="xdot_ctrler_main.css" rel="stylesheet">
@@ -43,15 +43,46 @@
 	</header><!----------------------------------------------->
 
   <!-- Main Content -->
-  <main>
-		<div id="terminal"></div>
-		<script>
-			var term = new Terminal();
-			term.open(document.getElementById('terminal'));
-			term.write('Hello from \x1B[1;3;31mxterm.js\x1B[0m $ ')
-		</script>
+  <main class="p-1">
+
+		<div>
+			<div class="card" style="width: 250px;">
+				<div class="" style="height: 19px;">
+					<p class="text-center font-weight-bold">XDot 01 | COM101 | MBED11</p>
+				</div>
+				<div class="terminal" style="border-radius: 0 0 1% 1%;"></div>
+			</div>
+		</div>
 
   </main>
 </body>
 
+<!-- Inner Javascript -->
+<script>
+//============================================================================//
+////  FUNCTIONs TO BE USED BY AHK ////
+
+//============================================================================//
+////  FUNCTIONs AS NORMAL FOR HTML USED ////
+jQuery(function($, undefined) {
+    $('.terminal').terminal(function(command, term) {
+        if (command !== '') {
+            try {
+                var result = window.eval(command);
+                if (result !== undefined) {
+                    term.echo(new String(result));
+                }
+            } catch(e) {
+                term.error(new String(e));
+            }
+        } else {
+           term.echo('');
+        }
+    }, {
+        greetings: 'XDot Controller',
+        height: 200,
+        prompt: '> '
+    });
+});
+</script>
 </html>

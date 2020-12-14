@@ -16,7 +16,7 @@ Global isMTCAP := False
 Global productName := ""
 
 ;Firmware list
-Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "mLinux 5.2.7", "AEP 1.4.3", "AEP 1.6.4", "AEP 1.7.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6", "AEP 5.2.1", "Actility 2.2.9"]
+Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "mLinux 5.2.7", "mLinux-Sag 5.1.8", "AEP 1.4.3", "AEP 1.6.4", "AEP 1.7.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6", "AEP 5.2.1", "Actility 2.2.9"]
 Global allMtcapFirmwares := ["mLinux 5.1.8", "AEP 5.1.6", "AEP 5.2.1"]
 
 ;;Paths and Links
@@ -27,6 +27,7 @@ Global mli419NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-fu
 Global mli518Path := "C:\vbtest\MTCDT\mLinux-5.1.8-2x7\mtcdt-rs9113-flash-full-5.1.8.tcl"
 Global mli518NoWiFPath := "C:\vbtest\MTCDT\mLinux-5.1.8-no-WiFiBT\mtcdt-flash-full-5.1.8.tcl"
 Global mli527Path := "C:\vbtest\MTCDT\mLinux-5.2.7\mtcdt-flash-full-5.2.7.tcl"
+Global mliSag518Path := "C:\vbtest\MTCDT\MLINUX_SagecomImage_518\mtcdt-flash-full-5.1.8.tcl"
 Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
 Global aep164Path := "C:\vbtest\MTCDT\AEP-1_6_4\mtcdt-flash-full-AEP.tcl"
 Global aep174Path := "C:\vbtest\MTCDT\AEP-1_7_4\mtcdt-flash-full-AEP_174.tcl"
@@ -263,6 +264,8 @@ install_firmware(fw, chk) {
                 ControlSetText, Edit1, %mli518NoWiFPath%, Select Script File.*
             If (fw = "mLinux 5.2.7")
                 ControlSetText, Edit1, %mli527Path%, Select Script File.*
+            If (fw = "mLinux-Sag 5.1.8")
+                ControlSetText, Edit1, %mliSag518Path%, Select Script File.*
             If (fw = "AEP 1.4.3")
                 ControlSetText, Edit1, %aep143Path%, Select Script File.*
             If (fw = "AEP 1.6.4")

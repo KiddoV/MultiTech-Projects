@@ -91,8 +91,13 @@ body {
 	scrollbar-3dlight-color:  #AAA;
 	scrollbar-darkshadow-color:  #AAA;
 	scrollbar-arrow-color:  #AAA;
-	/* -ms-overflow-style: none; */
+	-ms-overflow-style: none;
 }
 
 /*============================================================*/
 /***********************Additional CSS*************************/
+/* jQuery Terminal */
+.terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
+    font-size: 11px;
+    line-height: 10px;
+}

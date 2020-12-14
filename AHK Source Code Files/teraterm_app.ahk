@@ -114,6 +114,7 @@ connectRS232() {
     ;RS232_DELAY := 0
     
     RS232_SETTINGS = %RS232_PORT%:baud=%RS232_BAUD% parity=%RS232_PARITY% data=%RS232_DATA% stop=%RS232_STOP% dtr=Off
+    MsgBox % RS232_SETTINGS
     ;Init
     RS232_FILEHANDLE := RS232_Initialize(RS232_SETTINGS)
     If (RS232_FILEHANDLE = 0) {
