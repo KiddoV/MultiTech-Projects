@@ -4,25 +4,128 @@
 */
 ;=============================================================================;
 Class AHK_Terminal {
-    __New(ComPortNum, BaudRate, BitData, Parity, BitStop, TransDelay) {
-        This.ComPortNum := ComPortNum       ;COM10, COM101...
-        This.BaudRate := BaudRate          ;9600, 115200...
-        This.BitData := BitData           ;7, 8
-        This.Parity := Parity       ;None|Odd|Even|Mark|Space
-        This.BitStop := BitStop     ;1 bit|1.5 bit|2 bit
-        This.TransDelay := TransDelay        ;0
+    ;=====================================================================;
+    ;==============================PRIVATE================================;
+    ;=====================================================================;
+    ;=====================================================================;
+    ;;Construtor
+    __New() {
+        This.ComPortNum := ""       ;COM10, COM101...
+        This.BaudRate := 0          ;9600, 115200...
+        This.BitData := 0           ;7, 8
+        This.Parity := ""           ;None|Odd|Even|Mark|Space
+        This.BitStop := 0           ;1 bit|1.5 bit|2 bit
+        This.TransDelay := 0        ;0
         
+        This.RS232_SETTINGS := ""
+        This.RS232_FILEHANDLE := ""
+        
+        This.CurrentCmdKeyword := ""
+        This.OutputBuffer := ""
+        
+        This.ErrMsg := ""
+    }
+    
+    ;=====================================================================;
+    ;;
+
+    
+    ;=====================================================================;
+    ;==============================PUBLIC=================================;
+    ;=====================================================================;
+    ;=====================================================================;
+    ;;Method: Connect()
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Connect(ComPort, Baud := 115200, Data := 8, Prty := "N", BStop := 1, TransD := 0) {
+        This.ComPortNum := ComPort      ;COM10, COM101...
+        This.BaudRate := Baud           ;9600, 115200...
+        This.BitData := Data            ;7, 8
+        This.Parity := Prty             ;None|Odd|Even|Mark|Space
+        This.BitStop := BStop           ;1 bit|1.5 bit|2 bit
+        This.TransDelay := TransD        ;0
+        This.RS232_SETTINGS := ComPort . ":baud=" . Baud . " parity=" . Prty . " data=" . Data . " stop=" . BStop . " dtr=Off"
+        
+        ;;Validate
+        If (RegExMatch(ComPort, "^COM\d+$") < 1) {
+            This.ErrMsg := "Invalid COM port! Example: COM1, COM101..."
+            Return False
+        }
         ;;Init
-        RS232_SETTINGS := This.ComPortNum . ":baud=" . This.BaudRate . " parity=" . This.Parity . " data=" . This.BitData . " stop=" . This.BitStop . " dtr=Off"
-        RS232_FILEHANDLE := RS232_Initialize(RS232_SETTINGS)
-        If (RS232_FILEHANDLE = 0) {
-            MsgBox 16, , Failed connecting to %ComPortNum%!
-            return
+        This.RS232_FILEHANDLE := RS232_Initialize(This.RS232_SETTINGS)
+        If (This.RS232_FILEHANDLE = 0) {
+            This.ErrMsg := "Failed connecting to COM port!"
+            Return False
+        }
+        Return True
+    }
+    
+    ;=====================================================================;
+    ;;Method: Disconnect()
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Disconnect() {
+        RS232_Close(This.RS232_FILEHANDLE)
+        This.Free()
+    }
+        
+    ;=====================================================================;
+    ;;Method: Send()
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Send(Keyword, SendBreak := 0) {
+        This.CurrentCmdKeyword := Keyword
+        Loop, Parse, Keyword
+        {
+            dataCode := Asc(SubStr(A_LoopField, 0))
+            If (dataCode != "")
+                RS232_Write(This.RS232_FILEHANDLE, dataCode) ; Send it out the RS232 COM port
+        }
+        If (SendBreak) {
+            RS232_Write(This.RS232_FILEHANDLE, 13)
+        }
+    }
+    
+    ;=====================================================================;
+    ;;Method: 
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Wait(WaitKeyword) {
+        
+    }
+    
+    ;=====================================================================;
+    ;;Method: 
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ReadData() {
+        noMoreMsg := 0
+        Read_Data := RS232_Read(This.RS232_FILEHANDLE, "0xFF", RS232_BYTES_RECEIVED)
+        if (RS232_Bytes_Received > 0) {
+            Critical On
+            ASCII =
+            Read_Data_Num_Bytes := StrLen(Read_Data) / 2 ;RS232_Read() returns 2 characters for each byte
+            textRecieved := ""
+            Loop %Read_Data_Num_Bytes%
+            {
+                StringLeft, Byte, Read_Data, 2
+                StringTrimLeft, Read_Data, Read_Data, 2
+                Byte = 0x%Byte%
+                Byte := Byte + 0 ;Convert to Decimal
+
+                ASCII_Chr := Chr(Byte)
+                textRecieved .= ASCII_Chr
+            }
+            Critical Off
+            This.OutputBuffer .= textRecieved
+            
+            Return textRecieved
         }
     }
 }
 
 ;=============================================================================;
+;;;;;;;;;;;;;; RS232 LIBRARY
 ;########################################################################
 ;###### Initialize RS232 COM Subroutine #################################
 ;########################################################################
@@ -123,7 +226,7 @@ RS232_Close(RS232_FileHandle)
 ;########################################################################
 ;###### Write to RS232 COM Subroutines ##################################
 ;########################################################################
-RS232_Write(RS232_FileHandle,Message)
+RS232_Write(RS232_FileHandle, Message)
 {	SetFormat, Integer, DEC
 	
 	; Parse the Message. Byte0 is the number of bytes in the array.
@@ -157,7 +260,7 @@ RS232_Write(RS232_FileHandle,Message)
 ;########################################################################
 ;###### Read from RS232 COM Subroutines #################################
 ;########################################################################
-RS232_Read(RS232_FileHandle,Num_Bytes,ByRef RS232_Bytes_Received)
+RS232_Read(RS232_FileHandle, Num_Bytes, ByRef RS232_Bytes_Received)
 {	SetFormat, Integer, HEX
 	
 	; Set the Data buffer size, prefill with 0x55 = ASCII character "U"
