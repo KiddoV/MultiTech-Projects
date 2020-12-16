@@ -25,6 +25,7 @@ NeutronWebApp.Load("xdot_controller_index.html")
 NeutronWebApp.Gui("+MinSize1200x900 +LabelXDotCtrler")
 
 ;;;Run BEFORE WebApp Started;;;
+RegRead, ieVers, HKLM, Software\Microsoft\Internet Explorer, svcVersion     ;;;Check Internet Explorer version
 NeutronWebApp.qs("#title-label").innerHTML := "XDot Controller"    ;;;;Set app title
 
 ;Display the Neutron main window
@@ -48,6 +49,9 @@ FileInstall, popper.min.js, popper.min.js
 FileInstall, fontawesome.js, fontawesome.js
 FileInstall, fa-all.js, fa-all.js
 FileInstall, font-googleapi.css, font-googleapi.css
+;;JQuery Terminal lib
+FileInstall, jquery.terminal.min.js, jquery.terminal.min.js
+FileInstall, jquery.terminal.min.css, jquery.terminal.min.css
 
 FileInstall, xdot_ctrler_main.css, xdot_ctrler_main.css
 FileInstall, xdot_ctrler_main.js, xdot_ctrler_main.js
@@ -66,8 +70,11 @@ Return
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;ADDITIONAL FUNCTIONs;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;Functions For HTML Used
-Test(neutron, jqTermObj, termCmd) {
+;;;;;;;;;;;;Functions For AHK Used
+
+
+;;;;;;;;;;;;Functions For HTML Used
+SendTermCmd(neutron, jqTermObj, termCmd) {
     jqTermObj.echo("You type " . termCmd)
-    MsgBox % jqTermObj.get_command()
+    
 }

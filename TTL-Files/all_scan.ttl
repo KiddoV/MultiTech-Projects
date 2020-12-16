@@ -77,9 +77,12 @@ strcompare labelType 'LABELTYPE6'
 isType6 = result
 strcompare labelType 'LABELTYPE7'
 isType7 = result
+strcompare labelType 'LABELTYPE8'
+isType8 = result
 
 if isType1 = 0 goto START_EEPROM
 if isType5 = 0 || isType7 = 0 goto check_lora
+if isType8 = 0 goto check_wifi_bt
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 :CONFIRM_DATA
 :check_imei
@@ -273,7 +276,7 @@ if result <> 0 then
     end
 endif
 
-if isType1 != 0 && isType5 != 0 && isType7 != 0 then
+if isType1 != 0 && isType5 != 0 && isType7 != 0 && isType8 != 0 then
     wait '#'
 	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 	waitregex '^imei.*'

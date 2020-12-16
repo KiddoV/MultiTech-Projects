@@ -19,8 +19,8 @@ FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-S
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["94557670LF", "94557673LF", "94557700LF", "94557716LF"]
-Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557576LF", "94557605LF"]
-Global 247_SKUNums := ["94557291LF", "94557550LF", "94557593LF", "94557594LF"]
+Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557575LF", "94557576LF", "94557605LF"]
+Global 247_SKUNums := ["94557274LF", "94557291LF", "94557550LF", "94557593LF", "94557594LF"]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
 
@@ -66,17 +66,17 @@ Gui Font
 
 Gui Add, Text, x22 y227 w198 h2 +0x10 ;;--------------------------
 
-Gui Add, Edit, x79 y123 w145 h21 vserialN hwndHED1 Limit8 Number
+Gui Add, Edit, x79 y123 w145 h21 vserialN hwndHED1 Number Limit32 ;Limit8
 ;SetEditCueBanner(HED1, "Ex: 12345678")
-Gui Add, Edit, x79 y148 w145 h21 vnodeIdN hwndHED2 Limit17
+Gui Add, Edit, x79 y148 w145 h21 vnodeIdN hwndHED2 Limit32 ;Limit17
 ;SetEditCueBanner(HED2, "Ex: 00:00:00:00:00:00")
-Gui Add, Edit, x79 y173 w145 h21 vimeiN hwndHED3 Limit15
+Gui Add, Edit, x79 y173 w145 h21 vimeiN hwndHED3 Number Limit32 ;Limit15
 ;SetEditCueBanner(HED3, "Ex: 123456789012345")
-Gui Add, Edit, x79 y198 w145 h21 vuuidN hwndHED4 Limit32
+Gui Add, Edit, x79 y198 w145 h21 vuuidN hwndHED4 Limit32 ;Limit32
 ;SetEditCueBanner(HED4, "Ex: 123456789ABCDEF123456789ABCDEF12")
-Gui Add, Edit, x79 y233 w145 h21 vloraN hwndHED5 Limit23
+Gui Add, Edit, x79 y233 w145 h21 vloraN hwndHED5 Limit32 ;Limit23
 ;SetEditCueBanner(HED5, "Ex: 00:00:00:00:00:00:00:00")
-Gui Add, Edit, x79 y259 w145 h21 vwifiN hwndHED6 Limit23
+Gui Add, Edit, x79 y259 w145 h21 vwifiN hwndHED6 Limit32 ;Limit23
 ;SetEditCueBanner(HED6, "Ex: 00:00:00:00:00:00:00:00")
 
 Gui Add, Button, x80 y300 w80 h23 gmainStart, &START
@@ -211,7 +211,7 @@ showScanHist() {
     Gui -MinimizeBox -MaximizeBox
     Gui, 2: Add, Text, x8 y11, Search:
     Gui, 2: Add, Edit, x50 y8 w250 vsearchTerm gSearch
-    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid -Multi, Date|Time|SKU Number|Product ID|Hardware Version|Serial Number|Node ID|IMEI|Node Lora ID|UUID|Wifi Addr|Bluetooth Addr
+    Gui, 2: Add, Listview, x8 w640 h500 vlistView gMoreDetail +Grid, Date|Time|SKU Number|Product ID|Hardware Version|Serial Number|Node ID|IMEI|Node Lora ID|UUID|Wifi Addr|Bluetooth Addr
     Gui, 2: Add, StatusBar
     SB_SetParts(200, 200)
     Loop Read, C:\DEVICE_EEPROM_RECORDS\all-scan-records.txt
@@ -245,11 +245,11 @@ showScanHist() {
     For each, item in itemList
     {
         If (searchTerm != "") {
-            If (Instr(item.1, searchTerm) > 0 || Instr(item.2, searchTerm) > 0 || Instr(item.3, searchTerm) > 0 || Instr(item.4, searchTerm) > 0 || Instr(item.5, searchTerm) > 0 || Instr(item.6, searchTerm) > 0 || Instr(item.7, searchTerm) > 0 || Instr(item.8, searchTerm) > 0 || Instr(item.9, searchTerm) > 0 || Instr(item.10, searchTerm) > 0 || Instr(item.11, searchTerm) > 0) {
-                LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+            If (Instr(item.1, searchTerm) > 0 || Instr(item.2, searchTerm) > 0 || Instr(item.3, searchTerm) > 0 || Instr(item.4, searchTerm) > 0 || Instr(item.5, searchTerm) > 0 || Instr(item.6, searchTerm) > 0 || Instr(item.7, searchTerm) > 0 || Instr(item.8, searchTerm) > 0 || Instr(item.9, searchTerm) > 0 || Instr(item.10, searchTerm) > 0 || Instr(item.11, searchTerm) > 0 || Instr(item.12, searchTerm) > 0) {
+                LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11, item.12)
             }
         } Else {
-            LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11)
+            LV_Add("", item.1, item.2, item.3, item.4, item.5, item.6, item.7, item.8, item.9, item.10, item.11, item.12)
         }
     }
     totalFound := LV_GetCount()
@@ -259,6 +259,7 @@ showScanHist() {
     LV_ModifyCol(2, "SortDesc")
     LV_ModifyCol(1, "SortDesc")
     Return ;Search label returned
+    
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     MoreDetail:
     rowNum := LV_GetNext("C")
@@ -274,6 +275,7 @@ showScanHist() {
     LV_GetText(c9, rowNum, 9)
     LV_GetText(c10, rowNum, 10)
     LV_GetText(c11, rowNum, 11)
+    LV_GetText(c12, rowNum, 12)
     
     If (rowNum != 0) {
         MsgBox 4160, More Details, 
@@ -282,17 +284,20 @@ showScanHist() {
             Scan Time:`t%c2%
             SKU Number:`t%c3%
             Product ID:`t%c4%
-            Serial Number:`t%c5%
-            Node ID (MAC ID):`t%c6%
-            IMEI Number:`t%c7%
-            Node Lora ID:`t%c8%
-            UUID:`t`t%c9%
-            Wifi Address:`t%c10%
-            Bluetooth Address:`t%c11%
+            Hardware ID: `t%c5%
+            Serial Number:`t%c6%
+            Node ID (MAC ID):`t%c7%
+            IMEI Number:`t%c8%
+            Node Lora ID:`t%c9%
+            UUID:`t`t%c10%
+            Wifi Address:`t%c11%
+            Bluetooth Address:`t%c12%
         )
     }
+    
     Return ;MoreDetail label returned
     
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     2GuiEscape:
     2GuiClose:
         Gui, 2: Cancel
@@ -313,22 +318,22 @@ checkInput() {
     GuiControlGet, isLoraEnabled, Enabled, loraN
     GuiControlGet, isWifiEnabled, Enabled, wifiN
     
-    If (StrLen(serialN) < 8) {
-        MsgBox, 48, INVALID INPUT, Invalid SERIAL NUMBER! Rescan!
+    If (RegExMatch(serialN, "^([^0]){1}+([\d]){7}$") < 1) {
+        MsgBox, 48, INVALID INPUT, Invalid SERIAL NUMBER! Rescan!`nSerial Number only have 8 digits.
         return 0
-    } Else If (StrLen(nodeIdN) < 17) {
+    } Else If (RegExMatch(nodeIdN, "^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$") < 1) {
         MsgBox, 48, INVALID INPUT, Invalid NODE ID! Rescan!
         return 0
-    } Else If (StrLen(imeiN) < 15 && isImeiEnabled = 1) {
+    } Else If (RegExMatch(imeiN, "^([\d]){15}$") < 1 && isImeiEnabled = 1) {
         MsgBox, 48, INVALID INPUT, Invalid IMEI NUMBER! Rescan!
         return 0
-    } Else If (StrLen(uuidN) <> 32) {
+    } Else If (RegExMatch(uuidN, "^([[:xdigit:]]){32}$") < 1) {
         MsgBox, 48, INVALID INPUT, Invalid UUID! Rescan!
         return 0
-    } Else If (StrLen(loraN) < 23 && isLoraEnabled = 1) {
+    } Else If (RegExMatch(loraN, "^([0-9A-F]{2}[:-]){7}([0-9A-F]{2})$") < 1 && isLoraEnabled = 1) {
         MsgBox, 48, INVALID INPUT, Invalid Lora Number! Rescan!
         return 0
-    } Else If (StrLen(wifiN) < 17 && isWifiEnabled = 1) {
+    } Else If (RegExMatch(wifiN, "^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$") < 1 && isWifiEnabled = 1) {
         MsgBox, 48, INVALID INPUT, Invalid Wifi ID Number! Rescan!
         return 0
     }
@@ -349,16 +354,18 @@ changeValueDropdown() {
 ;LABELTYPE5 -- Serial, NodeID, UUID, LORA, WIFI
 ;LABELTYPE6 -- Serial, NodeID, UUID, IMEI, WIFI
 ;LABELTYPE7 -- Serial, NodeID, UUID, LORA
+;LABELTYPE8 -- Serial, NodeID, UUID, WIFI
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
-    LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF"]
+    LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF", "94557575LF"]
     LABELTYPE3 := ["94557576LF", "94557670LF", "94557673LF", "94557605LF"]
     LABELTYPE4 := ["94557291LF", "94557594LF"]
     LABELTYPE5 := ["94557550LF"]
     LABELTYPE6 := ["94557593LF"]
     LABELTYPE7 := ["94557543LF"]
+    LABELTYPE8 := ["94557274LF"]
     
-    allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4,LABELTYPE5,LABELTYPE6,LABELTYPE7"
+    allLabelType := "LABELTYPE1,LABELTYPE2,LABELTYPE3,LABELTYPE4,LABELTYPE5,LABELTYPE6,LABELTYPE7,LABELTYPE8"
     
     GuiControlGet, skuNum1 ;Get value from DropDownList
     GuiControlGet, skuNum2 ;Get value from DropDownList
@@ -418,6 +425,11 @@ changeDisplayWithSKUNum() {
         GuiControl Disable, imeiN
         GuiControl Disable, wifiLabel
         GuiControl Disable, wifiN
+    } else if (labelType = "LABELTYPE8") {
+        GuiControl Disable, imeiLabel
+        GuiControl Disable, imeiN
+        GuiControl Disable, loraLabel
+        GuiControl Disable, loraN
     } else {
         Loop Parse, allValueScan, `,
             GuiControl Disable, %A_LoopField%

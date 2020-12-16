@@ -27,6 +27,8 @@
 </head>
 
 <body class="bg-app-color no-select-text" oncontextmenu="return false;">
+	<!--=======================================================================-->
+	<!-- Title Bar -->
   <header class="position-sticky"><!------------------------------------------------>
 		<!-- Title Bar -->
 		<div class="d-flex align-items-stretch bg-app-theme-dark text-white shadow-sm sticky-top" style="z-index: 100;">
@@ -40,27 +42,60 @@
 		<div>
 			<!--  -->
 		</div>
-	</header><!----------------------------------------------->
+	</header>
 
+	<!--=======================================================================-->
   <!-- Main Content -->
-  <main class="p-1">
+  <main class="p-2">
 
 		<div>
-			<div class="card" style="width: 250px;">
-				<div class="" style="height: 19px;">
-					<p class="text-center font-weight-bold">XDot 01 | COM101 | MBED11</p>
+			<div id="term-01" class="card" style="width: 250px;">
+				<div class="d-flex pl-1 pr-1" style="height: 19px;">
+					<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-process"></i> #01 | COM101</p>
+					<span class="flex-grow-1"></span>
+					<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
 				</div>
-				<div class="terminal" style="border-radius: 0 0 1% 1%;"></div>
+				<div class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
 			</div>
 		</div>
 
   </main>
+
+	<!--=======================================================================-->
+	<!-- ==== All Popup Modals ==== -->
+	<!-- Settings Modal -->
+	<div id="modal-settings" class="modal fade">
+		<div class="modal-dialog" style="max-width: 75%;">
+			<div class="modal-content">
+				 <div class="modal-header">
+					<h6 class="modal-title font-weight-bold pl-1 default-mouse">Application Settings</h6>
+					<span type="button" class="icon-btn-xs" data-dismiss="modal"><i class="fas fa-1x fa-times mt-1 mr-2" style="font-size: 1.2rem"></i></span>
+				 </div>
+				 <div class="modal-body" style="word-wrap: break-word;">
+					 <!-- Contents -->
+
+				 </div>
+				 <div class="modal-footer">
+					 <button type="button" class="btn btn-sm btn-light" data-dismiss="modal">Cancel</button>
+					 <button type="button" class="btn btn-sm bg-app-theme-dark text-white">Save</button>
+				 </div>
+			 </div>
+		 </div>
+	</div>
+
+	<footer class="d-flex align-items-stretch fixed-bottom bg-app-theme-dark text-white p-0">
+		<span class="flex-grow-1"></span>
+		<span class="footer-btn" data-toggle="modal" data-target="#modal-settings"><i class="fas fa-cog"></i></span>
+	</footer>
+
 </body>
 
+<!--=======================================================================-->
 <!-- Inner Javascript -->
 <script>
 //============================================================================//
 ////  FUNCTIONs TO BE USED BY AHK ////
+
 
 //============================================================================//
 ////  FUNCTIONs AS NORMAL FOR HTML USED ////
@@ -68,17 +103,18 @@ jQuery(function($, undefined) {
     $('.terminal').terminal(function(command) {
         if (command !== '') {
             try {
-                ahk.Test(this, command)
+                ahk.SendTermCmd(this, command);
             } catch(e) {
                 this.error(new String(e));
             }
         } else {
-           this.echo('');
+           return
         }
     }, {
-        greetings: 'XDot Controller',
+        greetings: 'XDot Controller Terminal',
         height: 200,
         prompt: '> ',
+				echoCommand: false,
     });
 });
 </script>

@@ -48,11 +48,11 @@ button {
 }
 
 .bg-app-theme-dark {
-	background: #37474F;
+	background: #1c2331;
 }
 
 .bg-app-theme-light {
-	background: #546E7A;
+	background: #2e3951;
 }
 
 .title-btn {
@@ -96,8 +96,51 @@ body {
 
 /*============================================================*/
 /***********************Additional CSS*************************/
-/* jQuery Terminal */
+/* Icon Status */
+.icon-good {
+	color: #00c853;
+}
+
+.icon-bad {
+	color: #f44336;
+}
+
+.icon-process {
+	color: #fbc02d;
+}
+
+/* Icon Buttons */
+.icon-btn-xs:hover {
+	color: rgba(0, 0, 0, .5);
+}
+
+/*=================================================================*/
+/***********************Third-Party CSS Mod*************************/
+/* jQuery Terminal Mod*/
 .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
     font-size: 11px;
     line-height: 10px;
+}
+
+/* Boostrap Mod */
+.btn,.btn:focus,.btn:active,.navbar-toggler,.navbar-toggler:focus {
+	border: none !important;
+  outline: none !important;	/* Get rid of the ugly dot border */
+  /* box-shadow: none !important; */
+}
+
+.modal-header, .modal-footer {
+	padding: 2px 5px 1px 5px !important;
+}
+.modal-backdrop {
+	z-index: 97;
+}
+.modal {
+	z-index: 98;
+}
+.modal-backdrop, .modal {
+	margin-top: 23px;
+}
+.modal-dialog {
+	margin-top: 5px;
 }
