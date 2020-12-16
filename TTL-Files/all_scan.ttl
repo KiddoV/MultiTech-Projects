@@ -283,7 +283,7 @@ if isType1 != 0 && isType5 != 0 && isType7 != 0 && isType8 != 0 then
 	strmatch inputstr '[\d+]{15}'
     promImeiNum = matchstr
 endif
-if isType4 = 0 || isType5 = 0 || isType6 = 0 then
+if isType4 = 0 || isType5 = 0 || isType6 = 0 || isType8 = 0 then
     wait '#'
 	sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
 	waitregex '^mac-bluetooth.*'
