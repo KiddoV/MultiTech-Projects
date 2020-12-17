@@ -47,18 +47,19 @@
 	<!--=======================================================================-->
   <!-- Main Content -->
   <main class="p-2">
-
-		<div>
-			<div id="term-01" class="card" style="width: 250px;">
-				<div class="d-flex pl-1 pr-1" style="height: 19px;">
-					<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-process"></i> #01 | COM101</p>
-					<span class="flex-grow-1"></span>
-					<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
-				</div>
-				<div class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
+			<div id="jq-terminal-container" class="">
+				<!-- <div>
+					<div class="card" style="width: 250px;">
+						<div class="d-flex pl-1 pr-1" style="height: 19px;">
+							<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-bad"></i> #01 | COM101</p>
+							<span class="flex-grow-1"></span>
+							<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
+						</div>
+						<div id="term-01" class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
+					</div>
+				</div> -->
 			</div>
-		</div>
-
+			<button class="btn btn-primary btn-sm" onclick="ahk.TestBtn(this)">Test</button>
   </main>
 
 	<!--=======================================================================-->
@@ -73,7 +74,40 @@
 				 </div>
 				 <div class="modal-body" style="word-wrap: break-word;">
 					 <!-- Contents -->
+					 <div class="wrapper">
+						 <!-- sett-sideNav -->
+				   	<nav id="sett-sideNav">
+				    	<ul class="components">
+								<li>
+ 				       		<a href="#">General</a>
+ 				       	</li>
+				      	<li class="">
+				        	<a href="#xdotSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">XDot</a>
+				          	<ul class="collapse" id="xdotSubmenu">
+				            	<li>
+				              	<a href="#" class="">Properties</a>
+				              </li>
+				              <li>
+				                <a href="#">Connection</a>
+				              </li>
+				           	</ul>
+				       </li>
+							 <li class="">
+								 <a href="#sampleSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">Sample</a>
+									 <ul class="collapse" id="sampleSubmenu">
+										 <li>
+											 <a href="#" class="active">Sample 1</a>
+										 </li>
+										 <li>
+											 <a href="#">Sample 2</a>
+										 </li>
+									 </ul>
+							</li>
 
+				    	</ul>
+				   	</nav>
+
+					 </div>
 				 </div>
 				 <div class="modal-footer">
 					 <button type="button" class="btn btn-sm btn-light" data-dismiss="modal">Cancel</button>
@@ -95,27 +129,29 @@
 <script>
 //============================================================================//
 ////  FUNCTIONs TO BE USED BY AHK ////
-
+function initTerminal(termCSSId, termNum) {
+	var termObj = $('#' + termCSSId).terminal(function(command) {
+				if (command !== '') {
+						try {
+								ahk.SendTermCmd(this, command);
+						} catch(e) {
+								this.error(new String(e));
+						}
+				} else {
+					 return
+				}
+		}, {
+				greetings: false, //'XDot Controller Terminal ' + termNum,
+				height: 200,
+				name: termNum,
+				prompt: '> ',
+				echoCommand: false,
+		});
+	return termObj;
+}
 
 //============================================================================//
 ////  FUNCTIONs AS NORMAL FOR HTML USED ////
-jQuery(function($, undefined) {
-    $('.terminal').terminal(function(command) {
-        if (command !== '') {
-            try {
-                ahk.SendTermCmd(this, command);
-            } catch(e) {
-                this.error(new String(e));
-            }
-        } else {
-           return
-        }
-    }, {
-        greetings: 'XDot Controller Terminal',
-        height: 200,
-        prompt: '> ',
-				echoCommand: false,
-    });
-});
+
 </script>
 </html>

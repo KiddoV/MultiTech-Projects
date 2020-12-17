@@ -38,6 +38,8 @@ Class AHK_Terminal {
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Connect(ComPort, Baud := 115200, Data := 8, Prty := "N", BStop := 1, TransD := 0) {
+        ComPort := "COM" . ComPort
+        
         This.ComPortNum := ComPort      ;COM10, COM101...
         This.BaudRate := Baud           ;9600, 115200...
         This.BitData := Data            ;7, 8

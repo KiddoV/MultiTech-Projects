@@ -20,7 +20,7 @@ Global TestCOM := new AHK_Terminal()
 Gui Show, , %appTitle%
 
 ;;;;;Run After Gui Started;;;;;
-If !TestCOM.Connect("COM101") {
+If !TestCOM.Connect(101) {
     Guicontrol, 1: , outputField, % TestCOM.ErrMsg
 } Else {
     Guicontrol, 1: , outputField, % "Connected to " . TestCOM.ComPortNum 

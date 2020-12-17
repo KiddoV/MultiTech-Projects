@@ -44,7 +44,7 @@ button {
 }
 
 .bg-app-color {
-	background: #eeeeee;
+	background: #E0E0E0;
 }
 
 .bg-app-theme-dark {
@@ -100,11 +100,9 @@ body {
 .icon-good {
 	color: #00c853;
 }
-
 .icon-bad {
 	color: #f44336;
 }
-
 .icon-process {
 	color: #fbc02d;
 }
@@ -114,12 +112,62 @@ body {
 	color: rgba(0, 0, 0, .5);
 }
 
+/* Settings SideNav */
+.wrapper {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+#sett-sideNav {
+  min-width: 150px;
+	max-width: 150px;
+  min-height: 70vh;
+}
+#sett-sideNav, a[data-toggle="collapse"] {
+  position: relative;
+}
+.dropdown-toggle::after {
+  display: block;
+  position: absolute;
+  top: 50%;
+  right: 20px;
+}
+a, a:hover, a:focus {
+  color: inherit;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+#sett-sideNav {
+  background: #2e3951;
+  color: #fff;
+  transition: all 0.1s;
+}
+#sett-sideNav ul.components {
+  padding: 20px 0;
+}
+#sett-sideNav ul li a {
+  padding: 10px;
+  font-size: 1.1em;
+  display: block;
+}
+#sett-sideNav ul li a:hover {
+  color: #2e3951;
+  background: #fff;
+}
+#sett-sideNav a.active, #sett-sideNav ul li > a.active, a[aria-expanded="false"] {
+  color: #fff;
+  background: #1c2331;
+}
+#sett-sideNav ul {
+	list-style-type: none;
+}
+
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
 /* jQuery Terminal Mod*/
 .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
     font-size: 11px;
-    line-height: 10px;
+    line-height: 11px;
 }
 
 /* Boostrap Mod */
@@ -143,4 +191,7 @@ body {
 }
 .modal-dialog {
 	margin-top: 5px;
+}
+.modal-body {
+	padding: 0;
 }
