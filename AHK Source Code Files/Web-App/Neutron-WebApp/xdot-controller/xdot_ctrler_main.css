@@ -168,6 +168,7 @@ a, a:hover, a:focus {
 .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
     font-size: 11px;
     line-height: 11px;
+		z-index: 96;
 }
 
 /* Boostrap Mod */

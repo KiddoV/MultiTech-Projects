@@ -49,18 +49,45 @@ AutoGenerateJQTerminal()
 ;Term01.echo("WTF YOU ARE TALKING ABOUT?")
 
 #Persistent
-;ReadCOMMsg := Func("ReadCOMMsg").Bind(TermComObj)
-;SetTimer, %ReadCOMMsg%, 200
+ReadCOMMsg := Func("ReadCOMMsg").Bind()
+SetTimer, %ReadCOMMsg%, 10
+;CheckCOMStatus := Func("CheckCOMStatus").Bind()
+;SetTimer, %CheckCOMStatus%, 200
 Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;=======================================================================================;
 ;;;Callback Functions and Labels
-ReadCOMMsg(comObj) {
+ReadCOMMsg() {
+    index := XDotPropObj.xdotProperties[1].index
     Loop, % XDotPropObj.xdotProperties.length()
     {
-        ;MsgBox % comObj[A_Index].ErrMsg
+        outMsg := TermComObj[index].ReadData()
+        If (outMsg != "") {
+            JQTermObj[index].echo(outMsg)
+            ;termOut := JQTermObj[index].get_output()
+        }
+        index++
     }
 }
 
+CheckCOMStatus() {
+    index := XDotPropObj.xdotProperties[1].index
+    Loop, % XDotPropObj.xdotProperties.length()
+    {
+        terminalNumber := Format("{1:02}", index)     ;Format to 2 digit number 01 02 03...
+        elId := "#status-term-" . terminalNumber
+        If (TermComObj[index].RS232_FILEHANDLE <> 0) {
+            NeutronWebApp.qs(elId).classList.remove("icon-process")
+            NeutronWebApp.qs(elId).classList.remove("icon-good")
+            NeutronWebApp.qs(elId).classList.add("icon-bad")
+        } Else {
+            NeutronWebApp.qs(elId).classList.remove("icon-process")
+            NeutronWebApp.qs(elId).classList.add("icon-good")
+            NeutronWebApp.qs(elId).classList.remove("icon-bad")
+        }
+        
+        index++
+    }
+}
 
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
@@ -98,17 +125,20 @@ Return
 ;;;;;;;;;;;;;;;ADDITIONAL FUNCTIONs;;;;;;;;;;;;;;
 ;;;;;;;;;;;;Functions For AHK Used
 AutoGenerateJQTerminal() {
+    xIndex := XDotPropObj.xdotProperties[1].index
     Loop, % XDotPropObj.xdotProperties.length()
     {
-        terminalNumber := Format("{1:02}", A_Index)     ;Format to 2 digit number 01 02 03...
-        xMainPort := XDotPropObj.xdotProperties[A_Index].mainPort
+        terminalNumber := Format("{1:02}", xIndex)     ;Format to 2 digit number 01 02 03...
+        xMainPort := XDotPropObj.xdotProperties[xIndex].mainPort
+        xCOMStatus := XDotPropObj.xdotProperties[xIndex].comStatus
+        termStatusHtmlId := "#status-term-" . terminalNumber
         
         html = 
         (LTrim
         <div class="d-inline-block pl-2">
             <div class="card" style="width: 250px;">
                 <div class="d-flex pl-1 pr-1" style="height: 19px;">
-                    <p class="font-weight-bold"><i id="status-term-%terminalNumber%" class="fas fa-circle animated flash infinite slow icon-bad"></i> #%terminalNumber% | COM%xMainPort%</p>
+                    <p class="font-weight-bold"><i id="status-term-%terminalNumber%" class="fas fa-circle animated flash infinite slow icon-process"></i> #%terminalNumber% | COM%xMainPort%</p>
                     <span class="flex-grow-1"></span>
                     <span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
                 </div>
@@ -117,30 +147,63 @@ AutoGenerateJQTerminal() {
         </div>
         )
         NeutronWebApp.qs("#jq-terminal-container").insertAdjacentHTML("beforeend", html)
-        JQTermObj.Push(NeutronWebApp.wnd.initTerminal("term-" . terminalNumber, A_Index))      ;JS Func
+        JQTermObj.Push(NeutronWebApp.wnd.initTerminal("term-" . terminalNumber, xIndex))      ;JS Func
         comObj := new AHK_Terminal()
         If (!comObj.Connect(xMainPort)) {
-            JQTermObj[A_Index].error(comObj.ErrMsg)
+            JQTermObj[xIndex].error(comObj.ErrMsg)
+            xCOMStatus := "F"
         } Else {
-            JQTermObj[A_Index].echo("[[;lightgreen;]Successfully connecting to COM" . xMainPort . "]")
+            JQTermObj[xIndex].echo("[[;lightgreen;]Successfully connecting to COM" . xMainPort . "]")
             TermComObj.Push(comObj)
+            xCOMStatus := "G"
         }
+        
+        xIndex++
     }
     ;JQTermObj[1].echo("HELLO FROM 1")
     JQTermObj[1].focus(true)    ;;Activate the first JQTerminal
 }
 
 ;;;;;;;;;;;;Functions For HTML Used
-SendTermCmd(neutron, jqTermObj, termCmd) {              ;;;General used for all JQ-Terminals
-    terminalId := jqTermObj.name
+SendTermCmd(neutron, jqTermObj, termCmd) {              ;;;Generaly used for all JQ-Terminals
+    terminalId := jqTermObj.name()
     ;jqTermObj.echo("[[;black;white]" . termCmd . "]")
-    jqTermObj.echo(terminalId)
+    ;jqTermObj.echo(terminalId)
     TermComObj[terminalId].Send(termCmd, 1)
-    ;jqTermObj.echo(terminalCSSId)
 }
 
 TestBtn(neutron, event) {
     ;JQTermObj[2].echo("HELLO FROM 2")
     ;TestCOM.Send(inputStr, 1)
+    TermComObj[1].Send("at", 1)
+    TermComObj[1].Wait("OK")
+    If (TermComObj[1].WaitResult == 1) {
+        JQTermObj[1].echo("[[;lightgreen;]Success!]")
+    } Else {
+        JQTermObj[1].error("Failed!")
+    }
+    TermComObj[1].Send("at+di", 1)
+    TermComObj[1].Wait("42")
+    If (TermComObj[1].WaitResult == 1) {
+       JQTermObj[1].echo("[[;lightgreen;]Success!]")
+    } Else {
+        JQTermObj[1].error("Failed!")
+    }
+    TermComObj[1].Send("at+di", 1)
+    TermComObj[1].Wait("(\d+){2}+(-)")
+    If (TermComObj[1].WaitResult == 1) {
+        JQTermObj[1].echo("[[;lightgreen;]Success!]")
+        JQTermObj[1].echo("[[;lightgreen;]" . TermComObj[1].WaitMatchStrLine . "]")
+    } Else {
+        JQTermObj[1].error("Failed!")
+    }
+    TermComObj[1].Send("ati", 1)
+    TermComObj[1].Wait("3.1.2")
+    If (TermComObj[1].WaitResult == 1) {
+        JQTermObj[1].echo("[[;lightgreen;]Success!]")
+        JQTermObj[1].echo("[[;lightgreen;]" . TermComObj[1].WaitMatchStrLine . "]")
+    } Else {
+        JQTermObj[1].error("Failed!")
+    }
 }
 

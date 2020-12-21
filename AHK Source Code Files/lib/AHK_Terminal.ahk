@@ -24,6 +24,10 @@ Class AHK_Terminal {
         This.OutputBuffer := ""
         
         This.ErrMsg := ""
+        
+        This.WaitResult := -1
+        This.WaitMatchStrLine := ""
+        This.TextReceived := ""
     }
     
     ;=====================================================================;
@@ -81,19 +85,39 @@ Class AHK_Terminal {
         {
             dataCode := Asc(SubStr(A_LoopField, 0))
             If (dataCode != "")
-                RS232_Write(This.RS232_FILEHANDLE, dataCode) ; Send it out the RS232 COM port
+                If (RS232_Write(This.RS232_FILEHANDLE, dataCode) == False) {
+                    This.ErrMsg := "Could not sent data to COM!"
+                    Return False
+                } ; Send it out the RS232 COM port
         }
         If (SendBreak) {
-            RS232_Write(This.RS232_FILEHANDLE, 13)
+            If (RS232_Write(This.RS232_FILEHANDLE, 13) == False) {
+                This.ErrMsg := "Could not sent data to COM!"
+                Return False
+            }
         }
+        Return True
     }
     
     ;=====================================================================;
     ;;Method: 
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
-    Wait(WaitKeyword) {
-        
+    Wait(WaitKeyword, Timeout := 1000) {
+        This.TextReceived := ""
+        This.WaitMatchStrLine := ""
+        This.WaitResult := -1
+        Loop, % Timeout * 100
+        {
+            ;;With Tooltip, Time is different in Loop
+            If (RegExMatch(This.TextReceived, "(.*)" . WaitKeyword . "(.*)", inStr) >= 1) {
+                This.WaitResult := 1
+                This.WaitMatchStrLine := inStr
+                Sleep 10
+                Break
+            }
+            This.WaitResult := 0
+        }
     }
     
     ;=====================================================================;
@@ -117,10 +141,11 @@ Class AHK_Terminal {
 
                 ASCII_Chr := Chr(Byte)
                 textRecieved .= ASCII_Chr
+                This.TextReceived .= ASCII_Chr
             }
             Critical Off
             This.OutputBuffer .= textRecieved
-            
+            ;This.TextReceived .= textRecieved ;RegExReplace(textRecieved, "\R+\R", "`r`n")
             Return textRecieved
         }
     }
@@ -154,7 +179,7 @@ RS232_Initialize(RS232_Settings)
 	If (BCD_Result <> 1)
 	{	; MsgBox, There is a problem with Serial Port communication. `nFailed Dll BuildCommDCB, BCD_Result=%BCD_Result%.
 		; Exit
-		RS232_FileHandle:=0
+		RS232_FileHandle := 0
 		Return %RS232_FileHandle%
 	}
 
@@ -172,7 +197,7 @@ RS232_Initialize(RS232_Settings)
 	
 	If (RS232_FileHandle < 1)
 	{	; MsgBox, There is a problem with Serial Port communication. `nFailed Dll CreateFile, RS232_FileHandle=%RS232_FileHandle% `nThe Script Will Now Exit.
-		RS232_FileHandle:=0
+		RS232_FileHandle := 0
 		Return %RS232_FileHandle%
 	}
 
@@ -256,7 +281,8 @@ RS232_Write(RS232_FileHandle, Message)
 		,"Int"  , "NULL")
 	
 	If ( WF_Result <> 1 or Bytes_Sent <> Data_Length )
-		MsgBox, Failed Dll WriteFile to RS232 COM, result=%WF_Result% `nData Length=%Data_Length% `nBytes_Sent=%Bytes_Sent%
+        Return False
+		;MsgBox, Failed Dll WriteFile to RS232 COM, result=%WF_Result% `nData Length=%Data_Length% `nBytes_Sent=%Bytes_Sent%
 }
 
 ;########################################################################
