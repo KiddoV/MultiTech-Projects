@@ -11,7 +11,7 @@ Class AHK_Terminal {
     ;;Construtor
     __New() {
         This.ComPortNum := ""       ;COM10, COM101...
-        This.BaudRate := 0          ;9600, 115200...
+        This.BaudRate := 0          ;110, 300, 600, 1200, 2400, 4800, 9600, 115200...
         This.BitData := 0           ;7, 8
         This.Parity := ""           ;None|Odd|Even|Mark|Space
         This.BitStop := 0           ;1 bit|1.5 bit|2 bit
@@ -81,14 +81,24 @@ Class AHK_Terminal {
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Send(Keyword, SendBreak := 0) {
         This.CurrentCmdKeyword := Keyword
-        Loop, Parse, Keyword
+        If Keyword Is Alpha
         {
-            dataCode := Asc(SubStr(A_LoopField, 0))
-            If (dataCode != "")
-                If (RS232_Write(This.RS232_FILEHANDLE, dataCode) == False) {
-                    This.ErrMsg := "Could not sent data to COM!"
-                    Return False
-                } ; Send it out the RS232 COM port
+            Loop, Parse, Keyword
+            {
+                dataCode := Asc(SubStr(A_LoopField, 0))
+                If (dataCode != "")
+                    If (RS232_Write(This.RS232_FILEHANDLE, dataCode) == False) {
+                        This.ErrMsg := "Could not sent data to COM!"
+                        Return False
+                    } ; Send it out the RS232 COM port
+            }
+        }
+        If Keyword Is Xdigit
+        {
+            If (RS232_Write(This.RS232_FILEHANDLE, Keyword) == False) {
+                This.ErrMsg := "Could not sent data to COM!"
+                Return False
+            }
         }
         If (SendBreak) {
             If (RS232_Write(This.RS232_FILEHANDLE, 13) == False) {

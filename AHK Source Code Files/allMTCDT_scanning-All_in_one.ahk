@@ -19,7 +19,7 @@ FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-S
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["94557670LF", "94557673LF", "94557700LF", "94557716LF"]
-Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557575LF", "94557576LF", "94557605LF"]
+Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557575LF", "94557576LF", "94557601LF", "94557605LF"]
 Global 247_SKUNums := ["94557274LF", "94557291LF", "94557550LF", "94557593LF", "94557594LF"]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
@@ -357,7 +357,7 @@ changeValueDropdown() {
 ;LABELTYPE8 -- Serial, NodeID, UUID, WIFI
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
-    LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF", "94557575LF"]
+    LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF", "94557575LF", "94557601LF"]
     LABELTYPE3 := ["94557576LF", "94557670LF", "94557673LF", "94557605LF"]
     LABELTYPE4 := ["94557291LF", "94557594LF"]
     LABELTYPE5 := ["94557550LF"]

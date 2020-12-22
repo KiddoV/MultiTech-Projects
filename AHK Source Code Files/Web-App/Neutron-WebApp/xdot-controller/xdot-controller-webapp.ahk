@@ -205,5 +205,83 @@ TestBtn(neutron, event) {
     } Else {
         JQTermObj[1].error("Failed!")
     }
+    
+    Sleep 2000
+    FileCopy, C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-AS923-mbed-os-5.7.7.bin, D:\, 1
+    If (ErrorLevel)
+        JQTermObj[1].error("Could not install firmware to D drive!")
+    JQTermObj[1].echo("[[;lightgreen;]Successfuly installed firmware!]")
+    
+    Sleep 2000
+    TermComObj[1].Disconnect()
+    JQTermObj[1].echo("[[;yellow;]Disconnected to COM101]")
+    If (!TermComObj[1].Connect(11, 9600)) {
+        JQTermObj[1].error(TermComObj[1].ErrMsg)
+    } Else {
+        JQTermObj[1].echo("[[;lightgreen;]Successfully connecting to COM" . 11 . "]")
+    }
+    TermComObj[1].Send(13)
+    JQTermObj[1].echo("[[;yellow;]Sent break!]")
+    
+    Sleep 2000
+    TermComObj[1].Disconnect()
+    JQTermObj[1].echo("[[;yellow;]Disconnected to COM11]")
+    If (!TermComObj[1].Connect(101)) {
+        JQTermObj[1].error(TermComObj[1].ErrMsg)
+    } Else {
+        JQTermObj[1].echo("[[;lightgreen;]Successfully connecting to COM" . 101 . "]")
+    }
+    TermComObj[1].Send("ati", 1)
+    TermComObj[1].Wait("OK")
+    If (TermComObj[1].WaitResult == 1) {
+        JQTermObj[1].echo("[[;lightgreen;]Success!]")
+    } Else {
+        JQTermObj[1].error("Failed!")
+    }
+}
+
+TestBtn2(neutron, event) {
+    #Persistent
+    JQTermObj[1].echo("[[;lightblue;]Disconnecting COM101...]")
+    TermComObj[1].Disconnect()
+    JQTermObj[1].echo("[[;yellow;]Disconnected to COM101]")
+    JQTermObj[1].echo("[[;lightblue;]Connecting to COM11...]")
+    If (!TermComObj[1].Connect(11, 9600)) {
+        JQTermObj[1].error(TermComObj[1].ErrMsg)
+        Return
+    } Else {
+        JQTermObj[1].echo("[[;lightgreen;]Successfully connecting to COM" . 11 . "]")
+    }
+    JQTermObj[1].echo("[[;lightblue;]Trying to send break...]")
+    ;ch := Chr(Byte)
+    Sleep 1000
+    Loop, 1
+    {
+        TermComObj[1].Send(0x00)
+        JQTermObj[1].echo("[[;yellow;]Sent " . A_Index . " byte!]")
+        ;Sleep 2000
+    }
+    TermComObj[1].Disconnect()
+    JQTermObj[1].echo("[[;lightblue;]Finished sending break!]")
+    
+    JQTermObj[1].echo("[[;lightblue;]Disconnecting COM11...]")
+    Sleep 2000
+    TermComObj[1].Disconnect()
+    JQTermObj[1].echo("[[;yellow;]Disconnected to COM11]")
+    JQTermObj[1].echo("[[;lightblue;]Connecting to COM101...]")
+    Sleep 1000
+    If (!TermComObj[1].Connect(101, 115200)) {
+        JQTermObj[1].error(TermComObj[1].ErrMsg)
+        Return
+    } Else {
+        JQTermObj[1].echo("[[;lightgreen;]Successfully connecting to COM" . 101 . "]")
+    }
+    TermComObj[1].Send("ati", 1)
+    TermComObj[1].Wait("OK")
+    If (TermComObj[1].WaitResult == 1) {
+        JQTermObj[1].echo("[[;lightgreen;]Success!]")
+    } Else {
+        JQTermObj[1].error("Failed!")
+    }
 }
 
