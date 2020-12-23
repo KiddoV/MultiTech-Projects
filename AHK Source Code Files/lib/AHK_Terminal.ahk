@@ -81,8 +81,13 @@ Class AHK_Terminal {
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Send(Keyword, SendBreak := 0) {
         This.CurrentCmdKeyword := Keyword
-        If Keyword Is Alpha
+        If Keyword Is Xdigit
         {
+            If (RS232_Write(This.RS232_FILEHANDLE, Keyword) == False) {
+                This.ErrMsg := "Could not sent data to COM!"
+                Return False
+            }
+        } Else {
             Loop, Parse, Keyword
             {
                 dataCode := Asc(SubStr(A_LoopField, 0))
@@ -91,13 +96,6 @@ Class AHK_Terminal {
                         This.ErrMsg := "Could not sent data to COM!"
                         Return False
                     } ; Send it out the RS232 COM port
-            }
-        }
-        If Keyword Is Xdigit
-        {
-            If (RS232_Write(This.RS232_FILEHANDLE, Keyword) == False) {
-                This.ErrMsg := "Could not sent data to COM!"
-                Return False
             }
         }
         If (SendBreak) {
@@ -113,20 +111,42 @@ Class AHK_Terminal {
     ;;Method: 
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    SendBreak() {
+        sendStatus := DllCall("SetCommBreak", "UInt", This.RS232_FILEHANDLE)
+        If (sendStatus != 0) {
+            clearStatus := DllCall("ClearCommBreak", "UInt", This.RS232_FILEHANDLE)
+        }
+        Return clearStatus
+    }
+    
+    ;=====================================================================;
+    ;;Method: 
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Wait(WaitKeyword, Timeout := 1000) {
         This.TextReceived := ""
         This.WaitMatchStrLine := ""
         This.WaitResult := -1
-        Loop, % Timeout * 100
-        {
-            ;;With Tooltip, Time is different in Loop
-            If (RegExMatch(This.TextReceived, "(.*)" . WaitKeyword . "(.*)", inStr) >= 1) {
-                This.WaitResult := 1
-                This.WaitMatchStrLine := inStr
+        
+        Loop, % Timeout / 40
+        {   ;;With Tooltip, Time is different in Loop
+            Sleep 1
+            Loop, Parse, WaitKeyword, |
+            {   
+                If (RegExMatch(This.TextReceived, "(.*)" . A_LoopField . "(.*)", inStr) >= 1) {
+                    This.WaitResult := A_Index
+                    This.WaitMatchStrLine := inStr
+                    Sleep 10
+                    Break
+                }
+            }
+            If (This.WaitResult != -1) {
                 Sleep 10
                 Break
             }
-            This.WaitResult := 0
+            If (A_Index == Timeout) {
+                This.WaitResult := 0
+            }
         }
     }
     
