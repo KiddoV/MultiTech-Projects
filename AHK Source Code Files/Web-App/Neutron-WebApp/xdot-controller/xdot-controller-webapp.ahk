@@ -50,6 +50,12 @@ Global TermComObj := []
 
 FileRead, xdotPropJson, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\xdot-properties.json
 Global XDotPropObj := JSON.Load(xdotPropJson)
+
+;;Define Global Unique IDentifier! (For other script to access objects)
+Global guid1 := "{AAAAAAAA-1111-0000-1111-120100111116}"
+Global guid2 := "{BBBBBBBB-2222-0000-2222-120100111116}"
+Global guid3 := "{CCCCCCCC-3333-0000-3333-120100111116}"
+Global guid4 := "{DDDDDDDD-4444-0000-4444-120100111116}"
 ;=========================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
@@ -67,7 +73,11 @@ NeutronWebApp.Show("w1200 h900")
 
 ;;;Run AFTER WebApp Started;;;
 AutoGenerateJQTerminal()
-;Term01.echo("WTF YOU ARE TALKING ABOUT?")
+;;Use x := ComObjActive("<guid>") to access this object!
+ObjRegisterActive(NeutronWebApp, guid1)
+ObjRegisterActive(JQTermObj, guid2)
+ObjRegisterActive(TermComObj, guid3)
+ObjRegisterActive(XDotPropObj, guid4)
 
 #Persistent
 ReadCOMMsg := Func("ReadCOMMsg").Bind()
@@ -222,11 +232,7 @@ TestEachXDot_CallBack(xdotPropObj, index) {
     If (TermComObj[index] != "")
         PrintToTerm(termObj, "INFO", "Running test on PORT " . xdotPropObj.mainPort . "...")
     Else {
-        Loop, 100
-        {
         PrintToTerm(termObj, "FAIL", "TEST FAILED: COM Object not created!" . A_Index)
-        Sleep 100
-        }
         Return
     }
     
@@ -467,3 +473,39 @@ TestBtn2(neutron, event) {
     }
 }
 
+;;;;;;;;;;;;Third party Functions
+CreateGUID()
+{
+    VarSetCapacity(pguid, 16, 0)
+    if !(DllCall("ole32.dll\CoCreateGuid", "ptr", &pguid)) {
+        size := VarSetCapacity(sguid, (38 << !!A_IsUnicode) + 1, 0)
+        if (DllCall("ole32.dll\StringFromGUID2", "ptr", &pguid, "ptr", &sguid, "int", size))
+            return StrGet(&sguid)
+    }
+    return ""
+}
+
+IsEqualGUID(guid1, guid2)
+{
+    return DllCall("ole32\IsEqualGUID", "ptr", &guid1, "ptr", &guid2)
+}
+
+ObjRegisterActive(Object, CLSID, Flags:=0) {
+    static cookieJar := {}
+    if (!CLSID) {
+        if (cookie := cookieJar.Remove(Object)) != ""
+            DllCall("oleaut32\RevokeActiveObject", "uint", cookie, "ptr", 0)
+        return
+    }
+    if cookieJar[Object]
+        throw Exception("Object is already registered", -1)
+    VarSetCapacity(_clsid, 16, 0)
+    if (hr := DllCall("ole32\CLSIDFromString", "wstr", CLSID, "ptr", &_clsid)) < 0
+        throw Exception("Invalid CLSID", -1, CLSID)
+    hr := DllCall("oleaut32\RegisterActiveObject"
+        , "ptr", &Object, "ptr", &_clsid, "uint", Flags, "uint*", cookie
+        , "uint")
+    if hr < 0
+        throw Exception(format("Error 0x{:x}", hr), -1)
+    cookieJar[Object] := cookie
+}
