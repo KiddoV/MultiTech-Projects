@@ -1,0 +1,84 @@
+{
+    "xdotProperties": [
+        {
+			"index": 1,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 101,
+            "mbedPort": 11,
+            "driveLetter": "D",
+			"testPortName": "PORT1",
+			"ahkObjName": "JQTerm01"
+        },
+        {
+			"index": 2,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 102,
+            "mbedPort": 12,
+            "driveLetter": "E",
+			"testPortName": "PORT2",
+			"ahkObjName": "JQTerm02"
+        },
+		        {
+			"index": 3,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 103,
+            "mbedPort": 13,
+            "driveLetter": "F",
+			"testPortName": "PORT3",
+			"ahkObjName": "JQTerm03"
+        },
+		        {
+			"index": 4,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 104,
+            "mbedPort": 14,
+            "driveLetter": "G",
+			"testPortName": "PORT4",
+			"ahkObjName": "JQTerm04"
+        },
+		        {
+			"index": 5,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 105,
+            "mbedPort": 15,
+            "driveLetter": "H",
+			"testPortName": "PORT5",
+			"ahkObjName": "JQTerm05"
+        },
+		        {
+			"index": 6,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 106,
+            "mbedPort": 16,
+            "driveLetter": "I",
+			"testPortName": "PORT6",
+			"ahkObjName": "JQTerm06"
+        },
+		        {
+			"index": 7,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 107,
+            "mbedPort": 17,
+            "driveLetter": "J",
+			"testPortName": "PORT7",
+			"ahkObjName": "JQTerm07"
+        },
+		        {
+			"index": 8,
+            "runStatus": "N",
+			"comStatus": "N",
+            "mainPort": 108,
+            "mbedPort": 18,
+            "driveLetter": "K",
+			"testPortName": "PORT8",
+			"ahkObjName": "JQTerm08"
+        }
+    ]
+}

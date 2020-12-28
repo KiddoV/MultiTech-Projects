@@ -80,8 +80,9 @@ Class AHK_Terminal {
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Send(Keyword, SendBreak := 0) {
+        This.TextReceived := ""
         This.CurrentCmdKeyword := Keyword
-        If Keyword Is Xdigit
+        If Keyword Is Digit
         {
             If (RS232_Write(This.RS232_FILEHANDLE, Keyword) == False) {
                 This.ErrMsg := "Could not sent data to COM!"
@@ -91,14 +92,16 @@ Class AHK_Terminal {
             Loop, Parse, Keyword
             {
                 dataCode := Asc(SubStr(A_LoopField, 0))
-                If (dataCode != "")
+                If (dataCode != "") {
                     If (RS232_Write(This.RS232_FILEHANDLE, dataCode) == False) {
                         This.ErrMsg := "Could not sent data to COM!"
                         Return False
                     } ; Send it out the RS232 COM port
+                }
             }
         }
         If (SendBreak) {
+            Sleep 1
             If (RS232_Write(This.RS232_FILEHANDLE, 13) == False) {
                 This.ErrMsg := "Could not sent data to COM!"
                 Return False
@@ -124,11 +127,10 @@ Class AHK_Terminal {
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Wait(WaitKeyword, Timeout := 1000) {
-        This.TextReceived := ""
         This.WaitMatchStrLine := ""
         This.WaitResult := -1
         
-        Loop, % Timeout / 40
+        Loop, % Timeout := Timeout / 40
         {   ;;With Tooltip, Time is different in Loop
             Sleep 1
             Loop, Parse, WaitKeyword, |
@@ -136,13 +138,8 @@ Class AHK_Terminal {
                 If (RegExMatch(This.TextReceived, "(.*)" . A_LoopField . "(.*)", inStr) >= 1) {
                     This.WaitResult := A_Index
                     This.WaitMatchStrLine := inStr
-                    Sleep 10
-                    Break
+                    Break 2
                 }
-            }
-            If (This.WaitResult != -1) {
-                Sleep 10
-                Break
             }
             If (A_Index == Timeout) {
                 This.WaitResult := 0
@@ -155,7 +152,6 @@ Class AHK_Terminal {
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     ReadData() {
-        noMoreMsg := 0
         Read_Data := RS232_Read(This.RS232_FILEHANDLE, "0xFF", RS232_BYTES_RECEIVED)
         if (RS232_Bytes_Received > 0) {
             Critical On
@@ -285,7 +281,6 @@ RS232_Close(RS232_FileHandle)
 ;########################################################################
 RS232_Write(RS232_FileHandle, Message)
 {	SetFormat, Integer, DEC
-	
 	; Parse the Message. Byte0 is the number of bytes in the array.
 	StringSplit, Byte, Message, `,
 	Data_Length := Byte0
@@ -304,15 +299,16 @@ RS232_Write(RS232_FileHandle, Message)
 	; MsgBox, Data string = %Data%
 	; ###### Write the data to the RS232 COM Port ######
 	WF_Result := DllCall("WriteFile"
-		,"UInt" , RS232_FileHandle ;File Handle
-		,"UInt" , &Data          ;Pointer to string to send
-		,"UInt" , Data_Length    ;Data Length
-		,"UInt*", Bytes_Sent     ;Returns pointer to num bytes sent
+		,"UInt" , RS232_FileHandle  ;File Handle
+		,"UInt" , &Data             ;Pointer to string to send
+		,"UInt" , Data_Length       ;Data Length
+		,"UInt*", Bytes_Sent        ;Returns pointer to num bytes sent
 		,"Int"  , "NULL")
 	
 	If ( WF_Result <> 1 or Bytes_Sent <> Data_Length )
         Return False
 		;MsgBox, Failed Dll WriteFile to RS232 COM, result=%WF_Result% `nData Length=%Data_Length% `nBytes_Sent=%Bytes_Sent%
+    Return True
 }
 
 ;########################################################################

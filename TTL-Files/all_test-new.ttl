@@ -1058,11 +1058,37 @@ wait '#'
 mpause 500
 sendln 'cd /opt/rs9113;bash /opt/rs9113/wlan_enable.sh >/dev/null 2>&1'
 wait '#' 'No such file or directory'
-if result=2 goto WIFI_FAILURE
+if result=2 then ;goto WIFI_FAILURE
+    sendln 13
+    str = ''
+    mpause 500
+    sendln '/etc/init.d/rs9113 stop >/dev/null 2>&1'
+    wait '#'
+	sendln "sed -i  's/COEX_MODE=[0-9]/COEX_MODE=5/' /etc/default/rs9113"
+	wait '#'
+	sendln '/etc/init.d/rs9113 start'
+	wait '#'
+endif
 mpause 500
 sendln '/opt/rs9113/onebox_util rpine0 create_vap wifi1 sta sw_bmiss'
 wait '#' 'No such file or directory'
-if result=2 goto WIFI_FAILURE
+if result=2 then ;goto WIFI_FAILURE
+    mpause 1000
+    sendln 13
+    send 13
+    str = ''
+    mpause 500
+    sendln '/etc/init.d/rs9113 stop >/dev/null 2>&1'
+    wait '#'
+	sendln "sed -i  's/COEX_MODE=[0-9]/COEX_MODE=5/' /etc/default/rs9113"
+	wait '#'
+	sendln '/etc/init.d/rs9113 start'
+	wait '#'
+	mpause 500
+	sendln '/opt/rs9113/onebox_util rpine0 create_vap wifi1 sta sw_bmiss'
+	wait '#' 'No such file or directory'
+	if result=2 goto WIFI_FAILURE
+endif
 mpause 500
 sendln 'ip link set dev wifi1 up'
 wait '#'
