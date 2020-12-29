@@ -53,7 +53,7 @@ TestEachXDot(index) {
     ;;Check Connection
     Sleep 500
     comObj.Send("at", 1)
-    comObj.Wait("OK", 10000)
+    comObj.Wait("OK")
     If (comObj.WaitResult == 1) {
         PrintToTerm(termObj, "SUCCESS", "Check!")
     } Else {
@@ -102,10 +102,8 @@ TestEachXDot(index) {
     tryNum := 1
     ;;Join Test
     PrintToTerm(termObj, "INFO", "---Begin Join Test---")
-    Sleep 500
     JOINT_TEST:
     comObj.Send("at+ni=1,XDOT-" . xTestPortName . "-NETWORK", 1)   ;;at+ni=1,XDOT-PORT1-NETWORK
-    ;Sleep 1000
     comObj.Wait("OK", 5000)
     If (comObj.WaitResult == 1) {
         PrintToTerm(termObj, "SUCCESS", "Check!")
@@ -113,9 +111,7 @@ TestEachXDot(index) {
         PrintToTerm(termObj, "FAIL", "TEST FAILED: Set NI failed!")
         Return 0
     }
-    ;Sleep 500
     comObj.Send("at+nk=1,XDOT-" . xTestPortName . "-PASSPHRASE", 1)
-    ;Sleep 1000
     comObj.Wait("OK", 5000)
     If (comObj.WaitResult == 1) {
         PrintToTerm(termObj, "SUCCESS", "Check!")
@@ -132,14 +128,13 @@ TestEachXDot(index) {
     comObj.Send("at+TXDR=DR3", 1)
     comObj.Wait("OK")
     
-    
     Sleep 500
     comObj.Send("at+join", 1)
-    comObj.Wait("Success|Fail", 8000)
+    comObj.Wait("Success", 8000)
     If (comObj.WaitResult == 1) {
         PrintToTerm(termObj, "SUCCESS", "Join network successfully!")
     } Else If (comObj.WaitResult != 1) {
-        If (tryNum < 3) {
+        If (tryNum < 100) {
             PrintToTerm(termObj, "FAIL", "Failed joining network. (Try: " . tryNum . ")")
             Sleep 500
             PrintToTerm(termObj, "WARNING", "Retry joining network...")
@@ -161,7 +156,7 @@ TestEachXDot(index) {
     Sleep 500
     PrintToTerm(termObj, "INFO", "---Begin Ping Test---")
     
-    PrintToTerm(termObj, "INFO", "--END")
+    PrintToTerm(termObj, "INFO", "-------END")
 }
 
 ;==========================================================================================;

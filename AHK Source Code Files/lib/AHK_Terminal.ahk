@@ -27,7 +27,7 @@ Class AHK_Terminal {
         
         This.WaitResult := -1
         This.WaitMatchStrLine := ""
-        This.TextReceived := ""
+        This.TextToWait := ""
     }
     
     ;=====================================================================;
@@ -80,7 +80,7 @@ Class AHK_Terminal {
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     Send(Keyword, SendBreak := 0) {
-        This.TextReceived := ""
+        This.TextToWait := ""
         This.CurrentCmdKeyword := Keyword
         If Keyword Is Digit
         {
@@ -130,12 +130,12 @@ Class AHK_Terminal {
         This.WaitMatchStrLine := ""
         This.WaitResult := -1
         
-        Loop, % Timeout := Timeout / 40
+        Loop, % Timeout := Timeout / 30
         {   ;;With Tooltip, Time is different in Loop
             Sleep 1
             Loop, Parse, WaitKeyword, |
             {   
-                If (RegExMatch(This.TextReceived, "(.*)" . A_LoopField . "(.*)", inStr) >= 1) {
+                If (RegExMatch(This.TextToWait, "(.*)" . A_LoopField . "(.*)", inStr) >= 1) {
                     This.WaitResult := A_Index
                     This.WaitMatchStrLine := inStr
                     Break 2
@@ -144,6 +144,7 @@ Class AHK_Terminal {
             If (A_Index == Timeout) {
                 This.WaitResult := 0
             }
+            This.ReadData()
         }
     }
     
@@ -153,7 +154,7 @@ Class AHK_Terminal {
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     ReadData() {
         Read_Data := RS232_Read(This.RS232_FILEHANDLE, "0xFF", RS232_BYTES_RECEIVED)
-        if (RS232_Bytes_Received > 0) {
+        If (RS232_Bytes_Received != "") {
             Critical On
             ASCII =
             Read_Data_Num_Bytes := StrLen(Read_Data) / 2 ;RS232_Read() returns 2 characters for each byte
@@ -167,11 +168,11 @@ Class AHK_Terminal {
 
                 ASCII_Chr := Chr(Byte)
                 textRecieved .= ASCII_Chr
-                This.TextReceived .= ASCII_Chr
+                This.TextToWait .= ASCII_Chr
             }
             Critical Off
             This.OutputBuffer .= textRecieved
-            ;This.TextReceived .= textRecieved ;RegExReplace(textRecieved, "\R+\R", "`r`n")
+            ;This.TextToWait .= textRecieved ;RegExReplace(textRecieved, "\R+\R", "`r`n")
             Return textRecieved
         }
     }

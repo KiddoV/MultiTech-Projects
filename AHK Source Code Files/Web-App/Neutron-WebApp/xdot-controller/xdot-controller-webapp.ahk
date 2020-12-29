@@ -98,7 +98,6 @@ ReadCOMMsg() {
         outMsg := TermComObj[index].ReadData()
         If (outMsg != "") {
             JQTermObj[index].echo(outMsg)
-            ;termOut := JQTermObj[index].get_output()
         }
         index++
     }
@@ -181,7 +180,7 @@ AutoGenerateJQTerminal() {
         html = 
         (LTrim
         <div class="d-inline-block pl-2">
-            <div class="card" style="width: 250px;">
+            <div class="card" style="width: 21vw;">
                 <div class="d-flex pl-1 pr-1" style="height: 19px;">
                     <p class="font-weight-bold"><i id="status-term-%terminalNumber%" class="fas fa-circle animated flash infinite slow icon-process"></i> #%terminalNumber% | COM%xMainPort%</p>
                     <span class="flex-grow-1"></span>
@@ -192,7 +191,7 @@ AutoGenerateJQTerminal() {
         </div>
         )
         NeutronWebApp.qs("#jq-terminal-container").insertAdjacentHTML("beforeend", html)
-        JQTermObj.Push(NeutronWebApp.wnd.initTerminal("term-" . terminalNumber, xIndex))      ;JS Func
+        JQTermObj.Push(NeutronWebApp.wnd.initTerminal("term-" . terminalNumber, terminalNumber))      ;JS Func
         comObj := new AHK_Terminal()
         If (!comObj.Connect(xMainPort)) {
             JQTermObj[xIndex].error(comObj.ErrMsg)
