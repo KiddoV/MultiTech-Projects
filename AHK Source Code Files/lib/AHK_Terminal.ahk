@@ -132,9 +132,13 @@ Class AHK_Terminal {
         
         Loop, % Timeout := Timeout / 30
         {   ;;With Tooltip, Time is different in Loop
+            ;VarSetCapacity(Data, 20, 0)
+            ;waitStatus := DllCall("WaitCommEvent", "UInt", This.RS232_FILEHANDLE, "UInt", &Data, "UInt", 0)
+            ;MsgBox % waitStatus
             Sleep 1
+            This.ReadData()
             Loop, Parse, WaitKeyword, |
-            {   
+            {
                 If (RegExMatch(This.TextToWait, "(.*)" . A_LoopField . "(.*)", inStr) >= 1) {
                     This.WaitResult := A_Index
                     This.WaitMatchStrLine := inStr
@@ -144,7 +148,6 @@ Class AHK_Terminal {
             If (A_Index == Timeout) {
                 This.WaitResult := 0
             }
-            This.ReadData()
         }
     }
     
@@ -152,9 +155,10 @@ Class AHK_Terminal {
     ;;Method: 
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
     ReadData() {
         Read_Data := RS232_Read(This.RS232_FILEHANDLE, "0xFF", RS232_BYTES_RECEIVED)
-        If (RS232_Bytes_Received != "") {
+        If (RS232_BYTES_RECEIVED != "") {
             Critical On
             ASCII =
             Read_Data_Num_Bytes := StrLen(Read_Data) / 2 ;RS232_Read() returns 2 characters for each byte
@@ -167,8 +171,8 @@ Class AHK_Terminal {
                 Byte := Byte + 0 ;Convert to Decimal
 
                 ASCII_Chr := Chr(Byte)
-                textRecieved .= ASCII_Chr
-                This.TextToWait .= ASCII_Chr
+                This.TextToWait .= ASCII_Chr, textRecieved .= ASCII_Chr
+                ;This.TextToWait .= ASCII_Chr
             }
             Critical Off
             This.OutputBuffer .= textRecieved

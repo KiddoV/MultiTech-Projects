@@ -186,7 +186,9 @@ AutoGenerateJQTerminal() {
                     <span class="flex-grow-1"></span>
                     <span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
                 </div>
-                <div id="term-%terminalNumber%" class="terminal allow-select-text" style="border-radius: 0 0 1`% 1`%;"></div>
+                <div style="height: 25vh;">
+                    <div id="term-%terminalNumber%" class="terminal allow-select-text" style="border-radius: 0 0 1`% 1`%; height: 100`%;"></div>
+                </div>
             </div>
         </div>
         )
@@ -230,7 +232,7 @@ SendTermCmd(neutron, jqTermObj, termCmd) {              ;;;Generaly used for all
 
 TestAllXDot(neutron, event) {
     xIndex := XDotPropObj.xdotProperties[1].index   ;;Get index by variable
-    Loop, % 1 ;XDotPropObj.xdotProperties.length()
+    Loop, % XDotPropObj.xdotProperties.length()
     {
         ;TestEachXDot_CallBack := Func("TestEachXDot_CallBack").Bind(XDotPropObj.xdotProperties[A_Index], A_Index)
         ;SetTimer, %TestEachXDot_CallBack%, 0

@@ -8,6 +8,7 @@ try = 1
 mtcdtipType = param2
 itemNumber = param3
 str2int isRunConfig param4
+promImei = 'N/A'
 radioType = param5
 mtcdtipTemp = 0
 radioVersion = 'N/A'
@@ -16,6 +17,7 @@ fwBuild = 'N/A'
 wifiAddr = 'N/A'
 bluetoothAddr = 'N/A'
 isCSQCheck = -1
+logStr = ''
 
 :CHECK_MTCDTIP_TYPE
 is266L = -1
@@ -63,10 +65,10 @@ endif
 
 ;=====================================;
 :CONNECTING
+timeout = 70 ; connection timeout in seconds
 flushrecv
 sprintf2 msg 'CONNECTING TO TERATERM...(%d)' try
 statusbox msg 'TERATERM CONNECTION'
-timeout = 70 ; connection timeout in seconds
 mpause 1000
 connect "192.168.2.1 /ssh /2 /auth=password /user=mtadm /passwd=root /nosecuritywarning"
 if result < 2 then
@@ -100,6 +102,7 @@ if isRunConfig=1 call CONFIG_STEP
 flushrecv
 timeout = 3
 statusbox 'CHECKING LED. PLEASE DO A VISUAL CHECK ON LED' 'CHECK LED'
+sendln 13
 bringupbox
 for i 1 2
 	mpause 300
@@ -429,17 +432,20 @@ endif
 statusbox 'SMC TEST PASSED' 'SMC PASSED'
 mpause 500
 send 24 ;Exit 'at' command promt
-closesbox
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 :SHORTING_MTCDTIP
 
 
 :GPS_TEST
-timeout = 20
+timeout = 35
 flushrecv
 statusbox 'CHECKING GPS...' 'GPS CHECK'
 mpause 500
+sendln 13
+sendln '/etc/init.d/gpsd restart'
+wait 'Restarting GPS'
+wait '#'
 sendln 'gpspipe -r'
 wait '$GPGGA' '$GPZDA' '$GPRMC' '$GPGSA' '$GNGLL' '$GPGSV' '$GNGSA'
 if result = 0 then
@@ -605,8 +611,8 @@ return	;;;;;;
 :CONFIG_STEP
 statusbox 'RUNNING CONFIGURATION STEP...' 'CONFIGURATION CONDUIT'
 config_vendor = 'Multi-Tech Systems'
-sprintf2 config_productId 'MTCDTIP-%s' itemNumber
-;config_productId = 'MTCDTIP-XXXX-XXXX'
+;sprintf2 config_productId 'MTCDTIP-%s' itemNumber
+config_productId = 'MTCDTIP-XXXX-XXXX'
 config_deviceId = '12345678'
 config_hwVers = 'MTCDTIP-0.0'
 config_macAddr = 'AA:08:00:AA:F1:F1'
@@ -632,12 +638,22 @@ if result = 0 then
 	closett
 	end
 endif
+flushrecv
 timeout = 20
 sendln '/etc/init.d/mts-io restart'
-mpause 5000
+wait 'OK' 'FAIL'
+if result=1 then
+    statusbox 'SUCCESSFULLY CONFIGURATION MTCDTIP!' 'CONFIGURATION FINISHED'
+else
+    closesbox
+    messagebox 'FAILED TO RUNNING CONFIGURATION. REBOOT DEVICE FAILED!' 'CONFIGURATION FAILURE'
+	closett
+	end	
+endif
+wait 'Resetting system modules'
 wait '#'
-statusbox 'SUCCESSFULLY CONFIGURATION MTCDTIP!' 'CONFIGURATION FINISHED'
 mpause 1000
+sendln 13
 return ;;;;;;
 
 :WIFI_FAILURE

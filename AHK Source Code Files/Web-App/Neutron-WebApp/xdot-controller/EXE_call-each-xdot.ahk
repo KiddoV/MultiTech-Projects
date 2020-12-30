@@ -53,8 +53,8 @@ TestEachXDot(index) {
     ;;Check Connection
     Sleep 500
     comObj.Send("at", 1)
-    comObj.Wait("OK")
-    If (comObj.WaitResult == 1) {
+    comObj.Wait("OK|ERROR")
+    If (comObj.WaitResult != 0) {
         PrintToTerm(termObj, "SUCCESS", "Check!")
     } Else {
         PrintToTerm(termObj, "FAIL", "TEST FAILED: No response on PORT " . xMainPort)
@@ -130,7 +130,7 @@ TestEachXDot(index) {
     
     Sleep 500
     comObj.Send("at+join", 1)
-    comObj.Wait("Success", 8000)
+    comObj.Wait("Success|Fail", 8000)
     If (comObj.WaitResult == 1) {
         PrintToTerm(termObj, "SUCCESS", "Join network successfully!")
     } Else If (comObj.WaitResult != 1) {
@@ -138,6 +138,7 @@ TestEachXDot(index) {
             PrintToTerm(termObj, "FAIL", "Failed joining network. (Try: " . tryNum . ")")
             Sleep 500
             PrintToTerm(termObj, "WARNING", "Retry joining network...")
+            Sleep 300
             comObj.Send("at&f", 1)
             comObj.Wait("OK")
             comObj.Send("at&w", 1)

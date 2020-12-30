@@ -165,6 +165,9 @@ RunTest() {
 runFuncTest(mtcdtipType, itemNumber, isRunConfig, radioType) {
     WinKill, 192.168.2.1
     ControlClick, Button1, Tera Term, , Left, 1
+    For xprocess in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'ttpmacro.exe' ")
+    Process, close, % xprocess.ProcessId
+    
     resetProcessStatus()
     Run, %ComSpec% /c cd C:\teraterm && TTPMACRO %MainTestFilePath% %mtcdtipType% %itemNumber% %isRunConfig% %radioType%, ,Hide
     
