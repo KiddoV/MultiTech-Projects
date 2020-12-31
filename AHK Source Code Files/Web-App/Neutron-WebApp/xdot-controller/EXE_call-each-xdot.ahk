@@ -27,7 +27,7 @@ If (!TestEachXDot(XDotIndex)) {
 TestEachXDot(index) {
     xDotProp := XDotPropObj.xdotProperties[index * 1]
     
-    testFirmwareVers := "3.0.2-debug-mbed144"
+    testFirmwareVers := "Nothing"
     xIndex := xDotProp.index
     xDriveLetter := xDotProp.driveLetter
     xMainPort := xDotProp.mainPort
@@ -42,7 +42,7 @@ TestEachXDot(index) {
         Return 0
     }
     
-    If (XComObj[index] != "")
+    If (IsObject(XComObj[index]))
         PrintToTerm(termObj, "WARNING", "Running test on PORT " . xMainPort . "...")
     Else {
         PrintToTerm(termObj, "FAIL", "SYSTEM ERROR: COM Object not created!")
@@ -73,6 +73,12 @@ TestEachXDot(index) {
         PrintToTerm(termObj, "FAIL", "Wrong test firmware version. Expecting: " . testFirmwareVers)
         Sleep 200
         PrintToTerm(termObj, "INFO", "Reprogram xDot to firmware " . testFirmwareVers . ", Please wait....")
+        XDotPropObj.xdotProperties[index * 1].comStatus := "R"
+        While !FileExist(xDriveLetter . ":\")
+        {
+            PrintToTerm(termObj, "WARNING", "Waiting for Drive: " . xDriveLetter . ":/ ...")
+            Sleep 400
+        }
         RunWait, %ComSpec% /c copy C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\bin-files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %xDriveLetter%:\, , Hide
         comObj.Disconnect()
         If (!comObj.Connect(xMbedPort, 9600)) {
@@ -87,11 +93,12 @@ TestEachXDot(index) {
             Return 0
         }
         PrintToTerm(termObj, "INFO", "Finished installing firmware!")
-        tryNum++
+        XDotPropObj.xdotProperties[index * 1].comStatus := "G"
         Sleep 300
-        If (tryNum < 3) 
+        If (tryNum < 3) {
+            tryNum++
             Goto CHECK_CURRENT_PROGRAM
-        Else {
+        } Else {
             PrintToTerm(termObj, "FAIL", "TEST FAILED: Could not reprogram xDot!")
             Return 0
         }
@@ -134,7 +141,7 @@ TestEachXDot(index) {
     If (comObj.WaitResult == 1) {
         PrintToTerm(termObj, "SUCCESS", "Join network successfully!")
     } Else If (comObj.WaitResult != 1) {
-        If (tryNum < 100) {
+        If (tryNum < 3) {
             PrintToTerm(termObj, "FAIL", "Failed joining network. (Try: " . tryNum . ")")
             Sleep 500
             PrintToTerm(termObj, "WARNING", "Retry joining network...")

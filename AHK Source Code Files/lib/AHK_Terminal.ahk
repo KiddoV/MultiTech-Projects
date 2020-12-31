@@ -18,7 +18,7 @@ Class AHK_Terminal {
         This.TransDelay := 0        ;0
         
         This.RS232_SETTINGS := ""
-        This.RS232_FILEHANDLE := ""
+        This.RS232_FILEHANDLE := 0
         
         This.CurrentCmdKeyword := ""
         This.OutputBuffer := ""
@@ -28,6 +28,10 @@ Class AHK_Terminal {
         This.WaitResult := -1
         This.WaitMatchStrLine := ""
         This.TextToWait := ""
+    }
+    
+    __Delete() {
+        This.Free()
     }
     
     ;=====================================================================;
@@ -51,6 +55,7 @@ Class AHK_Terminal {
         This.BitStop := BStop           ;1 bit|1.5 bit|2 bit
         This.TransDelay := TransD        ;0
         This.RS232_SETTINGS := ComPort . ":baud=" . Baud . " parity=" . Prty . " data=" . Data . " stop=" . BStop . " dtr=Off"
+        This.RS232_FILEHANDLE := 0
         
         ;;Validate
         If (RegExMatch(ComPort, "^COM\d+$") < 1) {
@@ -59,7 +64,7 @@ Class AHK_Terminal {
         }
         ;;Init
         This.RS232_FILEHANDLE := RS232_Initialize(This.RS232_SETTINGS)
-        If (This.RS232_FILEHANDLE = 0) {
+        If (This.RS232_FILEHANDLE == 0) {
             This.ErrMsg := "Failed connecting to COM port!"
             Return False
         }
@@ -73,6 +78,7 @@ Class AHK_Terminal {
     Disconnect() {
         RS232_Close(This.RS232_FILEHANDLE)
         This.Free()
+        This.RS232_FILEHANDLE := 0
     }
         
     ;=====================================================================;
@@ -115,9 +121,11 @@ Class AHK_Terminal {
     ;;Description: 
     ;;;;;;;;;;;;;;;;;;;;;;;;;;
     SendBreak() {
-        sendStatus := DllCall("SetCommBreak", "UInt", This.RS232_FILEHANDLE)
+        sendStatus := DllCall("SetCommBreak"
+            , "UInt", This.RS232_FILEHANDLE)
         If (sendStatus != 0) {
-            clearStatus := DllCall("ClearCommBreak", "UInt", This.RS232_FILEHANDLE)
+            clearStatus := DllCall("ClearCommBreak"
+                , "UInt", This.RS232_FILEHANDLE)
         }
         Return clearStatus
     }
@@ -132,9 +140,6 @@ Class AHK_Terminal {
         
         Loop, % Timeout := Timeout / 30
         {   ;;With Tooltip, Time is different in Loop
-            ;VarSetCapacity(Data, 20, 0)
-            ;waitStatus := DllCall("WaitCommEvent", "UInt", This.RS232_FILEHANDLE, "UInt", &Data, "UInt", 0)
-            ;MsgBox % waitStatus
             Sleep 1
             This.ReadData()
             Loop, Parse, WaitKeyword, |
@@ -154,12 +159,11 @@ Class AHK_Terminal {
     ;=====================================================================;
     ;;Method: 
     ;;Description: 
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;
-    
+    ;;;;;;;;;;;;;;;;;;;;;;;;;; 
     ReadData() {
         Read_Data := RS232_Read(This.RS232_FILEHANDLE, "0xFF", RS232_BYTES_RECEIVED)
         If (RS232_BYTES_RECEIVED != "") {
-            Critical On
+            ;Critical On
             ASCII =
             Read_Data_Num_Bytes := StrLen(Read_Data) / 2 ;RS232_Read() returns 2 characters for each byte
             textRecieved := ""
@@ -174,10 +178,33 @@ Class AHK_Terminal {
                 This.TextToWait .= ASCII_Chr, textRecieved .= ASCII_Chr
                 ;This.TextToWait .= ASCII_Chr
             }
-            Critical Off
+            ;Critical Off
             This.OutputBuffer .= textRecieved
             ;This.TextToWait .= textRecieved ;RegExReplace(textRecieved, "\R+\R", "`r`n")
             Return textRecieved
+        }
+    }
+    
+    ;=====================================================================;
+    ;;Method: 
+    ;;Description: 
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;
+    GetComStatus() {
+        ;funcStatus := DllCall("GetDevicePowerState"
+            ;,"UInt", This.RS232_FILEHANDLE
+            ;,"Int *", pfOn)
+        ;Return pfOn
+    
+        lpModemStat := ""
+        VarSetCapacity(lpModemStat, 10)
+        funcStatus := DllCall("GetCommModemStatus"
+            ,"UInt", This.RS232_FILEHANDLE      
+            ,"Int *", lpModemStat)              
+        If (funcStatus) {
+            If (lpModemStat == 16)
+                Return True
+            Else 
+                Return False
         }
     }
 }
@@ -241,6 +268,7 @@ RS232_Initialize(RS232_Settings)
 	{	; MsgBox, There is a problem with Serial Port communication. `nFailed Dll SetCommState, SCS_Result=%SCS_Result% `nThe Script Will Now Exit.
 		RS232_Close(RS232_FileHandle)
 		; Exit
+        Return 0
 	}
 
 	; ###### Create the SetCommTimeouts Structure ######
@@ -265,6 +293,7 @@ RS232_Initialize(RS232_Settings)
 	{	; MsgBox, There is a problem with Serial Port communication. `nFailed Dll SetCommState, SCT_result=%SCT_result% `nThe Script Will Now Exit.
 		RS232_Close(RS232_FileHandle)
 		; Exit
+        Return 0
 	} 
 	; Msgbox %RS232_FileHandle%
 	Return %RS232_FileHandle%
@@ -275,10 +304,12 @@ RS232_Initialize(RS232_Settings)
 ;########################################################################
 RS232_Close(RS232_FileHandle)
 {	; ###### Close the COM File ######
-	CH_result := DllCall("CloseHandle", "UInt", RS232_FileHandle)
-	If (CH_result <> 1)
-		; MsgBox, Failed Dll CloseHandle CH_result=%CH_result%
-	Return
+	funcStatus := DllCall("CloseHandle"
+        , "UInt", RS232_FileHandle)
+        
+	If (funcStatus == 0)
+		Return False
+	Return True
 }
 
 ;########################################################################
@@ -341,7 +372,7 @@ RS232_Read(RS232_FileHandle, Num_Bytes, ByRef RS232_Bytes_Received)
 	If (Read_Result <> 1)
 	{   ; MsgBox, There is a problem with Serial Port communication. `nFailed Dll ReadFile on RS232 COM, result=%Read_Result% - The Script Will Now Exit.
 		RS232_Close(RS232_FileHandle)
-		Exit
+		;Exit
 	}
 	
 	; ###### Format the received data ######
@@ -375,4 +406,45 @@ RS232_Read(RS232_FileHandle, Num_Bytes, ByRef RS232_Bytes_Received)
 	Data := Data_HEX
 	
 	Return Data
+}
+
+RS232_WaitCommEvent(RS232_FileHandle, Event := 0x3ff)
+{
+    /*
+    Events:
+    EV_BREAK:=0x0040 ;A break was detected on input.
+    EV_CTS:=0x0008 ;The CTS (clear-to-send) signal changed state.
+    EV_DSR:=0x0010 ;The DSR (data-set-ready) signal changed state.
+    EV_ERR:=0x0080 ;A line-status error occurred. Line-status errors are CE_FRAME, CE_OVERRUN, and CE_RXPARITY.
+    EV_RING:=0x0100 ;A ring indicator was detected.
+    EV_RLSD:=0x0020 ;The RLSD (receive-line-signal-detect) signal changed state.
+    EV_RXCHAR:=0x0001 ;A character was received and placed in the input buffer.
+    EV_RXFLAG:=0x0002 ;The event character was received and placed in the input buffer. The event character is specified in the device's DCB structure, which is applied to a serial port by using the SetCommState function.
+    EV_TXEMPTY:=0x0004 ;The last character in the output buffer was sent.
+    */
+    MaskSet := DllCall("SetCommMask"
+        ,"UInt" , RS232_FileHandle ;File Handle
+        ,"int", Event)          ;Mask
+    If !MaskSet
+    {
+        ;RS232_Close(RS232_FileHandle)
+        ;COMFail=1
+        Return False
+    }
+    
+    VarSetCapacity(Data, 4, 0)
+    
+    Success := DllCall("WaitCommEvent"
+         ,"UInt" , RS232_FileHandle ;File Handle
+         ,Ptr , &Data            ;Pointer to Event
+         ,Ptr , 0)
+    
+    if !Success
+    {
+        ;RS232_Close(RS232_FileHandle)
+        ;COMFail=1
+        Return False
+    }
+    Return True
+;  tooltip,% Errorlevel "`n" a_lasterror "`n" Success "`nEvent = " format("0x{:04x}",numget(Data,0,"Int64"))
 }

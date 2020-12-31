@@ -46,12 +46,12 @@ FileInstall C:\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-KR920-mbed
 FileInstall C:\MultiTech-Projects\BIN-Files\3.1.0\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\bin-files\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
+FileRead, xdotPropJson, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\xdot-properties.json
+Global XDotPropObj := JSON.Load(xdotPropJson)
+
 Global JSON := new JSON()
 Global JQTermObj := []
 Global TermComObj := []
-
-FileRead, xdotPropJson, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\xdot-properties.json
-Global XDotPropObj := JSON.Load(xdotPropJson)
 
 ;;Define Global Unique IDentifier! (For other script to access objects)
 Global guid1 := "{AAAAAAAA-1111-0000-1111-120100111116}"
@@ -86,8 +86,8 @@ ReadCOMMsg := Func("ReadCOMMsg").Bind()
 SetTimer, %ReadCOMMsg%, 0
 AutoCloseAPWindow := Func("AutoCloseAPWindow").Bind()
 SetTimer, %AutoCloseAPWindow%, 10
-;CheckCOMStatus := Func("CheckCOMStatus").Bind()
-;SetTimer, %CheckCOMStatus%, 200
+CheckCOMStatus := Func("CheckCOMStatus").Bind()
+SetTimer, %CheckCOMStatus%, 200
 Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;=======================================================================================;
 ;;;Callback Functions and Labels
@@ -104,22 +104,53 @@ ReadCOMMsg() {
 }
 
 CheckCOMStatus() {
-    index := XDotPropObj.xdotProperties[1].index
+    xIndex := XDotPropObj.xdotProperties[1].index
+    
     Loop, % XDotPropObj.xdotProperties.length()
     {
-        terminalNumber := Format("{1:02}", index)     ;Format to 2 digit number 01 02 03...
-        elId := "#status-term-" . terminalNumber
-        If (TermComObj[index].RS232_FILEHANDLE <> 0) {
-            NeutronWebApp.qs(elId).classList.remove("icon-process")
-            NeutronWebApp.qs(elId).classList.remove("icon-good")
-            NeutronWebApp.qs(elId).classList.add("icon-bad")
-        } Else {
-            NeutronWebApp.qs(elId).classList.remove("icon-process")
-            NeutronWebApp.qs(elId).classList.add("icon-good")
-            NeutronWebApp.qs(elId).classList.remove("icon-bad")
-        }
+        If (!IsObject(TermComObj[xIndex]))
+            Continue
+        xMainPort := XDotPropObj.xdotProperties[xIndex].mainPort
+        xCOMStatus := XDotPropObj.xdotProperties[xIndex].comStatus
+        xDriveLetter := XDotPropObj.xdotProperties[xIndex].driveLetter
         
-        index++
+        terminalNumber := Format("{1:02}", xIndex)     ;Format to 2 digit number 01 02 03...
+        elId := "#status-term-" . terminalNumber
+        
+        Try
+        {
+            ;DriveGet, driveStatus, Status, % xDriveLetter . ":/"    ;;;;THIS VERY LAG
+            If (!TermComObj[xIndex].GetComStatus() && driveStatus != "Ready") {
+                NeutronWebApp.qs(elId).classList.remove("icon-process")
+                NeutronWebApp.qs(elId).classList.remove("icon-good")
+                NeutronWebApp.qs(elId).classList.add("icon-bad")
+                
+                If (xCOMStatus == "G") {
+                    PrintToTerm(JQTermObj[xIndex], "WARNING" ,"COM" . xMainPort . " has been DISCONNECTED!")
+                    TermComObj[xIndex].Disconnect()
+                    XDotPropObj.xdotProperties[xIndex].comStatus := "F"
+                }
+            }
+            
+            If (driveStatus == "Ready") {
+                NeutronWebApp.qs(elId).classList.remove("icon-process")
+                NeutronWebApp.qs(elId).classList.add("icon-good")
+                NeutronWebApp.qs(elId).classList.remove("icon-bad")
+                
+                If (xCOMStatus == "F") {
+                    TermComObj[xIndex].Connect(xMainPort)
+                    PrintToTerm(JQTermObj[xIndex], "WARNING" ,"COM" . xMainPort . " has been RE-CONNECTED!")
+                    XDotPropObj.xdotProperties[xIndex].comStatus := "G"
+                }
+            }
+        }
+        Catch err
+        {
+            MsgBox % "Error in " err.What ", which was called at line " err.Line
+        }
+
+        
+        xIndex++
     }
 }
 
@@ -182,7 +213,7 @@ AutoGenerateJQTerminal() {
         <div class="d-inline-block pl-2">
             <div class="card" style="width: 21vw;">
                 <div class="d-flex pl-1 pr-1" style="height: 19px;">
-                    <p class="font-weight-bold"><i id="status-term-%terminalNumber%" class="fas fa-circle animated flash infinite slow icon-process"></i> #%terminalNumber% | COM%xMainPort%</p>
+                    <p class="font-weight-bold"><span id="status-term-%terminalNumber%" class="icon-bad"><i class="fas fa-circle animated flash infinite slow"></i></span> #%terminalNumber% | COM%xMainPort%</p>
                     <span class="flex-grow-1"></span>
                     <span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
                 </div>
@@ -197,11 +228,11 @@ AutoGenerateJQTerminal() {
         comObj := new AHK_Terminal()
         If (!comObj.Connect(xMainPort)) {
             JQTermObj[xIndex].error(comObj.ErrMsg)
-            xCOMStatus := "F"
+            XDotPropObj.xdotProperties[xIndex].comStatus := "F"
         } Else {
             JQTermObj[xIndex].echo("[[;lightgreen;]Successfully connecting to COM" . xMainPort . "]")
-            TermComObj.Push(comObj)
-            xCOMStatus := "G"
+            TermComObj[xIndex] := comObj
+            XDotPropObj.xdotProperties[xIndex].comStatus := "G"
         }
         
         xIndex++
@@ -249,7 +280,7 @@ TestBtn(neutron, event) {
 }
 
 TestBtn2(neutron, event) {
-    
+    TermComObj[1].Connect(101)
 }
 
 ;;;;;;;;;;;;Third party Functions
