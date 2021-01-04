@@ -23,6 +23,9 @@ If (!TestEachXDot(XDotIndex)) {
     
 }
 ;==========================================================================================;
+;;;;;Callback Functions
+
+;==========================================================================================;
 ;;;;;Main Functions
 TestEachXDot(index) {
     xDotProp := XDotPropObj.xdotProperties[index * 1]
@@ -54,7 +57,7 @@ TestEachXDot(index) {
     Sleep 500
     comObj.Send("at", 1)
     comObj.Wait("OK|ERROR")
-    If (comObj.WaitResult != 0) {
+    If (comObj.WaitResult > 0) {
         PrintToTerm(termObj, "SUCCESS", "Check!")
     } Else {
         PrintToTerm(termObj, "FAIL", "TEST FAILED: No response on PORT " . xMainPort)
@@ -72,14 +75,35 @@ TestEachXDot(index) {
     } Else {
         PrintToTerm(termObj, "FAIL", "Wrong test firmware version. Expecting: " . testFirmwareVers)
         Sleep 200
-        PrintToTerm(termObj, "INFO", "Reprogram xDot to firmware " . testFirmwareVers . ", Please wait....")
-        XDotPropObj.xdotProperties[index * 1].comStatus := "R"
         While !FileExist(xDriveLetter . ":\")
         {
             PrintToTerm(termObj, "WARNING", "Waiting for Drive: " . xDriveLetter . ":/ ...")
             Sleep 400
         }
-        RunWait, %ComSpec% /c copy C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\bin-files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %xDriveLetter%:\, , Hide
+        PrintToTerm(termObj, "INFO", "Reprogram xDot to firmware " . testFirmwareVers . ", Please wait....")
+        XDotPropObj.xdotProperties[index * 1].comStatus := "R"
+        
+        Run, %ComSpec% /c copy C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\bin-files\xdot-firmware-3.0.2-US915-mbed-os-5.4.7-debug.bin %xDriveLetter%:\, , Hide, winPID      
+        Process, Wait, %winPID%
+        oPrompt := termObj.get_prompt()
+        termObj.pause(1)
+        aIndex := 0
+        Loop
+        {
+            If (A_Index >= 100)
+                aIndex := 100
+            string := GetProgressBarString(aIndex)
+            termObj.set_prompt(string)
+            Sleep 170
+            
+            Process, Exist, %winPID%
+            If (ErrorLevel == 0)
+                Break
+            aIndex++
+        }
+        string := GetProgressBarString(100)
+        JQTermObj[XDotIndex].echo(string . " [[b;lightgreen;]OK]").set_prompt(oPrompt).resume()
+        
         comObj.Disconnect()
         If (!comObj.Connect(xMbedPort, 9600)) {
             PrintToTerm(termObj, "FAIL", "TEST FAILED: Could not connect to COM" . xMbedPort)
@@ -99,6 +123,7 @@ TestEachXDot(index) {
             tryNum++
             Goto CHECK_CURRENT_PROGRAM
         } Else {
+            Sleep 300
             PrintToTerm(termObj, "FAIL", "TEST FAILED: Could not reprogram xDot!")
             Return 0
         }
@@ -181,4 +206,21 @@ PrintToTerm(termObj, msgType, message) {
     } Else {
         termObj.echo("[[;white;]" . message . "]")
     }
+}
+
+GetProgressBarString(percent, width := 20) {
+    progSize := Round(width * percent / 100)
+    
+    left := "", taken := ""
+    Loop, % progSize
+        taken .= "="
+    If (StrLen(taken) > 0)
+        taken := taken . ">"
+    
+    Loop, % width - progSize
+        left .= " "
+    
+    progBar := "[" . taken . left . "] " . percent . "%"
+    
+    Return progBar
 }

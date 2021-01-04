@@ -108,8 +108,8 @@ CheckCOMStatus() {
     
     Loop, % XDotPropObj.xdotProperties.length()
     {
-        If (!IsObject(TermComObj[xIndex]))
-            Continue
+        ;If (!IsObject(TermComObj[xIndex]))
+            ;Continue
         xMainPort := XDotPropObj.xdotProperties[xIndex].mainPort
         xCOMStatus := XDotPropObj.xdotProperties[xIndex].comStatus
         xDriveLetter := XDotPropObj.xdotProperties[xIndex].driveLetter
@@ -119,8 +119,9 @@ CheckCOMStatus() {
         
         Try
         {
+            driveStatus := DllCall("GetDriveType", "Str", xDriveLetter ":\")
             ;DriveGet, driveStatus, Status, % xDriveLetter . ":/"    ;;;;THIS VERY LAG
-            If (!TermComObj[xIndex].GetComStatus() && driveStatus != "Ready") {
+            If (!TermComObj[xIndex].GetComStatus() && driveStatus != 2) {
                 NeutronWebApp.qs(elId).classList.remove("icon-process")
                 NeutronWebApp.qs(elId).classList.remove("icon-good")
                 NeutronWebApp.qs(elId).classList.add("icon-bad")
@@ -132,7 +133,7 @@ CheckCOMStatus() {
                 }
             }
             
-            If (driveStatus == "Ready") {
+            If (driveStatus == 2) {
                 NeutronWebApp.qs(elId).classList.remove("icon-process")
                 NeutronWebApp.qs(elId).classList.add("icon-good")
                 NeutronWebApp.qs(elId).classList.remove("icon-bad")
@@ -255,6 +256,24 @@ PrintToTerm(termObj, msgType, message) {
     }
 }
 
+GetProgressBarString(percent, width := 20) {
+    ;promt := termObj.get_prompt()
+    progSize := Round(width * percent / 100)
+    
+    left := "", taken := ""
+    Loop, % progSize
+        taken .= "="
+    If (StrLen(taken) > 0)
+        taken := taken . ">"
+    
+    Loop, % width - progSize
+        left .= " "
+    
+    progBar := "[" . taken . left . "] " . percent . "%"
+    
+    ;termObj.set_prompt(progBar)
+    Return progBar
+}
 ;;;;;;;;;;;;Functions For HTML Used
 SendTermCmd(neutron, jqTermObj, termCmd) {              ;;;Generaly used for all JQ-Terminals
     terminalId := jqTermObj.name()
@@ -280,7 +299,28 @@ TestBtn(neutron, event) {
 }
 
 TestBtn2(neutron, event) {
-    TermComObj[1].Connect(101)
+    ;TermComObj[1].Connect(101)
+    comObj := TermComObj[1]
+    termObj := JQTermObj[1]
+    ;oPrompt := JQTermObj[1].get_prompt()
+    ;JQTermObj[1].pause(1)
+    ;Loop, 100
+    ;{
+        ;string := GetProgressBarString(A_Index)
+        ;JQTermObj[1].set_prompt(string)
+        ;Sleep 100
+    ;}
+    ;JQTermObj[1].echo(string . " [[b;lightgreen;]OK]").set_prompt(oPrompt).resume()
+    
+    comObj.Send("at", 1)
+    comObj.Wait("OK|ERROR")
+    MsgBox % comObj.WaitResult
+    If (comObj.WaitResult > 0) {
+        PrintToTerm(termObj, "SUCCESS", "Check!")
+    } Else {
+        PrintToTerm(termObj, "FAIL", "TEST FAILED: No response on PORT " . xMainPort)
+        Return 0
+    }
 }
 
 ;;;;;;;;;;;;Third party Functions

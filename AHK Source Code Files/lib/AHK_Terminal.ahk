@@ -79,6 +79,7 @@ Class AHK_Terminal {
         RS232_Close(This.RS232_FILEHANDLE)
         This.Free()
         This.RS232_FILEHANDLE := 0
+        This.RS232_SETTINGS := ""
     }
         
     ;=====================================================================;
@@ -138,7 +139,7 @@ Class AHK_Terminal {
         This.WaitMatchStrLine := ""
         This.WaitResult := -1
         
-        Loop, % Timeout := Timeout / 30
+        Loop, % Timeout := Round(Timeout / 30)
         {   ;;With Tooltip, Time is different in Loop
             Sleep 1
             This.ReadData()
@@ -199,7 +200,8 @@ Class AHK_Terminal {
         VarSetCapacity(lpModemStat, 10)
         funcStatus := DllCall("GetCommModemStatus"
             ,"UInt", This.RS232_FILEHANDLE      
-            ,"Int *", lpModemStat)              
+            ,"Int *", lpModemStat)
+            
         If (funcStatus) {
             If (lpModemStat == 16)
                 Return True
@@ -221,7 +223,7 @@ RS232_Initialize(RS232_Settings)
 	RS232_Temp1_Len := StrLen(RS232_Temp1)  ; For COM Ports > 9 \\.\ needs to prepended to the COM Port name.
 	If (RS232_Temp1_Len > 4)                   ; So the valid names are
 		RS232_COM = \\.\%RS232_Temp1%             ; ... COM8  COM9   \\.\COM10  \\.\COM11  \\.\COM12 and so on...
-	else                                          
+	Else                                          
 		RS232_COM = \\.\%RS232_Temp1%
 	
 	; 8/10/09 A BIG Thanks to trenton_xavier for figuring out how to make COM Ports greater than 9 work for USB-Serial Dongles.
@@ -240,7 +242,7 @@ RS232_Initialize(RS232_Settings)
 		RS232_FileHandle := 0
 		Return %RS232_FileHandle%
 	}
-
+    
 	; ###### Create RS232 COM File ######
 	; Creates the RS232 COM Port File Handle
 	RS232_FileHandle := DllCall("CreateFile"
@@ -258,7 +260,7 @@ RS232_Initialize(RS232_Settings)
 		RS232_FileHandle := 0
 		Return %RS232_FileHandle%
 	}
-
+    
 	; ###### Set COM State ######
 	; Sets the RS232 COM Port number, baud rate,...
 	SCS_Result := DllCall("SetCommState"

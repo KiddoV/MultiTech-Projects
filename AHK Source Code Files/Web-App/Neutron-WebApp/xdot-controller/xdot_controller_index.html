@@ -147,7 +147,8 @@ function initTerminal(termCSSId, termNum) {
 				name: termNum,
 				prompt: '> ',
 				echoCommand: false,
-				scrollOnEcho: false
+				scrollOnEcho: false,
+				pauseEvents: true
 		});
 	return termObj;
 }
