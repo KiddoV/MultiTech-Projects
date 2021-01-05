@@ -164,14 +164,14 @@ a, a:hover, a:focus {
 
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
-/* jQuery Terminal Mod*/
+/*********** jQuery Terminal Mod ***********/
 .terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
     font-size: 11px;
     line-height: 11px;
 		z-index: 96;
 }
 
-/* Boostrap Mod */
+/*********** Boostrap Mod ***********/
 .btn,.btn:focus,.btn:active,.navbar-toggler,.navbar-toggler:focus {
 	border: none !important;
   outline: none !important;	/* Get rid of the ugly dot border */
@@ -195,4 +195,21 @@ a, a:hover, a:focus {
 }
 .modal-body {
 	padding: 0;
+}
+
+/* Tab Pill */
+.ctrler-tab .nav-pills .nav-item .nav-link.active {
+	background-color: #2e3951;
+	border-radius: 4px 4px 0 0;
+	font-weight: bold;
+}
+.ctrler-tab .nav-pills .nav-item .nav-link:not(.active) {
+	background-color: #9E9E9E;
+	color: #EEEEEE;
+	border-radius: 4px 4px 0 0;
+	font-weight: bold;
+}
+.ctrler-tab .tab-content {
+	border: solid 2px #2e3951;
+	border-radius: 0 0 4px 4px;
 }

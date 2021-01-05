@@ -30,7 +30,7 @@ If (!TestEachXDot(XDotIndex)) {
 TestEachXDot(index) {
     xDotProp := XDotPropObj.xdotProperties[index * 1]
     
-    testFirmwareVers := "Nothing"
+    testFirmwareVers := "3.0.2-debug-mbed144"
     xIndex := xDotProp.index
     xDriveLetter := xDotProp.driveLetter
     xMainPort := xDotProp.mainPort

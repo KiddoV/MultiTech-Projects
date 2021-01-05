@@ -108,7 +108,7 @@ mpause 2000
 :check_cell_connection
 sprintf2 msg 'CHECKING CELL CONNECTION...(%d)' try
 statusbox msg 'STEP 1'
-timeout = 2
+timeout = 30
 flushrecv
 send 13
 wait '#'

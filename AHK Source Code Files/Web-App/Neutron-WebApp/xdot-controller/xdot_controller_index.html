@@ -21,12 +21,16 @@
 	<script src="jquery.terminal.min.js"></script>
 	<link href="jquery.terminal.min.css" rel="stylesheet"/>
 
+	<!-- JQuery Lined Textarea -->
+	<script src="jquery-linedtextarea.js"></script>
+	<link href="jquery-linedtextarea.css" rel="stylesheet"/>
+
   <!-- Custom CSS and JS -->
   <link href="xdot_ctrler_main.css" rel="stylesheet">
   <script src="xdot_ctrler_main.js"></script>
 </head>
 
-<body class="bg-app-color no-select-text" oncontextmenu="return false;">
+<body class="bg-app-color no-select-text" onresize="onResizeWindow()" oncontextmenu="return false;">
 	<!--=======================================================================-->
 	<!-- Title Bar -->
   <header class="position-sticky"><!------------------------------------------------>
@@ -46,8 +50,9 @@
 
 	<!--=======================================================================-->
   <!-- Main Content -->
-  <main class="p-2">
-			<div id="jq-terminal-container" class="">
+  <main class="p-2" class="container">
+		<div class="row pr-2 pl-2">
+			<div id="jq-terminal-container" class="col-xl-9 p-0 m-0">
 				<!-- <div>
 					<div class="card" style="width: 250px;">
 						<div class="d-flex pl-1 pr-1" style="height: 19px;">
@@ -59,10 +64,49 @@
 					</div>
 				</div> -->
 			</div>
-			<button class="btn btn-primary btn-sm" onclick="ahk.TestAllXDot(this)">Test All</button>
-			<button class="btn btn-primary btn-sm" onclick="ahk.TestBtn2(this)">Test 2</button>
-  </main>
 
+			<div id="controller-container" class="col-xl-3 p-0 m-0" style="">
+				<div class="card mr-2 pb-2" style="height: 93.5vh">
+					<div class="card-body p-2">
+						<div class="ctrler-tab">
+							<ul class="nav nav-pills">
+							  <li class="nav-item pr-1"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-1-1">XDot Testing</a></li>
+							  <li class="nav-item"><a class="nav-link p-1" data-toggle="tab" href="#tab-1-2">XDot Programming</a></li>
+							</ul>
+							<div class="tab-content p-2" style="height: 23vh;">
+								<div class="tab-pane fade show active" id="tab-1-1">
+									Hello 1
+								</div>
+								<div class="tab-pane fade" id="tab-1-2">
+									Hello 2
+								</div>
+							</div>
+						</div>
+
+						<div class="pt-2">
+							<div class="ctrler-tab">
+								<ul class="nav nav-pills">
+									<li class="nav-item"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-2-1">XDot EUI</a></li>
+								</ul>
+								<div class="tab-content p-2" style="height: calc(65vh - 30px);">
+									<div class="tab-pane fade show active" id="tab-2-1">
+										<div style="">
+											<textarea id="eui-editor" class="allow-select-text" rows="24" cols="40" style="">
+											</textarea>
+										</div>
+									</div>
+								</div>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+		</div>
+	</main>
+
+	<!-- <button class="btn btn-primary btn-sm" onclick="ahk.TestAllXDot(this)">Test All</button>
+	<button class="btn btn-primary btn-sm" onclick="ahk.TestBtn2(this)">Test 2</button> -->
 	<!--=======================================================================-->
 	<!-- ==== All Popup Modals ==== -->
 	<!-- Settings Modal -->
@@ -155,6 +199,18 @@ function initTerminal(termCSSId, termNum) {
 
 //============================================================================//
 ////  FUNCTIONs AS NORMAL FOR HTML USED ////
+function onResizeWindow() {
+	var winW = window.outerWidth;
+  var winH = window.outerHeight;
+	document.getElementById("eui-editor").value = winW + ":" + winH;
+	document.getElementById("eui-editor").width = "300px";
+}
+
+$(function() {
+	$("#eui-editor").linedtextarea({
+		selectedLine: 24
+	});
+});
 
 </script>
 </html>

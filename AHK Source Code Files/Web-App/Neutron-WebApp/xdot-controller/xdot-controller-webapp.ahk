@@ -64,14 +64,14 @@ Global NeutronWebApp := new NeutronWindow()
 
 NeutronWebApp.Load("xdot_controller_index.html")
 
-NeutronWebApp.Gui("+MinSize1200x900 +LabelXDotCtrler")
+NeutronWebApp.Gui("+MinSize1400x900 +LabelXDotCtrler")
 
 ;;;Run BEFORE WebApp Started;;;
 RegRead, ieVers, HKLM, Software\Microsoft\Internet Explorer, svcVersion     ;;;Check Internet Explorer version
 NeutronWebApp.qs("#title-label").innerHTML := "XDot Controller"    ;;;;Set app title
 
 ;Display the Neutron main window
-NeutronWebApp.Show("w1200 h900")
+NeutronWebApp.Show("w1400 h900")
 
 ;;;Run AFTER WebApp Started;;;
 AutoGenerateJQTerminal()
@@ -212,7 +212,7 @@ AutoGenerateJQTerminal() {
         html = 
         (LTrim
         <div class="d-inline-block pl-2">
-            <div class="card" style="width: 21vw;">
+            <div class="card" style="width: 18vw;">
                 <div class="d-flex pl-1 pr-1" style="height: 19px;">
                     <p class="font-weight-bold"><span id="status-term-%terminalNumber%" class="icon-bad"><i class="fas fa-circle animated flash infinite slow"></i></span> #%terminalNumber% | COM%xMainPort%</p>
                     <span class="flex-grow-1"></span>
