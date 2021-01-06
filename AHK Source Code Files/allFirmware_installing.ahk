@@ -16,31 +16,30 @@ Global isMTCAP := False
 Global productName := ""
 
 ;Firmware list
-Global allFirmwares := ["mLinux 4.0.1", "mLinux 4.0.1 - NO WiFi", "mLinux 4.1.9", "mLinux 4.1.9 - NO WiFi", "mLinux 5.1.8", "mLinux 5.1.8 - NO WiFi", "mLinux 5.2.7", "mLinux-Sag 5.1.8", "AEP 1.4.3", "AEP 1.6.4", "AEP 1.7.4", "AEP 5.0.0", "AEP 5.1.2", "AEP 5.1.5", "AEP 5.1.6", "AEP 5.2.1", "Actility 2.2.9"]
-Global allMtcapFirmwares := ["mLinux 5.1.8", "AEP 5.1.6", "AEP 5.2.1"]
+Global allMTCDTFirmwareProperties := [{}]
+allMTCDTFirmwareProperties[1] := {fwName: "mLinux 4.0.1", fwPath: "C:\vbtest\MTCDT\mLinux-4.0.1-2x7\mtcdt-rs9113-flash-full-4.0.1.tcl"}
+allMTCDTFirmwareProperties[2] := {fwName: "mLinux 4.0.1 - NO WiFi", fwPath: "C:\vbtest\MTCDT\mLinux-4.0.1-no-WiFiBT\mtcdt-flash-full-4.0.1.tcl"}
+allMTCDTFirmwareProperties[3] := {fwName: "mLinux 4.1.9", fwPath: "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"}
+allMTCDTFirmwareProperties[4] := {fwName: "mLinux 4.1.9 - NO WiFi", fwPath: "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-full-4.1.9.tcl"}
+allMTCDTFirmwareProperties[5] := {fwName: "mLinux 5.1.8", fwPath: "C:\vbtest\MTCDT\mLinux-5.1.8-2x7\mtcdt-rs9113-flash-full-5.1.8.tcl"}
+allMTCDTFirmwareProperties[6] := {fwName: "mLinux 5.1.8 - NO WiFi", fwPath: "C:\vbtest\MTCDT\mLinux-5.1.8-no-WiFiBT\mtcdt-flash-full-5.1.8.tcl"}
+allMTCDTFirmwareProperties[7] := {fwName: "mLinux 5.2.7", fwPath: "C:\vbtest\MTCDT\mLinux-5.2.7\mtcdt-flash-full-5.2.7.tcl"}
+allMTCDTFirmwareProperties[8] := {fwName: "mLinux-Sag 5.1.8", fwPath: "C:\vbtest\MTCDT\MLINUX_SagecomImage_518\mtcdt-flash-full-5.1.8.tcl"}
+allMTCDTFirmwareProperties[9] := {fwName: "AEP 1.4.3", fwPath: "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"}
+allMTCDTFirmwareProperties[10] := {fwName: "AEP 1.6.4", fwPath: "C:\vbtest\MTCDT\AEP-1_6_4\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[11] := {fwName: "AEP 1.7.4", fwPath: "C:\vbtest\MTCDT\AEP-1_7_4\mtcdt-flash-full-AEP_174.tcl"}
+allMTCDTFirmwareProperties[12] := {fwName: "AEP 5.0.0", fwPath: "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[13] := {fwName: "AEP 5.1.2", fwPath: "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[14] := {fwName: "AEP 5.1.5", fwPath: "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[15] := {fwName: "AEP 5.1.6", fwPath: "C:\vbtest\MTCDT\AEP-5_1_6\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[16] := {fwName: "AEP 5.2.1", fwPath: "C:\vbtest\MTCDT\AEP-5_2_1\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[17] := {fwName: "AEP 5.3.0", fwPath: "C:\vbtest\MTCDT\AEP-5_3_0\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[18] := {fwName: "Actility 2.2.9", fwPath: "C:\vbtest\MTCDT\v2.2.9-LoRa-H\Generic-915\mtcdt-flash-Generic-915-v2_2_9-LoRa-H.production.tcl"}
 
-;;Paths and Links
-Global mli401Path := "C:\vbtest\MTCDT\mLinux-4.0.1-2x7\mtcdt-rs9113-flash-full-4.0.1.tcl"
-Global mli401NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.0.1-no-WiFiBT\mtcdt-flash-full-4.0.1.tcl"
-Global mli419Path := "C:\vbtest\MTCDT\mLinux-4.1.9-2x7\mtcdt-rs9113-flash-full-4.1.9.tcl"
-Global mli419NoWiFPath := "C:\vbtest\MTCDT\mLinux-4.1.9-no-WiFiBT\mtcdt-flash-full-4.1.9.tcl"
-Global mli518Path := "C:\vbtest\MTCDT\mLinux-5.1.8-2x7\mtcdt-rs9113-flash-full-5.1.8.tcl"
-Global mli518NoWiFPath := "C:\vbtest\MTCDT\mLinux-5.1.8-no-WiFiBT\mtcdt-flash-full-5.1.8.tcl"
-Global mli527Path := "C:\vbtest\MTCDT\mLinux-5.2.7\mtcdt-flash-full-5.2.7.tcl"
-Global mliSag518Path := "C:\vbtest\MTCDT\MLINUX_SagecomImage_518\mtcdt-flash-full-5.1.8.tcl"
-Global aep143Path := "C:\vbtest\MTCDT\AEP-1_4_3\mtcdt-flash-full-AEP.001.tcl"
-Global aep164Path := "C:\vbtest\MTCDT\AEP-1_6_4\mtcdt-flash-full-AEP.tcl"
-Global aep174Path := "C:\vbtest\MTCDT\AEP-1_7_4\mtcdt-flash-full-AEP_174.tcl"
-Global aep500Path := "C:\vbtest\MTCDT\AEP-5_0_0\mtcdt-flash-full-AEP.tcl"
-Global aep512Path := "C:\vbtest\MTCDT\AEP-5_1_2\mtcdt-flash-full-AEP.tcl"
-Global aep515Path := "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"
-Global aep516Path := "C:\vbtest\MTCDT\AEP-5_1_6\mtcdt-flash-full-AEP.tcl"
-Global aep521Path := "C:\vbtest\MTCDT\AEP-5_2_1\mtcdt-flash-full-AEP.tcl"
-Global acti229Path := "C:\vbtest\MTCDT\v2.2.9-LoRa-H\Generic-915\mtcdt-flash-Generic-915-v2_2_9-LoRa-H.production.tcl"
-
-Global mtcapMLinux518Path := "C:\vbtest\MTCAP\mLinux_v5_1_8\mtcap-flash-full-5.1.8.tcl"
-Global mtcapAep516Path := "C:\vbtest\MTCAP\AEP_v5_1_6\mtcap-flash-full-AEP.tcl"
-Global mtcapAep521Path := "C:\vbtest\MTCAP\AEP_v5_2_1\mtcap-flash-full-AEP521.tcl"
+Global allMTCAPFirmwareProperties := [{}]
+allMTCAPFirmwareProperties[1] := {fwName: "mLinux 5.1.8", fwPath: "C:\vbtest\MTCAP\mLinux_v5_1_8\mtcap-flash-full-5.1.8.tcl"}
+allMTCAPFirmwareProperties[2] := {fwName: "AEP 5.1.6", fwPath: "C:\vbtest\MTCAP\AEP_v5_1_6\mtcap-flash-full-AEP.tcl"}
+allMTCAPFirmwareProperties[3] := {fwName: "AEP 5.2.1", fwPath: "C:\vbtest\MTCAP\AEP_v5_2_1\mtcap-flash-full-AEP521.tcl"}
 
 ;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
@@ -75,11 +74,11 @@ Gui Font, Bold
 Gui Add, Text, x11 y4 w100 vproLabel, MTCDT
 Gui Font
 Gui Add, GroupBox, x8 y24 w186 h60 Section, Select Firmware Version
-For each, item in allFirmwares
-    firmware .= (each == 1 ? "" : "|") . item
+For each, item in allMTCDTFirmwareProperties
+    firmware .= (each == 1 ? "" : "|") . item.fwName
 Gui Add, DropDownList, x16 y50 w169 vfware Choose1, %firmware%
-For each, item in allMtcapFirmwares
-    firmware2 .= (each == 1 ? "" : "|") . item
+For each, item in allMTCAPFirmwareProperties
+    firmware2 .= (each == 1 ? "" : "|") . item.fwName
 Gui Add, DropDownList, x16 y50 w169 vmtcapFware +Hidden Choose1, %firmware2%
 Gui Add, CheckBox, x9 y90 h23 vcheck, % " Included Re-Program Step"
 Gui Add, Button, x60 y124 w80 h23 gmainRun, &RUN
@@ -250,49 +249,39 @@ install_firmware(fw, chk) {
         addToProgressBar(10)
         
         If (isMTCDT) {
-            If (fw = "mLinux 4.0.1")
-                ControlSetText, Edit1, %mli401Path%, Select Script File.*
-            If (fw = "mLinux 4.0.1 - NO WiFi")
-                ControlSetText, Edit1, %mli401NoWiFPath%, Select Script File.*
-            If (fw = "mLinux 4.1.9")
-                ControlSetText, Edit1, %mli419Path%, Select Script File.*
-            If (fw = "mLinux 4.1.9 - NO WiFi")
-                ControlSetText, Edit1, %mli419NoWiFPath%, Select Script File.*
-            If (fw = "mLinux 5.1.8")
-                ControlSetText, Edit1, %mli518Path%, Select Script File.*
-            If (fw = "mLinux 5.1.8 - NO WiFi")
-                ControlSetText, Edit1, %mli518NoWiFPath%, Select Script File.*
-            If (fw = "mLinux 5.2.7")
-                ControlSetText, Edit1, %mli527Path%, Select Script File.*
-            If (fw = "mLinux-Sag 5.1.8")
-                ControlSetText, Edit1, %mliSag518Path%, Select Script File.*
-            If (fw = "AEP 1.4.3")
-                ControlSetText, Edit1, %aep143Path%, Select Script File.*
-            If (fw = "AEP 1.6.4")
-                ControlSetText, Edit1, %aep164Path%, Select Script File.*
-            If (fw = "AEP 1.7.4")
-                ControlSetText, Edit1, %aep174Path%, Select Script File.*
-            If (fw = "AEP 5.0.0")
-                ControlSetText, Edit1, %aep500Path%, Select Script File.*
-            If (fw = "AEP 5.1.2")
-                ControlSetText, Edit1, %aep512Path%, Select Script File.*
-            If (fw = "AEP 5.1.5")
-                ControlSetText, Edit1, %aep515Path%, Select Script File.*
-            If (fw = "AEP 5.1.6")
-                ControlSetText, Edit1, %aep516Path%, Select Script File.*
-            If (fw = "AEP 5.2.1")
-                ControlSetText, Edit1, %aep521Path%, Select Script File.*
-            If (fw = "Actility 2.2.9")
-                ControlSetText, Edit1, %acti229Path%, Select Script File.*
+            Loop, % allMTCDTFirmwareProperties.Length()
+            {
+                If (fw == allMTCDTFirmwareProperties[A_Index].fwName) {
+                    fwPath := allMTCDTFirmwareProperties[A_Index].fwPath
+                    If !FileExist(fwPath) {
+                        MsgBox, 16, File Not Found, % "Could not located this file: `n<" fwPath " >`nPlease check if file is presented!"
+                        GuiControl,, progress, 0
+                        WinKill, Select Script File.*
+                        WinKill, SAM-BA.*
+                        Return
+                    }
+                    ControlSetText, Edit1, %fwPath%, Select Script File.*
+                    Break
+                }
+            }
         }
         
         If (isMTCAP) {
-            If (fw = "mLinux 5.1.8")
-                ControlSetText, Edit1, %mtcapMLinux518Path%, Select Script File.*
-            If (fw = "AEP 5.1.6")
-                ControlSetText, Edit1, %mtcapAep516Path%, Select Script File.*
-            If (fw = "AEP 5.2.1")
-                ControlSetText, Edit1, %mtcapAep521Path%, Select Script File.*
+            Loop, % allMTCAPFirmwareProperties.Length()
+            {
+                If (fw == allMTCAPFirmwareProperties[A_Index].fwName) {
+                    fwPath := allMTCAPFirmwareProperties[A_Index].fwPath
+                    If !FileExist(fwPath) {
+                        MsgBox, 16, % "File Not Found, Could not located this file: `n<" fwPath " >`nPlease check if file is presented!"
+                        GuiControl,, progress, 0
+                        WinKill, Select Script File.*
+                        WinKill, SAM-BA.*
+                        Return
+                    }
+                    ControlSetText, Edit1, %fwPath%, Select Script File.*
+                    Break
+                }
+            }
         }
         
         

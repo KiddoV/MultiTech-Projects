@@ -181,6 +181,9 @@ FileInstall, font-googleapi.css, font-googleapi.css
 ;;JQuery Terminal lib
 FileInstall, jquery.terminal.min.js, jquery.terminal.min.js
 FileInstall, jquery.terminal.min.css, jquery.terminal.min.css
+;;Code Mirror lib
+FileInstall, codemirror.js, codemirror.js
+FileInstall, codemirror.css, codemirror.css
 
 ;;Buit-in Images
 ;=======================================================================================;
@@ -295,32 +298,12 @@ TestAllXDot(neutron, event) {
 
 
 TestBtn(neutron, event) {
-    
+
 }
 
 TestBtn2(neutron, event) {
-    ;TermComObj[1].Connect(101)
-    comObj := TermComObj[1]
-    termObj := JQTermObj[1]
-    ;oPrompt := JQTermObj[1].get_prompt()
-    ;JQTermObj[1].pause(1)
-    ;Loop, 100
-    ;{
-        ;string := GetProgressBarString(A_Index)
-        ;JQTermObj[1].set_prompt(string)
-        ;Sleep 100
-    ;}
-    ;JQTermObj[1].echo(string . " [[b;lightgreen;]OK]").set_prompt(oPrompt).resume()
-    
-    comObj.Send("at", 1)
-    comObj.Wait("OK|ERROR")
-    MsgBox % comObj.WaitResult
-    If (comObj.WaitResult > 0) {
-        PrintToTerm(termObj, "SUCCESS", "Check!")
-    } Else {
-        PrintToTerm(termObj, "FAIL", "TEST FAILED: No response on PORT " . xMainPort)
-        Return 0
-    }
+    codeMirrObj := NeutronWebApp.wnd.euiEditor
+    MsgBox % codeMirrObj.lineCount()
 }
 
 ;;;;;;;;;;;;Third party Functions

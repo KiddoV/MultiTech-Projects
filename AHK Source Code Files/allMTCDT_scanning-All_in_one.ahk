@@ -19,7 +19,7 @@ FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-S
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global 240_SKUNums := ["94557670LF", "94557673LF", "94557700LF", "94557716LF"]
-Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557575LF", "94557576LF", "94557601LF", "94557605LF"]
+Global 246_SKUNums := ["94557252LF", "94557543LF", "94557574LF", "94557575LF", "94557576LF", "94557585LF", "94557601LF", "94557605LF"]
 Global 247_SKUNums := ["94557274LF", "94557291LF", "94557550LF", "94557593LF", "94557594LF", "94557617LF"]
     
 FormatTime, TimeString, %A_Now%, yyyy-MM-dd hh:mm
@@ -118,6 +118,14 @@ mainStart() {
     If (whichTab = "247L")
         skuNum := skuNum3
     
+    ;;Add value to check for MTAC present
+    Global checkMtac := ""
+    If (RegExMatch(skuNum, "94557585LF")) {
+        checkMtac := "Check2"
+    } Else If (RegExMatch(skuNum, "94557700LF")) {
+        checkMtac := "Check1"
+    }
+    
     ;Global skuNumPath := %skuNum%Path
     Global labelType := getLabelType()
     
@@ -159,7 +167,7 @@ mainStart() {
     ;Input datas
     SB_SetText("Sending datas to Teraterm Macro")
     WinWait ALL DATAS
-    ControlSetText, Edit1, %labelType%`,%skuNum%`,%serialN%`,%nodeIdN%`,%imeiN%`,%uuidN%`,%loraN%`,%wifiN%, ALL DATAS
+    ControlSetText, Edit1, %labelType%`,%skuNum%`,%serialN%`,%nodeIdN%`,%imeiN%`,%uuidN%`,%loraN%`,%wifiN%`,%checkMtac%, ALL DATAS
     ControlSend, Edit1, {Enter}, ALL DATAS
     ControlClick, Button1, ALL DATAS, , Left, 3 ;Do this if ControlSend not working
     
@@ -357,7 +365,7 @@ changeValueDropdown() {
 ;LABELTYPE8 -- Serial, NodeID, UUID, WIFI
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
-    LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF", "94557575LF", "94557601LF"]
+    LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF", "94557575LF", "94557601LF", "94557585LF"]
     LABELTYPE3 := ["94557576LF", "94557670LF", "94557673LF", "94557605LF"]
     LABELTYPE4 := ["94557291LF", "94557594LF", "94557617LF"]
     LABELTYPE5 := ["94557550LF"]

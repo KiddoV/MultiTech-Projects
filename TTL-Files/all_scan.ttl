@@ -62,6 +62,7 @@ imeiNum = groupmatchstr5
 uuidNum = groupmatchstr6
 nodeLoraNum = groupmatchstr7
 nodeWifiNum = groupmatchstr8
+checkMTAC = groupmatchstr9
 
 strcompare labelType 'LABELTYPE1'
 isType1 = result
@@ -79,6 +80,10 @@ strcompare labelType 'LABELTYPE7'
 isType7 = result
 strcompare labelType 'LABELTYPE8'
 isType8 = result
+
+flushrecv
+strlen checkMTAC
+if result > 1 call CHECK_MTAC_INSTALL
 
 if isType1 = 0 goto START_EEPROM
 if isType5 = 0 || isType7 = 0 goto check_lora
@@ -349,3 +354,37 @@ closesbox
 messagebox msg 'SCAN COMPLETED'
 disconnect
 end
+
+;;;;;;;;;;;;;;;;;Additional Labels;;;;;;;;;;;;;;;;;;;;;;
+:CHECK_MTAC_INSTALL
+flushrecv
+strcompare checkMTAC 'Check2'
+if result = 0 then
+    sendln 03
+    sendln 'mts-io-sysfs show ap1/device-id'
+	waitln 'No such file' '20' '21' '80'
+	if result = 1 then
+	    messagebox 'MTAC NOT FOUND IN PORT AP 1. PLEASE CHECK!' 'MTAC FAILURE'
+	    end
+	endif
+	
+	sendln 03
+    sendln 'mts-io-sysfs show ap2/device-id'
+	waitln 'No such file' '20' '21' '80'
+	if result = 1 then
+	    messagebox 'MTAC NOT FOUND IN PORT AP 2. PLEASE CHECK!' 'MTAC FAILURE'
+	    end
+	endif	
+endif
+strcompare checkMTAC 'Check1'
+if result = 0 then
+    sendln 03
+    sendln 'mts-io-sysfs show ap1/device-id'
+	waitln 'No such file' '20' '21' '80'
+	if result = 1 then
+	    messagebox 'MTAC NOT FOUND IN PORT AP 1. PLEASE CHECK!' 'MTAC FAILURE'
+	    end
+	endif
+endif
+
+Return
