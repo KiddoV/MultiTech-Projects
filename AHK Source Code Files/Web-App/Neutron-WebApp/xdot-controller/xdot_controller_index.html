@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -50,32 +51,43 @@
 
 	<!--=======================================================================-->
   <!-- Main Content -->
-  <main class="p-2" class="container">
-		<div class="row pr-2 pl-2">
-			<div id="jq-terminal-container" class="col-xl-9 p-0 m-0">
-				<!-- <div>
-					<div class="card" style="width: 250px;">
-						<div class="d-flex pl-1 pr-1" style="height: 19px;">
-							<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-bad"></i> #01 | COM101</p>
-							<span class="flex-grow-1"></span>
-							<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
+  <main class="p-2" class="">
+		<div class="row yellow pr-2 pl-2">
+			<div class="col-xl-9 p-0 m-0">
+				<div class="row red col-xl-12 p-1 m-0" style="height: 60%">
+					<div id="jq-terminal-container" class="">
+					<!-- <div>
+						<div class="card" style="width: 250px;">
+							<div class="d-flex pl-1 pr-1" style="height: 19px;">
+								<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-bad"></i> #01 | COM101</p>
+								<span class="flex-grow-1"></span>
+								<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
+							</div>
+							<div id="term-01" class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
 						</div>
-						<div id="term-01" class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
-					</div>
-				</div> -->
+					</div> -->
+				</div>
 			</div>
+			<div class="row blue col-xl-12 p-1 m-0" style="height: 35%">
+				<div class="card" style="width: 100%; height: 100%;">
+					<div class="card-body p-2" style="height: calc(45vh - 35px)">
+						Hello!
+					</div>
+				</div>
+			</div>
+		</div>
 
-			<div id="controller-container" class="col-xl-3 p-0 m-0" style="">
-				<div class="card mr-2 pb-2" style="height: 93.5vh">
+			<div id="controller-container" class="green col-xl-3 p-1 m-0" style="">
+				<div class="card" style="height: 99.5%">
 					<div class="card-body p-2">
-						<div class="ctrler-tab">
+						<div class="ctrler-tab pb-2">
 							<ul class="nav nav-pills">
 							  <li class="nav-item pr-1"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-1-1">XDot Testing</a></li>
 							  <li class="nav-item"><a class="nav-link p-1" data-toggle="tab" href="#tab-1-2">XDot Programming</a></li>
 							</ul>
-							<div class="tab-content p-2" style="height: 23vh;">
+							<div class="tab-content" style="height: 23vh;">
 								<div class="tab-pane fade show active" id="tab-1-1">
-									<button class="btn btn-primary btn-sm" onclick="ahk.TestBtn2(this)">Test 2</button>
+									<button class="btn btn-primary btn-xs" onclick="ahk.TestBtn2(this)">Test 2</button>
 								</div>
 								<div class="tab-pane fade" id="tab-1-2">
 									Hello 2
@@ -83,15 +95,14 @@
 							</div>
 						</div>
 
-						<div class="pt-2">
+						<div class="">
 							<div class="ctrler-tab">
 								<ul class="nav nav-pills">
-									<li class="nav-item"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-2-1">XDot EUI</a></li>
+									<li class="nav-item"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-2-1">XDot EUID</a></li>
 								</ul>
-								<div class="tab-content p-2" style="height: calc(65vh - 30px);">
+								<div class="tab-content p-2" style="height: calc(65vh - 40px);">
 									<div class="tab-pane fade show active" id="tab-2-1">
 										<div class="eui-editor-container" style="width: 100%; border: solid 1px #AAA; border-radius: 2px;">
-											<!-- <textarea id="eui-editor" class="" rows="24" style="width: 100%"></textarea> -->
 											<textarea id="eui-editor"></textarea>
 										</div>
 									</div>
@@ -162,7 +173,7 @@
 		 </div>
 	</div>
 
-	<footer class="d-flex align-items-stretch fixed-bottom bg-app-theme-dark text-white p-0">
+	<footer class="d-flex align-items-stretch fixed-bottom bg-app-theme-dark text-white p-0 m-0">
 		<span class="flex-grow-1"></span>
 		<span class="footer-btn" data-toggle="modal" data-target="#modal-settings"><i class="fas fa-cog"></i></span>
 	</footer>
@@ -200,9 +211,9 @@ function initTerminal(termCSSId, termNum) {
 //============================================================================//
 ////  FUNCTIONs AS NORMAL FOR HTML USED ////
 // Disabled rightclick OR use: [oncontextmenu="return false"]
-$( ".app-body-container" ).contextmenu(function() {
-  return false;
-});
+// $( ".app-body-container" ).contextmenu(function() {
+//   return false;
+// });
 // Function run when resize window
 function onResizeWindow() {
 	var winW = window.outerWidth;
@@ -211,14 +222,13 @@ function onResizeWindow() {
 }
 
 // Created instance for Code Mirror
-var euiEditor = CodeMirror.fromTextArea(document.getElementById("eui-editor"), {
+var euidEditor = CodeMirror.fromTextArea(document.getElementById("eui-editor"), {
 	lineNumbers: true,
-	extraKeys: {
-		"Ctrl-A": function(cm) {
-		      cm.replaceSelection("spaces");
-		},
-	}
 });
+// euidEditor.on('keyup', function(cm, event){
+// 	alert(event.keyCode)
+// });
+// euiEditor.addKeyMap()
 // euiEditor.setOption("extraKeys", {
 // 	Shift-Ctrl-Space: function(cm) {
 //     var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");

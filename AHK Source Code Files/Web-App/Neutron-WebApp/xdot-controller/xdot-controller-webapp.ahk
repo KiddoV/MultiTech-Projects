@@ -75,6 +75,7 @@ NeutronWebApp.Show("w1400 h900")
 
 ;;;Run AFTER WebApp Started;;;
 AutoGenerateJQTerminal()
+Global EuidEditorObj := NeutronWebApp.wnd.euidEditor
 ;;Use x := ComObjActive("<guid>") to access this object!
 ObjRegisterActive(NeutronWebApp, guid1)
 ObjRegisterActive(JQTermObj, guid2)
@@ -187,10 +188,10 @@ FileInstall, codemirror.css, codemirror.css
 
 ;;Buit-in Images
 ;=======================================================================================;
-^q::
 XDotCtrlerClose:
     For xprocess in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-call-each-port.exe' ")
     Process, close, % xprocess.ProcessId
+    
     NeutronWebApp.Destroy()     ;Free memory  
     Gui, Destroy
     ExitApp
@@ -214,7 +215,7 @@ AutoGenerateJQTerminal() {
         
         html = 
         (LTrim
-        <div class="d-inline-block pl-2">
+        <div class="d-inline-block pl-1 pr-1">
             <div class="card" style="width: 18vw;">
                 <div class="d-flex pl-1 pr-1" style="height: 19px;">
                     <p class="font-weight-bold"><span id="status-term-%terminalNumber%" class="icon-bad"><i class="fas fa-circle animated flash infinite slow"></i></span> #%terminalNumber% | COM%xMainPort%</p>
@@ -302,7 +303,7 @@ TestBtn(neutron, event) {
 }
 
 TestBtn2(neutron, event) {
-    codeMirrObj := NeutronWebApp.wnd.euiEditor
+    codeMirrObj := NeutronWebApp.wnd.euidEditor
     MsgBox % codeMirrObj.lineCount()
 }
 
@@ -342,3 +343,29 @@ ObjRegisterActive(Object, CLSID, Flags:=0) {
         throw Exception(format("Error 0x{:x}", hr), -1)
     cookieJar[Object] := cookie
 }
+
+;=======================================================================================;
+;;;;;;;;;;;;;;;;;;HOT KEYs;;;;;;;;;;;;;;;;;
+~^a::
+    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        EuidEditorObj.execCommand("selectAll")
+return
+~^c::
+    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        NeutronWebApp.doc.execCommand("copy")
+return
+~^v::
+    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        NeutronWebApp.doc.execCommand("paste")
+return
+~^z::
+    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        EuidEditorObj.execCommand("undo")
+return
+~^y::
+    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        EuidEditorObj.execCommand("redo")
+return
+~^q::
+    Gosub XDotCtrlerClose
+return
