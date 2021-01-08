@@ -52,34 +52,38 @@
 	<!--=======================================================================-->
   <!-- Main Content -->
   <main class="p-2" class="">
-		<div class="row yellow pr-2 pl-2">
+		<div class="row yellow pr-2 pl-2" style="height: 100vh;">
 			<div class="col-xl-9 p-0 m-0">
-				<div class="row red col-xl-12 p-1 m-0" style="height: 60%">
-					<div id="jq-terminal-container" class="">
-					<!-- <div>
-						<div class="card" style="width: 250px;">
-							<div class="d-flex pl-1 pr-1" style="height: 19px;">
-								<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-bad"></i> #01 | COM101</p>
-								<span class="flex-grow-1"></span>
-								<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
-							</div>
-							<div id="term-01" class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
+				<div class="row">
+					<div class="red col-xl-12 p-1 m-0">
+						<div id="jq-terminal-container" class="">
+							<!-- <div>
+								<div class="card" style="width: 250px;">
+									<div class="d-flex pl-1 pr-1" style="height: 19px;">
+										<p class="font-weight-bold"><i class="fas fa-circle animated flash infinite slow icon-bad"></i> #01 | COM101</p>
+										<span class="flex-grow-1"></span>
+										<span type="button" class="icon-btn-xs"><i class="fas fa-cog"></i></span>
+									</div>
+									<div id="term-01" class="terminal allow-select-text" style="border-radius: 0 0 1% 1%;"></div>
+								</div>
+							</div> -->
 						</div>
-					</div> -->
-				</div>
+					</div>
 			</div>
-			<div class="row blue col-xl-12 p-1 m-0" style="height: 35%">
-				<div class="card" style="width: 100%; height: 100%;">
-					<div class="card-body p-2" style="height: calc(45vh - 35px)">
-						Hello!
+			<div class="blue row p-0 m-0">
+				<div class="col-xl-12 p-1">
+					<div class="card" style="width: 100%;">
+						<div class="card-body p-2" style="height: calc(45vh - 75px)">
+							Bottom Section
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 
 			<div id="controller-container" class="green col-xl-3 p-1 m-0" style="">
-				<div class="card" style="height: 99.5%">
-					<div class="card-body p-2">
+				<div class="card" style="width: 100%;">
+					<div class="card-body p-2" style="height: calc(95vh - 20px)">
 						<div class="ctrler-tab pb-2">
 							<ul class="nav nav-pills">
 							  <li class="nav-item pr-1"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-1-1">XDot Testing</a></li>
@@ -95,19 +99,19 @@
 							</div>
 						</div>
 
-						<div class="">
-							<div class="ctrler-tab">
-								<ul class="nav nav-pills">
-									<li class="nav-item"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-2-1">XDot EUID</a></li>
-								</ul>
-								<div class="tab-content p-2" style="height: calc(65vh - 40px);">
-									<div class="tab-pane fade show active" id="tab-2-1">
-										<div class="eui-editor-container" style="width: 100%; border: solid 1px #AAA; border-radius: 2px;">
-											<textarea id="eui-editor"></textarea>
+							<div class="">
+								<div class="ctrler-tab">
+									<ul class="nav nav-pills">
+										<li class="nav-item"><a class="nav-link p-1 active" data-toggle="tab" href="#tab-2-1">XDot EUID</a></li>
+									</ul>
+									<div class="tab-content p-2" style="height: calc(65vh - 40px);">
+										<div class="tab-pane fade show active" id="tab-2-1">
+											<div class="eui-editor-container" style="width: 100%; border: solid 1px #AAA; border-radius: 2px;">
+												<textarea id="eui-editor"></textarea>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
 							</div>
 						</div>
 					</div>

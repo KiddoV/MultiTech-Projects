@@ -1,0 +1,48 @@
+GetAdaptersInfo(What := "")
+{
+	if (DllCall("iphlpapi.dll\GetAdaptersInfo", "ptr", 0, "uint*", size) = 111)
+		if !(VarSetCapacity(buf, size, 0))
+			throw Exception("Memory allocation failed for IP_ADAPTER_INFO structures")
+
+	if (DllCall("iphlpapi.dll\GetAdaptersInfo", "ptr", &buf, "uint*", size) != 0)
+		throw Exception("Call to GetAdaptersInfo failed with error: " A_LastError, -1)
+
+	addr := &buf, offs := A_PtrSize, IP_ADAPTER_INFO := {}
+	while (addr)
+	{
+		IP_ADAPTER_INFO[A_Index, "ComboIndex"]          := NumGet(addr+0, offs, "uint"),           offs += 4
+		IP_ADAPTER_INFO[A_Index, "AdapterName"]         := StrGet(addr + offs, 260, "cp0"),        offs += 260
+		IP_ADAPTER_INFO[A_Index, "Description"]         := StrGet(addr + offs, 132, "cp0"),        offs += 132
+		IP_ADAPTER_INFO[A_Index, "AddressLength"]       := NumGet(addr+0, offs, "uint"),           offs += 4
+		loop % IP_ADAPTER_INFO[A_Index].AddressLength
+			mac .= Format("{:02x}",                        NumGet(addr+0, offs + A_Index - 1, "uchar")) "-"
+		IP_ADAPTER_INFO[A_Index, "Address"]             := SubStr(mac, 1, -1), mac := "",          offs += 8
+		IP_ADAPTER_INFO[A_Index, "Index"]               := NumGet(addr+0, offs, "uint"),           offs += 4
+		IP_ADAPTER_INFO[A_Index, "Type"]                := NumGet(addr+0, offs, "uint"),           offs += 4
+		IP_ADAPTER_INFO[A_Index, "DhcpEnabled"]         := NumGet(addr+0, offs, "uint"),           offs += A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "CurrentIpAddress"]    := NumGet(addr+0, offs, "uptr"),           offs += A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "IpAddressList"]       := StrGet(addr + offs + A_PtrSize, "cp0"), offs += A_PtrSize + 32 + A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "GatewayList"]         := StrGet(addr + offs + A_PtrSize, "cp0"), offs += A_PtrSize + 32 + A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "DhcpServer"]          := StrGet(addr + offs + A_PtrSize, "cp0"), offs += A_PtrSize + 32 + A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "HaveWins"]            := NumGet(addr+0, offs, "int"),            offs += A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "PrimaryWinsServer"]   := StrGet(addr + offs + A_PtrSize, "cp0"), offs += A_PtrSize + 32 + A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "SecondaryWinsServer"] := StrGet(addr + offs + A_PtrSize, "cp0"), offs += A_PtrSize + 32 + A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "LeaseObtained"]       := NumGet(addr+0, offs, "int"),            offs += A_PtrSize
+		IP_ADAPTER_INFO[A_Index, "LeaseExpires"]        := NumGet(addr+0, offs, "int")
+		addr := NumGet(addr+0, "uptr"), offs := A_PtrSize
+	}
+    If (What := "ipv4") {
+        for k, v in IP_ADAPTER_INFO
+        {
+            If (RegExMatch(v.IpAddressList, "192.168") > 0) {
+                ipv4 := v.IpAddressList
+                Return ipv4
+                Break
+            }
+        }
+    }
+	Return IP_ADAPTER_INFO
+}
+
+MsgBox % GetAdaptersInfo("ipv4")
+ExitApp
