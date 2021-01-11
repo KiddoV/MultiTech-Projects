@@ -37,7 +37,7 @@ Global NeutronWebApp := new NeutronWindow()
 
 NeutronWebApp.Load("aoi_project_manager_index.html")
 
-NeutronWebApp.Gui("+MinSize800x600 +MaxSize1200x1000 +LabelAOIProManager")
+NeutronWebApp.Gui("+MinSize1020x750 +LabelAOIProManager")
 
 ;;;Run BEFORE WebApp Started;;;
 NeutronWebApp.qs("#title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
@@ -45,7 +45,7 @@ ProcessIniFile()
 changeUserLoginDisplay("LOCKED")
 
 ;Display the Neutron main window
-NeutronWebApp.Show("w800 h600")
+NeutronWebApp.Show("w1020 h750")
 
 ;;;Run AFTER WebApp Started;;;
 ;;Connecting to Database
@@ -237,7 +237,7 @@ HtmlMsgBox(Icon := "", Options := "", Size = "w300 h150", Title := "", MainText 
         ;NeutronMsgBox.qs(MsgboxIconElId).classList.remove("d-block")
         ;NeutronMsgBox.qs(MsgboxIconElId).classList.add("d-none")
         ;NeutronMsgBox.Gui("Cancel")
-        NeutronMsgBox.Destroy()     ;Free memory  
+        NeutronMsgBox.Destroy()     ;Free memory
         Gui, Destroy
     Return
 }
@@ -261,77 +261,62 @@ DisplayAlertMsg(Text := "", ColorClass := "", Timeout := 2500) {
 }
 
 DisplayProgCard(Result) {
-    ;MsgBox % BuildJson(Result)
-    If (Result.HasNames) {
+    If (Result.HasNames && Result.HasRows) {
         NeutronWebApp.doc.getElementById("search-result-container").innerHTML := ""     ;Delete all old result before display new result
-        If (Result.HasRows) {
-            Loop, % Result.RowCount 
-            {
-                Result.Next(Row)
-                Loop, % Result.ColumnCount
-                {
-                    If (A_Index = 1)
-                        progDBId := Row[A_Index]
-                    If (A_Index = 2)
-                        progFullName := Row[A_Index]
-                    If (A_Index = 3)
-                        progStatus := Row[A_Index]
-                    If (A_Index = 4)
-                        buildNum := Row[A_Index]
-                    If (A_Index = 5)
-                        pcbNum := Row[A_Index]
-                    If (A_Index = 6)
-                        currentECO := Row[A_Index]
-                    If (A_Index = 7)
-                        currentECL := Row[A_Index]
-                    If (A_Index = 10)
-                        dateTimeCreated := Row[A_Index]
-                    If (A_Index = 14)
-                        machineBrandName := Row[A_Index]
-                    If (A_Index = 15)
-                        progAltType := Row[A_Index]
-                    If (A_Index = 18)
-                        progSubsName := Row[A_Index]
-                }
+        
+        programData := DataBaseTableToObject(Result)
+        
+        Loop, % programData.Length()
+        {
+            progDBId := programData[A_Index].prog_id
+            progFullName := programData[A_Index].prog_full_name
+            progStatus := programData[A_Index].prog_status
+            buildNum := programData[A_Index].prog_build_number
+            pcbNum := programData[A_Index].prog_pcb_number
+            currentECO := programData[A_Index].prog_current_eco
+            currentECL := programData[A_Index].prog_current_ecl
+            dateTimeCreated := programData[A_Index].prog_date_created
+            machineBrandName := programData[A_Index].prog_aoi_machine
+            progAltType := programData[A_Index].prog_alternate_type
+            progSubsName := programData[A_Index].prog_substitute
                 
-                progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : progStatus = "SUBSTITUTE" ? "pro-card-status-substitute" : ""
-                brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : "default-brand-icon.png"
-                If (dateTimeCreated != "") {
-                    FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
-                    FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
-                } Else {
-                    dateCreated := "N/A"
-                }
-                If (progSubsName != "")
-                    progFullName := progFullName . "<span class='red-text'> (USE => " . progSubsName . ")</span>"
-                
-                html =
-                (Ltrim
-                <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%; height: 60px;" data-toggle="modal" data-target="#prog-card-modal" onclick="ahk.DisplayProgCardModal(this)">
-                    <div class="row">
-                        <div class="col-md-10">
-                            <div class="row">
-                                <h6 class="col-sm pt-1 prog-card-title">%buildNum%</h6>
-                                <div class="col-sm">
-                                    <span class="badge badge-dark">%progAltType%</span>
-                                </div>
-                                <h6 class="col-sm pt-1 prog-card-title">%currentECL%</h6>
-								<h6 class="col-sm pt-1 prog-card-title">%currentECO%</h6>
-								<h6 class="col-sm pt-1 prog-card-title">%pcbNum%</h6>
-							</div>
-							<div class="row">
-								<p class="col-sm text-muted prog-card-subtitle">%progFullName%</p>
-                                <p class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %dateCreated%</p>
-							</div>
-						</div>
-						<div class="col-md-2" style="">
-                            <img id="prog-card-brand-logo" src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="65" height="65">
-						</div>
-					</div> 
-                </div>
-                )
-                NeutronWebApp.qs("#search-result-container").insertAdjacentHTML("beforeend", html)
+            progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : progStatus = "SUBSTITUTE" ? "pro-card-status-substitute" : ""
+            brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : "default-brand-icon.png"
+            If (dateTimeCreated != "") {
+                FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
+                FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
+            } Else {
+                dateCreated := "N/A"
             }
+            If (progSubsName != "")
+                progFullName := progFullName . "<span class='red-text'> (USE => " . progSubsName . ")</span>"
+                
+            html =
+            (Ltrim
+            <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%; height: 60px;" data-toggle="modal" data-target="#prog-card-modal" onclick="ahk.DisplayProgCardModal(this)">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="row">
+                            <h6 class="col-sm pt-1 prog-card-title">%buildNum%</h6>
+                            <div class="col-sm">
+                                <span class="badge badge-dark">%progAltType%</span>
+                            </div>
+                            <h6 class="col-sm pt-1 prog-card-title">%currentECL%</h6>
+                            <h6 class="col-sm pt-1 prog-card-title">%currentECO%</h6>
+							<h6 class="col-sm pt-1 prog-card-title">%pcbNum%</h6>
+						</div>
+						<div class="row">
+							<p class="col-sm text-muted prog-card-subtitle">%progFullName%</p>
+                            <p class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %dateCreated%</p>
+						</div>
+					</div>
+					<div class="col-md-2" style="">
+                        <img id="prog-card-brand-logo" src="%brandLogoPath%" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80;" width="65" height="65">
+					</div>
+				</div> 
+            </div>
+            )
+            NeutronWebApp.qs("#search-result-container").insertAdjacentHTML("beforeend", html)
         }
     }
 }
@@ -350,31 +335,33 @@ DisplayProgCardModal(neutron, event) {
         DisplayAlertMsg("Display failed! Got empty Result Set.", "alert-danger")
     }
     
+    programData := DataBaseTableToObject(ProgCardData)
+    
     ;;;Save data to var
     ;;Table 1
-    pcmProgName := ProgCardData.Rows[1][2]
-    pcmProgStatus := ProgCardData.Rows[1][3]
-    pcmProgBuildNum := ProgCardData.Rows[1][4]
-    pcmProgPcbNum := ProgCardData.Rows[1][5]
-    pcmProgCurntEco := ProgCardData.Rows[1][6]
-    pcmProgCurntEcl := ProgCardData.Rows[1][7]
-    pcmProgDateCre := ProgCardData.Rows[1][10]
-    pcmProgAoiMa := ProgCardData.Rows[1][14]
-    pcmProgAltType := ProgCardData.Rows[1][15]
-    pcmProgSubsName := ProgCardData.Rows[1][18]
+    pcmProgName := programData[1].prog_full_name
+    pcmProgStatus := programData[1].prog_status
+    pcmProgBuildNum := programData[1].prog_build_number
+    pcmProgPcbNum := programData[1].prog_pcb_number
+    pcmProgCurntEco := programData[1].prog_current_eco
+    pcmProgCurntEcl := programData[1].prog_current_ecl
+    pcmProgDateCre := programData[1].prog_date_created
+    pcmProgAoiMa := programData[1].prog_aoi_machine
+    pcmProgAltType := programData[1].prog_alternate_type
+    pcmProgSubsName := programData[1].prog_substitute
     ;;Table 2
-    pcmPcbStatus := ProgCardData.Rows[1][20]
-    pcmPcbFullName := ProgCardData.Rows[1][21] = "" ? "*No Info In Database*" : ProgCardData.Rows[1][21]
-    pcmPcbInsFileName := ProgCardData.Rows[1][23]
-    pcmPcbQty := ProgCardData.Rows[1][24]
-    pcmPcbDwg := ProgCardData.Rows[1][25]
+    pcmPcbStatus := programData[1].pcb_part_status
+    pcmPcbFullName := programData[1].pcb_full_name = "" ? "*No Info In Database*" : programData[1].pcb_full_name
+    pcmPcbInsFileName := programData[1].pcb_ins_file_name
+    pcmPcbQty := programData[1].pcb_quantity_onhand
+    pcmPcbDwg := programData[1].pcb_dwg_number
     ;;Table 3
-    pcmUserFn := ProgCardData.Rows[1][27]
-    pcmUserLn := ProgCardData.Rows[1][28]
+    pcmUserFn := programData[1].user_firstname
+    pcmUserLn := programData[1].user_lastname
     ;;Table 4
-    pcmBuildName := ProgCardData.Rows[1][36]
-    pcmBuildCost := ProgCardData.Rows[1][38]
-    pcmBuildStatus := ProgCardData.Rows[1][37]
+    pcmBuildName := programData[1].build_name
+    pcmBuildCost := programData[1].build_cost
+    pcmBuildStatus := programData[1].build_part_status
     
     ;;Get data from _build_eco_history
     SQL := "SELECT * FROM _build_eco_history WHERE build_number='" . pcmProgBuildNum . "' ORDER BY date_effect DESC"

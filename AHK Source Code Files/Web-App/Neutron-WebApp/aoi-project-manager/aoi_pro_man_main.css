@@ -99,6 +99,14 @@ body{
 
 /*============================================================*/
 /***********************Additional CSS*************************/
+/* Icon Buttons */
+.icon-btn-xs {
+	padding: 0;
+}
+.icon-btn-xs:hover {
+	color: rgba(0, 0, 0, .5);
+}
+
 /**Nav Bar**/
 
 /* Program Card */
