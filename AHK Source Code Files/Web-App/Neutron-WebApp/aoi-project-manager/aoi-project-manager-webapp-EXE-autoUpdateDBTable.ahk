@@ -13,8 +13,8 @@ SetTitleMatchMode, RegEx
 ;;;;;Get var by parsing using command
 Global ColumnVar = % A_Args[1]
 Global TableName = % A_Args[2]
-Global MainDBFilePath = % A_Args[3]
-Global MainSettingsFilePath = % A_Args[4]
+;Global GUID1 = % A_Args[3]
+;Global MainSettingsFilePath = % A_Args[4]
 
 ;;Debugging
 ;Global ColumnVar := "75582934LB"
@@ -29,11 +29,12 @@ If(ColumnVar = "" || TableName = "") {
 }
 
 ;;Connecting to Database
-Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
-If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
-    MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
-    Return
-}
+;Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
+;If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
+    ;MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    ;Return
+;}
+Global AOI_Pro_DB := ComObjActive(A_Args[3])
 
 If (TableName = "aoi_pcbs")
     autoUpdatePcbDBTable(ColumnVar)

@@ -31,6 +31,9 @@ Global DBStatus := ""
 
 Global IsUserLogin := False
 Global UserInfo := {userId: "???", userFirstName: "???", userLastName: "???", userInitial: "???", userUserName: "???", userPassword: "???", userRole: "N/A"}
+
+;;Define Global Unique IDentifier! (For other script to access objects)
+Global GUID1 := "{AAAAAAAA-1111-0000-116D-616E61676572}"
 ;=======================================================================================;
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
@@ -59,6 +62,9 @@ IfExist, %MainDBFilePath%
        MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
     }
 }
+
+;;Use x := ComObjActive("<guid>") to access this object!
+ObjRegisterActive(AOI_Pro_DB, GUID1)
 
 #Persistent
 SetTimer, CheckDataBaseStatus, 400
@@ -106,6 +112,8 @@ CheckWebSourceStatus:
     }
 Return
 
+OnExit, AOIProManagerClose
+Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
@@ -123,8 +131,8 @@ FileInstall, fontawesome.js, fontawesome.js
 FileInstall, fa-all.js, fa-all.js
 FileInstall, font-googleapi.css, font-googleapi.css
 FileInstall, circle-prog-bar.css, circle-prog-bar.css
-FileInstall, boostrap-select.min.css, boostrap-select.min.css
-FileInstall, boostrap-select.min.js, boostrap-select.min.js
+FileInstall, bootstrap-select.min.css, bootstrap-select.min.css
+FileInstall, bootstrap-select.min.js, bootstrap-select.min.js
 
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
@@ -133,8 +141,10 @@ FileInstall, default-brand-logo.png, default-brand-logo.png
 FileInstall, yestech-logo.png, yestech-logo.png
 FileInstall, rti-logo.png, rti-logo.png
 ;=======================================================================================;
-^q::
 AOIProManagerClose:
+    For xprocess in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process  WHERE name = 'aoi-pro-man_autoUpdateDBTable.exe' ")
+    Process, Close, % xprocess.ProcessId
+    
     AOI_Pro_DB.CloseDB()
     NeutronWebApp.Destroy()     ;Free memory  
     Gui, Destroy
@@ -330,7 +340,7 @@ DisplayProgCardModal(neutron, event) {
     If !AOI_Pro_DB.GetTable(SQL, ProgCardData) {
         DisplayAlertMsg("Execute SQL statement FAILED!!! Could not get data!", "alert-danger")
     }
-    
+
     If (!ProgCardData.HasRows) {
         DisplayAlertMsg("Display failed! Got empty Result Set.", "alert-danger")
     }
@@ -372,9 +382,10 @@ DisplayProgCardModal(neutron, event) {
     RegExMatch(pcmProgCurntEcl, "^\w{1}", fstCharEcl)
     pcmProgBuildNumWEcl .= pcmProgBuildNum "" fstCharEcl
     ;;Auto Update Table aoi_pcbs
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %GUID1%, , Hide
     ;;Auto Update Table aoi_builds
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgBuildNumWEcl% "aoi_builds" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgBuildNumWEcl% "aoi_builds" %GUID1%, , Hide
     
     progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"
     brandLogoPath := pcmProgAoiMa = "YesTech" ? "yestech-logo.png" : pcmProgAoiMa = "TRI" ? "rti-logo.png" : "default-brand-logo.png"
@@ -640,7 +651,6 @@ UserLogin(neutron, event) {
             inputPassword := value
     }
     
-    
     If (inputUserName = "" || inputPassword = "") {
         If (inputUserName = "") {
             NeutronWebApp.qs("#inputUserN").classList.add("is-invalid")
@@ -665,9 +675,10 @@ UserLogin(neutron, event) {
         Return
     }
     If (ResultSet := validateUserLogin(inputUserName, inputPassword)) {
+        userData := DataBaseTableToObject(ResultSet)
         IsUserLogin := True
-        UserInfo.userFirstName := ResultSet.Rows[1][2]
-        UserInfo.userRole := ResultSet.Rows[1][7]
+        UserInfo.userFirstName := userData[1].user_firstname
+        UserInfo.userRole := userData[1].user_role
     }
     
     DisplayAlertMsg("Welcome " . UserInfo.userFirstName . "!", "alert-success")
@@ -705,7 +716,8 @@ validateUserLogin(username, password) {
 changeUserLoginDisplay(status) {
     If (status = "UNLOCKED") {
         If (IsUserLogin) {
-            NeutronWebApp.qs("#auth-container").style.display := "none"
+            NeutronWebApp.wnd.hideModal("#auth-container")
+            ;NeutronWebApp.qs("#auth-container").style.display := "none"
             loginDivs := NeutronWebApp.qsa(".auth-container")
             for index, loginDiv in NeutronWebApp.Each(loginDivs)
                 loginDiv.innerText := ""
@@ -731,9 +743,10 @@ changeUserLoginDisplay(status) {
     
     If (status = "LOCKED") {
         If (!IsUserLogin) {
+            ;;<div class="mr-3" type="button"><a class="badge badge-pill bg-app-theme-light" onclick="toggleLoginForm()"><i id="userTopBtnLabel" class="fas fa-lock mr-1"></i>Login</a></div>
             html = 
             (LTrim
-			<div class="mr-3" type="button"><a class="badge badge-pill bg-app-theme-light" onclick="toggleLoginForm()"><i id="userTopBtnLabel" class="fas fa-lock mr-1"></i>Login</a></div>
+			<div class="mr-3" type="button"><a class="badge badge-pill bg-app-theme-light" data-toggle="modal" data-target="#auth-container"><i id="userTopBtnLabel" class="fas fa-lock mr-1"></i>Login</a></div>
             )
             NeutronWebApp.qs("#userTopBtn").innerHTML := ""
             NeutronWebApp.qs("#userTopBtn").insertAdjacentHTML("beforeend", html)
@@ -964,3 +977,29 @@ reverseArray(array)
 	arrayC := tempObj := ""
     return array
 }
+
+ObjRegisterActive(Object, CLSID, Flags:=0) {
+    static cookieJar := {}
+    if (!CLSID) {
+        if (cookie := cookieJar.Remove(Object)) != ""
+            DllCall("oleaut32\RevokeActiveObject", "uint", cookie, "ptr", 0)
+        return
+    }
+    if cookieJar[Object]
+        throw Exception("Object is already registered", -1)
+    VarSetCapacity(_clsid, 16, 0)
+    if (hr := DllCall("ole32\CLSIDFromString", "wstr", CLSID, "ptr", &_clsid)) < 0
+        throw Exception("Invalid CLSID", -1, CLSID)
+    hr := DllCall("oleaut32\RegisterActiveObject"
+        , "ptr", &Object, "ptr", &_clsid, "uint", Flags, "uint*", cookie
+        , "uint")
+    if hr < 0
+        throw Exception(format("Error 0x{:x}", hr), -1)
+    cookieJar[Object] := cookie
+}
+
+;=======================================================================================;
+;;;;;;;;;;Hot Keys;;;;;;;;;;
+^q::
+    Gosub AOIProManagerClose
+Return

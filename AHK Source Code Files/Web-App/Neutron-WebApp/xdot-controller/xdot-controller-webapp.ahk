@@ -346,26 +346,26 @@ ObjRegisterActive(Object, CLSID, Flags:=0) {
 
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;HOT KEYs;;;;;;;;;;;;;;;;;
-~^a::
-    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
-        EuidEditorObj.execCommand("selectAll")
-return
-~^c::
-    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
-        NeutronWebApp.doc.execCommand("copy")
-return
-~^v::
-    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
-        NeutronWebApp.doc.execCommand("paste")
-return
-~^z::
-    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
-        EuidEditorObj.execCommand("undo")
-return
-~^y::
-    If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
-        EuidEditorObj.execCommand("redo")
-return
+;~^a::
+    ;If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        ;EuidEditorObj.execCommand("selectAll")
+;return
+;~^c::
+    ;If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        ;NeutronWebApp.doc.execCommand("copy")
+;return
+;~^v::
+    ;If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        ;NeutronWebApp.doc.execCommand("paste")
+;return
+;~^z::
+    ;If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        ;EuidEditorObj.execCommand("undo")
+;return
+;~^y::
+    ;If (EuidEditorObj.hasFocus() != 0)  ;;;Fix bug where CodeMirror cannot use Keymap in ActiveX
+        ;EuidEditorObj.execCommand("redo")
+;return
 ~^q::
     Gosub XDotCtrlerClose
 return

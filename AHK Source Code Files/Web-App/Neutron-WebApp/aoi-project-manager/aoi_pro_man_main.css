@@ -211,6 +211,9 @@ body{
 	right: 0.5em;
 	z-index: 98;
 }
+/* .auth-container .modal-backdrop {
+	background-color: transparent;
+} */
 
 
 /* Icon inside INPUT box */
