@@ -63,8 +63,8 @@ IfExist, %MainDBFilePath%
     }
 }
 
-;;Use x := ComObjActive("<guid>") to access this object!
-ObjRegisterActive(AOI_Pro_DB, GUID1)
+;;;Register Global objects to be used in other script (Sqlite DB object not working!!!)
+ObjRegisterActive(NeutronWebApp, GUID1)
 
 #Persistent
 SetTimer, CheckDataBaseStatus, 400
@@ -371,6 +371,7 @@ DisplayProgCardModal(neutron, event) {
     ;;Table 4
     pcmBuildName := programData[1].build_name
     pcmBuildCost := programData[1].build_cost
+    pcmBuildQnty := programData[1].build_quantity_onhand
     pcmBuildStatus := programData[1].build_part_status
     
     ;;Get data from _build_eco_history
@@ -383,9 +384,9 @@ DisplayProgCardModal(neutron, event) {
     pcmProgBuildNumWEcl .= pcmProgBuildNum "" fstCharEcl
     ;;Auto Update Table aoi_pcbs
     
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %GUID1%, , Hide
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath% %GUID1%, , Hide
     ;;Auto Update Table aoi_builds
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgBuildNumWEcl% "aoi_builds" %GUID1%, , Hide
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgBuildNumWEcl% "aoi_builds" %MainDBFilePath% %MainSettingsFilePath% %GUID1%, , Hide
     
     progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"
     brandLogoPath := pcmProgAoiMa = "YesTech" ? "yestech-logo.png" : pcmProgAoiMa = "TRI" ? "rti-logo.png" : "default-brand-logo.png"
@@ -419,6 +420,7 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-modal-build-name").innerHTML := pcmBuildName . "  <span class='pricetag z-depth-1 default-mouse'>$" . pcmBuildCost . "</span>"
     NeutronWebApp.qs("#prog-card-modal-build").innerHTML := pcmProgBuildNum
     NeutronWebApp.qs("#prog-card-modal-build-status").innerHTML := "Status: <span class='badge " . buildStatusColor . "'>" . pcmBuildStatus . "</span>"
+    NeutronWebApp.qs("#prog-card-modal-build-instock").innerHTML := pcmBuildQnty . " (pcs)"
     NeutronWebApp.qs("#prog-card-modal-build-eco-hist").innerHTML := ""     ;Delete all old result before display new result
     
     If (ProgCardBuildECOHistData.HasRows) {

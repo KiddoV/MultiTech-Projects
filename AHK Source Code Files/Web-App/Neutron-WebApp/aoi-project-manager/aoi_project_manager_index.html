@@ -340,7 +340,7 @@
 											<div class="row">
 												<h6 class="col-sm prog-card-title">Build #: <var id="prog-card-modal-build" class="text-muted">?????????</var></h6>
 												<h6 id="prog-card-modal-build-status" class="col-sm prog-card-title">Status: </h6>
-												<h6 class="col-sm prog-card-title">In Stock: <var id="prog-card-modal-build-instock"></var></h6>
+												<h6 class="col-sm prog-card-title">In Stock: <var id="prog-card-modal-build-instock" class="text-muted"></var></h6>
 											</div>
 											<hr class="m-2"/>
 											<div class="row">
@@ -579,6 +579,13 @@
 
 	function getBackOldModalCardProgInfoContent() {
 	  document.getElementById("prog-card-main-info-group").innerHTML = origModalCardProgInfoContent;
+	}
+
+	function autoCloseAlertMsg(elId, timeout) {
+		setTimeout(function(){
+			var el = document.getElementById(elId);
+			el.click();
+		}, timeout);
 	}
 	//============================================================================//
 	////  FUNCTIONs AS NORMAL FOR HTML USED ////

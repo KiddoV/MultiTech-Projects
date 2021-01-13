@@ -13,9 +13,10 @@ SetTitleMatchMode, RegEx
 ;;;;;Get var by parsing using command
 Global ColumnVar = % A_Args[1]
 Global TableName = % A_Args[2]
-;Global GUID1 = % A_Args[3]
-;Global MainSettingsFilePath = % A_Args[4]
+Global MainDBFilePath = % A_Args[3]
+Global MainSettingsFilePath = % A_Args[4]
 
+Global NeutronWebObj := ComObjActive(A_Args[5])
 ;;Debugging
 ;Global ColumnVar := "75582934LB"
 ;Global TableName := "aoi_builds"
@@ -29,17 +30,20 @@ If(ColumnVar = "" || TableName = "") {
 }
 
 ;;Connecting to Database
-;Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
-;If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
-    ;MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
-    ;Return
-;}
-Global AOI_Pro_DB := ComObjActive(A_Args[3])
+Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
+If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
+    MsgBox, 16, SQLite Error, % "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    Return
+}
+;Global AOI_Pro_DB := ComObjActive(A_Args[3])
+;Global AOI_Pro_DB := ComObjActive("{AAAAAAAA-1111-0000-116D-616E61676572}")
 
-If (TableName = "aoi_pcbs")
+If (TableName = "aoi_pcbs") {
     autoUpdatePcbDBTable(ColumnVar)
-If (TableName = "aoi_builds")
+}
+If (TableName = "aoi_builds") {
     autoUpdateBuildDBTable(ColumnVar)
+}
 
 Return
 ;==========================================================================================;
@@ -122,6 +126,7 @@ autoUpdatePcbDBTable(PcbNum) {
 }
 
 autoUpdateBuildDBTable(BuildNumWEcl) {
+    DisplayAlertMsg("I'm Here!", "alert-warning", 5000)
     RegExMatch(BuildNumWEcl, "[0-9]{8}L", BuildNum)
     ;;;;Get data from the web
     Try {
@@ -179,6 +184,12 @@ autoUpdateBuildDBTable(BuildNumWEcl) {
             RegExMatch(strCost, "\d.*", buildCost)
             buildCost := Round(buildCost, 2)
         }
+        
+        If (RegExMatch(A_LoopField, "Quantity On Hand") > 0)
+            qtyIndex := A_Index + 1
+        If (A_Index == qtyIndex)
+            buildQtyOh := A_LoopField
+            
         If (RegExMatch(A_LoopField, ".*.PDF") = 1) {
             fileName :=  A_LoopField
             RegExMatch(fileName, "\d{5}", cadId)
@@ -226,18 +237,18 @@ autoUpdateBuildDBTable(BuildNumWEcl) {
     
     ;;;;Update or Insert to Database
     SQL := "SELECT * FROM aoi_builds WHERE build_number = '" . BuildNum . "'"
+    
     If !AOI_Pro_DB.Query(SQL, ResultSet) {
         MsgBox % "FAILED DOING DB QUERY!!! Msg: " . AOI_Pro_DB.ErrorMsg . " Code:" . AOI_Pro_DB.ErrorCode
         Return
     }
     
     If (!ResultSet.HasRows) {    ;If cannot find record in Database then INSERT new record to <aoi_builds> table
-        SQL := "INSERT INTO aoi_builds VALUES('" . BuildNum . "', " . buildEcoList[1].eco . ", '" . buildEcoList[1].ecl . "', '" . buildName . "', '" . buildPartStatus . "', '" . buildCost . "')"
+        SQL := "INSERT INTO aoi_builds VALUES('" . BuildNum . "', " . buildEcoList[1].eco . ", '" . buildEcoList[1].ecl . "', '" . buildName . "', '" . buildPartStatus . "', '" . buildCost . "', " . buildQtyOh . ")"    
         If !AOI_Pro_DB.Exec(SQL)
             Return
     } Else {        ;If record found then UPDATE nessesary data
-        SQL := "UPDATE aoi_builds SET build_part_status ='" . buildPartStatus . "', build_current_eco= " . buildEcoList[1].eco . ", build_current_ecl='" . buildEcoList[1].ecl . "', build_cost='" . buildCost . "' WHERE build_number='" . BuildNum . "'"
-        Clipboard := SQL
+        SQL := "UPDATE aoi_builds SET build_part_status ='" . buildPartStatus . "', build_current_eco= " . buildEcoList[1].eco . ", build_current_ecl='" . buildEcoList[1].ecl . "', build_cost='" . buildCost . "', build_quantity_onhand=" . buildQtyOh . " WHERE build_number='" . BuildNum . "'"
         If !AOI_Pro_DB.Exec(SQL)
             Return
     }
@@ -258,6 +269,29 @@ autoUpdateBuildDBTable(BuildNumWEcl) {
             Return
         }
     }
+}
+;==========================================================================================;
+;;;;;Neutron Webapp Functions
+AutoCloseAlertMsg(elId) {
+    NeutronWebObj.doc.getElementById(elId).click()
+}
+DisplayAlertMsg(Text := "", ColorClass := "", Timeout := 2500) {
+    randId := "close-alert-btn-" . A_TickCount
+    
+    html =
+    (LTrim
+    <div class="row justify-content-md-center">
+        <div id="alert-box" class="alert alert-dismissible %ColorClass% z-depth-2 fade show" role="alert" auto-close="5000">
+            <p id="alert-box-content" style="margin: 0;">%Text%</p>
+            <span id="%randId%" type="button" class="close" data-dismiss="alert" style="padding: 2px 10px 0 0;"><i class="fas fa-xs fa-times"></i></span>
+        </div>
+    </div>
+    )
+    NeutronWebObj.qs("#alert-box-container").insertAdjacentHTML("afterbegin", html)
+    
+    NeutronWebObj.wnd.autoCloseAlertMsg(randId, Timeout)
+    ;Fn := Func("AutoCloseAlertMsg").Bind(randId)
+    ;SetTimer, %Fn%, -%Timeout%
 }
 
 ;==========================================================================================;
@@ -281,4 +315,20 @@ DateParse(str) {    ;;US version -- Convert mm/dd/yyyy hh:mm:ss AA/PM to YYYYMMD
 
 	SetFormat, Float, %f%
 	Return, SubStr(d,1,4) SubStr(d,7,2) SubStr(d,5,2) SubStr(d,9)
+}
+
+;;;Function to print out JSON format From SQLite DB
+BuildJson(obj) {
+    str := "" , array := true
+    For k in obj 
+    {
+        if (k == A_Index)
+            continue
+        array := false
+        break
+    }
+    For a, b in obj
+        str .= (array ? "" : """" a """: ") . (IsObject(b) ? BuildJson(b) : (0 * b == 0) ? b : """" b """") . ", "	
+    str := RTrim(str, " ,")
+    Return (array ? "[" str "]" : "{" str "}")
 }
