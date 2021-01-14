@@ -126,7 +126,6 @@ autoUpdatePcbDBTable(PcbNum) {
 }
 
 autoUpdateBuildDBTable(BuildNumWEcl) {
-    DisplayAlertMsg("I'm Here!", "alert-warning", 5000)
     RegExMatch(BuildNumWEcl, "[0-9]{8}L", BuildNum)
     ;;;;Get data from the web
     Try {
@@ -289,7 +288,7 @@ DisplayAlertMsg(Text := "", ColorClass := "", Timeout := 2500) {
     )
     NeutronWebObj.qs("#alert-box-container").insertAdjacentHTML("afterbegin", html)
     
-    NeutronWebObj.wnd.autoCloseAlertMsg(randId, Timeout)
+    NeutronWebObj.wnd.autoCloseAlertMsg(randId, Timeout) ;;;;NOT WORKING
     ;Fn := Func("AutoCloseAlertMsg").Bind(randId)
     ;SetTimer, %Fn%, -%Timeout%
 }

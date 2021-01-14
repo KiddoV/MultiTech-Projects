@@ -120,18 +120,23 @@ body{
 }
 
 .pro-card-status-useable {
+	border: 1px solid #00c853;
 	border-left: 10px solid #00c853;
 }
 .pro-card-status-needupdate {
+	border: 1px solid #673ab7;
 	border-left: 10px solid #673ab7;
 }
 .pro-card-status-notready {
+	border: 1px solid #ff3d00;
 	border-left: 10px solid #ff3d00;
 }
 .pro-card-status-inprogress {
+	border: 1px solid #fbc02d;
 	border-left: 10px solid #fbc02d;
 }
 .pro-card-status-substitute {
+	border: 1px solid #9e9e9e;
 	border-left: 10px solid #9e9e9e;
 }
 
@@ -324,7 +329,8 @@ body{
 }
 
 .badge {
-	top: 0;
+	vertical-align: middle;
+	margin-top: -0.25em;
 }
 
 .nav-pills .prog-card-nav-link .nav-link:not(.active) {

@@ -161,11 +161,12 @@ TestBttn(neutron, event) {
     ;MsgBox HELLO FROM AHK
     ;NeutronWebApp.wnd.alert("Hi")
     ;DisplayAlertMsg("You click the button!!!!", "alert-success")
-    SQL := "SELECT * FROM user_tasks;"
-    If !AOI_Pro_DB.GetTable(SQL, Result)
-       MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
-    
-    DataBaseTableToObject(Result)
+    ;SQL := "SELECT * FROM user_tasks;"
+    ;If !AOI_Pro_DB.GetTable(SQL, Result)
+       ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+    ;
+    DisplayAlertMsg("Test alert msg!", "alert-success", 2000)
+    ;DataBaseTableToObject(Result)
     ;MsgBox % Result.ColumnCount
     ;Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
 }
@@ -185,7 +186,7 @@ SearchProgram(neutron, event) {
     
     ;;Get data from DB
     NeutronWebApp.qs("#search-status-label").innerHTML := "Searching..."
-    SQL := "SELECT * FROM aoi_programs WHERE prog_build_number LIKE '%" . searchInput . "%' OR prog_full_name LIKE '%" . searchInput . "%' OR prog_pcb_number LIKE '%" . searchInput . "%' OR prog_current_eco LIKE '%" . searchInput . "%' OR prog_current_ecl LIKE '%" . searchInput . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
+    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON prog_pcb_number=pcb_number WHERE prog_build_number LIKE '%" . searchInput . "%' OR prog_full_name LIKE '%" . searchInput . "%' OR prog_pcb_number LIKE '%" . searchInput . "%' OR prog_current_eco LIKE '%" . searchInput . "%' OR prog_current_ecl LIKE '%" . searchInput . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
     
     If !AOI_Pro_DB.GetTable(SQL, Result) {
         DisplayAlertMsg("Execute SQL statement FAILED!!!", "alert-danger")
@@ -266,8 +267,9 @@ DisplayAlertMsg(Text := "", ColorClass := "", Timeout := 2500) {
     )
     NeutronWebApp.qs("#alert-box-container").insertAdjacentHTML("afterbegin", html)
     
-    Fn := Func("AutoCloseAlertMsg").Bind(randId)
-    SetTimer, %Fn%, -%Timeout%
+    NeutronWebApp.wnd.autoCloseAlertMsg(randId, Timeout)    ;JS func
+    ;Fn := Func("AutoCloseAlertMsg").Bind(randId)
+    ;SetTimer, %Fn%, -%Timeout%
 }
 
 DisplayProgCard(Result) {
@@ -286,20 +288,31 @@ DisplayProgCard(Result) {
             currentECO := programData[A_Index].prog_current_eco
             currentECL := programData[A_Index].prog_current_ecl
             dateTimeCreated := programData[A_Index].prog_date_created
+            dateTimeUpdated := programData[A_Index].prog_date_updated
             machineBrandName := programData[A_Index].prog_aoi_machine
             progAltType := programData[A_Index].prog_alternate_type
             progSubsName := programData[A_Index].prog_substitute
-                
+            progLibName := programData[A_Index].prog_library_name = "" ? "N/A" : programData[A_Index].prog_library_name
+            
+            pcbPartStatus := programData[A_Index].pcb_part_status
+            
             progStatusClass := progStatus = "USABLE" ? "pro-card-status-useable" : progStatus = "NEED UPDATE" ? "pro-card-status-needupdate" : progStatus = "NOT READY" ? "pro-card-status-notready" : progStatus = "IN PROGRESS" ? "pro-card-status-inprogress" : progStatus = "SUBSTITUTE" ? "pro-card-status-substitute" : ""
             brandLogoPath := machineBrandName = "YesTech" ? "yestech-logo.png" : machineBrandName = "TRI" ? "rti-logo.png" : "default-brand-icon.png"
+            partStatusColor := pcbPartStatus = "ACTIVE" ? "green" : pcbPartStatus = "BETA" ? "indigo" : pcbPartStatus = "OBSOLETE" ? "deep-orange" : pcbPartStatus = "USE UP" ? "yellow" : pcbPartStatus = "LAST-TIME BUY" ? "teal" : pcbPartStatus = "NO DESIGN" ? "brown" : "grey"
             If (dateTimeCreated != "") {
                 FormatTime, dateCreated, %dateTimeCreated%, MMM dd, yyyy
                 FormatTime, timeCreated, %dateTimeCreated%, hh:mm:ss tt
             } Else {
                 dateCreated := "N/A"
             }
+            If (dateTimeUpdated != "") {
+                FormatTime, dateUpdated, %dateTimeUpdated%, MMM dd, yyyy
+                FormatTime, timeUpdated, %dateTimeUpdated%, hh:mm:ss tt
+            } Else {
+                dateUpdated := "N/A"
+            }
             If (progSubsName != "")
-                progFullName := progFullName . "<span class='red-text'> (USE => " . progSubsName . ")</span>"
+                progFullName := progFullName . "<span class='red-text'> (=> " . progSubsName . ")</span>"
                 
             html =
             (Ltrim
@@ -313,11 +326,15 @@ DisplayProgCard(Result) {
                             </div>
                             <h6 class="col-sm pt-1 prog-card-title">%currentECL%</h6>
                             <h6 class="col-sm pt-1 prog-card-title">%currentECO%</h6>
-							<h6 class="col-sm pt-1 prog-card-title">%pcbNum%</h6>
+							<div class="col-sm pt-1 prog-card-title">
+                                <span class="badge %partStatusColor%" style="font-size: 14px;">%pcbNum%</span>
+                            </div>
 						</div>
 						<div class="row">
-							<p class="col-sm text-muted prog-card-subtitle">%progFullName%</p>
+							<p class="col-sm-4 text-muted prog-card-subtitle">%progFullName%</p>
                             <p class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-plus"></i> %dateCreated%</p>
+                            <p class="col-sm text-muted prog-card-subtitle"><i class="fas fa-calendar-check"></i> %dateUpdated%</p>
+                            <p class="col-sm text-muted prog-card-subtitle"><i class="fas fa-folder"></i> %progLibName%</p>
 						</div>
 					</div>
 					<div class="col-md-2" style="">
@@ -416,7 +433,7 @@ DisplayProgCardModal(neutron, event) {
     NeutronWebApp.qs("#prog-card-created-by").innerHTML := pcmUserFn . " " . pcmUserLn
     
     ;;Display Data on Second Tab
-    buildStatusColor := pcmBuildStatus = "ACTIVE" ? "green" : pcmBuildStatus = "BETA" ? "indigo" : pcmBuildStatus = "OBSOLETE" ? "deep-orange" :"black"
+    buildStatusColor := pcmBuildStatus = "ACTIVE" ? "green" : pcmBuildStatus = "BETA" ? "indigo" : pcmBuildStatus = "OBSOLETE" ? "deep-orange" : pcmBuildStatus = "USE UP" ? "yellow" : pcmBuildStatus = "LAST-TIME BUY" ? "teal" : pcmBuildStatus = "NO DESIGN" ? "brown" : "grey"
     NeutronWebApp.qs("#prog-card-modal-build-name").innerHTML := pcmBuildName . "  <span class='pricetag z-depth-1 default-mouse'>$" . pcmBuildCost . "</span>"
     NeutronWebApp.qs("#prog-card-modal-build").innerHTML := pcmProgBuildNum
     NeutronWebApp.qs("#prog-card-modal-build-status").innerHTML := "Status: <span class='badge " . buildStatusColor . "'>" . pcmBuildStatus . "</span>"
@@ -426,7 +443,7 @@ DisplayProgCardModal(neutron, event) {
     If (ProgCardBuildECOHistData.HasRows) {
         Loop, % ProgCardBuildECOHistData.RowCount
         {
-            progHere := "<i class='pt-1 fas fa-lg fa-caret-left'></i>&nbsp;<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgName . "</span>"
+            progHere := "<i class='fas fa-lg fa-caret-left'></i>&nbsp;<span class='badge' style='background-color: " . progStatusColor . "'>" . pcmProgName . "</span>"
             ProgCardBuildECOHistData.Next(Row)
             Loop, % ProgCardBuildECOHistData.ColumnCount
             {
@@ -458,7 +475,7 @@ DisplayProgCardModal(neutron, event) {
     }
     
     ;;Display Data on Third Tab
-    pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : pcmPcbStatus = "OBSOLETE" ? "deep-orange" : "black"
+    pcbStatusColor := pcmPcbStatus = "ACTIVE" ? "green" : pcmPcbStatus = "BETA" ? "indigo" : pcmPcbStatus = "OBSOLETE" ? "deep-orange" : pcmPcbStatus = "USE UP" ? "yellow" : pcmPcbStatus = "LAST-TIME BUY" ? "teal" : pcmPcbStatus = "NO DESIGN" ? "brown" : "grey"
     NeutronWebApp.qs("#prog-card-modal-pcb-name").innerHTML := pcmPcbFullName " | " pcmProgPcbNum
     NeutronWebApp.qs("#prog-card-modal-pcb").innerHTML := pcmProgPcbNum
     NeutronWebApp.qs("#prog-card-modal-pcb-status").innerHTML := "Status: <span class='badge " . pcbStatusColor . "'>" . pcmPcbStatus . "</span>"
