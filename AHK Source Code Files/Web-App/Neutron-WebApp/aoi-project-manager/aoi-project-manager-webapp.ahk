@@ -154,21 +154,11 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    ;HtmlMsgBox("WARNING", , , "Test MsgBox", "HELLO! This is a message", 0)
-    ;fn := Func("autoUpdatePcbDBTable").Bind("13580620L")
-    ;SetTimer, %fn%, -0
-    ;autoUpdatePcbDBTable("13580252L")   ;;;DELETE ME!!!
-    ;MsgBox HELLO FROM AHK
-    ;NeutronWebApp.wnd.alert("Hi")
-    ;DisplayAlertMsg("You click the button!!!!", "alert-success")
-    ;SQL := "SELECT * FROM user_tasks;"
-    ;If !AOI_Pro_DB.GetTable(SQL, Result)
-       ;MsgBox, 16, SQLite Error, % "Msg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
-    ;
-    DisplayAlertMsg("Test alert msg!", "alert-success", 2000)
-    ;DataBaseTableToObject(Result)
-    ;MsgBox % Result.ColumnCount
-    ;Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe "10000791L" "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath%, , Hide
+    html =
+    (
+    <div type="button" class="card toggle-modal-test">Test Modal 2</div>
+    )
+    NeutronWebApp.qs("#test-div").insertAdjacentHTML("beforeend", html)
 }
 
 TestBttn2(neutron, event) {
@@ -551,7 +541,7 @@ DisplayTaskCard(Data) {
                 <div class="row">
                     <div class="col-md-10 pl-4">
                         <div class="row">
-                            <h6 class="col-sm task-card-title">%taskType%</h6>
+                            <h6 class="col-sm task-card-title">%taskType%</h6>  
                             <div class="col-sm">
                                 <span class="badge %taskStatusColorClass%">%taskStatus%</span>
                             </div>

@@ -13,7 +13,7 @@
 	<link href="bootstrap.min.css" rel="stylesheet">
 	<link href="mdb.min.css" rel="stylesheet">
 	<link href="font-googleapi.css" rel="stylesheet">
-	
+
 	<!-- Font Awesome -->
 	<script src="fontawesome.js"></script>
 	<script src="fa-all.js"></script>
@@ -100,10 +100,10 @@
 		<!-- Left nav bar -->
 		<div class="nav flex-column nav-pills bg-app-theme-light text-light" id="nav-tab" role="tablist" ondragstart="return false;">
 			<span class="pt-5" id="spacer"></span>
-			<a class="nav-link text-light left-nav-link left-nav-link-lock active" id="nav-task-tab" data-toggle="tab" href="#task-tab" role="tab"><span data-toggle="tooltip" data-placement="right" data-html="true" title="<b>AOI Tasks</b>"><i class="fas fa-lg fa-project-diagram" style="margin-left: 1.4px;"></i></span></a>
-			<a class="nav-link text-light left-nav-link" id="nav-search-tab" data-toggle="tab" href="#prog-search-tab" role="tab"><span data-toggle="tooltip" data-placement="right"data-html="true"  title="<b>AOI Program Finder</b>"><i class="fas fa-lg fa-search" style="font-size: 1.5rem; margin-top: -4px;"></i></span></a>
-			<a class="nav-link text-light left-nav-link" id="nav-tool-tab" data-toggle="tab" href="#tool-tab" role="tab"><span data-toggle="tooltip" data-placement="right" data-html="true" title="<b>More Tools</b>"><i class="fas fa-lg fa-toolbox" style="font-size: 1.5rem; margin-top: -4px;"></i></span></a>
-			<a class="nav-link text-light left-nav-link" id="nav-database-tool-tab" data-toggle="tab" href="#database-tab" role="tab"><span data-toggle="tooltip" data-placement="right" data-html="true" title="<b>Database Viewer</b>"><i class="fas fa-lg fa-database" style="font-size: 1.5rem; margin-top: -4px; margin-left: 1.3px;"></i></span></a>
+			<a class="nav-link text-light left-nav-link left-nav-link-lock active tool-green" id="nav-task-tab" data-toggle="tab" href="#task-tab" role="tab" tool="tooltip" data-placement="right" data-html="true" title="<b>AOI Tasks</b>"><i class="fas fa-lg fa-project-diagram" style="margin-left: 1.4px;"></i></a>
+			<a class="nav-link text-light left-nav-link" id="nav-search-tab" data-toggle="tab" href="#prog-search-tab" role="tab" tool="tooltip" data-placement="right" data-html="true" title="<b>AOI Program Finder</b>"><i class="fas fa-lg fa-search" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
+			<a class="nav-link text-light left-nav-link" id="nav-tool-tab" data-toggle="tab" href="#tool-tab" role="tab" tool="tooltip" data-placement="right"data-html="true"  title="<b>More Tools</b>"><i class="fas fa-lg fa-toolbox" style="font-size: 1.5rem; margin-top: -4px;"></i></a>
+			<a class="nav-link text-light left-nav-link" id="nav-database-tool-tab" data-toggle="tab" href="#database-tab" role="tab" tool="tooltip" data-placement="right" data-html="true" title="<b>Database Viewer</b>"><i class="fas fa-lg fa-database" style="font-size: 1.5rem; margin-top: -4px; margin-left: 1.3px;"></i></a>
 		</div>
 
 		<!-- Main Content -->
@@ -412,68 +412,11 @@
 								  data-content="Login Here!">popover
 								  on bottom</button>
 
-									<button type="button" class="btn btn-primary" data-toggle="tooltip" data-placement="right"
-									  title="Tooltip on right">
-									  Tooltip on right
-									</button>
+									<a class="" tool="tooltip-secondary" data-placement="bottom" title="Tooltip 1 title">Tool Tip</a>
 
-									<!-- <div class="" style="width: 200px; height: 50px;">
-						        <select class="selectpicker form-control-sm" id="number" data-container="body" data-live-search="true" title="Select a number" data-hide-disabled="true"></select>
-						      </div> -->
-									<div>
-										<div class="">
-								      <span type="button" class=" dropdown-toggle" data-toggle="dropdown">
-								        <i class="glyphicon glyphicon-plus-sign"></i> <span class="caret"></span>
-								      </span>
-								      <ul class="dropdown-menu" role="menu">
-								        <li><a href="#">Action</a></li>
-								        <li><a href="#">Another action</a></li>
-								        <li><a href="#">Something else here</a></li>
-								        <li class="divider"></li>
-								        <li><a href="#">Separated link</a></li>
-								      </ul>
-								  	</div>
-
-								    <div class="">
-								      <span type="button" class=" dropdown-toggle" data-toggle="dropdown">
-								        <i class="glyphicon glyphicon-cog"></i> <span class="caret"></span>
-								      </span>
-								      <span class="dropdown-menu" role="menu">
-								        <a href="#">Action 2</a>
-								        <a href="#">Another action 2</a>
-								        <a href="#">Something else here 2</a>
-								      </span>
-								    </div>
+									<div id="test-div">
+										<div type="button" class="card toggle-modal-test">Test Modal 1</div>
 									</div>
-									<!-- Basic dropdown -->
-									<!-- Basic dropdown -->
-								<!-- Basic dropdown -->
-						<!-- <div class="row">
-							<div class="col-md-6">
-								<img src="E:\Temp\MapBG_Top.bmp" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80; filter: brightness(70%) contrast(200%) saturate(160%);">
-							</div>
-							<div class="col-md-6">
-								<img src="E:\Temp\MapBG_Top.bmp" class="rounded mx-auto d-block img-fluid z-depth-1" style="margin-top: -7px; z-index: 80; filter: brightness(50%);">
-							</div>
-						</div>
-						<marquee behavior="scroll" bgcolor="yellow" loop="-1" width="30%"><i><font color="blue"><strong>Today's date is :<span id="time"></span></strong>  </font></i></marquee> -->
-						<!-- <button id="test-btn" type="button" class="btn btn-primary" onclick="ahk.TestBttn2(event)">Test MsgBox</button> -->
-						<!-- <div class="dropdown">
-						  <button class="btn btn-secondary" type="button" data-toggle="dropdown">
-						    Dropdown button
-						  </button>
-						  <div class="dropdown-menu dropdown-menu-sm" >
-						    <a class="dropdown-item" href="#">Action</a>
-						    <a class="dropdown-item" href="#">Another action</a>
-						    <a class="dropdown-item" href="#">Something else here</a>
-						  </div>
-						</div> -->
-
-						<!-- <button id="prog-card-req-bttn" type="button" data-toggle="dropdown" class="btn z-depth-0 px-1" style=""><i class="fas fa-2x fa-ellipsis-v"></i><button>
-						<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
-							<a class="dropdown-item" href="">Request ECO Update</a>
-							<a class="dropdown-item" href="">Request Program Debug</a>
-						</div> -->
 					</div>
 				</div>
 
@@ -634,15 +577,6 @@
   //   $('body').removeClass("auth-container");
 	// })
 
-	// Tooltips Initialization
-	$(function () {
-		$('[data-toggle="tooltip"]').tooltip();
-	});
-	//Fix a bug where tooltip stayed onclick.
-	$('[data-toggle="tooltip"]').tooltip({
-	    trigger : 'hover'
-	});
-
 	//Fix bug where user cannot hit enter to submit form
 	$("#inputUserN").bind("keydown", {}, keypressInBox);
 	$("#inputPw").bind("keydown", {}, keypressInBox);
@@ -657,5 +591,15 @@
 	function hideModal(modalId) {
 		$(modalId).modal("hide");
 	}
+
+	$(".toggle-modal-test").click(function(e){
+		alert('TEST HERE!');
+		e.preventDefault();
+		var $id = $(this).attr("data-target");
+		$($id).modal({
+			backdrop: false,
+			keyboard: false
+		});
+	});
 </script>
 </html>

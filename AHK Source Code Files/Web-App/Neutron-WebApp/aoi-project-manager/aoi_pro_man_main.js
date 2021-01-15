@@ -138,3 +138,65 @@ $("#prog-card-dropdown a").on("click", function() {
 // 		}, timeout);
 // 	});
 // });
+
+// ========================================================================= //
+// Tooltips Initialization
+$(function () {
+  $('[tool="tooltip"]').tooltip({
+    trigger : 'hover'
+  });
+  // Custom tooltip
+  $('[tool="tooltip-success"]').tooltip({
+    template: '<div class="tooltip t-success" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+  });
+  $('[tool="tooltip-warning"]').tooltip({
+    template: '<div class="tooltip t-warning" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+  });
+  $('[tool="tooltip-alert"]').tooltip({
+    template: '<div class="tooltip t-alert" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+  });
+  $('[tool="tooltip-info"]').tooltip({
+    template: '<div class="tooltip t-info" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+  });
+  $('[tool="tooltip-secondary"]').tooltip({
+    template: '<div class="tooltip t-secondary" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
+  });
+});
+
+// ========================================================================= //
+// Minimize and Maximize boostrap modal
+$(function(){
+  var $content, $modal, $apnData, $modalCon;
+  $content = $(".min");
+
+  //To fire modal
+  $(".toggle-modal").click(function(e){
+    alert('HERE!');
+    e.preventDefault();
+    var $id = $(this).attr("data-target");
+    $($id).modal({
+      backdrop: false,
+      keyboard: false
+    });
+  });
+
+  $(".modal-minimize").on("click", function(){
+    $modalCon = $(this).closest(".mymodal").attr("id");
+    $apnData = $(this).closest(".mymodal");
+    $modal = "#" + $modalCon;
+    $(".modal-backdrop").addClass("display-none");
+    $($modal).toggleClass("min");
+    if ( $($modal).hasClass("min") ){
+      $(".minmaxCon").append($apnData);
+      $(this).find("i").toggleClass( 'fa-minus').toggleClass( 'fa-clone');
+    } else {
+      $(".container").append($apnData);
+      $(this).find("i").toggleClass( 'fa-clone').toggleClass( 'fa-minus');
+    };
+  });
+  $("[data-dismiss='modal']").click(function(){
+    $(this).closest(".mymodal").removeClass("min");
+    $(".container").removeClass($apnData);
+    $(this).next('.modalMinimize').find("i").removeClass('fa fa-clone').addClass( 'fa fa-minus');
+  });
+});

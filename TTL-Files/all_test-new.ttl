@@ -1090,7 +1090,10 @@ mpause 500
 sendln "ifconfig |grep -i wifi1 |awk '{print $5}'"
 waitln '00:' '88:' '80:'
 strlen inputstr
-if result <>17 goto start_wifi
+if result <>17 then
+   sendln 03
+   goto WIFI_FAILURE
+endif
 strconcat wifiAddr inputstr
 
 timeout=30
