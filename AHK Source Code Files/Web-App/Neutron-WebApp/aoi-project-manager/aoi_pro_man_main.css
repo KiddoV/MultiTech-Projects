@@ -257,6 +257,29 @@ body{
   }
 }
 
+/****** Min-Max Modal ******/
+.minmax-container {
+	height: 15px;
+	align-self: center;
+}
+.min {
+	width: inherit;
+  overflow: hidden !important;
+}
+.min .modal-header, .min .modal-title {
+	/* background-color: black !important; */
+	height: 15px !important;
+	font-size: 10px !important;
+	border-radius: 2px;
+}
+.min .modal-body, .min .modal-footer {
+	display: none;
+	position: absolute;
+}
+.min .icon-btn-xs {
+	font-size: 0.6rem !important;
+	margin: 0 !important;
+}
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
 /***Boostrap CSS***/

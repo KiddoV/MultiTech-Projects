@@ -154,11 +154,7 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 TestBttn(neutron, event) {
-    html =
-    (
-    <div type="button" class="card toggle-modal-test">Test Modal 2</div>
-    )
-    NeutronWebApp.qs("#test-div").insertAdjacentHTML("beforeend", html)
+
 }
 
 TestBttn2(neutron, event) {
@@ -306,7 +302,7 @@ DisplayProgCard(Result) {
                 
             html =
             (Ltrim
-            <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable" style="max-width: 99`%; height: 60px;" data-toggle="modal" data-target="#prog-card-modal" onclick="ahk.DisplayProgCardModal(this)">
+            <div id="%progDBId%" type="button" class="prog-card card p-1 pl-2 mb-2 %progStatusClass% fast animated bounceInDown hoverable toggle-modal" style="max-width: 99`%; height: 60px;" data-target="#prog-card-modal" onclick="ahk.DisplayProgCardModal(this)">
                 <div class="row">
                     <div class="col-md-10">
                         <div class="row">
@@ -334,6 +330,8 @@ DisplayProgCard(Result) {
             </div>
             )
             NeutronWebApp.qs("#search-result-container").insertAdjacentHTML("beforeend", html)
+            
+            ;;;Create modal for each programcard
         }
     }
 }

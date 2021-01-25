@@ -107,7 +107,7 @@
 		</div>
 
 		<!-- Main Content -->
-		<main class="flex-grow-1 overflow-auto bg-app-color" style="overflow: hidden;">
+		<main class="flex-grow-1 overflow-auto bg-app-color app-container" style="overflow: hidden;">
 			<div id="nav-all-tab-content" class="tab-content container p-0 m-0">
 
 				<!-- Task Tab Contents -->
@@ -291,12 +291,16 @@
 					</div>
 
 					<!-- Modal for Prog-Card -->
-					<div id="prog-card-modal" class="modal faster animated bounceIn" tabindex="-1" role="dialog">
+					<div id="prog-card-modal-container"></div>
+					<div id="prog-card-modal" class="modal minmax-modal faster animated bounceIn" role="dialog">
 						<div class="modal-dialog modal-notify modal-success modal-dialog-centered" style="max-width: 900px;">
 							<div class="modal-content">
 								<div id="prog-card-modal-header" class="modal-header">
-										<h6 id="prog-card-modal-title" class="modal-title heading lead p-0" style="font-weight: bold;">?????????</h6>
-										<span type="button" class="text-white" data-dismiss="modal"><i class="icon-btn-xs fas fa-1x fa-times mt-1 mr-1" style="font-size: 1.2rem"></i></span>
+										<h6 id="prog-card-modal-title" class="modal-title heading lead p-0 pr-2" style="font-weight: bold;">?????????</h6>
+										<div>
+											<span type="button" class="icon-btn-outer text-white modal-minimize"><i class="icon-btn-xs fas fa-window-minimize mt-1 mr-2" style="font-size: 0.9rem"></i></span>
+											<span type="button" class="icon-btn-outer text-white" data-dismiss="modal"><i class="icon-btn-xs fas fa-times mt-1 mr-1" style="font-size: 1.2rem"></i></span>
+										</div>
 								</div>
 								<div class="modal-body p-2 pt-3" style="height: 550px; overflow-x: auto;">
 									<div class="tab-content">
@@ -413,11 +417,6 @@
 								  on bottom</button>
 
 									<a class="" tool="tooltip-secondary" data-placement="bottom" title="Tooltip 1 title">Tool Tip</a>
-
-									<div id="test-div">
-										<div type="button" class="card toggle-modal-test">Test Modal 1</div>
-										<div type="button" class="card toggle-modal-test">Test Modal 2</div>
-									</div>
 					</div>
 				</div>
 
@@ -503,9 +502,9 @@
 		<div id="icon-status-bar" class="ml-2" style="margin-top: 2px;">
 			<span class="mr-1"><i class="fas fa-server"></i></span>
 			<span id="icon-database-status" class="mr-1 icon-problem"><i class="fas fa-database"></i></span>
-			<span id="icon-web-status" class="icon-problem"><i class="fas fa-globe"></i></span>
+			<span id="icon-web-status" class="icon-problem pr-2"><i class="fas fa-globe"></i></span>
 		</div>
-		<span class="flex-grow-1"></span>
+		<div class="flex-grow-1 minmax-container"></div>
 		<span class="footer-btn" data-toggle="modal" data-target="#modal-settings"><i class="fas fa-cog"></i></span>
 	</footer>
 	</div><!-------------------------------------------------------------------------->
@@ -516,6 +515,7 @@
 	//============================================================================//
 	////  FUNCTIONs TO BE USED BY AHK ////
 	var origModalCardProgInfoContent = document.getElementById("prog-card-main-info-group").innerHTML;
+	var progCardModalTemplate = document.getElementById("prog-card-modal").outerHTML;
 
 	function activateProgCardFirstTab() {
 	  $('#prog-card-modal-tabs li:first-child a').tab('show');
@@ -535,6 +535,7 @@
 	}
 	//============================================================================//
 	////  FUNCTIONs AS NORMAL FOR HTML USED ////
+
 	$("[data-toggle=popover]").popover();			//Call this to use Popover
 
 	function showPassword(elId, x) {
@@ -594,10 +595,5 @@
 	function hideModal(modalId) {
 		$(modalId).modal("hide");
 	}
-
-	$(".toggle-modal-test").on("click", function(e) {
-		alert('TEST ON CLICK!');
-		e.preventDefault();
-	});
 </script>
 </html>

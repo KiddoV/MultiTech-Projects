@@ -166,37 +166,50 @@ $(function () {
 // ========================================================================= //
 // Minimize and Maximize boostrap modal
 $(function(){
-  var $content, $modal, $apnData, $modalCon;
+  var $content, $modal, $apnData, $modalCon, $origModalTitle, $minModalTitle, $id;
   $content = $(".min");
 
   //To fire modal
-  $(".toggle-modal").on("click", function(e) {
-    alert('HERE!');
+  $(document).on("click", ".toggle-modal", function(e) {
     e.preventDefault();
-    var $id = $(this).attr("data-target");
+    $id = $(this).attr("data-target");
     $($id).modal({
-      backdrop: false,
-      keyboard: false
+      //backdrop: false,
+      //keyboard: false
     });
   });
 
-  $(".modal-minimize").on("click", function() {
-    $modalCon = $(this).closest(".mymodal").attr("id");
-    $apnData = $(this).closest(".mymodal");
+  //After fire modal
+  $(document).on("shown.bs.modal", $id, function() {
+    $origModalTitle = $($id + " .modal-title")[0].innerHTML;
+  });
+
+  //Minimize-maximize modal
+  $(document).on("click", ".modal-minimize", function() {
+    $modalCon = $(this).closest(".minmax-modal").attr("id");
     $modal = "#" + $modalCon;
-    $(".modal-backdrop").addClass("display-none");
+    $apnData = $(this).closest(".minmax-modal");
+
+    $(".modal-backdrop").toggleClass("d-none");
+    $minModalTitle = $origModalTitle.match(/[^\s]+/);
     $($modal).toggleClass("min");
-    if ( $($modal).hasClass("min") ){
-      $(".minmaxCon").append($apnData);
-      $(this).find("i").toggleClass( 'fa-minus').toggleClass( 'fa-clone');
+    if ($($modal).hasClass("min")){
+      $($modal + " .modal-title").html($minModalTitle);
+      $(".minmax-container").append($apnData);
+      // $(this).find("i").toggleClass( 'fa-window-minimize').toggleClass( 'fa-window-restore');
     } else {
-      $(".container").append($apnData);
-      $(this).find("i").toggleClass( 'fa-clone').toggleClass( 'fa-minus');
+      $($modal + " .modal-title").html($origModalTitle);
+      // $(".modal-backdrop").removeClass("d-none");
+      //$(".app-container").append($apnData);
+      // $(this).find("i").toggleClass( 'fa-window-restore').toggleClass( 'fa-window-minimize');
     };
   });
-  $("[data-dismiss='modal']").click(function(){
-    $(this).closest(".mymodal").removeClass("min");
-    $(".container").removeClass($apnData);
-    $(this).next('.modalMinimize').find("i").removeClass('fa fa-clone').addClass( 'fa fa-minus');
+
+  //Close min-max modal
+  $(".minmax-modal [data-dismiss='modal']").click(function(){
+    $(this).closest(".minmax-modal").removeClass("min");
+    $(".app-container").removeClass($apnData);
+    $(this).next('.modal-minimize').find("i").removeClass('fas fa-window-restore').addClass( 'fas fa-window-minimize');
   });
+
 });
