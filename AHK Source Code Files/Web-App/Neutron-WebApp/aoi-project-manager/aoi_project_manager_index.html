@@ -416,6 +416,7 @@
 
 									<div id="test-div">
 										<div type="button" class="card toggle-modal-test">Test Modal 1</div>
+										<div type="button" class="card toggle-modal-test">Test Modal 2</div>
 									</div>
 					</div>
 				</div>
@@ -527,7 +528,9 @@
 	function autoCloseAlertMsg(elId, timeout) {
 		setTimeout(function(){
 			var el = document.getElementById(elId);
-			el.click();
+			if (el !== null) {
+					el.click();
+			}
 		}, timeout);
 	}
 	//============================================================================//
@@ -592,14 +595,9 @@
 		$(modalId).modal("hide");
 	}
 
-	$(".toggle-modal-test").click(function(e){
-		alert('TEST HERE!');
+	$(".toggle-modal-test").on("click", function(e) {
+		alert('TEST ON CLICK!');
 		e.preventDefault();
-		var $id = $(this).attr("data-target");
-		$($id).modal({
-			backdrop: false,
-			keyboard: false
-		});
 	});
 </script>
 </html>

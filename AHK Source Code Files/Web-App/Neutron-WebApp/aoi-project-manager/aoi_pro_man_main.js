@@ -170,7 +170,7 @@ $(function(){
   $content = $(".min");
 
   //To fire modal
-  $(".toggle-modal").click(function(e){
+  $(".toggle-modal").on("click", function(e) {
     alert('HERE!');
     e.preventDefault();
     var $id = $(this).attr("data-target");
@@ -180,7 +180,7 @@ $(function(){
     });
   });
 
-  $(".modal-minimize").on("click", function(){
+  $(".modal-minimize").on("click", function() {
     $modalCon = $(this).closest(".mymodal").attr("id");
     $apnData = $(this).closest(".mymodal");
     $modal = "#" + $modalCon;
