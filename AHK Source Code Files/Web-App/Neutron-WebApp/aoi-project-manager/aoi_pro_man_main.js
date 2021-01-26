@@ -168,13 +168,12 @@ $(function () {
 $(function(){
   var $content, $modal, $apnData, $modalCon, $origModalTitle, $minModalTitle, $id;
   $content = $(".min");
-
   //To fire modal
   $(document).on("click", ".toggle-modal", function(e) {
     e.preventDefault();
     $id = $(this).attr("data-target");
     $($id).modal({
-      //backdrop: false,
+      backdrop: false,
       //keyboard: false
     });
   });
@@ -190,17 +189,21 @@ $(function(){
     $modal = "#" + $modalCon;
     $apnData = $(this).closest(".minmax-modal");
 
-    $(".modal-backdrop").toggleClass("d-none");
+    //$(".modal-backdrop").addClass("d-none");
     $minModalTitle = $origModalTitle.match(/[^\s]+/);
     $($modal).toggleClass("min");
     if ($($modal).hasClass("min")){
       $($modal + " .modal-title").html($minModalTitle);
+      //$detach1 = $($modal + " .modal-body").detach();
+      //$detach2 = $($modal + " .modal-footer").detach();
+      //ahk.Test(this, $apnData.html());
       $(".minmax-container").append($apnData);
+      //document.querySelector(".minmax-container").insertAdjacentHTML("beforeend", "<span type='button' class='badge black modal-minimize'>Hello</span>")
       // $(this).find("i").toggleClass( 'fa-window-minimize').toggleClass( 'fa-window-restore');
     } else {
       $($modal + " .modal-title").html($origModalTitle);
-      // $(".modal-backdrop").removeClass("d-none");
-      //$(".app-container").append($apnData);
+      //$(".modal-backdrop").removeClass("d-none");
+      $(".app-container").append($apnData);
       // $(this).find("i").toggleClass( 'fa-window-restore').toggleClass( 'fa-window-minimize');
     };
   });

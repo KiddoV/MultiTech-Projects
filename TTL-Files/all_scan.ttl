@@ -154,6 +154,7 @@ if isType3 = 0 || isType7 = 0 goto START_EEPROM
 flushrecv
 sendln 'df'
 wait 'sda1' 'sdb1'
+mpause 300
 if result=1 sendln '/media/sda1/wifiscan2-check.sh'
 if result=2 sendln '/media/sdb1/wifiscan2-check.sh'
 waitln 'No such file or directory' '#'
