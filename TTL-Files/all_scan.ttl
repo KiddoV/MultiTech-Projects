@@ -100,19 +100,21 @@ waitln '2' '3' '4' '5'
 strcompare inputstr imeiNum
 if result <> 0 then
     closesbox
-    yesnobox 'IMEI MISMATCH!! CHECK LABEL AND RESCAN?' 'IMEI MISMATCH'
-    if result = 1 then
-        inputbox 'RE-SCAN IMEI #:' 'IMEI NUMBER RESCAN'
-		imeiNum = inputstr
-		statusbox imeiNum 'RESCAN IMEI'
-		mpause 400
-		goto recheck_imei
-    else
-    	send 24
-    	wait '#'
-    	messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
-    	end
-    endif
+    send 24
+    messagebox 'IMEI MISMATCH!! CHECK LABEL AND RESCAN!' 'IMEI MISMATCH'
+    end
+    ;if result = 1 then
+    ;    inputbox 'RE-SCAN IMEI #:' 'IMEI NUMBER RESCAN'
+	;	imeiNum = inputstr
+	;	statusbox imeiNum 'RESCAN IMEI'
+	;	mpause 400
+	;	goto recheck_imei
+    ;else
+    ;	send 24
+    ;	wait '#'
+    ;	messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
+    ;	end
+    ;endif
 else
 	send 24
 	wait '#'
@@ -134,17 +136,19 @@ promNodeLora = inputstr
 strcompare promNodeLora nodeLoraNum
 if result <> 0 then
     closesbox
-    yesnobox 'NODE LORA MISMATCH!! CHECK LABEL AND RESCAN?' 'LORA MISMATCH'
-    if result = 1 then
-        inputbox 'RE-SCAN NODE LORA #:' 'NODE LORA NUMBER RESCAN'
-		nodeLoraNum = inputstr
-		statusbox nodeLoraNum 'RESCAN NODE LORA'
-		mpause 400
-		goto check_lora
-	else
-		messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
-		end
-	endif
+    send 13
+    messagebox 'NODE LORA MISMATCH!! CHECK LABEL AND RESCAN!' 'LORA MISMATCH'
+    end
+;    if result = 1 then
+;        inputbox 'RE-SCAN NODE LORA #:' 'NODE LORA NUMBER RESCAN'
+;		nodeLoraNum = inputstr
+;		statusbox nodeLoraNum 'RESCAN NODE LORA'
+;		mpause 400
+;		goto check_lora
+;	else
+;		messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
+;		end
+;	endif
 endif
 closesbox
 
@@ -172,17 +176,19 @@ promNodeWiFi = matchstr
 strcompare promNodeWiFi nodeWifiNum
 if result <> 0 then
     closesbox
-    yesnobox 'NODE WIFI MISMATCH!! DO YOU WANT TO RESCAN?' 'WIFI MISMATCH'
-    if result = 1 then
-        inputbox 'RE-SCAN NODE WIFI #:' 'NODE WIFI NUMBER RESCAN'
-		nodeWifiNum = inputstr
-		statusbox nodeWifiNum 'RESCAN NODE WIFI'
-		mpause 400
-		goto recheck_wifi
-	else
-		messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
-		end
-	endif
+    send 13
+    messagebox 'NODE WIFI MISMATCH!! DO YOU WANT TO RESCAN!' 'WIFI MISMATCH'
+    end
+;    if result = 1 then
+;        inputbox 'RE-SCAN NODE WIFI #:' 'NODE WIFI NUMBER RESCAN'
+;		nodeWifiNum = inputstr
+;		statusbox nodeWifiNum 'RESCAN NODE WIFI'
+;		mpause 400
+;		goto recheck_wifi
+;	else
+;		messagebox 'YOU STOPPED THE SCAN. SCAN FAILED!' 'SCAN FAILURE'
+;		end
+;	endif
 endif
 closesbox
 :get_bt

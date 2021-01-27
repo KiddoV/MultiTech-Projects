@@ -18,7 +18,7 @@ FileInstall C:\MultiTech-Projects\TTL-Files\all_scan.ttl, C:\V-Projects\AMAuto-S
 
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\version518.bmp, C:\V-Projects\AMAuto-Scanner\Imgs-for-Search-Func\version518.bmp, 1
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
-Global 240_SKUNums := ["94557670LF", "94557673LF", "94557700LF", "94557716LF"]
+Global 240_SKUNums := ["94557670LF", "94557673LF", "94557700LF", "94557709LF", "94557716LF", "94557717LF"]
 Global 246_SKUNums := ["94557252LF", "94557540LF", "94557543LF", "94557574LF", "94557575LF", "94557576LF", "94557585LF", "94557601LF", "94557605LF"]
 Global 247_SKUNums := ["94557274LF", "94557291LF", "94557550LF", "94557593LF", "94557594LF", "94557598LF", "94557616LF", "94557617LF"]
     
@@ -140,7 +140,7 @@ mainStart() {
     IfMsgBox Cancel
         return
     
-    If (checkInput() = 0) {
+    If (checkInput(skuNum) = 0) {
         SB_SetText("Correct the values before scanning!")
         return
     }
@@ -183,21 +183,23 @@ mainStart() {
             clearCtrlVar()
         Return
     } Else If WinExist("MISMATCH|RESCAN") {
-        SB_SetText("Scan value missmatched!")
-        WinWait RESCAN IMEI|RESCAN NODE LORA|RESCAN NODE WIFI
-        If WinExist("RESCAN IMEI") {
-            WinGetText, rescanImei, RESCAN IMEI
-            Guicontrol, Text, imeiN, %rescanImei%
-        } Else If WinExist("RESCAN NODE LORA") {
-            WinGetText, rescanNodeLora, RESCAN NODE LORA
-            Guicontrol, Text, loraN, %rescanNodeLora%
-        } Else If WinExist("RESCAN NODE WIFI") {
-            WinGetText, rescanNodeWifi, RESCAN NODE WIFI
-            Guicontrol, Text, wifiN, %rescanNodeWifi%
-        }
+        SB_SetText("Scan value missmatched! Please rescan all values!")
+        clearCtrlVar()
+        Return
+        ;WinWait RESCAN IMEI|RESCAN NODE LORA|RESCAN NODE WIFI
+        ;If WinExist("RESCAN IMEI") {
+            ;WinGetText, rescanImei, RESCAN IMEI
+            ;Guicontrol, Text, imeiN, %rescanImei%
+        ;} Else If WinExist("RESCAN NODE LORA") {
+            ;WinGetText, rescanNodeLora, RESCAN NODE LORA
+            ;Guicontrol, Text, loraN, %rescanNodeLora%
+        ;} Else If WinExist("RESCAN NODE WIFI") {
+            ;WinGetText, rescanNodeWifi, RESCAN NODE WIFI
+            ;Guicontrol, Text, wifiN, %rescanNodeWifi%
+        ;}
         
-        Sleep 300
-        Goto WaitForResponse
+        ;Sleep 300
+        ;Goto WaitForResponse
     } Else If WinExist("INVALID|FAILURE|ERROR"){
         SB_SetText("Failed to scan!")
         Return
@@ -314,7 +316,7 @@ showScanHist() {
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
-checkInput() {
+checkInput(skuNum := "") {
     GuiControlGet, serialN
     GuiControlGet, imeiN
     GuiControlGet, nodeIdN
@@ -338,9 +340,18 @@ checkInput() {
     } Else If (RegExMatch(uuidN, "^([[:xdigit:]]){32}$") < 1) {
         MsgBox, 48, INVALID INPUT, Invalid UUID! Rescan!
         return 0
-    } Else If (RegExMatch(loraN, "^([0-9A-F]{2}[:-]){7}([0-9A-F]{2})$") < 1 && isLoraEnabled = 1) {
-        MsgBox, 48, INVALID INPUT, Invalid Lora Number! Rescan!
-        return 0
+    } Else If (isLoraEnabled = 1) {
+        if (RegExMatch(skuNum, "94557709LF|94557717LF") >= 1) {
+            if (RegExMatch(loraN, "^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$") < 1) {
+                MsgBox, 48, INVALID INPUT, Invalid Lora Number (!!Special Lora Number!!)! Rescan!
+                return 0
+            }
+        } else {
+            if (RegExMatch(loraN, "^([0-9A-F]{2}[:-]){7}([0-9A-F]{2})$") < 1) {
+            MsgBox, 48, INVALID INPUT, Invalid Lora Number! Rescan!
+            return 0
+            }
+        }
     } Else If (RegExMatch(wifiN, "^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$") < 1 && isWifiEnabled = 1) {
         MsgBox, 48, INVALID INPUT, Invalid Wifi ID Number! Rescan!
         return 0
@@ -366,7 +377,7 @@ changeValueDropdown() {
 getLabelType() {
     LABELTYPE1 := ["94557252LF"]
     LABELTYPE2 := ["94557574LF", "94557700LF", "94557716LF", "94557575LF", "94557601LF", "94557585LF"]
-    LABELTYPE3 := ["94557576LF", "94557670LF", "94557673LF", "94557605LF"]
+    LABELTYPE3 := ["94557576LF", "94557670LF", "94557673LF", "94557605LF", "94557717LF", "94557709LF"]
     LABELTYPE4 := ["94557291LF", "94557594LF", "94557617LF", "94557598LF"]
     LABELTYPE5 := ["94557550LF"]
     LABELTYPE6 := ["94557593LF", "94557616LF"]

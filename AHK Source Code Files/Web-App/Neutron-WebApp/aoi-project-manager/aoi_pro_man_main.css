@@ -258,21 +258,21 @@ body{
 }
 
 /****** Min-Max Modal ******/
+/* Not perfect but it works! */
 .minmax-container {
 	height: 15px;
+	max-height: 15px;
+	overflow: hidden;
 	align-self: center;
 }
 .min {
-	width: inherit;
-	padding: 0px !important;
-  margin: 0px !important;
+	width: 102px;
+	padding: 0 !important;
+  margin: 0 0 0 2px !important;
   float: left !important;
   overflow: hidden !important;
+	border-radius: 3px;
 	/* position: static !important; */
-}
-.min.modal {
-	background-color: red;
-	/* display: inline-block !important; */
 	position: relative;
 }
 .min .modal-dialog, .min .modal-content {
@@ -282,14 +282,17 @@ body{
 	/* display: inline-block !important; */
 	/* position: relative; */
 }
+.min .modal-title {
+	text-overflow: ellipsis;
+	width: 72px;
+	overflow: hidden;
+	white-space: nowrap;
+}
 .min .modal-header, .min .modal-title {
 	/* background-color: black !important; */
-	margin-bottom: calc(100vh - 15px);
-	/* bottom: 0px; */
+	margin-bottom: calc(100vh - 15px);	/* make title header on top of its outer div */
 	height: 15px !important;
 	font-size: 10px !important;
-	border-radius: 2px;
-	/* display: inline-block !important; */
 }
 .min .modal-body, .min .modal-footer {
 	display: none;
