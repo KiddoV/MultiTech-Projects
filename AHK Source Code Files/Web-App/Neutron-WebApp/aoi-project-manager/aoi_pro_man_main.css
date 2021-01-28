@@ -276,11 +276,8 @@ body{
 	position: relative;
 }
 .min .modal-dialog, .min .modal-content {
-	background-color: blue;
 	margin: 0px !important;
 	padding: 0px !important;
-	/* display: inline-block !important; */
-	/* position: relative; */
 }
 .min .modal-title {
 	text-overflow: ellipsis;
@@ -289,7 +286,6 @@ body{
 	white-space: nowrap;
 }
 .min .modal-header, .min .modal-title {
-	/* background-color: black !important; */
 	margin-bottom: calc(100vh - 15px);	/* make title header on top of its outer div */
 	height: 15px !important;
 	font-size: 10px !important;

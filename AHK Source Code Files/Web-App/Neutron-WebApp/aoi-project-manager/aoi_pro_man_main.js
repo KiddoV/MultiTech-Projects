@@ -166,8 +166,7 @@ $(function () {
 // ========================================================================= //
 // Minimize and Maximize boostrap modal
 $(function(){
-  var $content, $apnData, $modalElId, $modalId;
-  $content = $(".min");
+  var $apnData, $modalElId, $modalId;
   //To fire modal
   $(document).on("click", ".toggle-modal", function(e) {
     e.preventDefault();
@@ -176,7 +175,8 @@ $(function(){
     $('body').addClass($modalId);
 
     $($modalElId).modal({
-      // backdrop: false,
+      focus: false,
+      //backdrop: false,
       //keyboard: false
     });
   });
@@ -214,6 +214,7 @@ $(function(){
   $(document).on("click", ".minmax-modal [data-dismiss='modal']", function(){
     $modalId = $(this).closest(".minmax-modal").attr("id");
     $(this).closest(".minmax-modal").removeClass("min");
+    $( "." + $modalId + " .modal-backdrop").addClass("d-none");
     $(".app-container").removeClass($apnData);
     //$(this).next('.modal-minimize').find("i").removeClass('fas fa-window-restore').addClass( 'fas fa-window-minimize');
   });
