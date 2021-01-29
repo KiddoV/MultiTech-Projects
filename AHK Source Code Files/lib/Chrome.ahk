@@ -71,9 +71,12 @@ class Chrome
 		
 		; Verify ChromePath
 		if (ChromePath == "")
-			FileGetShortcut, %A_StartMenuCommon%\Programs\Google Chrome.lnk, ChromePath
+			; By using winmgmts to get the path of a shortcut file we fix an edge case where the path is retreived incorrectly
+			; if using the ahk executable with a different architecture than the OS (using 32bit AHK on a 64bit OS for example)
+			 ChromePath := ComObjGet("winmgmts:").ExecQuery("Select * from Win32_ShortcutFile where Name=""" StrReplace(A_StartMenuCommon "\Programs\Google Chrome.lnk", "\", "\\") """").ItemIndex(0).Target
+			; FileGetShortcut, %A_StartMenuCommon%\Programs\Google Chrome.lnk, ChromePath
 		if (ChromePath == "")
-			RegRead, ChromePath, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Pahs\chrome.exe
+			RegRead, ChromePath, HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe
 		if !FileExist(ChromePath)
 			throw Exception("Chrome could not be found")
 		this.ChromePath := ChromePath
@@ -133,34 +136,34 @@ class Chrome
 		Index      - If multiple pages match the given criteria, which one of them to return
 		fnCallback - A function to be called whenever message is received from the page
 	*/
-	GetPageBy(Key, Value, MatchMode:="exact", Index:=1, fnCallback:="")
+	GetPageBy(Key, Value, MatchMode:="exact", Index:=1, fnCallback:="", fnClose:="")
 	{
 		Count := 0
 		for n, PageData in this.GetPageList()
 		{
 			if (((MatchMode = "exact" && PageData[Key] = Value) ; Case insensitive
-				|| (MatchMode = "contains" && InStr(PageData[Key], Value))
-				|| (MatchMode = "startswith" && InStr(PageData[Key], Value) == 1)
-				|| (MatchMode = "regex" && PageData[Key] ~= Value))
-				&& ++Count == Index)
-				return new this.Page(PageData.webSocketDebuggerUrl, fnCallback)
+			|| (MatchMode = "contains" && InStr(PageData[Key], Value))
+			|| (MatchMode = "startswith" && InStr(PageData[Key], Value) == 1)
+			|| (MatchMode = "regex" && PageData[Key] ~= Value))
+			&& ++Count == Index)
+				return new this.Page(PageData.webSocketDebuggerUrl, fnCallback, fnClose)
 		}
 	}
 	
 	/*
 		Shorthand for GetPageBy("url", Value, "startswith")
 	*/
-	GetPageByURL(Value, MatchMode:="startswith", Index:=1, fnCallback:="")
+	GetPageByURL(Value, MatchMode:="startswith", Index:=1, fnCallback:="", fnClose:="")
 	{
-		return this.GetPageBy("url", Value, MatchMode, Index, fnCallback)
+		return this.GetPageBy("url", Value, MatchMode, Index, fnCallback, fnClose)
 	}
 	
 	/*
 		Shorthand for GetPageBy("title", Value, "startswith")
 	*/
-	GetPageByTitle(Value, MatchMode:="startswith", Index:=1, fnCallback:="")
+	GetPageByTitle(Value, MatchMode:="startswith", Index:=1, fnCallback:="", fnClose:="")
 	{
-		return this.GetPageBy("title", Value, MatchMode, Index, fnCallback)
+		return this.GetPageBy("title", Value, MatchMode, Index, fnCallback, fnClose)
 	}
 	
 	/*
@@ -169,9 +172,9 @@ class Chrome
 		The default type to search for is "page", which is the visible area of
 		a normal Chrome tab.
 	*/
-	GetPage(Index:=1, Type:="page", fnCallback:="")
+	GetPage(Index:=1, Type:="page", fnCallback:="", fnClose:="")
 	{
-		return this.GetPageBy("type", Type, "exact", Index, fnCallback)
+		return this.GetPageBy("type", Type, "exact", Index, fnCallback, fnClose)
 	}
 	
 	/*
@@ -186,10 +189,12 @@ class Chrome
 		/*
 			wsurl      - The desired page's WebSocket URL
 			fnCallback - A function to be called whenever message is received
+			fnClose    - A function to be called whenever the page connection is lost
 		*/
-		__New(wsurl, fnCallback:="")
+		__New(wsurl, fnCallback:="", fnClose:="")
 		{
 			this.fnCallback := fnCallback
+			this.fnClose := fnClose
 			this.BoundKeepAlive := this.Call.Bind(this, "Browser.getVersion",, False)
 			
 			; TODO: Throw exception on invalid objects
@@ -209,20 +214,20 @@ class Chrome
 			parameters.
 			
 			DomainAndMethod - The endpoint domain and method name for the
-			endpoint you would like to call. For example:
-			PageInst.Call("Browser.close")
-			PageInst.Call("Schema.getDomains")
+				endpoint you would like to call. For example:
+				PageInst.Call("Browser.close")
+				PageInst.Call("Schema.getDomains")
 			
 			Params - An associative array of parameters to be provided to the
-			endpoint. For example:
-			PageInst.Call("Page.printToPDF", {"scale": 0.5 ; Numeric Value
-			, "landscape": Chrome.Jxon_True() ; Boolean Value
-			, "pageRanges: "1-5, 8, 11-13"}) ; String value
-			PageInst.Call("Page.navigate", {"url": "https://autohotkey.com/"})
+				endpoint. For example:
+				PageInst.Call("Page.printToPDF", {"scale": 0.5 ; Numeric Value
+					, "landscape": Chrome.Jxon_True() ; Boolean Value
+					, "pageRanges: "1-5, 8, 11-13"}) ; String value
+				PageInst.Call("Page.navigate", {"url": "https://autohotkey.com/"})
 			
 			WaitForResponse - Whether to block until a response is received from
-			Chrome, which is necessary to receive a return value, or whether
-			to continue on with the script without waiting for a response.
+				Chrome, which is necessary to receive a return value, or whether
+				to continue on with the script without waiting for a response.
 		*/
 		Call(DomainAndMethod, Params:="", WaitForResponse:=True)
 		{
@@ -274,7 +279,9 @@ class Chrome
 			))
 			
 			if (response.exceptionDetails)
-				throw Exception(response.result.description,, Chrome.Jxon_Dump(response.exceptionDetails))
+				throw Exception(response.result.description, -1
+					, Chrome.Jxon_Dump({"Code": JS
+					, "exceptionDetails": response.exceptionDetails}))
 			
 			return response.result
 		}
@@ -323,10 +330,8 @@ class Chrome
 			else if (EventName == "Close")
 			{
 				this.Disconnect()
-			}
-			else if (EventName == "Error")
-			{
-				throw Exception("Websocket Error!")
+				fnClose := this.fnClose
+				%fnClose%(this)
 			}
 		}
 		

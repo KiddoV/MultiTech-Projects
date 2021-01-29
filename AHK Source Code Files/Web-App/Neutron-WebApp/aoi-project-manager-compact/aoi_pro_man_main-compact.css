@@ -1,0 +1,421 @@
+/*=========================================================*/
+/***********************Default CSS*************************/
+html,
+body {
+	width: 100%;
+	height: 100%;
+}
+
+html, #title-label {
+	font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+#title-label {
+	font-weight: bold;
+	font-size: 10pt;
+}
+
+header {
+	font-size: 11pt;
+}
+
+body {
+	font-size: 10pt;
+	overflow: hidden !important; /* Hide scrollbars */
+}
+
+button {
+	outline: none;
+	border: none;
+	box-shadow: none;
+}
+
+/* Prevent user from select text */
+.no-select-text {
+	-ms-user-select: none; /* Internet Explorer/Edge */
+}
+
+.allow-select-text {
+	-ms-user-select: text; /* Internet Explorer/Edge */
+}
+
+.default-mouse {
+	cursor: default;
+}
+
+.bg-app-color {
+	background: #eeeeee;
+}
+
+.bg-app-theme-dark {
+	background: #37474F;
+}
+
+.bg-app-theme-light {
+	background: #546E7A;
+}
+
+.title-btn {
+	padding: 0.05em 1.30em;
+	cursor: pointer;
+	/* vertical-align: top; */
+	/* font-family: Webdings;	/* This font for the icons */ */
+	/* font-size: 11pt; */
+}
+
+.title-btn-disable {
+	pointer-events: none;
+	cursor: default;
+	background: #dadada;
+}
+
+.title-btn:hover, .footer-btn:hover {
+	background: rgba(0, 0, 0, .3);
+}
+
+.title-btn-close:hover {
+	background: #dc3545;
+}
+
+.footer-btn {
+	padding: 0.05em 0.90em;
+	cursor: pointer;
+}
+
+.menu-btn {
+	cursor: pointer;
+	padding: 0px 10px 0px;
+	font-size: 12px;
+}
+
+/* Scrollbar display */
+body{
+	scrollbar-track-color:  #AAA;
+	scrollbar-3dlight-color:  #AAA;
+	scrollbar-darkshadow-color:  #AAA;
+	scrollbar-arrow-color:  #AAA;
+	-ms-overflow-style: none;		/* Hide the scrollbar */
+}
+
+/*============================================================*/
+/***********************Additional CSS*************************/
+/* Icon Buttons */
+.icon-btn-xs {
+	padding: 0;
+}
+.icon-btn-xs:hover {
+	color: rgba(0, 0, 0, .5);
+}
+
+/**Nav Bar**/
+
+/* Program Card */
+.prog-card-title {
+	font-weight: bold;
+	font-family: sans-serif;
+}
+.prog-card-subtitle {
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.pro-card-status-useable {
+	border: 1px solid #00c853;
+	border-left: 10px solid #00c853;
+}
+.pro-card-status-needupdate {
+	border: 1px solid #673ab7;
+	border-left: 10px solid #673ab7;
+}
+.pro-card-status-notready {
+	border: 1px solid #ff3d00;
+	border-left: 10px solid #ff3d00;
+}
+.pro-card-status-inprogress {
+	border: 1px solid #fbc02d;
+	border-left: 10px solid #fbc02d;
+}
+.pro-card-status-substitute {
+	border: 1px solid #9e9e9e;
+	border-left: 10px solid #9e9e9e;
+}
+
+#prog-card-req-bttn:hover {
+	color: rgba(0, 0, 0, .3);
+}
+
+#prog-card-brand-logo:hover {
+	animation: rubberBand 1s linear .2s infinite;
+}
+
+/* Icon Status */
+.icon-working {
+	color: #00c853;
+}
+
+.icon-stopped {
+	color: #f44336;
+}
+
+.icon-problem {
+	color: #fbc02d;
+}
+
+/* Task Card */
+.task-card-title {
+	font-weight: bold;
+	font-size: 17px;
+}
+
+/* Price Tag */
+.pricetag{
+    white-space:nowrap;
+    position:relative;
+    margin:0 5px 0 10px;
+    displaY:inline-block;
+    height:25px;
+    border-radius: 0 3px 3px 0;
+    padding: 0 8px 0 15px;
+    background: #ffcc80;
+    border: 1px solid #C7D2D4;
+    color: #757575;
+    line-height:23px;
+}
+.pricetag:before{
+    position:absolute;
+		border-radius: 2px;
+    background: #ffcc80;
+    content:"\25CF";
+    color: white;
+    text-shadow: 0 0 2px #aaa;
+    font-size: 20px;
+    line-height: 10px;
+    text-indent: 6px;
+    top: 1.7px;
+    left: -10px;
+    width: 18px;
+    height: 19px;
+    transform: rotate(45deg);
+    border-left:1px solid #C7D2D4;
+    border-bottom:1px solid #C7D2D4;
+}
+
+/* Authentication */
+.login-overlay {
+	position: fixed;
+	margin-top: -8px;
+	width: 100%;
+	height: 100%;
+	background-color: #90a4ae;
+	z-index: 97;
+}
+.login-form {
+	width: 300px;
+	position: fixed;
+	top: 2em;
+	right: 0.5em;
+	z-index: 98;
+}
+/* .auth-container .modal-backdrop {
+	background-color: transparent;
+} */
+
+
+/* Icon inside INPUT box */
+.input-icon-right {
+  position: absolute;
+  right: 10px;
+  top: calc(50% - 0.6em); /* Keep icon in center of input, regardless of the input height */
+}
+.input-wrapper {
+  position: relative;
+}
+.input-wrapper input {
+  padding-right: 30px;
+}
+
+.box {
+  &_inner {
+    &:before {
+      content: '';
+      position: absolute;
+      display: block;
+      height: 12px;
+      width: 100%;
+      background: #cb5a5e;
+      background: repeating-linear-gradient(
+        -45deg,
+        #cb5a5e,
+        #cb5a5e 12px,
+        transparent 10px,
+        transparent 23px
+      );
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-bottom: 0;
+    }
+  }
+}
+
+/****** Min-Max Modal ******/
+/* Not perfect but it works! */
+.minmax-container {
+	height: 15px;
+	max-height: 15px;
+	overflow: hidden;
+	align-self: center;
+}
+.min {
+	width: 102px;
+	padding: 0 !important;
+  margin: 0 0 0 2px !important;
+  float: left !important;
+  overflow: hidden !important;
+	border-radius: 3px;
+	/* position: static !important; */
+	position: relative;
+}
+.min .modal-dialog, .min .modal-content {
+	margin: 0px !important;
+	padding: 0px !important;
+}
+.min .modal-title {
+	text-overflow: ellipsis;
+	width: 72px;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.min .modal-header, .min .modal-title {
+	margin-bottom: calc(100vh - 15px);	/* make title header on top of its outer div */
+	height: 15px !important;
+	font-size: 10px !important;
+}
+.min .modal-body, .min .modal-footer {
+	display: none;
+}
+.min .icon-btn-xs {
+	font-size: 0.6rem !important;
+	margin: 0 !important;
+}
+/*=================================================================*/
+/***********************Third-Party CSS Mod*************************/
+/***Boostrap CSS***/
+.btn,.btn:focus,.btn:active,.navbar-toggler,.navbar-toggler:focus {
+	border: none !important;
+  outline: none !important;	/* Get rid of the ugly dot border */
+  /* box-shadow: none !important; */
+}
+
+.btn-group-xs > .btn, .btn-xs {
+  padding: .50rem .45rem .55rem .45rem;
+  font-size: .775rem;
+  line-height: .5;
+  border-radius: .15rem;
+}
+
+#nav-tab{
+	width: 55px !important;
+}
+.left-nav-link {
+	border-radius: 0 !important;
+	max-height: 35px !important;
+}
+.left-nav-link:hover {
+	background: rgba(0, 0, 0, .3);
+}
+.left-nav-link.active {
+	background: #eeeeee !important;
+	color: black !important;
+	border-left: 5px solid coral;
+	padding-left: 20px;
+}
+
+.left-nav-link-lock.active {
+	background: #90a4ae !important;
+	color: white !important;
+	border-left: 5px solid red;
+	padding-left: 20px;
+}
+
+.task-nav-link {
+	padding: 2px 6px !important;
+	color: black;
+}
+.task-nav-link.active {
+	background: coral !important;
+}
+
+.alert {
+	padding: 5px 50px 7px 20px !important;
+	display: inline-block !important;
+	text-align: left !important;
+	z-index: 99;
+}
+
+.modal-header, .modal-footer {
+	padding: 1px 5px 1px 5px !important;
+}
+.modal-backdrop {
+	z-index: 97;
+}
+.modal {
+	z-index: 98;
+}
+.modal-backdrop, .modal {
+	margin-top: 23px;
+}
+.modal-dialog {
+	margin-top: 5px;
+}
+
+.badge {
+	vertical-align: middle;
+	margin-top: -0.27em;
+}
+
+.nav-pills .prog-card-nav-link .nav-link:not(.active) {
+	background-color: rgba(0, 0, 0, 0.2);
+	font-weight: bold;
+}
+.nav-pills .prog-card-nav-link .nav-link {
+	background-color: rgba(0, 0, 0, 0.5);
+	font-weight: bold;
+	color: white;
+}
+
+/* Disable form control icons */
+.form-control.is-invalid, .form-control.is-valid{
+    background-image: none;
+}
+
+/**** Tooltip mods ****/
+/* success */
+.t-success > .tooltip-inner { background-color: #00C853; }
+.t-success.tooltip.bs-tooltip-right .arrow:before { border-right-color: #00C853 !important; }
+.t-success.tooltip.bs-tooltip-left .arrow:before { border-left-color: #00C853 !important; }
+.t-success.tooltip.bs-tooltip-bottom .arrow:before { border-bottom-color: #00C853 !important; }
+.t-success.tooltip.bs-tooltip-top .arrow:before { border-top-color: #00C853 !important; }
+/* warning */
+.t-warning > .tooltip-inner { background-color: #ffae00; }
+.t-warning.tooltip.bs-tooltip-right .arrow:before { border-right-color: #ffae00 !important; }
+.t-warning.tooltip.bs-tooltip-left .arrow:before { border-left-color: #ffae00 !important; }
+.t-warning.tooltip.bs-tooltip-bottom .arrow:before { border-bottom-color: #ffae00 !important; }
+.t-warning.tooltip.bs-tooltip-top .arrow:before { border-top-color: #ffae00 !important; }
+/* alert */
+.t-alert > .tooltip-inner { background-color: #D50000; }
+.t-alert.tooltip.bs-tooltip-right .arrow:before { border-right-color: #D50000 !important; }
+.t-alert.tooltip.bs-tooltip-left .arrow:before { border-left-color: #D50000 !important; }
+.t-alert.tooltip.bs-tooltip-bottom .arrow:before { border-bottom-color: #D50000 !important; }
+.t-alert.tooltip.bs-tooltip-top .arrow:before { border-top-color: #D50000 !important; }
+/* info */
+.t-info > .tooltip-inner { background-color: #42A5F5; }
+.t-info.tooltip.bs-tooltip-right .arrow:before { border-right-color: #42A5F5 !important; }
+.t-info.tooltip.bs-tooltip-left .arrow:before { border-left-color: #42A5F5 !important; }
+.t-info.tooltip.bs-tooltip-bottom .arrow:before { border-bottom-color: #42A5F5 !important; }
+.t-info.tooltip.bs-tooltip-top .arrow:before { border-top-color: #42A5F5 !important; }
+/* secondary */
+.t-secondary > .tooltip-inner { background-color: #9E9E9E; }
+.t-secondary.tooltip.bs-tooltip-right .arrow:before { border-right-color: #9E9E9E !important; }
+.t-secondary.tooltip.bs-tooltip-left .arrow:before { border-left-color: #9E9E9E !important; }
+.t-secondary.tooltip.bs-tooltip-bottom .arrow:before { border-bottom-color: #9E9E9E !important; }
+.t-secondary.tooltip.bs-tooltip-top .arrow:before { border-top-color: #9E9E9E !important; }

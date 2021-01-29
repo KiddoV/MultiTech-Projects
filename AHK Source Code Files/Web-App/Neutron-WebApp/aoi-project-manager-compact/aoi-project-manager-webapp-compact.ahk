@@ -17,8 +17,8 @@ SetBatchLines -1
 IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
     FileCreateDir C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager
 
-FileInstall, C:\MultiTech-Projects\DLL-files\SQLite3.dll, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\SQLite3.dll, 1
-FileInstall, C:\MultiTech-Projects\EXE-Files\aoi-pro-man_autoUpdateDBTable.exe, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe, 1
+FileInstall, C:\MultiTech-Projects\DLL-files\32-bit\SQLite3.dll, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\SQLite3.dll, 1
+FileInstall, C:\MultiTech-Projects\EXE-Files\aoi-pro-man_autoUpdateDBTable-compact.exe, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable-compact.exe, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
 Global JSON := new JSON()
@@ -38,7 +38,7 @@ Global GUID1 := "{AAAAAAAA-1111-0000-116D-616E61676572}"
 ;Create a new NeutronWindow and navigate to our HTML page
 Global NeutronWebApp := new NeutronWindow()
 
-NeutronWebApp.Load("aoi_project_manager_index.html")
+NeutronWebApp.Load("aoi_project_manager-compact_index.html")
 
 NeutronWebApp.Gui("+MinSize1020x750 +LabelAOIProManager")
 
@@ -122,17 +122,7 @@ FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, bootstrap.min.js, bootstrap.min.js
-FileInstall, mdb.min.css, mdb.min.css
-FileInstall, mdb.min.js, mdb.min.js
 FileInstall, popper.min.js, popper.min.js
-FileInstall, bootstrap-table.min.css, bootstrap-table.min.css
-FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
-FileInstall, fontawesome.js, fontawesome.js
-FileInstall, fa-all.js, fa-all.js
-FileInstall, font-googleapi.css, font-googleapi.css
-FileInstall, circle-prog-bar.css, circle-prog-bar.css
-FileInstall, bootstrap-select.min.css, bootstrap-select.min.css
-FileInstall, bootstrap-select.min.js, bootstrap-select.min.js
 
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
