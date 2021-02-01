@@ -116,16 +116,18 @@ OnExit, AOIProManagerClose
 Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
-FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
-FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
+FileInstall, aoi_project_manager-compact_index.html, aoi_project_manager-compact_index.html     ;Main html file
+;FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
 ;;Boostrap components for GUI (All CSS and JS required!)
 FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.min.css, bootstrap.min.css
-FileInstall, bootstrap.min.js, bootstrap.min.js
+FileInstall, bootstrap-ie8.css, bootstrap-ie8.css
 FileInstall, popper.min.js, popper.min.js
+FileInstall, bootstrap-ie8.js, bootstrap-ie8.js
+FileInstall, bootstrap.js, bootstrap.js
 
-FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
-FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
+FileInstall, aoi_pro_man_main-compact.css, aoi_pro_man_main-compact.css
+FileInstall, aoi_pro_man_main-compact.js, aoi_pro_man_main-compact.js
 ;;Buit-in Images
 FileInstall, default-brand-logo.png, default-brand-logo.png
 FileInstall, yestech-logo.png, yestech-logo.png
@@ -396,9 +398,9 @@ DisplayProgCardModal(neutron, event) {
     RegExMatch(pcmProgCurntEcl, "^\w{1}", fstCharEcl)
     pcmProgBuildNumWEcl .= pcmProgBuildNum "" fstCharEcl
     ;;Auto Update Table aoi_pcbs
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgPcbNum% "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath% %GUID1%, , Hide
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable-compact.exe %pcmProgPcbNum% "aoi_pcbs" %MainDBFilePath% %MainSettingsFilePath% %GUID1%, , Hide
     ;;Auto Update Table aoi_builds
-    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable.exe %pcmProgBuildNumWEcl% "aoi_builds" %MainDBFilePath% %MainSettingsFilePath% %GUID1%, , Hide
+    Run, %ComSpec% /c start C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\aoi-pro-man_autoUpdateDBTable-compact.exe %pcmProgBuildNumWEcl% "aoi_builds" %MainDBFilePath% %MainSettingsFilePath% %GUID1%, , Hide
 
     pcmProgDBId := "#" . pcmProgDBId
     progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"

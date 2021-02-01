@@ -10,8 +10,8 @@ SendMode Input
 
 ;=======================================================================================;
 ;;;Libraries
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\Webapp.ahk
-#Include C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\lib\webapp\JSON_ToObj.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\webapp\Webapp.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\webapp\JSON_ToObj.ahk
 ;;;Start HTML UI
 __Webapp_AppStart:
 ;<< Header End >>

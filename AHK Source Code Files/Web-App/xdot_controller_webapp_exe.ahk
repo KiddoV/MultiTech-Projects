@@ -15,13 +15,13 @@ IfNotExist C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css
 IfNotExist C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js
     FileCreateDir C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js
 
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\AHK Source Code Files\Web-App\xdot_controller_webapp.ahk, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\xdot_controller_webapp.ahk, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\HTML-Files\xdot_controller_index.html, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\index.html, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\CSS-Files\material.min.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\material.min.css, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\CSS-Files\xdot_controller_main.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\xdot_controller_main.css, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\JAVASCRIPT-Files\material.min.js, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js\material.min.js, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\JAVASCRIPT-Files\material.min.js, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js\tln.min.js, 1
-FileInstall C:\Users\Administrator\Documents\MultiTech-Projects\CSS-Files\jquery-linedtextarea.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\tln.min.css, 1
+FileInstall C:\MultiTech-Projects\AHK Source Code Files\Web-App\xdot_controller_webapp.ahk, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\xdot_controller_webapp.ahk, 1
+FileInstall C:\MultiTech-Projects\HTML-Files\xdot_controller_index.html, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\index.html, 1
+FileInstall C:\MultiTech-Projects\CSS-Files\material.min.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\material.min.css, 1
+FileInstall C:\MultiTech-Projects\CSS-Files\xdot_controller_main.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\xdot_controller_main.css, 1
+FileInstall C:\MultiTech-Projects\JAVASCRIPT-Files\material.min.js, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js\material.min.js, 1
+FileInstall C:\MultiTech-Projects\JAVASCRIPT-Files\material.min.js, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\js\tln.min.js, 1
+FileInstall C:\MultiTech-Projects\CSS-Files\jquery-linedtextarea.css, C:\V-Projects\WEB-APPLICATIONS\XDot-Controller\Assets\css\tln.min.css, 1
 
 ;=======================================================================================;
 ;;;Create a JSON file

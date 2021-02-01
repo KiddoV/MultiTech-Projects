@@ -1,6 +1,6 @@
 // ========================================================================= //
 // Tooltips Initialization
-$(function () {
+/*$(function () {
   $('[tool="tooltip"]').tooltip({
     trigger : 'hover'
   });
@@ -21,9 +21,10 @@ $(function () {
     template: '<div class="tooltip t-secondary" role="tooltip"><div class="arrow"></div><div class="tooltip-inner"></div></div>'
   });
 });
-
+*/
 // ========================================================================= //
 // Minimize and Maximize boostrap modal
+/*
 $(function(){
   var $apnData, $modalElId, $modalId;
   //To fire modal
@@ -39,17 +40,6 @@ $(function(){
       //keyboard: false
     });
   });
-
-  //After fire modal
-  // $(document).on("shown.bs.modal", $modalElId, function() {
-  //   $modalId = $($modalElId).attr("id");
-  //   $('body').addClass($modalId);
-  // });
-  //When close (hide) modal
-  // $(document).on("hide.bs.modal", $modalElId, function() {
-  //   $('body').removeClass($modalId);
-  //   $($modalElId).removeClass("min");
-  // });
 
   //Minimize-maximize modal
   $(document).on("click", ".modal-minimize", function() {
@@ -79,3 +69,4 @@ $(function(){
   });
 
 });
+*/
