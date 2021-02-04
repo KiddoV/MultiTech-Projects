@@ -172,6 +172,7 @@ mainStart() {
     ControlClick, Button1, ALL DATAS, , Left, 3 ;Do this if ControlSend not working
     
     ;Wait for Teraterm
+    WinKill SCAN COMPLETED|INVALID|FAILURE|ERROR|MISMATCH|RESCAN    ;;Fix bug 
     WaitForResponse:
     SB_SetText("Waiting for processes")
     WinWait SCAN COMPLETED|INVALID|FAILURE|ERROR|MISMATCH|RESCAN
@@ -179,8 +180,12 @@ mainStart() {
     If WinExist("SCAN COMPLETED") {
         FormatTime, localTime, %A_Now%, hh:mm:ss tt
         SB_SetText("You just finished a scan at " localTime)
+        WaitCompleteClose:
         WinWaitClose, SCAN COMPLETED
+        IfWinNotExist
             clearCtrlVar()
+        IfWinExist
+            Goto WaitCompleteClose
         Return
     } Else If WinExist("MISMATCH|RESCAN") {
         SB_SetText("Scan value missmatched! Please rescan all values!")

@@ -6,10 +6,20 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<!-- ===================================================================== -->
 	<!-- Other CSS and JS lib -->
-
+  <script src="jquery.min.js"></script>		<!-- Always load JQuery first!!! -->
+	<link href="semantic.min.css" rel="stylesheet" />
+	<script src="semantic.min.js"></script>
+	<link href="icon.min.css" rel="stylesheet" />
 	<!-- Custom CSS and JS -->
-	<link href="aoi_pro_man_main.css" rel="stylesheet">
+	<link href="aoi_pro_man_main.css" rel="stylesheet" />
 	<script src="aoi_pro_man_main.js"></script>
+
+	<!--[if lt IE 9]>
+	<script src="html5shiv-printshiv.js"></script>
+	<script src="rem.min.js"></script>
+	<script src="selectivizr-min.js"></script>
+	<script src="PIE_IE678.js"></script>
+	<![endif]-->
 	<!-- ===================================================================== -->
 	<!-- Inner CSS -->
 	<style>
@@ -18,14 +28,26 @@
 </head>
 
 <header>
-	<span class='title-bar' onmousedown='neutron.DragTitleBar()'>??????</span>
+	<span class='title-bar' onmousedown='neutron.DragTitleBar()'><span id="title-label">???????</span></span>
 	<span class='title-btn' onclick='neutron.Minimize()'>0</span>
 	<span class='title-btn' onclick='neutron.Maximize()'>1</span>
 	<span class='title-btn title-btn-close' onclick='neutron.Close()'>r</span>
 </header>
 
 <body>
-  <h1>HELLO WORLD!!</h1>
+	<main class="ui container">
+  <h1>Testing Application</h1>
+	<h5>You are running Internet Explorer version: <var id="ie-vers">????</var><h5>
+
+	<div class="ui labeled button" tabindex="0">
+	  <div class="ui red button">
+	    <i class="heart icon"></i> Like
+	  </div>
+	  <a class="ui basic red left pointing label">
+	    1,048
+	  </a>
+	</div>
+	<main>
 </body>
 
 </html>

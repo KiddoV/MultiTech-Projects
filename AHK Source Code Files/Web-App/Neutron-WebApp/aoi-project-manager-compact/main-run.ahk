@@ -19,6 +19,9 @@ IfNotExist C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\compact
 
 FileInstall, C:\MultiTech-Projects\DLL-files\32-bit\SQLite3.dll, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\compact\SQLite3.dll, 1
 FileInstall, C:\MultiTech-Projects\EXE-Files\aoi-pro-man_autoUpdateDBTable.exe, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\compact\aoi-pro-man_autoUpdateDBTable.exe, 1
+
+;;For Semantic-icon usage
+FileCopyDir, C:\MultiTech-Projects\AHK Source Code Files\Web-App\Neutron-WebApp\aoi-project-manager-compact\assets, C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\compact\assets, 1
 ;=======================================================================================;
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
 Global JSON := new JSON()
@@ -37,10 +40,12 @@ Global NeutronWebApp := new NeutronWindow()
 
 NeutronWebApp.Load("aoi_project_manager_index.html")
 
-NeutronWebApp.Gui("+Border +MinSize1020x750 +LabelAOIProManager")
+NeutronWebApp.Gui("+Caption +MinSize1020x750 +LabelAOIProManager")
 
 ;;;Run BEFORE WebApp Started;;;
-NeutronWebApp.qs("#title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
+RegRead, ieVers, HKLM, Software\Microsoft\Internet Explorer, svcVersion     ;;;Check Internet Explorer version
+NeutronWebApp.doc.getElementById("ie-vers").innerHTML := ieVers
+NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ProcessIniFile()
 ;;changeUserLoginDisplay("LOCKED")
 
@@ -74,22 +79,16 @@ Return
 ;=======================================================================================;
 ;;;Must include FileInstall to work on EXE file (All nessesary files must be in the same folder!)
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
-FileInstall, html_msgbox.html, html_msgbox.html     ;MsgBox html file
-;;Boostrap components for GUI (All CSS and JS required!)
+;;JS and CSS components for GUI (All CSS and JS required!)
 FileInstall, jquery.min.js, jquery.min.js
-FileInstall, bootstrap.min.css, bootstrap.min.css
-FileInstall, bootstrap.min.js, bootstrap.min.js
-FileInstall, mdb.min.css, mdb.min.css
-FileInstall, mdb.min.js, mdb.min.js
-FileInstall, popper.min.js, popper.min.js
-FileInstall, bootstrap-table.min.css, bootstrap-table.min.css
-FileInstall, bootstrap-table.min.js, bootstrap-table.min.js
-FileInstall, fontawesome.js, fontawesome.js
-FileInstall, fa-all.js, fa-all.js
-FileInstall, font-googleapi.css, font-googleapi.css
-FileInstall, circle-prog-bar.css, circle-prog-bar.css
-FileInstall, bootstrap-select.min.css, bootstrap-select.min.css
-FileInstall, bootstrap-select.min.js, bootstrap-select.min.js
+FileInstall, semantic.min.css, semantic.min.css
+FileInstall, semantic.min.js, semantic.min.js
+FileInstall, icon.min.css, icon.min.css
+;;Support ~IE8
+FileInstall, html5shiv-printshiv.js, html5shiv-printshiv.js
+FileInstall, rem.min.js, rem.min.js
+FileInstall, selectivizr-min.js, selectivizr-min.js
+FileInstall, PIE_IE678.js, PIE_IE678.js
 
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
@@ -99,8 +98,8 @@ FileInstall, yestech-logo.png, yestech-logo.png
 FileInstall, rti-logo.png, rti-logo.png
 ;=======================================================================================;
 AOIProManagerClose:
-    For xprocess in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process  WHERE name = 'aoi-pro-man_autoUpdateDBTable.exe' ")
-    Process, Close, % xprocess.ProcessId
+    ;For xprocess in ComObjGet("winmgmts:").ExecQuery("SELECT * FROM Win32_Process  WHERE name = 'aoi-pro-man_autoUpdateDBTable.exe' ")
+    ;Process, Close, % xprocess.ProcessId
 
     AOI_Pro_DB.CloseDB()
     NeutronWebApp.Destroy()     ;Free memory

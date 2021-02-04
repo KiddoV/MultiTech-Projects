@@ -81,6 +81,7 @@ isType7 = result
 strcompare labelType 'LABELTYPE8'
 isType8 = result
 
+timeout = 20
 flushrecv
 strlen checkMTAC
 if result > 1 call CHECK_MTAC_INSTALL
@@ -93,7 +94,7 @@ if isType8 = 0 goto check_wifi_bt
 :check_imei
 flushrecv
 sendln 'microcom /dev/modem_at0'
-mpause 200
+mpause 500
 :recheck_imei
 sendln 'at+cgsn'
 waitln '2' '3' '4' '5'
