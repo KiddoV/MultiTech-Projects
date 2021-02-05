@@ -44,8 +44,6 @@ NeutronWebApp.Gui("+Caption +MinSize1020x750 +LabelAOIProManager")
 
 ;;;Run BEFORE WebApp Started;;;
 RegRead, ieVers, HKLM, Software\Microsoft\Internet Explorer, svcVersion     ;;;Check Internet Explorer version
-NeutronWebApp.doc.getElementById("ie-vers").innerHTML := ieVers
-NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ProcessIniFile()
 ;;changeUserLoginDisplay("LOCKED")
 
@@ -53,6 +51,8 @@ ProcessIniFile()
 NeutronWebApp.Show("w1020 h750")
 
 ;;;Run AFTER WebApp Started;;;
+NeutronWebApp.doc.getElementById("ie-vers").innerHTML := ieVers == "" ? "N/A" : ieVers
+NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ;;Connecting to Database
 Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
 
@@ -81,17 +81,16 @@ Return
 FileInstall, aoi_project_manager_index.html, aoi_project_manager_index.html     ;Main html file
 ;;JS and CSS components for GUI (All CSS and JS required!)
 FileInstall, jquery.min.js, jquery.min.js
-FileInstall, semantic.min.css, semantic.min.css
-FileInstall, semantic.min.js, semantic.min.js
-FileInstall, icon.min.css, icon.min.css
-;;Support ~IE8
-FileInstall, html5shiv-printshiv.js, html5shiv-printshiv.js
-FileInstall, rem.min.js, rem.min.js
-FileInstall, selectivizr-min.js, selectivizr-min.js
-FileInstall, PIE_IE678.js, PIE_IE678.js
+FileInstall, bootstrap.min.css, bootstrap.min.css
+FileInstall, bootstrap.min.js, bootstrap.min.js
 
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
+
+;;Supports IE8
+FileInstall, html5shiv-printshiv.js, html5shiv-printshiv.js
+FileInstall, CSS_selector_engine.js, CSS_selector_engine.js
+
 ;;Buit-in Images
 FileInstall, default-brand-logo.png, default-brand-logo.png
 FileInstall, yestech-logo.png, yestech-logo.png
@@ -106,6 +105,13 @@ AOIProManagerClose:
     Gui, Destroy
     ExitApp
 Return
+;=======================================================================================;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;Main Functions;;;;;;;;;;;;;;;;
+Test(neutron, event) {
+    Random, ranNum, 1, 100
+    NeutronWebApp.qs("#title-label").innerHTML := ranNum
+}
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;

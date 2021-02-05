@@ -11,12 +11,28 @@ html, body {
 body {
 }
 
-header {
+main {
+  padding: 5px;
+}
+
+html {
+  border: 2px solid #bdbdbd;
+  border-top: 0;
+}
+
+button {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+.title-bar-container {
   width: 100%;
   display: flex;
   background: #bdbdbd;
   font-family: Segoe UI;
   font-size: 9pt;
+  padding-left: 3px;
 }
 
 .title-bar {

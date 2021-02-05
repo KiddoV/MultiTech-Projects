@@ -563,17 +563,17 @@ class NeutronWindow
 			Sleep, 50
 	}
 	
-	; Shorthand method for document.querySelector (Not work in IE8)
-	;qs(selector)
-	;{
-		;return this.doc.querySelector(selector)
-	;}
-	;
-	 ;;;;Shorthand method for document.querySelectorAll
-	;qsa(selector)
-	;{
-		;return this.doc.querySelectorAll(selector)
-	;}
+	 ;;Shorthand method for document.querySelector (Not work in IE8)
+	qs(selector)
+	{
+		return this.doc.querySelector(selector)
+	}
+	
+	 ;;;Shorthand method for document.querySelectorAll
+	qsa(selector)
+	{
+		return this.doc.querySelectorAll(selector)
+	}
 	
 	; Passthrough method for the Gui command, targeted at the Neutron Window
 	; instance

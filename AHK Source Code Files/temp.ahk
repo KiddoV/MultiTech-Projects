@@ -1,60 +1,75 @@
-﻿SetTitleMatchMode, RegEx
-#SingleInstance Force
-#NoEnv
-SetBatchLines -1
+﻿;activex gui 2 - test  joedf - 2014/09/19
+#SingleInstance, off
+OnExit,OnExit
 
-#Include C:\MultiTech-Projects\AHK Source Code Files\lib\AHK_Terminal.ahk
+HTML_page =
+( Ltrim Join
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+			body{font-family:sans-serif;background-color:#1A1A1A;color:white}
+			#title{font-size:36px;}
+			input{margin:4px;Border: 2px white solid;background-color:black;color:white;}
+			p{font-size:16px;border:solid 1px #666;padding:4px;}
+			#footer{text-align:center;}
+		</style>
+	</head>
+	<body>
+		<div id="title">Hello World</div>
+		<textarea rows="4" cols="70" id="MyTextBox">1234567890-=\ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$^&*()_+|~</textarea>
+		<p id="footer">
+			<input type="button" id="MyButton1" value="Show Content in AHK MsgBox">
+			<input type="button" id="MyButton2" value="Change Content with AHK">
+			<input type="button" id="MyButton3" value="Greetings from AHK">
+		</p>
+	</body>
+</html>
+)
 
-Global appTitle := "Test Terminal"
-;=============================================================================;
-;;Main GUI
-Gui, Font, s10, Terminal
-Gui Add, Edit, x10 y10 w550 h368 +ReadOnly hWndhOutput voutputField
-Gui, Font
-Gui Add, Edit, x10 y380 w550 h21 +Multi -VScroll hWndhInput vinputField
+Gui Add, ActiveX, x0 y0 w640 h480 vWB, Shell.Explorer  ; The final parameter is the name of the ActiveX component.
+WB.silent := true ;Surpress JS Error boxes
+Display(WB,HTML_page)
 
-;;;;;Run Before Gui Started;;;;;
-Global TestCOM := new AHK_Terminal()
+;Wait for IE to load the page, before we connect the event handlers
+while WB.readystate != 4 or WB.busy
+	sleep 10
 
-;;Starts main gui
-Gui Show, , %appTitle%
+;Use DOM access just like javascript!
+MyButton1 := wb.document.getElementById("MyButton1")
+MyButton2 := wb.document.getElementById("MyButton2")
+MyButton3 := wb.document.getElementById("MyButton3")
+ComObjConnect(MyButton1, "MyButton1_") ;connect button events
+ComObjConnect(MyButton2, "MyButton2_")
+ComObjConnect(MyButton3, "MyButton3_")
+Gui Show, w640 h480
+return
 
-;;;;;Run After Gui Started;;;;;
-If !TestCOM.Connect(101) {
-    Guicontrol, 1: , outputField, % TestCOM.ErrMsg
-} Else {
-    Guicontrol, 1: , outputField, % "Connected to " . TestCOM.ComPortNum 
-}
-
-
-
-Return
-
-GuiEscape:
 GuiClose:
-    ExitApp
-;=============================================================================;
-;;Hot Keys
-~Enter::
-    ControlGetFocus, focusedCtrl, %appTitle%
-    if (focusedCtrl = "Edit2") {
-        ;RS232_Write(RS232_FileHandle, 13)   ;Send linebreak
-        GuiControlGet, inputStr, , inputField
-        Guicontrol, 1: , inputField,        ;Empty text in the field
-        TestCOM.Send(inputStr, 1)
-        msg := ""
-        noMoreMsg := 0
-        oldBuff := ""
-        Loop
-        {
-            ToolTip, % A_Index
-            msg := TestCOM.ReadData()
-            oldBuff := TestCOM.OutputBuffer
-            Guicontrol, 1: , outputField, % TestCOM.OutputBuffer
-            If (msg = "")
-                noMoreMsg++
-            If (A_Index > 1 && oldBuff == TestCOM.OutputBuffer)
-                Break
-        }
-    }
-Return
+ExitApp
+OnExit:
+	FileDelete,%A_Temp%\*.DELETEME.html ;clean tmp file
+ExitApp
+
+; Our Event Handlers
+MyButton1_OnClick() {
+	global wb
+	MsgBox % wb.Document.getElementById("MyTextBox").Value
+}
+MyButton2_OnClick() {
+	global wb
+	FormatTime, TimeString, %A_Now%, dddd MMMM d, yyyy HH:mm:ss
+	data := "AHK Version " A_AhkVersion " - " (A_IsUnicode ? "Unicode" : "Ansi") " " (A_PtrSize == 4 ? "32" : "64") "bit`nCurrent time: " TimeString
+	wb.Document.getElementById("MyTextBox").value := data
+}
+MyButton3_OnClick() {
+	MsgBox Hello world!
+}
+;------------------
+Display(WB,html_str) {
+	Count:=0
+	while % FileExist(f:=A_Temp "\" A_TickCount A_NowUTC "-tmp" Count ".DELETEME.html")
+		Count+=1
+	FileAppend,%html_str%,%f%
+	WB.Navigate("file://" . f)
+}
