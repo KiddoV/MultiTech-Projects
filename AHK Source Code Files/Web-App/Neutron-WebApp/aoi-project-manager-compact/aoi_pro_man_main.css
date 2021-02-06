@@ -7,59 +7,15 @@ html, body {
   padding: 0;
   font-family: sans-serif;
 }
-
 body {
 }
-
 main {
   padding: 5px;
 }
-
-html {
-  border: 2px solid #bdbdbd;
-  border-top: 0;
-}
-
 button {
   outline: none;
   border: none;
   box-shadow: none;
-}
-
-.title-bar-container {
-  width: 100%;
-  display: flex;
-  background: #bdbdbd;
-  font-family: Segoe UI;
-  font-size: 9pt;
-  padding-left: 3px;
-}
-
-.title-bar {
-  padding: 0.35em 0.5em;
-  flex-grow: 1;
-}
-
-.title-btn {
-  padding: 0.35em 1.0em;
-  cursor: pointer;
-  vertical-align: bottom;
-  font-family: Webdings;
-  font-size: 11pt;
-}
-
-.title-btn:hover {
-  background: rgba(0, 0, 0, .2);
-}
-
-.title-btn-close:hover {
-  background: #dc3545;
-}
-
-.main {
-  flex-grow: 1;
-  padding: 0.5em;
-  overflow: auto;
 }
 /*============================================================*/
 /***********************Additional CSS*************************/

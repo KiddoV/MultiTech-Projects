@@ -26,6 +26,7 @@ FileCopyDir, C:\MultiTech-Projects\AHK Source Code Files\Web-App\Neutron-WebApp\
 ;;;;;;;;;;;;;Global Variables Definition;;;;;;;;;;;;;;;;
 Global JSON := new JSON()
 
+Global AppTitleName := "AOI Project Manager"
 Global MainDBFilePath := "C:\MultiTech-Projects\SQLite-DB\AOI_Pro_Manager_DB.DB"
 Global MainSettingsFilePath := "C:\V-Projects\WEB-APPLICATIONS\AOI-Project-Manager\compact\app-settings.ini"
 Global CompFindUrl := "virtu.multitech.prv"
@@ -52,7 +53,8 @@ NeutronWebApp.Show("w1020 h750")
 
 ;;;Run AFTER WebApp Started;;;
 NeutronWebApp.doc.getElementById("ie-vers").innerHTML := ieVers == "" ? "N/A" : ieVers
-NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
+Gui, % NeutronWebApp.hWnd ": Show", , % AppTitleName   ;;;;Set app title
+;;NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ;;Connecting to Database
 Global AOI_Pro_DB := new SQLiteDB(MainSettingsFilePath)
 
@@ -109,8 +111,7 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Main Functions;;;;;;;;;;;;;;;;
 Test(neutron, event) {
-    Random, ranNum, 1, 100
-    NeutronWebApp.qs("#title-label").innerHTML := ranNum
+    MsgBox Hello!
 }
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
