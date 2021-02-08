@@ -8,9 +8,10 @@ html, body {
   font-family: sans-serif;
 }
 body {
+  background-color: #F0F0F0;
+  padding: 5px 15px 5px 15px;
 }
 main {
-  padding: 5px;
 }
 button {
   outline: none;
@@ -19,9 +20,46 @@ button {
 }
 /*============================================================*/
 /***********************Additional CSS*************************/
+.recipe-card {
+  cursor: hand;
+}
+.recipe-card:hover {
+  background-color: #eeeeee;
+}
 
+#search-result-container {
+  padding: 0 10px 0 15px;
+  height: 590px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.recipe-card-status-useable {
+	border: 1px solid #00c853;
+	border-left: 10px solid #00c853;
+}
+.recipe-card-status-needupdate {
+	border: 1px solid #673ab7;
+	border-left: 10px solid #673ab7;
+}
+.recipe-card-status-notready {
+	border: 1px solid #ff3d00;
+	border-left: 10px solid #ff3d00;
+}
+.recipe-card-status-inprogress {
+	border: 1px solid #fbc02d;
+	border-left: 10px solid #fbc02d;
+}
+.recipe-card-status-substitute {
+	border: 1px solid #9e9e9e;
+	border-left: 10px solid #9e9e9e;
+}
+
+.text-red {
+  color: #b71c1c;
+}
 /*=================================================================*/
 /***********************Third-Party CSS Mod*************************/
-.ui.container {
-  padding: 0 !important;
+.recipe-card > .panel-body {
+  padding: 5px 0 5px 5px;
 }
