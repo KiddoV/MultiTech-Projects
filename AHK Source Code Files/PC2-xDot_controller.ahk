@@ -156,6 +156,8 @@ SetTimer, CheckFileChange, 20
 SetTimer, CheckLotChange, 200
 SetTimer, SyncModeCheck, 100
 SetTimer, MappingToolCheck, 100
+AutoCloseAPWindow := Func("AutoCloseAPWindow").Bind()
+SetTimer, %AutoCloseAPWindow%, 10
 OnExit("OnExitMainApp")
 Return      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -242,7 +244,7 @@ MappingToolCheck:
 Return
 
 GuiClose:
-    MsgBox 36, , Are you sure you want to quit?
+    MsgBox 36, Exit App, Are you sure you want to quit?
     IfMsgBox Yes
     {
         resetSyncDataFile()
@@ -448,6 +450,9 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
+~^!l::
+    OpenLogViewer()
+return
 ^q::
     resetSyncDataFile()
     For process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")

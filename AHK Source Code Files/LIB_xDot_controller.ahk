@@ -18,8 +18,13 @@ IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
     FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
 IfNotExist C:\V-Projects\XDot-Controller\TEMP-DATA
     FileCreateDir C:\V-Projects\XDot-Controller\TEMP-DATA
+    
 IfNotExist Z:\XDOT\Saved-Nodes
     FileCreateDir Z:\XDOT\Saved-Nodes
+IfNotExist Z:\XDOT\Logging\writing
+    FileCreateDir Z:\XDOT\Logging\writing
+IfNotExist Z:\XDOT\Logging\system
+    FileCreateDir Z:\XDOT\Logging\system
 
 FileInstall C:\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\x_mark.png, 1
 FileInstall C:\MultiTech-Projects\Imgs-for-GUI\check_mark.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\check_mark.png, 1
@@ -93,6 +98,8 @@ Global disImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\disable.png"
 Global exclaImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png"
 
 Global xdotMapRemoteFilePath := "Z:\XDOT\Data\mapping-remote.dat"
+
+Global UserInfo := {userId: "???", userFirstName: "???", userLastName: "???", userInitial: "???", userUserName: "???", userPassword: "???", userRole: "N/A"}
 ;=======================================================================================;
 
 WinSet, Redraw, , ahk_id %hIdListView%
@@ -108,7 +115,10 @@ AddMainMenuBar() {
         Menu OptionMenu, Add  ;Separator
         Menu OptionMenu, Add, Enable Sync Mode, endableSyncModeHandler
     Menu MainMenuBar, Add, &Options, :OptionMenu     ;Main button
+        Menu ToolMenu, Add, Log Viewer, logViewerHandler
+        Menu ToolMenu, Add  ;Separator
         Menu ToolMenu, Add, XDot Mapping, xdotMapHandler
+        Menu ToolMenu, Add  ;Separator
         Menu ToolMenu, Add, Analyst, analystHandler
     Menu MainMenuBar, Add, &Tools, :ToolMenu     ;Main button
         Menu HelpMenu, Add, Image Indicators, imageIndicatorHandler
@@ -156,6 +166,10 @@ endableSyncModeHandler() {
     syncModeWriteIni("AutoPick", isSyncMode)
 }
 
+logViewerHandler() {
+    OpenLogViewer()
+}
+
 xdotMapHandler() {
     XDotMappingTool()
 }
@@ -171,6 +185,14 @@ imageIndicatorHandler() {
 aboutHandler() {
     
 }
+;=======================================================================================;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
+AutoCloseAPWindow() {
+    IfWinExist, AutoPlay
+        WinClose, AutoPlay
+}
+
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
@@ -1194,6 +1216,31 @@ getCmdOut(command) {
     return Clipboard
 }
 
+; Function: AutoXYWH .Move and resize control automatically when GUI resizes.
+AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t=1079
+  static cInfo := {}
+ 
+  If (DimSize = "reset")
+    Return cInfo := {}
+ 
+  For i, ctrl in cList {
+    ctrlID := A_Gui ":" ctrl
+    If ( cInfo[ctrlID].x = "" ){
+        GuiControlGet, i, %A_Gui%:Pos, %ctrl%
+        MMD := InStr(DimSize, "*") ? "MoveDraw" : "Move"
+        fx := fy := fw := fh := 0
+        For i, dim in (a := StrSplit(RegExReplace(DimSize, "i)[^xywh]")))
+            If !RegExMatch(DimSize, "i)" dim "\s*\K[\d.-]+", f%dim%)
+              f%dim% := 1
+        cInfo[ctrlID] := { x:ix, fx:fx, y:iy, fy:fy, w:iw, fw:fw, h:ih, fh:fh, gw:A_GuiWidth, gh:A_GuiHeight, a:a , m:MMD}
+    }Else If ( cInfo[ctrlID].a.1) {
+        dgx := dgw := A_GuiWidth  - cInfo[ctrlID].gw  , dgy := dgh := A_GuiHeight - cInfo[ctrlID].gh
+        For i, dim in cInfo[ctrlID]["a"]
+            Options .= dim (dg%dim% * cInfo[ctrlID]["f" dim] + cInfo[ctrlID][dim]) A_Space
+        GuiControl, % A_Gui ":" cInfo[ctrlID].m , % ctrl, % Options
+} } }
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;OnMessage Functions;;;;
 WM_KEYDOWN(lparam) {
     if (lparam = 13 && A_GuiControl = "lotCodeSelected") {  ;When press enter in Lot code select section
@@ -1234,8 +1281,8 @@ GetXDot() {
     isXdot := RegExMatch(A_GuiControl, "^XDot[0-9]{2}$")
     isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
     isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
-
-    if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {
+    
+    if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {    ;; Check If XDot button is in disabled state. Do not open the GUI!
         WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
         Gui, xdot: Cancel
         Gui, xdot: Destroy
@@ -1525,6 +1572,54 @@ GetXDot() {
         Return
     }
     Return
+}
+
+;;;;;;Log Viewer GUI
+OpenLogViewer() {
+    Global
+    ;;;GUI  ;;===============================;;
+    Gui, logView: Default
+    Gui, logView: +Resize +MinSize600x500
+    Gui, logView: Add, Tab3, Section w580 h490 vlogViewMainTabCon  +BackgroundTrans, Result Logging|System Logging
+    ;;;;;;; Tab Content ;;;;;;;;;
+    Gui, logView: Tab, 1    ;;;;;
+        Gui, logView: Add, Edit, xs+5 ys+30 w100 vlotInputBox gSearchLot +Number,
+        Gui, logView: Add, ListBox, xs+5 ys+53 w100 h435 vlotListBox gPickLot, 
+        Gui, logView: Add, ListView, xs+110 ys+30 w462 h455 vlotListView, Date|Time|Status|
+    Gui, logView: Tab, 2    ;;;;;
+    
+    Gui, logView: Tab
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    Gui, logView: Show, w600 h500, Log Viewer
+    Return  ;;===============================;;
+    
+    ;; Auto re-size and re-position when main window changed.
+    logViewGuiSize:
+        If (A_EventInfo = 1) ;The window has been minimized.
+            Return
+        AutoXYWH("wh", "logViewMainTabCon")
+        AutoXYWH("h", "lotListBox")
+        AutoXYWH("wh", "lotListView")
+    Return
+    
+    logViewGuiClose:
+        Gui, logView: Destroy
+    Return
+    
+    ;;;Functions and Labels for logView GUI;;;
+    ;;===============================;;
+    SearchLot:
+        
+    Return  ;;=======================;;
+    
+    ;;===============================;;
+    PickLot:
+        If (A_GuiControlEvent == "DoubleClick") {
+            GuiControlGet, lotListBox  ; Retrieve the ListBox's current selection.
+            MsgBox You double-clicked the item: %lotListBox%
+        }
+    Return  ;;=======================;;
 }
 
 OpenAboutMsgGui1() {

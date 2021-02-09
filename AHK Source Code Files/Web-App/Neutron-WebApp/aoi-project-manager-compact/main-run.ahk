@@ -52,7 +52,7 @@ ProcessIniFile()
 NeutronWebApp.Show("w1000 h700")
 
 ;;;Run AFTER WebApp Started;;;
-NeutronWebApp.doc.getElementById("ie-vers").innerHTML := ieVers == "" ? "N/A" : ieVers
+;;NeutronWebApp.doc.getElementById("ie-vers").innerHTML := ieVers == "" ? "N/A" : ieVers
 Gui, % NeutronWebApp.hWnd ": Show", , % AppTitleName   ;;;;Set app title
 ;;NeutronWebApp.doc.getElementById("title-label").innerHTML := "AOI Project Manager"    ;;;;Set app title
 ;;Connecting to Database
@@ -269,6 +269,7 @@ DisplayRecipeData(neutron, event) {
     ;;;Process variables
     progStatusColor := pcmProgStatus = "USABLE" ? "#00c853" : pcmProgStatus = "NEED UPDATE" ? "#673ab7" : pcmProgStatus = "NOT READY" ? "#ff3d00" : pcmProgStatus = "IN PROGRESS" ? "#fbc02d" : pcmProgStatus = "SUBSTITUTE" ? "#9e9e9e" : "black"
     pcmProgName := pcmProgAltType = "" ? pcmProgName : pcmProgName . "  <span class='badge'>" . pcmProgAltType . "</span>"
+    pcmProgName := pcmProgSubsName = "" ? pcmProgName : pcmProgName . "  <span style='color: red;'>(Use => " . pcmProgSubsName . ")</span>"
     
     ;;Put data to view
     NeutronWebApp.doc.getElementById("recipe-data-header").style.backgroundColor := progStatusColor
