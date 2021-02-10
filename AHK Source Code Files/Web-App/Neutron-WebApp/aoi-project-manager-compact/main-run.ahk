@@ -153,7 +153,8 @@ SearchRecipe(neutron, event) {
 
 DisplayRecipeCard(recipeResult) {
     If (recipeResult.HasNames && recipeResult.HasRows) {
-        NeutronWebApp.doc.getElementById("search-result-container").innerHTML := ""     ;Delete all old result before display new result
+        NeutronWebApp.wnd.contentElm.innerHTML := ""
+        ;;NeutronWebApp.doc.getElementById("search-result-container").innerHTML := ""     ;Delete all old result before display new result
 
         recipeData := DataBaseTableToObject(recipeResult)
         Loop, % recipeData.Length()
@@ -193,7 +194,7 @@ DisplayRecipeCard(recipeResult) {
             recipeNameColorClass := progSubsName != "" ? "text-red" : "text-muted"
                 
             html =
-            (Ltrim
+            (
             <div id="%progDBId%" class="recipe-card panel %progStatusClass%" onclick="ahk.DisplayRecipeData(this)">
                 <div class="panel-body row">
                     <div class="col-xs-9">
@@ -218,7 +219,7 @@ DisplayRecipeCard(recipeResult) {
                 </div>
             </div>
             )
-            NeutronWebApp.doc.getElementById("search-result-container").insertAdjacentHTML("beforeend", html)
+            NeutronWebApp.wnd.contentElm.insertAdjacentHTML("beforeend", html)
         }
     }
 }
