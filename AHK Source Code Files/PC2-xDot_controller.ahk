@@ -451,7 +451,10 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
 ~^!l::
-    OpenLogViewer()
+    IfWinExist, ahk_id %LogViewGui%
+        WinActivate, ahk_id %LogViewGui%
+    Else
+        OpenLogViewer()
 return
 ^q::
     resetSyncDataFile()

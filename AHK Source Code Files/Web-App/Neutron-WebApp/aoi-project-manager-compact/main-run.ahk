@@ -86,6 +86,9 @@ FileInstall, jquery.min.js, jquery.min.js
 FileInstall, bootstrap.min.css, bootstrap.min.css
 FileInstall, bootstrap.min.js, bootstrap.min.js
 
+FileInstall, OverlayScrollbars.min.css, OverlayScrollbars.min.css
+FileInstall, jquery.overlayScrollbars.min.js, jquery.overlayScrollbars.min.js
+
 FileInstall, aoi_pro_man_main.css, aoi_pro_man_main.css
 FileInstall, aoi_pro_man_main.js, aoi_pro_man_main.js
 
@@ -153,7 +156,7 @@ SearchRecipe(neutron, event) {
 
 DisplayRecipeCard(recipeResult) {
     If (recipeResult.HasNames && recipeResult.HasRows) {
-        NeutronWebApp.wnd.contentElm.innerHTML := ""
+        NeutronWebApp.wnd.recipeCardContentElm.innerHTML := ""
         ;;NeutronWebApp.doc.getElementById("search-result-container").innerHTML := ""     ;Delete all old result before display new result
 
         recipeData := DataBaseTableToObject(recipeResult)
@@ -219,7 +222,7 @@ DisplayRecipeCard(recipeResult) {
                 </div>
             </div>
             )
-            NeutronWebApp.wnd.contentElm.insertAdjacentHTML("beforeend", html)
+            NeutronWebApp.wnd.recipeCardContentElm.insertAdjacentHTML("beforeend", html)
         }
     }
 }

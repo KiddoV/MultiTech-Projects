@@ -85,8 +85,13 @@
 
 <script>
 // Init Overlay Scrollbar
-var osIns = $("#search-result-container").overlayScrollbars({ }).overlayScrollbars();
-var contentElm = osIns.getElements().content;
+var recipeCardOs = $("#search-result-container").overlayScrollbars({
+	overflowBehavior : {
+	        x : "hidden",
+	        y : "scroll"
+	    },
+}).overlayScrollbars();
+var recipeCardContentElm = recipeCardOs.getElements().content;
 
 //Prevent user use right mouse to open context
 $(".app-container").on("contextmenu", function (e) {

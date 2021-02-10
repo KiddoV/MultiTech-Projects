@@ -10,7 +10,9 @@ timeout = 5
 mpause 1000
 
 :GET_SET_VARS
-writeFirmwareVers = param9
+strsplit param2 ','		;Get all datas by 1 param
+
+writeFirmwareVers = groupmatchstr8
 isSkipWriteFw = 0
 
 strcompare writeFirmwareVers 'v3.2.1'
@@ -20,19 +22,19 @@ if result=0 firmwareVers = 'Firmware : 3.1.0-mbed161'
 strcompare writeFirmwareVers '-Skip-'
 if result=0 isSkipWriteFw = 1
 
-xdotMainPort = param3	;101
-xdotBreakPort = param4	;11
-sprintf2 xdotDriveLoc '%s:\' param5
-strcompare param6 'singleWrite'
+xdotMainPort = groupmatchstr2	;101
+xdotBreakPort = groupmatchstr3	;11
+sprintf2 xdotDriveLoc '%s:\' groupmatchstr4
+strcompare groupmatchstr5 'singleWrite'
 isSingleWrite = result
-freq = param7
+freq = groupmatchstr6
 
 strcompare freq 'IN865'
 if result=0 debugFirmwareVers = '3.2.1-debug-mbed51101'
 if result<>0 debugFirmwareVers = '3.0.2-debug-mbed144'
 
 outDFreq = ''
-deadNode = param8
+deadNode = groupmatchstr7
 outDeadNode = ''
 writeStatus = ''
 fail = 0
@@ -42,6 +44,12 @@ sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
 binFileLoc = ''
 
 if isSkipWriteFw=1 goto WRITE_BLANK_LINE
+
+currentLotCode = param3
+sprintf2 writeResultLogFilePath 'Z:\XDOT\Logging\writing\%s.log' currentLotCode
+
+outDeadNode = 'N/A'
+outDFreq = 'N/A'
 
 strcompare writeFirmwareVers 'v3.2.1'
 if result=0 then
@@ -83,22 +91,8 @@ if result=0 then
 	if result=0 binFileLoc = 'C:\V-Projects\XDot-Controller\BIN-Files\xdot-firmware-3.1.0-US915-mbed-os-5.7.7.bin'
 endif
 
-:WRITE_BLANK_LINE
-isFirstNode = -1
-strcompare xdotMainPort '101'
-if result=0 isFirstNode = result
-strcompare xdotMainPort '109'
-if result=0 isFirstNode = result
-strcompare xdotMainPort '117'
-if result=0 isFirstNode = result
-if isFirstNode = 0 then
-   fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
-   filewrite fhandle #13#10
-   fileclose fhandle
-endif
-
 :CONNECT
-sprintf2 cmdStr '/C=%s' param3
+sprintf2 cmdStr '/C=%s' xdotMainPort
 connect cmdStr
 if result=1 goto connection_failed
 
@@ -119,7 +113,7 @@ if result=0 then
     writeStatus = 'FAILED CONNECTING TO PORT'
     statusbox writeStatus portNumberFailureMsg
     connFail=0
-    goto WRITE_RESULT_DATA
+    goto RESULT_LOGGING
     end
 endif
 
@@ -261,26 +255,28 @@ endif
 
 :recheck_write_input
 flushrecv
+;mpause 500
+;sendln 'at+freq'
+;waitregex '[A-Z]+([0-9]{3})'
+;outFreq = inputstr
 mpause 500
 sendln 'at+freq'
-waitregex '[A-Z]+([0-9]{3})'
+waitln freq
 outFreq = inputstr
-mpause 500
-sendln 'at+freq'
-wait freq
 if result=0 then
     writeStatus = 'WRONG FREQUENCY'
     statusbox writeStatus portNumberFailureMsg
     mpause 300
 	goto RESULT_LOGGING
 endif
-mpause 500
-sendln 'at+dfreq'
-waitregex '[A-Z]+([0-9]{3})'
-outDFreq = inputstr
+;mpause 500
+;sendln 'at+dfreq'
+;waitregex '[A-Z]+([0-9]{3})'
+;outDFreq = inputstr
 mpause 500
 sendln 'at+dfreq'
 wait freq
+outDFreq = inputstr
 if result=0 then
     writeStatus = 'WRONG DEFAULT FREQUENCY'
     statusbox writeStatus portNumberFailureMsg
@@ -289,8 +285,11 @@ if result=0 then
 endif
 mpause 500
 sendln 'at+di?'
-waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
+waitln '0' '8'
 outDeadNode = inputstr
+mpause 500
+sendln 'at+di?'
+waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
 for i 1 17
 	strreplace outDeadNode 1 '-' ''
 next
@@ -322,11 +321,17 @@ mpause 500
 date = ''
 time = ''
 logStr = ''
-getdate date "%Y\%m\%d"
+getdate date "%Y/%m/%d"
 getdate time "%H:%M:%S"
-sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
-fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
-filewrite fhandle #13#10
+;;sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
+sprintf2 logStr '%s,%s,%s,%s,%s,%s,%s,%s,%s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq xdotBreakPort
+filesearch writeResultLogFilePath
+if result = 0 then
+   filecreate fhandle writeResultLogFilePath
+else
+	fileopen fhandle writeResultLogFilePath 1
+	filewrite fhandle #13#10	;;Make a line feed
+endif
 filewrite fhandle logStr
 fileclose fhandle
 

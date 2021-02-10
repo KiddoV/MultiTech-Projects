@@ -5,6 +5,7 @@
 ;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\Toolbar.ahk
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\Class_LV_Colors.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\LV_EX.ahk
 ;;;;;;;;;;Installs files for app to run;;;;;;;;;;
 IfNotExist C:\V-Projects\XDot-Controller\Imgs-for-GUI
     FileCreateDir C:\V-Projects\XDot-Controller\Imgs-for-GUI
@@ -38,6 +39,10 @@ FileInstall C:\MultiTech-Projects\Imgs-for-GUI\folder-icon.ico, C:\V-Projects\XD
 FileInstall C:\MultiTech-Projects\Imgs-for-GUI\save-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\save-icon.ico, 1
 FileInstall C:\MultiTech-Projects\Imgs-for-GUI\pen_with_note-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\pen_with_note-icon.ico, 1
 FileInstall C:\MultiTech-Projects\Imgs-for-GUI\add_file-icon.ico, C:\V-Projects\XDot-Controller\Imgs-for-GUI\add_file-icon.ico, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\green-dot-sm.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\green-dot-sm.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\red-dot-sm.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\red-dot-sm.png, 1
+FileInstall C:\MultiTech-Projects\Imgs-for-GUI\yellow-dot-sm.png, C:\V-Projects\XDot-Controller\Imgs-for-GUI\yellow-dot-sm.png, 1
+
 FileInstall C:\MultiTech-Projects\TTL-Files\all_xdot_test.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl, 1
 FileInstall C:\MultiTech-Projects\TTL-Files\all_xdot_write_euid.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl, 1
 FileInstall C:\MultiTech-Projects\TTL-Files\all_xdot_write_eco-lab.ttl, C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl, 1
@@ -76,6 +81,7 @@ Global lotCodeList := []
 Global xdotTestFilePath := "C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_test.ttl"
 Global teratermMacroExePath := "C:\teraterm\ttpmacro.exe"
 Global syncModeFilePath := "Z:\XDOT\Data\syncdata.snc"
+Global ResultLoggingPath := "Z:\XDOT\Logging\writing"
 
 Global isReprogram := False
 Global isEcoLabMode := False
@@ -283,6 +289,12 @@ runAll() {
 writeAll() {
     GuiControlGet, chosenFreq, , chosenFreq, Text   ;Get value from DropDownList
     GuiControlGet, chosenWFw, , chosenWFw, Text     ;Get value from DropDownList
+    GuiControlGet, recentLotCode, , recentLotCode, Text   ;Get lot code
+    
+    if (recentLotCode == "") {
+        MsgBox 4144, WARNING, Please ADD LOT CODE before running!
+        return
+    }
     
     if (chosenFreq = "") {
         MsgBox 4144, WARNING, Please select a FREQUENCY!
@@ -375,7 +387,7 @@ writeAll() {
                 GuiControlGet, node, , nodeToWrite%index%
                 StringReplace node, node, %A_Space%, , All  ;Delete all white space in variable
                 
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenFreq% %node% %chosenWFw%, , Hide, TTWinPID
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenFreq%`,%node%`,%chosenWFw% %recentLotCode%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 Sleep 3000
             }
@@ -1282,6 +1294,8 @@ GetXDot() {
     isBadXdot := RegExMatch(A_GuiControl, "^BadXDot[0-9]{2}$")
     isGoodXdot := RegExMatch(A_GuiControl, "^GoodXDot[0-9]{2}$")
     
+    GuiControlGet, recentLotCode, , recentLotCode, Text   ;Get lot code
+    
     if (isXdot = 1 || isBadXdot = 1 || isGoodXdot = 1) {    ;; Check If XDot button is in disabled state. Do not open the GUI!
         WinGetPos mainX, mainY, mainWidth, mainHeight, ahk_id %hMainWnd%
         Gui, xdot: Cancel
@@ -1533,10 +1547,10 @@ GetXDot() {
             Gui, Font, c0c63ed
             GuiControl, Font, xStatus
             GuiControl, Text, xStatus, RUNNING   ;Change text
-            if (isEcoLabMode)
+            if (isEcoLabMode)   ;;EcoLab
                 Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 dummyParam7 %inId% newTTVersion, , Hide
-            else
-                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %inFreq% %inId% %inFw%, ,Hide
+            else    ;;Normal
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%inFreq%`,%inId%`,%inFw% %recentLotCode%, ,Hide
             
             WinWait %mainPort% FAILURE|%mainPort% PASSED
             ifWinExist, %mainPort% FAILURE
@@ -1577,21 +1591,32 @@ GetXDot() {
 ;;;;;;Log Viewer GUI
 OpenLogViewer() {
     Global
+    GuiControlGet, recentLotCode, , recentLotCode, Text   ;Get lot code from main GUI
     ;;;GUI  ;;===============================;;
     Gui, logView: Default
-    Gui, logView: +Resize +MinSize600x500
-    Gui, logView: Add, Tab3, Section w580 h490 vlogViewMainTabCon  +BackgroundTrans, Result Logging|System Logging
+    Gui, logView: +Resize +MinSize850x650 +HwndLogViewGui
+    Gui, logView: Add, Tab3, Section w832 h640 vlogViewMainTabCon  +BackgroundTrans, Result Logging|System Logging
     ;;;;;;; Tab Content ;;;;;;;;;
     Gui, logView: Tab, 1    ;;;;;
         Gui, logView: Add, Edit, xs+5 ys+30 w100 vlotInputBox gSearchLot +Number,
-        Gui, logView: Add, ListBox, xs+5 ys+53 w100 h435 vlotListBox gPickLot, 
-        Gui, logView: Add, ListView, xs+110 ys+30 w462 h455 vlotListView, Date|Time|Status|
+        Gui, logView: Add, ListBox, xs+5 ys+57 w100 h577 vlotListBox gPickLot 0x100 Sort, 
+        Gui, logView: Add, ListView, xs+110 ys+30 w713 h605 hWndhlotListView vlotListView +Grid, ???|???|???|???|???|???|
     Gui, logView: Tab, 2    ;;;;;
     
     Gui, logView: Tab
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;Run Before GUI STARTED
+    logLotList := ""
+    Loop, Files, %ResultLoggingPath%\*.log
+    {
+        fullFileName := A_LoopFileName
+        StringReplace, fullFileName, fullFileName, .log, , All    ;Remove .log
+        logLotList .= "|" . fullFileName
+    }
+    GuiControl, , lotListBox, % logLotList
+    LogViewer_DisplayResultLog(recentLotCode)
     
-    Gui, logView: Show, w600 h500, Log Viewer
+    Gui, logView: Show, w850 h650, Log Viewer
     Return  ;;===============================;;
     
     ;; Auto re-size and re-position when main window changed.
@@ -1616,10 +1641,69 @@ OpenLogViewer() {
     ;;===============================;;
     PickLot:
         If (A_GuiControlEvent == "DoubleClick") {
-            GuiControlGet, lotListBox  ; Retrieve the ListBox's current selection.
-            MsgBox You double-clicked the item: %lotListBox%
+            Gui, logView: Default
+            GuiControlGet, boxLotCode  ; Retrieve the ListBox's current selection.
+            MsgBox % boxLotCode
+            LogViewer_DisplayResultLog(boxLotCode)
         }
     Return  ;;=======================;;
+}
+
+LogViewer_DisplayResultLog(lotCode) {
+    If (lotCode == "")
+        Return
+    
+    Gui, logView: ListView, lotListView     ; Specify which listview will be updated with LV commands  
+    LV_Delete()                             ; Delete all rows in listview
+    Loop, % LV_GetCount("Column")
+        LV_DeleteCol(1)             ;Delete all cols before init new one!
+    
+    lvItems := {}
+    ILSt:= IL_Create(1,1,0)
+    LV_SetImageList(ILSt, 1)
+    IL_Add(ILSt, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\green-dot-sm.png")
+    IL_Add(ILSt, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\red-dot-sm.png")
+    IL_Add(ILSt, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\yellow-dot-sm.png")
+    
+    Loop, Read, %ResultLoggingPath%/%lotCode%.log
+    {
+        
+        lineCount := A_Index
+        fileLineContents := A_LoopReadLine
+        If (fileLineContents == "")
+            Continue
+        Loop, Parse, fileLineContents, `,
+        {
+            itemCount := A_Index
+            If (lineCount > 1)
+                Break
+        }
+        ;;Add item to LV
+        If (itemCount == 9) {
+            colHeaders := "@|Date|Time|Main Port|Status|Write NodeID|Expect NodeID|Write Frequency|Expect Frequency|MBed Port"
+            Loop, Parse, colHeaders, |
+            {
+                If (A_LoopField == "") ;the end has been reached
+                    break
+                LV_InsertCol(A_Index, "AutoHdr", A_LoopField)
+            }
+        }
+        StringSplit, item, fileLineContents, `,
+        If (RegExMatch(item4, "PASSED"))
+            LV_Add("Icon" . 1, , item1, item2, item3, item4, item5, item6, item7, item8, item9)
+        If (RegExMatch(item4, "FAILED|INVALID|WRONG|NOT FOUND"))
+            LV_Add("Icon" . 2, , item1, item2, item3, item4, item5, item6, item7, item8, item9)
+        lvItems.Push({1: item1, 2: item2, 3: item3, 4: item4, 5: item5, 6: item6, 7: item7, 8: item8, 9: item9})
+    }
+    Loop, % LV_GetCount("Column")
+        LV_ModifyCol(A_Index, "AutoHdr")
+    LV_ModifyCol(6, "SortDesc")
+    LV_EX_GroupInsert(hlotListView, 10, "Panel", 2)
+    Loop, 5
+       LV_EX_SetGroup(hlotListView, A_Index, 10)
+    LV_EX_GroupSetState(hlotListView, 10, "Collapsible")
+    LV_EX_EnableGroupView(hlotListView)
+    
 }
 
 OpenAboutMsgGui1() {

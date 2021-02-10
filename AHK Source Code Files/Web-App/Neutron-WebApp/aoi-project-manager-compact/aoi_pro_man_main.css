@@ -1,6 +1,7 @@
 /*=========================================================*/
 /***********************Default CSS*************************/
 html, body {
+  overflow: hidden;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -30,8 +31,6 @@ button {
 #search-result-container {
   padding: 0 10px 0 15px;
   height: 590px;
-  overflow-y: scroll;
-  overflow-x: hidden;
 }
 
 .recipe-card-status-useable {
