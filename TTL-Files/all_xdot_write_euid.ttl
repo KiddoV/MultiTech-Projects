@@ -10,6 +10,9 @@ timeout = 5
 mpause 1000
 
 :GET_SET_VARS
+currentLotCode = param3
+sprintf2 writeResultLogFilePath 'Z:\XDOT\Logging\writing\%s.log' currentLotCode
+
 strsplit param2 ','		;Get all datas by 1 param
 
 writeFirmwareVers = groupmatchstr8
@@ -43,10 +46,7 @@ sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
 sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
 binFileLoc = ''
 
-if isSkipWriteFw=1 goto WRITE_BLANK_LINE
-
-currentLotCode = param3
-sprintf2 writeResultLogFilePath 'Z:\XDOT\Logging\writing\%s.log' currentLotCode
+if isSkipWriteFw=1 goto CONNECT
 
 outDeadNode = 'N/A'
 outDFreq = 'N/A'
@@ -291,10 +291,10 @@ mpause 500
 sendln 'at+di?'
 waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
 for i 1 17
-	strreplace outDeadNode 1 '-' ''
+	strreplace inputstr 1 '-' ''
 next
 if result=1 then
-    strcompare outDeadNode deadNode
+    strcompare inputstr deadNode
     if result <> 0 then
         writeStatus = 'INVALID EUID - NOT MATCH'
         statusbox writeStatus portNumberFailureMsg

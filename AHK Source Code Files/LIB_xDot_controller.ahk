@@ -197,6 +197,8 @@ aboutHandler() {
 AutoCloseAPWindow() {
     IfWinExist, AutoPlay
         WinClose, AutoPlay
+    IfWinExist, ahk_exe cmd.exe
+        WinMinimize, ahk_exe cmd.exe
 }
 
 ;=======================================================================================;
@@ -206,6 +208,7 @@ runAll() {
     GuiControlGet, isRunTestChecked, , totalGPortRadio
     GuiControlGet, isRunReprogChecked, , reproGPortRadio
     isReprogram := isRunReprogChecked = 1 ? True : False
+    
     if (isRunTestChecked = 1) {
         OnMessage(0x44, "PlayInCircleIcon") ;Add icon
         MsgBox 0x81, RUN FUNCTIONAL TEST, Begin FUNCTIONAL TESTS on all %totalGoodPort% ports?
@@ -312,11 +315,15 @@ writeAll() {
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
+        startTime := A_TickCount
+        
         isReprogram := False
         resetXdotBttns()
         deleteOldCacheFiles()
         resetNodesToWrite()
         index := startedIndex
+        
+        ;;; Checking all node id in the input field before running!
         Loop, %totalPort%
         {
             ctrlVar := xdotProperties[index].ctrlVar
@@ -387,12 +394,16 @@ writeAll() {
                 GuiControlGet, node, , nodeToWrite%index%
                 StringReplace node, node, %A_Space%, , All  ;Delete all white space in variable
                 
+                if (firstWriteNode == "" )
+                    firstWriteNode := node
                 Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenFreq%`,%node%`,%chosenWFw% %recentLotCode%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
+                lastWriteNode := node
                 Sleep 3000
             }
             
-             if (index = 24) {
+            ;;;; Remove the first 24 node and replace with the next nodes on the list (if only port 24 is finised!)
+            if (index = 24) {
                 FileRead, fileContent, %remotePath%\nodesToWrite.txt
                 noNodeCount := 1
                 Loop, Parse, fileContent, `n
@@ -414,15 +425,26 @@ writeAll() {
             }
             index++
         }
+        
+        Process, WaitClose, xdot-winwaitEachPort.exe
+        endTime := A_TickCount - startTime
+        totalTimeInMin := (endTime / 1000) / 60
+        
+        FormatTime, timeNow, , hh:mm:ss tt (MM/dd/yyyy)
+        OnMessage(0x44, "CheckIcon") ;Add icon
+        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nThe first node is: " firstWriteNode "`nThe last node is: " lastWriteNode "`nNOTED: Please fix all failure XDots before labelling!"
+        OnMessage(0x44, "") ;Clear icon
     }
     IfMsgBox Cancel
         return
+    
 }
 
 writeEcoLab() {
     ;Global
     GuiControlGet, chosenEcoFreq, , chosenEcoFreq, Text   ;Get value from DropDownList
     GuiControlGet, chosenEcoWFw, , chosenEcoWFw, Text     ;Get value from DropDownList
+    GuiControlGet, recentLotCode, , recentLotCode, Text   ;Get lot code
 
     if (chosenEcoFreq = "") {
         MsgBox 4144, WARNING, Please select a FREQUENCY for ECO LAB!
@@ -445,6 +467,8 @@ writeEcoLab() {
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
+        startTime := A_TickCount
+        
         Gui, ListView, idListView
         isReprogram := False
         resetXdotBttns()
@@ -469,7 +493,7 @@ writeEcoLab() {
             
             xStatus := xdotProperties[index].status
             if (xStatus = "G") {
-                Loop, Parse, allIdRead, `,
+                Loop, Parse, allIdRead, `,|
                 {   
                     if (A_Index = 1)
                         serialNumRead := A_LoopField
@@ -482,7 +506,7 @@ writeEcoLab() {
                 }
                 
                 if (uuidRead = "") {
-                    MsgBox 16 , ERROR, Invalid IDs in the node field. Please recheck your input!!!`nRemember, this is the WRITING PROCESS for ECO LAB
+                    MsgBox 16 , ERROR, Invalid IDs in the node field. Please recheck your input!!!`nNoted, you are on the WRITING PROCESS for ECO LAB!!!
                     return
                 }
                 
@@ -551,10 +575,10 @@ writeEcoLab() {
                 Loop, 5
                 {
                     LV_GetText(idStr, rowNum, A_Index)
-                    allIdStr .= idStr ","
+                    allIdStr .= idStr "|"
                 }
                 
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 %chosenEcoFreq% %allIdStr% %chosenEcoWFw%, , Hide, TTWinPID
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenEcoFreq%`,%allIdStr%`,%chosenEcoWFw% %recentLotCode%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 Sleep 3000
             }
@@ -582,6 +606,15 @@ writeEcoLab() {
             
             indexCount++
         }
+        
+        Process, WaitClose, xdot-winwaitEachPort.exe
+        endTime := A_TickCount - startTime
+        totalTimeInMin := (endTime / 1000) / 60
+        
+        FormatTime, timeNow, , hh:mm:ss tt (MM/dd/yyyy)
+        OnMessage(0x44, "CheckIcon") ;Add icon
+        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nThe first node is: " firstWriteNode "`nThe last node is: " lastWriteNode "`nNOTED: Please fix all failure XDots before labelling!"
+        OnMessage(0x44, "") ;Clear icon
     }
     
     IfMsgBox Cancel
@@ -697,8 +730,13 @@ readNodeLine(lineNum) {
     GuiControlGet listEditNodes, , editNode
     Loop, Parse, listEditNodes, `n
     {
-        if (A_Index = lineNum)
-            return A_LoopField
+        if (A_Index = lineNum) {
+            if (isEcoLabMode) {
+                StringReplace, nodes, A_LoopField, `,, |, All
+                return nodes
+            } else
+                return A_LoopField
+        }
     }
 }
 
@@ -1358,6 +1396,14 @@ GetXDot() {
         Gui xdot: Add, GroupBox, xm+0 ym+205 w200 h55 Section, Programming
         Gui xdot: Add, Button, w180 xs+10 ys+20 gToDebugEach, Program %ctrlVar% to debug mode
         
+        ;;Modify GUI for ECO LAB MODE!!!
+        if (isEcoLabMode) {
+            GuiControl, Text, xFreq, %chosenEcoFreq%  ;Change text
+            GuiControl, Disable, xFreq
+            GuiControl, Text, xFw, %chosenEcoWFw%  ;Change text
+            GuiControl, Disable, xFw
+        }
+        
         if (RegExMatch(data, "WRITE") > 0)
             GuiControl, xdot: Choose, SysTabControl321, 2   ;Focus on tab 2
             
@@ -1409,8 +1455,12 @@ GetXDot() {
         if (isBadXdot = 1 || isGoodXdot = 1) && if (RegExMatch(data, "WRITE") > 0) {
             Loop, Parse, data, `|
             {
-                if (A_Index = 3)
-                    GuiControl, Text, xEUID, %A_LoopField%   ;Change text
+                if (A_Index = 3) {
+                    euidParse := A_LoopField
+                    if (isEcoLabMode)
+                        StringReplace, euidParse, euidParse, `,, |, All
+                    GuiControl, Text, xEUID, %euidParse%   ;Change text
+                }
                 if (A_Index = 4) {
                     if (RegExMatch(A_LoopField, "FAIL|WRONG|INVALID|NOT"))
                         Gui, Font, cf24b3f
@@ -1424,13 +1474,6 @@ GetXDot() {
                 if (A_Index = 6)
                     GuiControl, Text, xFw, %A_LoopField%   ;Change text
             }
-        }        
-        ;;Modify GUI for ECO LAB MODE!!!
-        if (isEcoLabMode) {
-            GuiControl, Text, xFreq, %chosenEcoFreq%  ;Change text
-            GuiControl, Disable, xFreq
-            GuiControl, Text, xFw, %chosenEcoWFw%  ;Change text
-            GuiControl, Disable, xFw
         }
         
         mainY := mainY + 145
@@ -1548,9 +1591,9 @@ GetXDot() {
             GuiControl, Font, xStatus
             GuiControl, Text, xStatus, RUNNING   ;Change text
             if (isEcoLabMode)   ;;EcoLab
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2 %mainPort% %breakPort% %driveName% dummyParam6 dummyParam7 %inId% newTTVersion, , Hide
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,singleWrite`,%inFreq%`,%mainPort%|%inId%`,%inFw% %recentLotCode%, , Hide
             else    ;;Normal
-                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%inFreq%`,%inId%`,%inFw% %recentLotCode%, ,Hide
+                Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,singleWrite`,%inFreq%`,%inId%`,%inFw% %recentLotCode%, ,Hide
             
             WinWait %mainPort% FAILURE|%mainPort% PASSED
             ifWinExist, %mainPort% FAILURE
@@ -1595,25 +1638,41 @@ OpenLogViewer() {
     ;;;GUI  ;;===============================;;
     Gui, logView: Default
     Gui, logView: +Resize +MinSize850x650 +HwndLogViewGui
-    Gui, logView: Add, Tab3, Section w832 h640 vlogViewMainTabCon  +BackgroundTrans, Result Logging|System Logging
+    Gui, logView: Add, Tab3, Section w832 h620 vlogViewMainTabCon, Result Logging|System Logging
     ;;;;;;; Tab Content ;;;;;;;;;
     Gui, logView: Tab, 1    ;;;;;
         Gui, logView: Add, Edit, xs+5 ys+30 w100 vlotInputBox gSearchLot +Number,
-        Gui, logView: Add, ListBox, xs+5 ys+57 w100 h577 vlotListBox gPickLot 0x100 Sort, 
-        Gui, logView: Add, ListView, xs+110 ys+30 w713 h605 hWndhlotListView vlotListView +Grid, ???|???|???|???|???|???|
+        Gui, logView: Add, ListBox, xs+5 ys+57 w100 h557 vlotListBox gPickLot 0x100 Sort, 
+        Gui, logView: Add, ListView, xs+110 ys+30 w713 h585 hWndhlotListView vlotListView +Grid, ???|???|???|???|???|???|
     Gui, logView: Tab, 2    ;;;;;
     
     Gui, logView: Tab
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    Gui, logView: Add, StatusBar, vlogStatusBar
+    SB_SetParts(230, 300)
+    
+    ;; Create an instance to use Class_LV_Color
+    lotListViewInstance := New LV_Colors(hlotListView, True, False)
+    
+    ; Create a popup menu to be used as the context menu:
+        Menu, LogViewContextMenuSub, Add, Red, cntxMenuFlagHander
+        Menu, LogViewContextMenuSub, Add, Yellow, cntxMenuFlagHander
+        Menu, LogViewContextMenuSub, Add, Green, cntxMenuFlagHander
+        Menu, LogViewContextMenuSub, Add, Brown, cntxMenuFlagHander
+    Menu, logView: LogViewContextMenu, Add, Marks, :LogViewContextMenuSub
+    
     ;;;;Run Before GUI STARTED
+    lotCount := 0
     logLotList := ""
     Loop, Files, %ResultLoggingPath%\*.log
     {
         fullFileName := A_LoopFileName
         StringReplace, fullFileName, fullFileName, .log, , All    ;Remove .log
         logLotList .= "|" . fullFileName
+        lotCount += 1
     }
     GuiControl, , lotListBox, % logLotList
+    SB_SetText("Total Lot Code: " . lotCount, 1)
     LogViewer_DisplayResultLog(recentLotCode)
     
     Gui, logView: Show, w850 h650, Log Viewer
@@ -1621,12 +1680,39 @@ OpenLogViewer() {
     
     ;; Auto re-size and re-position when main window changed.
     logViewGuiSize:
+        Gui, logView: Default
         If (A_EventInfo = 1) ;The window has been minimized.
             Return
         AutoXYWH("wh", "logViewMainTabCon")
         AutoXYWH("h", "lotListBox")
         AutoXYWH("wh", "lotListView")
     Return
+    
+    logViewGuiContextMenu:      ; Launched in response to a right-click or press of the Apps key.
+        if (A_GuiControl == "lotListView") {
+            Menu, logView: LogViewContextMenu, Show, %A_GuiX%, %A_GuiY%
+        }
+    Return
+    
+    cntxMenuFlagHander:
+        Gui, logView: Default
+        selectedRowNumber := 0  ; This causes the first loop iteration to start the search at the top of the list.
+        Loop
+        {
+            selectedRowNumber := LV_GetNext(selectedRowNumber)  ; Resume the search at the row after that found by the previous iteration.
+            If Not selectedRowNumber                            ; If the above returned zero, so there are no more selected rows.
+                break
+            If (A_ThisMenuItem == "Red")
+                lotListViewInstance.Row(selectedRowNumber, 0xf44336, 0xffffff)  ;;Change color
+            Else If (A_ThisMenuItem == "Yellow")
+                lotListViewInstance.Row(selectedRowNumber, 0xfbc02d, 0xffffff)  ;;Change color
+            Else If (A_ThisMenuItem == "Green")
+                lotListViewInstance.Row(selectedRowNumber, 0x2e7d32, 0xffffff)  ;;Change color
+            Else If (A_ThisMenuItem == "Brown")
+                lotListViewInstance.Row(selectedRowNumber, 0x6d4c41, 0xffffff)  ;;Change color
+            LV_Modify(selectedRowNumber, "-Select")     ;;De-selected row
+        }
+    return
     
     logViewGuiClose:
         Gui, logView: Destroy
@@ -1641,9 +1727,7 @@ OpenLogViewer() {
     ;;===============================;;
     PickLot:
         If (A_GuiControlEvent == "DoubleClick") {
-            Gui, logView: Default
-            GuiControlGet, boxLotCode  ; Retrieve the ListBox's current selection.
-            MsgBox % boxLotCode
+            GuiControlGet, boxLotCode, , lotListBox  ; Retrieve the ListBox's current selection.
             LogViewer_DisplayResultLog(boxLotCode)
         }
     Return  ;;=======================;;
@@ -1652,14 +1736,18 @@ OpenLogViewer() {
 LogViewer_DisplayResultLog(lotCode) {
     If (lotCode == "")
         Return
-    
+    SB_SetText("Current Lot Code View: " lotCode, 3)
     Gui, logView: ListView, lotListView     ; Specify which listview will be updated with LV commands  
     LV_Delete()                             ; Delete all rows in listview
     Loop, % LV_GetCount("Column")
         LV_DeleteCol(1)             ;Delete all cols before init new one!
     
+    itemCount := 0
+    passedCount := 0
+    failedCount := 0
     lvItems := {}
-    ILSt:= IL_Create(1,1,0)
+    IL_Destroy(ILSt)
+    ILSt:= IL_Create(1, 1, 0)
     LV_SetImageList(ILSt, 1)
     IL_Add(ILSt, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\green-dot-sm.png")
     IL_Add(ILSt, "C:\V-Projects\XDot-Controller\Imgs-for-GUI\red-dot-sm.png")
@@ -1678,32 +1766,42 @@ LogViewer_DisplayResultLog(lotCode) {
             If (lineCount > 1)
                 Break
         }
-        ;;Add item to LV
+        
+        ;;Add Column to LV
         If (itemCount == 9) {
-            colHeaders := "@|Date|Time|Main Port|Status|Write NodeID|Expect NodeID|Write Frequency|Expect Frequency|MBed Port"
+            colHeaders := "@|Date|Time|Main Port|Status|Write NodeID|Expected NodeID|Write Frequency|Expected Frequency|MBed Port"
             Loop, Parse, colHeaders, |
             {
                 If (A_LoopField == "") ;the end has been reached
-                    break
+                    Break
+                LV_InsertCol(A_Index, "AutoHdr", A_LoopField)
+            }
+        } Else If (itemCount == 13) {
+            colHeaders := "@|Date|Time|Main Port|Status|Write NodeID|Expected NodeID|Write Frequency|Expected Frequency|Write UUID|Expected UUID|Write AppKey|Expected AppKey|MBed Port"
+            Loop, Parse, colHeaders, |
+            {
+                If (A_LoopField == "") ;the end has been reached
+                    Break
                 LV_InsertCol(A_Index, "AutoHdr", A_LoopField)
             }
         }
+        ;; Add items to LV
+        ;;; It's ok to insert 13 items to a LV with 9 items?
         StringSplit, item, fileLineContents, `,
-        If (RegExMatch(item4, "PASSED"))
-            LV_Add("Icon" . 1, , item1, item2, item3, item4, item5, item6, item7, item8, item9)
-        If (RegExMatch(item4, "FAILED|INVALID|WRONG|NOT FOUND"))
-            LV_Add("Icon" . 2, , item1, item2, item3, item4, item5, item6, item7, item8, item9)
-        lvItems.Push({1: item1, 2: item2, 3: item3, 4: item4, 5: item5, 6: item6, 7: item7, 8: item8, 9: item9})
+        If (RegExMatch(item4, "PASSED")) {
+            LV_Add("Icon" . 1, , item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13)
+            passedCount += 1
+        }
+        If (RegExMatch(item4, "FAILED|INVALID|WRONG|NOT FOUND")) {
+            LV_Add("Icon" . 2, , item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13)
+            failedCount += 1
+        }
+        lvItems.Push({1: item1, 2: item2, 3: item3, 4: item4, 5: item5, 6: item6, 7: item7, 8: item8, 9: item9, 10: item10, 11: item11, 12: item12, 13: item13})
     }
     Loop, % LV_GetCount("Column")
         LV_ModifyCol(A_Index, "AutoHdr")
     LV_ModifyCol(6, "SortDesc")
-    LV_EX_GroupInsert(hlotListView, 10, "Panel", 2)
-    Loop, 5
-       LV_EX_SetGroup(hlotListView, A_Index, 10)
-    LV_EX_GroupSetState(hlotListView, 10, "Collapsible")
-    LV_EX_EnableGroupView(hlotListView)
-    
+    SB_SetText("Total Ran: " . passedCount + failedCount . " | Total Passed: " . passedCount . " | Total Failed: " . failedCount, 2)
 }
 
 OpenAboutMsgGui1() {

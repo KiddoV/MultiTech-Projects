@@ -10,30 +10,34 @@ timeout = 5
 mpause 1000
 
 :GET_SET_VARS
-writeFirmwareVers = param9
+currentLotCode = param3
+sprintf2 writeResultLogFilePath 'Z:\XDOT\Logging\writing\%s.log' currentLotCode
+
+strsplit param2 ','		;Get all datas by 1 param
+
+writeFirmwareVers = groupmatchstr8
 strcompare writeFirmwareVers 'v3.0.2'
 if result=0 firmwareVers = 'Firmware : 3.0.2-mbed144'
 strcompare writeFirmwareVers 'v3.2.1'
 if result=0 firmwareVers = 'Firmware : 3.2.1-mbed51101'
 
 debugFirmwareVers = '3.0.2-debug-mbed144'
-xdotMainPort = param3	;101
-xdotBreakPort = param4	;11
-sprintf2 xdotDriveLoc '%s:\' param5
-strcompare param6 'singleWrite'
+xdotMainPort = groupmatchstr2	;101
+xdotBreakPort = groupmatchstr3	;11
+sprintf2 xdotDriveLoc '%s:\' groupmatchstr4
+strcompare groupmatchstr5 'singleWrite'
 isSingleWrite = result
-freq = param7
-outDFreq = ''
-allID = param8
-outDeadNode = ''
-outAppKey = ''
-outUuid = ''
-writeStatus = ''
+freq = groupmatchstr6
+outDFreq = 'N/A'
+allID = groupmatchstr7
+outDeadNode = 'N/A'
+outAppKey = 'N/A'
+outUuid = 'N/A'
+writeStatus = 'N/A'
 fail = 0
 connFail = 0
 sprintf2 portNumberFailureMsg 'PORT %s FAILURE' xdotMainPort
-sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort
-
+sprintf2 portNumberTitleMsg 'PORT %s' xdotMainPort'
 flushrecv
 strcompare writeFirmwareVers 'v3.0.2'
 if result=0 then
@@ -47,28 +51,33 @@ if result=0 then
 endif
 
 ;;;Split data
-strsplit allID ','
-deadNode = groupmatchstr2
-serialNum = groupmatchstr3
+strsplit allID '|'
+if isSingleWrite != 0 then
+	deadNode = groupmatchstr2
+	serialNum = groupmatchstr3
+else
+	deadNode = groupmatchstr3
+	serialNum = groupmatchstr2	
+endif
 appKey = groupmatchstr4
 uuid = groupmatchstr5
 
-:WRITE_BLANK_LINE
-isFirstNode = -1
-strcompare xdotMainPort '101'
-if result=0 isFirstNode = result
-strcompare xdotMainPort '109'
-if result=0 isFirstNode = result
-strcompare xdotMainPort '117'
-if result=0 isFirstNode = result
-if isFirstNode = 0 then
-   fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
-   filewrite fhandle #13#10
-   fileclose fhandle
-endif
+;:WRITE_BLANK_LINE
+;isFirstNode = -1
+;strcompare xdotMainPort '101'
+;if result=0 isFirstNode = result
+;strcompare xdotMainPort '109'
+;if result=0 isFirstNode = result
+;strcompare xdotMainPort '117'
+;if result=0 isFirstNode = result
+;if isFirstNode = 0 then
+;   fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
+;   filewrite fhandle #13#10
+;   fileclose fhandle
+;endif
 
 :CONNECT
-sprintf2 cmdStr '/C=%s' param3
+sprintf2 cmdStr '/C=%s' xdotMainPort
 connect cmdStr
 if result=1 goto connection_failed
 
@@ -89,7 +98,7 @@ if result=0 then
     writeStatus = 'FAILED CONNECTING TO PORT'
     statusbox writeStatus portNumberFailureMsg
     connFail=0
-    goto WRITE_RESULT_DATA
+    goto RESULT_LOGGING
     end
 endif
 
@@ -254,7 +263,8 @@ if result=0 then
 endif
 mpause 500
 sendln 'at+dfreq'
-waitregex '[A-Z]+([0-9]{3})'
+;waitregex '[A-Z]+([0-9]{3})'
+waitln freq
 outDFreq = inputstr
 mpause 500
 sendln 'at+dfreq'
@@ -267,13 +277,16 @@ if result=0 then
 endif
 mpause 500
 sendln 'at+di?'
-waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
+waitln '0' '8'
 outDeadNode = inputstr
+mpause 500
+sendln 'at+di?'
+waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
 for i 1 17
-	strreplace outDeadNode 1 '-' ''
+	strreplace inputstr 1 '-' ''
 next
 if result=1 then
-    strcompare outDeadNode deadNode
+    strcompare inputstr deadNode
     if result <> 0 then
         writeStatus = 'INVALID NODE ID - NOT MATCH'
         statusbox writeStatus portNumberFailureMsg
@@ -289,13 +302,16 @@ if result=2 then
 endif
 mpause 500
 sendln 'at+ni?'
-waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
+waitln '0' '8'
 outAppKey = inputstr
+mpause 500
+sendln 'at+ni?'
+waitregex '([0-9a-fA-F]{2}[:-]){7}([0-9a-fA-F]{2})' '00-00-00-00-00-00-00-00'
 for i 1 17
-	strreplace outAppKey 1 '-' ''
+	strreplace inputstr 1 '-' ''
 next
 if result=1 then
-    strcompare outAppKey appKey
+    strcompare inputstr appKey
     if result <> 0 then
         writeStatus = 'INVALID APP KEY - NOT MATCH'
         statusbox writeStatus portNumberFailureMsg
@@ -311,14 +327,16 @@ if result=2 then
 endif
 mpause 500
 sendln 'at+nk?'
-waitregex '([0-9a-fA-F]{2}[.:-]){15}([0-9a-fA-F]{2})' '00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00'
+waitln '0'
 outUuid = inputstr
-
+mpause 500
+sendln 'at+nk?'
+waitregex '([0-9a-fA-F]{2}[.:-]){15}([0-9a-fA-F]{2})' '00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00'
 for i 1 32
-	strreplace outUuid 1 '\.' ''
+	strreplace inputstr 1 '\.' ''
 next
 if result=1 then
-    strcompare outUuid uuid
+    strcompare inputstr uuid
     if result <> 0 then
         writeStatus = 'INVALID UUID - NOT MATCH'
         statusbox writeStatus portNumberFailureMsg
@@ -345,11 +363,18 @@ mpause 500
 date = ''
 time = ''
 logStr = ''
-getdate date "%Y\%m\%d"
+getdate date "%Y/%m/%d"
 getdate time "%H:%M:%S"
-sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, UUID: %s, ReadUUID: %s, AppKey: %s, ReadAppKey: %s,BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort
-fileopen fhandle 'C:\Vbtest\mtxdot\xdot_EUI_and_FIRMWARE_results_info.txt' 1
-filewrite fhandle #13#10
+;sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, UUID: %s, ReadUUID: %s, AppKey: %s, ReadAppKey: %s,BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort
+sprintf2 logStr '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort
+
+filesearch writeResultLogFilePath
+if result = 0 then
+   filecreate fhandle writeResultLogFilePath
+else
+	fileopen fhandle writeResultLogFilePath 1
+	filewrite fhandle #13#10	;;Make a line feed
+endif
 filewrite fhandle logStr
 fileclose fhandle
 
@@ -365,7 +390,7 @@ if result = 0 filecreate fhandle cacheFileLoc
 
 fileopen fhandle cacheFileLoc 0	;0 for overwrite
 sprintf2 allID '%s,%s,%s,%s' serialNum deadNode appKey uuid
-sprintf2 writeStr 'WRITE|%s|%s|%s|%s' xdotMainPort allID writeStatus freq
+sprintf2 writeStr 'WRITE|%s|%s|%s|%s|%s' xdotMainPort allID writeStatus freq writeFirmwareVers
 filewrite fhandle writeStr
 fileclose fhandle
 
