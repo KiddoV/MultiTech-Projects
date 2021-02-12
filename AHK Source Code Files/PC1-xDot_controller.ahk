@@ -144,6 +144,7 @@ posY := A_ScreenHeight - 560
 Gui, Show, x%posX% y%posY%, %mainWndTitle%
 
 ;;;Functions to run AFTER main gui is started;;;
+DisplayLogin()
 editnodeToolbar := CreateEditNodeToolbar()
 ;loadNodesToWrite()
 

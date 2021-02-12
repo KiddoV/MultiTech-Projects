@@ -105,7 +105,11 @@ Global exclaImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png"
 
 Global xdotMapRemoteFilePath := "Z:\XDOT\Data\mapping-remote.dat"
 
-Global UserInfo := {userId: "???", userFirstName: "???", userLastName: "???", userInitial: "???", userUserName: "???", userPassword: "???", userRole: "N/A"}
+;Global Register_Key := "mtech!createnewaccount"
+Global Register_Key := "123"
+Global Crypt_Key := "Multitech System Inc"
+Global UserInfo := {userFirstName: "???", userLastName: "???", userUserName: "???", userPassword: "???", userRole: "N/A", isLogin: False}
+Global userMainDataFilePath := "Z:\XDOT\Data\AppUser.dat"
 ;=======================================================================================;
 
 WinSet, Redraw, , ahk_id %hIdListView%
@@ -576,6 +580,13 @@ writeEcoLab() {
                 {
                     LV_GetText(idStr, rowNum, A_Index)
                     allIdStr .= idStr "|"
+                    
+                    ;;get first and last node
+                    if (A_Index == 2)
+                        LV_GetText(node, rowNum, A_Index)
+                    if (firstWriteNode == "")
+                        firstWriteNode := node
+                    lastWriteNode := node
                 }
                 
                 Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenEcoFreq%`,%allIdStr%`,%chosenEcoWFw% %recentLotCode%, , Hide, TTWinPID
@@ -1543,38 +1554,38 @@ GetXDot() {
             GuiControlGet, inId, , xEUID
             GuiControlGet, writeBttnLabel, , writeBttnEach
             if (inFreq = "" || inId = "" || inFw = "") {
-                MsgBox 16 , ,Please enter all requires fields!
+                MsgBox 16 , INVALID, Please enter all requires fields!
                 return
             }
             
             if (RegExMatch(inFreq, "[A-Z]+([0-9]{3})") = 0) {
-                MsgBox 16 , ERROR ,INPUT INVALID FREQUENCY. RETRY!
+                MsgBox 16 , ERROR, INPUT INVALID FREQUENCY. RETRY!
                 return
             }
             
             if (!isEcoLabMode) {
                 if (HasValue(allWriteFW, inFw) = 0) {
-                    MsgBox 16 , ERROR , INPUT INVALID FIRMWARE VERSION. RETRY!
+                    MsgBox 16 , ERROR, INPUT INVALID FIRMWARE VERSION. RETRY!
                     return
                 }
             }
             
             if (isEcoLabMode) {
                 if (HasValue(allEcoWriteFw, inFw) = 0) {
-                    MsgBox 16 , ERROR , INPUT INVALID FIRMWARE VERSION. RETRY!
+                    MsgBox 16 , ERROR, INPUT INVALID FIRMWARE VERSION. RETRY!
                     return
                 }
             }
             
             if (!isEcoLabMode)
                 if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) <> 16) {
-                    MsgBox 16 , ERROR , INPUT INVALID EUID. RETRY!
+                    MsgBox 16 , ERROR, INPUT INVALID EUID. RETRY!
                     return
                 }
             
             if (isEcoLabMode)
                 if (RegExMatch(inId, "[g-zG-Z]") > 0 || StrLen(inId) < 18) {
-                    MsgBox 16 , ERROR , INPUT INVALID IDs FOR ECO LAB. RETRY!
+                    MsgBox 16 , ERROR, INPUT INVALID IDs FOR ECO LAB. RETRY!
                     return
                 }
             
@@ -1736,7 +1747,7 @@ OpenLogViewer() {
 LogViewer_DisplayResultLog(lotCode) {
     If (lotCode == "")
         Return
-    SB_SetText("Current Lot Code View: " lotCode, 3)
+    SB_SetText("Current Lot Code in View: " lotCode, 3)
     Gui, logView: ListView, lotListView     ; Specify which listview will be updated with LV commands  
     LV_Delete()                             ; Delete all rows in listview
     Loop, % LV_GetCount("Column")
@@ -1769,7 +1780,7 @@ LogViewer_DisplayResultLog(lotCode) {
         
         ;;Add Column to LV
         If (itemCount == 9) {
-            colHeaders := "@|Date|Time|Main Port|Status|Write NodeID|Expected NodeID|Write Frequency|Expected Frequency|MBed Port"
+            colHeaders := "@|Date|Time|Main Port|Status|In NodeID|Out NodeID|In Frequency|Out Frequency|MBed Port"
             Loop, Parse, colHeaders, |
             {
                 If (A_LoopField == "") ;the end has been reached
@@ -1777,7 +1788,7 @@ LogViewer_DisplayResultLog(lotCode) {
                 LV_InsertCol(A_Index, "AutoHdr", A_LoopField)
             }
         } Else If (itemCount == 13) {
-            colHeaders := "@|Date|Time|Main Port|Status|Write NodeID|Expected NodeID|Write Frequency|Expected Frequency|Write UUID|Expected UUID|Write AppKey|Expected AppKey|MBed Port"
+            colHeaders := "@|Date|Time|Main Port|Status|In NodeID|Out NodeID|In Frequency|Out Frequency|In UUID|Out UUID|In AppKey|Out AppKey|MBed Port"
             Loop, Parse, colHeaders, |
             {
                 If (A_LoopField == "") ;the end has been reached
@@ -1845,6 +1856,181 @@ OpenAboutMsgGui1() {
     Return
 }
 
+;=======================================================================================;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;; Users Authentication ;;;;;;;;;;;;;
+DisplayLogin() {
+    Global
+    Gui, auth: +AlwaysOnTop -MinimizeBox -MaximizeBox -Resize +HwndhAuthGui
+    Gui, auth: Add, Text, y10 cRed vloginStatusLabel w290, Please login to use the program!
+    Gui, auth: Add, GroupBox, xm+0 ym+20 Section w280 h80,
+    Gui, auth: Add, Text, xs+10 ys+18, Username:
+    Gui, auth: Add, Edit, xs+90 ys+15 w180 vinUsername,
+    Gui, auth: Add, Text, xs+10 ys+48, Password:
+    Gui, auth: Add, Edit, xs+90 ys+45 w180 vinPassword +Password,
+    
+    Gui, auth: Add, Button, xs+90 ys+90 w100 gUserLogin, Login
+    Gui auth: Add, Link, xs+83 ys+120 gUserSignUp, <a href="#">Sign up a new account!</a>
+    
+    Gui, auth: Show, w300, XDot Controller - Authentication
+    
+    Gui, 1: +Disabled
+    
+    #Persistent
+    
+    Return  ;;;;;;;;;;;;;;;;
+    
+    
+    authGuiClose:
+        ExitApp
+    Return
+}
+
+UserLogin() {
+    Gui, auth: Default
+    GuiControlGet, userName, , inUsername
+    GuiControlGet, userPassword, , inPassword
+    
+    If (userName == "" && userPassword == "") {
+        GuiControl, Text, loginStatusLabel, % "Invalid! Please type Username and Password"
+        Return
+    }
+    
+    If FileExist(userMainDataFilePath) {
+        Loop, Read, %userMainDataFilePath%
+        {
+            getUserLoginInfo := DecryptString(A_LoopReadLine, Crypt_Key)
+            Loop, Parse, getUserLoginInfo, `|
+            {
+                if (A_Index == 1)
+                    getUserName := A_LoopField
+                if (A_Index == 2)
+                    getPassword := A_LoopField
+                if (A_Index == 3)
+                    getFirstName := A_LoopField
+                if (A_Index == 4)
+                    getLastName := A_LoopField
+                if (A_Index == 5)
+                    getAcctRole := A_LoopField
+                    
+                if (getUserName == userName && getPassword == userPassword && A_Index == 5) {                    
+                    UserInfo := {userFirstName: getFirstName, userLastName: getLastName, userUserName: getUserName, userPassword: getPassword, userRole: getAcctRole, isLogin: True}
+                    Gui, 1: -Disabled
+                    Gui, auth: Destroy
+                    Return
+                }
+            }
+        }
+        GuiControl, Text, loginStatusLabel, % "Wrong username or password. Try again!"
+        Return
+    } Else {
+        GuiControl, Text, loginStatusLabel, % "No accounts in system. Please create at least 1!"
+        Return
+    }
+}
+
+UserSignUp() {
+    ;;Create new sign up Gui
+    Global
+    Gui, authSiUp: +AlwaysOnTop -MinimizeBox -MaximizeBox -Resize +HwndAuthSiUpGui
+    Gui, authSiUp: Add, Text, y10 w290, This process require an administrative right!`n Please ask the ADMIN to help you create an account!
+    Gui, authSiUp: Add, GroupBox, xm+0 ym+30 Section w280 h180,
+    Gui, authSiUp: Add, Text, xs+10 ys+18, Register Code:
+    Gui, authSiUp: Add, Edit, xs+90 ys+15 w180 vinRegisterCode +Password,
+    Gui, authSiUp: Add, Text, xs+10 ys+45 w265 h2 +0x10 ;;-----------------------------
+    
+    Gui, authSiUp: Add, Text, xs+10 ys+60, First Name:
+    Gui, authSiUp: Add, Edit, xs+70 ys+57 w65 vinFirstName,
+    Gui, authSiUp: Add, Text, xs+145 ys+60, Last Name:
+    Gui, authSiUp: Add, Edit, xs+205 ys+57 w65 vinLastName,
+    Gui, authSiUp: Add, Text, xs+10 ys+90, New Username:
+    Gui, authSiUp: Add, Edit, xs+95 ys+87 w175 vinNewUsername,
+    Gui, authSiUp: Add, Text, xs+10 ys+120, New Password:
+    Gui, authSiUp: Add, Edit, xs+95 ys+117 w175 +Password vinNewPassword,
+    Gui, authSiUp: Add, Text, xs+10 ys+150, Account Role:
+    Gui, authSiUp: Add, DropDownList, xs+95 ys+147 w175 +Choose2 vinAcctRole, ADMIN|OPPERATOR
+    Gui, authSiUp: Add, Text, cred xs+5 ys+180 w300 vsignupStatusLabel,
+    
+    Gui, authSiUp: Add, Button, xs+90 ys+200 w100 gUserSignUpSubmit, Submit
+    
+    Gui, authSiUp: Show, w300 h270, XDot Controller - Sign Up
+    Return  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+    UserSignUpSubmit:
+        Gui, authSiUp: Default
+        GuiControlGet, registerCode, , inRegisterCode
+        GuiControlGet, firstName, , inFirstName
+        GuiControlGet, lastName, , inLastName
+        GuiControlGet, newUsername, , inNewUsername
+        GuiControlGet, newPassword, , inNewPassword
+        GuiControlGet, acctRole, , inAcctRole
+        
+        if (registerCode == "" || firstName == "" || lastName == "" || newUsername == "" || newPassword == "" || acctRole == "") {
+            GuiControl, Text, signupStatusLabel, % "Please fill all required fields!"
+            return
+        }
+        
+        if (registerCode != Register_Key) {
+            GuiControl, Text, signupStatusLabel, % "Wrong REGISTER CODE. Try again!"
+            return
+        }
+        
+        newUserData := newUsername . "|" . newPassword . "|" . firstName . "|" . lastName . "|" acctRole
+        If FileExist(userMainDataFilePath) 
+        {
+            Loop, Read, %userMainDataFilePath%
+            {
+                Loop, Parse, A_LoopReadLine, `|
+                {
+                    if (A_Index == 1) {
+                        existUsername := A_LoopField
+                        if (existUsername == newUsername) {
+                            GuiControl, Text, signupStatusLabel, % "Username already exist!. Please choose a different one."
+                            Return
+                        }
+                    }
+                }
+            }
+            newUserData := EncryptString(newUserData, Crypt_Key)
+            FileAppend, %newUserData%`n, %userMainDataFilePath%
+            Gui, authSiUp: Destroy
+        } Else {
+            newUserData := EncryptString(newUserData, Crypt_Key)
+            FileAppend, %newUserData%`n, %userMainDataFilePath%
+            Gui, authSiUp: Destroy
+        }
+    Return
+    
+    authSiUpGuiClose:
+        Gui, authSiUp: Destroy
+    Return
+}
+
+EncryptString(String, Key)
+{
+	Random,, Key
+	Loop, Parse, String
+	{
+		Random x, 1, 100000
+		Random y, 1, 100000
+		newString .= (Asc(A_loopfield) + x) y
+	}
+	Return newString
+}
+
+DecryptString(String, Key)
+{
+	Random,, Key
+	While StrLen(String) > 0
+	{
+		Random x, 1, 100000
+		Random y, 1, 100000
+		Pos := InStr(String, y)
+		oldString .= Chr(SubStr(String, 1, Pos - 1) - x)
+		String := SubStr(String, Pos + StrLen(y))
+	}	
+	Return oldString
+}
 ;=======================================================================================;
 ;=======================================================================================;
 ;=======================================================================================;
