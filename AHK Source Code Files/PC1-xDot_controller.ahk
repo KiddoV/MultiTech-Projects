@@ -131,6 +131,9 @@ LVInstance := New LV_Colors(hIdListView)
 ;Gui Add, GroupBox, xm+205 ym+430 w290 h55 Section, All Records
 ;Gui Add, Button, xs+100 ys+20 w140 h25 ggetRecords, EUID Write History
 
+Gui, Add, StatusBar, ,
+SB_SetParts(210)
+
 ;;;Functions to run BEFORE main gui is started;;;
 OnMessage(0x100, "WM_KEYDOWN")
 OnMessage(0x200, "WM_MOUSEMOVE")
@@ -140,7 +143,7 @@ deleteOldCacheFiles()    ;Delete result port data before gui start (Ex: 101.dat)
 AddMainMenuBar()
 
 posX := A_ScreenWidth - 540
-posY := A_ScreenHeight - 560
+posY := A_ScreenHeight - 580
 Gui, Show, x%posX% y%posY%, %mainWndTitle%
 
 ;;;Functions to run AFTER main gui is started;;;
@@ -451,17 +454,18 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;HOT KEYS;;;;;;;;
+^q::
+    resetSyncDataFile()
+    For process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")
+    Process, close, % process.ProcessId
+    ExitApp
+#IfWinActive, PC1
 ~^!l::
     IfWinExist, ahk_id %LogViewGui%
         WinActivate, ahk_id %LogViewGui%
     Else
         OpenLogViewer()
 return
-^q::
-    resetSyncDataFile()
-    For process in ComObjGet("winmgmts:").ExecQuery("Select * from Win32_Process  where name = 'xdot-winwaitEachPort.exe' ")
-    Process, close, % process.ProcessId
-    ExitApp
 ^t::
     runAll()
 return
@@ -469,7 +473,6 @@ return
     Gui, xdot: Destroy
     writeAll()
 return
-#IfWinActive, PC1
 ^s::
     saveNodesToWrite()
 #IfWinActive

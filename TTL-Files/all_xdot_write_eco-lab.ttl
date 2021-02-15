@@ -11,6 +11,7 @@ mpause 1000
 
 :GET_SET_VARS
 currentLotCode = param3
+runUser = param4
 sprintf2 writeResultLogFilePath 'Z:\XDOT\Logging\writing\%s.log' currentLotCode
 
 strsplit param2 ','		;Get all datas by 1 param
@@ -366,7 +367,7 @@ logStr = ''
 getdate date "%Y/%m/%d"
 getdate time "%H:%M:%S"
 ;sprintf2 logStr '%s, %s, COM: %s, STATUS: %s, DeadNode: %s, ReadNode: %s, Freq: %s, D-Freq: %s, UUID: %s, ReadUUID: %s, AppKey: %s, ReadAppKey: %s,BK-COM: %s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort
-sprintf2 logStr '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort
+sprintf2 logStr '%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s' date time xdotMainPort writeStatus deadNode outDeadNode freq outDFreq uuid outUuid appKey outAppKey xdotBreakPort runUser
 
 filesearch writeResultLogFilePath
 if result = 0 then

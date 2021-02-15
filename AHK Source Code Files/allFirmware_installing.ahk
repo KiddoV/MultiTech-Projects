@@ -33,8 +33,9 @@ allMTCDTFirmwareProperties[13] := {fwName: "AEP 5.1.2", fwPath: "C:\vbtest\MTCDT
 allMTCDTFirmwareProperties[14] := {fwName: "AEP 5.1.5", fwPath: "C:\vbtest\MTCDT\AEP-5_1_5\mtcdt-flash-full-AEP.tcl"}
 allMTCDTFirmwareProperties[15] := {fwName: "AEP 5.1.6", fwPath: "C:\vbtest\MTCDT\AEP-5_1_6\mtcdt-flash-full-AEP.tcl"}
 allMTCDTFirmwareProperties[16] := {fwName: "AEP 5.2.1", fwPath: "C:\vbtest\MTCDT\AEP-5_2_1\mtcdt-flash-full-AEP.tcl"}
-allMTCDTFirmwareProperties[17] := {fwName: "AEP 5.3.0", fwPath: "C:\vbtest\MTCDT\AEP-5_3_0\mtcdt-flash-full-AEP.tcl"}
-allMTCDTFirmwareProperties[18] := {fwName: "Actility 2.2.9", fwPath: "C:\vbtest\MTCDT\v2.2.9-LoRa-H\Generic-915\mtcdt-flash-Generic-915-v2_2_9-LoRa-H.production.tcl"}
+allMTCDTFirmwareProperties[17] := {fwName: "AEP 5.2.5", fwPath: "C:\vbtest\MTCDT\AEP-5_2_5\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[18] := {fwName: "AEP 5.3.0", fwPath: "C:\vbtest\MTCDT\AEP-5_3_0\mtcdt-flash-full-AEP.tcl"}
+allMTCDTFirmwareProperties[19] := {fwName: "Actility 2.2.9", fwPath: "C:\vbtest\MTCDT\v2.2.9-LoRa-H\Generic-915\mtcdt-flash-Generic-915-v2_2_9-LoRa-H.production.tcl"}
 
 Global allMTCAPFirmwareProperties := [{}]
 allMTCAPFirmwareProperties[1] := {fwName: "mLinux 5.1.8", fwPath: "C:\vbtest\MTCAP\mLinux_v5_1_8\mtcap-flash-full-5.1.8.tcl"}

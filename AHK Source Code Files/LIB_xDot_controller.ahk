@@ -19,7 +19,9 @@ IfNotExist C:\V-Projects\XDot-Controller\BIN-Files
     FileCreateDir C:\V-Projects\XDot-Controller\BIN-Files
 IfNotExist C:\V-Projects\XDot-Controller\TEMP-DATA
     FileCreateDir C:\V-Projects\XDot-Controller\TEMP-DATA
-    
+
+IfNotExist Z:\XDOT\Data
+    FileCreateDir Z:\XDOT\Data
 IfNotExist Z:\XDOT\Saved-Nodes
     FileCreateDir Z:\XDOT\Saved-Nodes
 IfNotExist Z:\XDOT\Logging\writing
@@ -82,6 +84,7 @@ Global xdotTestFilePath := "C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_tes
 Global teratermMacroExePath := "C:\teraterm\ttpmacro.exe"
 Global syncModeFilePath := "Z:\XDOT\Data\syncdata.snc"
 Global ResultLoggingPath := "Z:\XDOT\Logging\writing"
+Global AuthRemoteFilePath := "Z:\XDOT\Data\auth.dat"
 
 Global isReprogram := False
 Global isEcoLabMode := False
@@ -105,11 +108,15 @@ Global exclaImg := "C:\V-Projects\XDot-Controller\Imgs-for-GUI\excla_mark.png"
 
 Global xdotMapRemoteFilePath := "Z:\XDOT\Data\mapping-remote.dat"
 
+;;SetTimer Global Functions
+Global Authentication := Func("Authentication").Bind()
+Global CheckUserLogin := Func("CheckUserLogin").Bind()
+
 ;Global Register_Key := "mtech!createnewaccount"
-Global Register_Key := "123"
+Global Register_Key := "MTech!Key"
 Global Crypt_Key := "Multitech System Inc"
 Global UserInfo := {userFirstName: "???", userLastName: "???", userUserName: "???", userPassword: "???", userRole: "N/A", isLogin: False}
-Global userMainDataFilePath := "Z:\XDOT\Data\AppUser.dat"
+Global UserMainDataFilePath := "Z:\XDOT\Data\AppUser.dat"
 ;=======================================================================================;
 
 WinSet, Redraw, , ahk_id %hIdListView%
@@ -118,6 +125,8 @@ AddMainMenuBar() {
     Global
     ;;;;;;Menu bar
         Menu FileMenu, Add, Reload Program, reloadProgHandler
+        Menu FileMenu, Add  ;Separator
+        Menu FileMenu, Add, Logout, logoutHandler
         Menu FileMenu, Add  ;Separator
         Menu FileMenu, Add, Quit, quitHandler
     Menu MainMenuBar, Add, &File, :FileMenu     ;Main button
@@ -148,6 +157,10 @@ AddMainMenuBar() {
 ;;;;;;;;;All menu handlers
 reloadProgHandler() {
     Reload
+}
+
+logoutHandler() {
+    UserLogout()
 }
 
 quitHandler() {
@@ -298,6 +311,8 @@ writeAll() {
     GuiControlGet, chosenWFw, , chosenWFw, Text     ;Get value from DropDownList
     GuiControlGet, recentLotCode, , recentLotCode, Text   ;Get lot code
     
+    userRun := UserInfo.userFirstName "_" UserInfo.userLastName
+    
     if (recentLotCode == "") {
         MsgBox 4144, WARNING, Please ADD LOT CODE before running!
         return
@@ -400,7 +415,7 @@ writeAll() {
                 
                 if (firstWriteNode == "" )
                     firstWriteNode := node
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenFreq%`,%node%`,%chosenWFw% %recentLotCode%, , Hide, TTWinPID
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_euid.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenFreq%`,%node%`,%chosenWFw% %recentLotCode% %userRun%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 lastWriteNode := node
                 Sleep 3000
@@ -436,7 +451,7 @@ writeAll() {
         
         FormatTime, timeNow, , hh:mm:ss tt (MM/dd/yyyy)
         OnMessage(0x44, "CheckIcon") ;Add icon
-        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nThe first node is: " firstWriteNode "`nThe last node is: " lastWriteNode "`nNOTED: Please fix all failure XDots before labelling!"
+        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nNOTED: Please fix all failure XDots before labelling!"
         OnMessage(0x44, "") ;Clear icon
     }
     IfMsgBox Cancel
@@ -449,7 +464,9 @@ writeEcoLab() {
     GuiControlGet, chosenEcoFreq, , chosenEcoFreq, Text   ;Get value from DropDownList
     GuiControlGet, chosenEcoWFw, , chosenEcoWFw, Text     ;Get value from DropDownList
     GuiControlGet, recentLotCode, , recentLotCode, Text   ;Get lot code
-
+    
+    userRun := UserInfo.userFirstName "_" UserInfo.userLastName
+    
     if (chosenEcoFreq = "") {
         MsgBox 4144, WARNING, Please select a FREQUENCY for ECO LAB!
         return
@@ -589,7 +606,7 @@ writeEcoLab() {
                     lastWriteNode := node
                 }
                 
-                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenEcoFreq%`,%allIdStr%`,%chosenEcoWFw% %recentLotCode%, , Hide, TTWinPID
+                Run, %teratermMacroExePath% C:\V-Projects\XDot-Controller\TTL-Files\all_xdot_write_eco-lab.ttl dummyParam2`,%mainPort%`,%breakPort%`,%driveName%`,dummyParam6`,%chosenEcoFreq%`,%allIdStr%`,%chosenEcoWFw% %recentLotCode% %userRun%, , Hide, TTWinPID
                 Run, %ComSpec% /c start C:\V-Projects\XDot-Controller\EXE-Files\xdot-winwaitEachPort.exe %mainPort% %breakPort% %TTWinPID%, , Hide
                 Sleep 3000
             }
@@ -624,7 +641,7 @@ writeEcoLab() {
         
         FormatTime, timeNow, , hh:mm:ss tt (MM/dd/yyyy)
         OnMessage(0x44, "CheckIcon") ;Add icon
-        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nThe first node is: " firstWriteNode "`nThe last node is: " lastWriteNode "`nNOTED: Please fix all failure XDots before labelling!"
+        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nNOTED: Please fix all failure XDots before labelling!"
         OnMessage(0x44, "") ;Clear icon
     }
     
@@ -1205,6 +1222,7 @@ HasValue(haystack, needle) {
 OnExitMainApp(ExitReason, ExitCode) {
     IniWrite, %False%, %xdotMapRemoteFilePath%, Mapping, Activate
     IniDelete, %xdotMapRemoteFilePath%, XDot-Status
+    IniDelete, %AuthRemoteFilePath%, AuthenticationSync, 
 }
 
 ;=======================================================================================;
@@ -1304,10 +1322,13 @@ AutoXYWH(DimSize, cList*){       ; http://ahkscript.org/boards/viewtopic.php?t=1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;OnMessage Functions;;;;
 WM_KEYDOWN(lparam) {
-    if (lparam = 13 && A_GuiControl = "lotCodeSelected") {  ;When press enter in Lot code select section
+    If (lparam = 13 && A_GuiControl = "lotCodeSelected") {  ;When press enter in Lot code select section
         loadNodeFromLot()
     }
-    return
+    
+    If (lparam == 13 && (A_GuiControl == "inUsername" || A_GuiControl == "inPassword")){
+        UserLogin()
+    }
 }
 
 ;;;Add tooltip on hover for a control (%ControlName%_TT)
@@ -1779,16 +1800,16 @@ LogViewer_DisplayResultLog(lotCode) {
         }
         
         ;;Add Column to LV
-        If (itemCount == 9) {
-            colHeaders := "@|Date|Time|Main Port|Status|In NodeID|Out NodeID|In Frequency|Out Frequency|MBed Port"
+        If (itemCount == 10) {
+            colHeaders := "@|Date|Time|Main Port|Status|In NodeID|Out NodeID|In Frequency|Out Frequency|MBed Port|User"
             Loop, Parse, colHeaders, |
             {
                 If (A_LoopField == "") ;the end has been reached
                     Break
                 LV_InsertCol(A_Index, "AutoHdr", A_LoopField)
             }
-        } Else If (itemCount == 13) {
-            colHeaders := "@|Date|Time|Main Port|Status|In NodeID|Out NodeID|In Frequency|Out Frequency|In UUID|Out UUID|In AppKey|Out AppKey|MBed Port"
+        } Else If (itemCount == 14) {
+            colHeaders := "@|Date|Time|Main Port|Status|In NodeID|Out NodeID|In Frequency|Out Frequency|In UUID|Out UUID|In AppKey|Out AppKey|MBed Port|User"
             Loop, Parse, colHeaders, |
             {
                 If (A_LoopField == "") ;the end has been reached
@@ -1800,14 +1821,14 @@ LogViewer_DisplayResultLog(lotCode) {
         ;;; It's ok to insert 13 items to a LV with 9 items?
         StringSplit, item, fileLineContents, `,
         If (RegExMatch(item4, "PASSED")) {
-            LV_Add("Icon" . 1, , item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13)
+            LV_Add("Icon" . 1, , item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14)
             passedCount += 1
         }
         If (RegExMatch(item4, "FAILED|INVALID|WRONG|NOT FOUND")) {
-            LV_Add("Icon" . 2, , item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13)
+            LV_Add("Icon" . 2, , item1, item2, item3, item4, item5, item6, item7, item8, item9, item10, item11, item12, item13, item14)
             failedCount += 1
         }
-        lvItems.Push({1: item1, 2: item2, 3: item3, 4: item4, 5: item5, 6: item6, 7: item7, 8: item8, 9: item9, 10: item10, 11: item11, 12: item12, 13: item13})
+        lvItems.Push({1: item1, 2: item2, 3: item3, 4: item4, 5: item5, 6: item6, 7: item7, 8: item8, 9: item9, 10: item10, 11: item11, 12: item12, 13: item13, 14: item14})
     }
     Loop, % LV_GetCount("Column")
         LV_ModifyCol(A_Index, "AutoHdr")
@@ -1859,15 +1880,64 @@ OpenAboutMsgGui1() {
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;; Users Authentication ;;;;;;;;;;;;;
+Authentication() {      ;;Sync mode for Authentication | Auto check login/logout
+    IniRead, syncUserInfo, %AuthRemoteFilePath%, AuthenticationSync, UserInfo
+    If (syncUserInfo != A_Space && syncUserInfo != "ERROR") {
+        syncUserInfoDec := DecryptString(syncUserInfo, 2021)
+        
+        If FileExist(UserMainDataFilePath) {
+            Loop, Read, %UserMainDataFilePath%
+            {
+                getUserLoginInfo := DecryptString(A_LoopReadLine, Crypt_Key)
+                If (getUserLoginInfo == syncUserInfoDec) {
+                    
+                    Loop, Parse, getUserLoginInfo, `|
+                    {
+                        if (A_Index == 1)
+                            getUserName := A_LoopField
+                        if (A_Index == 2)
+                            getPassword := A_LoopField
+                        if (A_Index == 3)
+                            getFirstName := A_LoopField
+                        if (A_Index == 4)
+                            getLastName := A_LoopField
+                        if (A_Index == 5)
+                            getAcctRole := A_LoopField
+                            
+                        if (A_Index == 5) {    
+                            UserInfo := {userFirstName: getFirstName, userLastName: getLastName, userUserName: getUserName, userPassword: getPassword, userRole: getAcctRole, isLogin: True}
+                            Gui, 1: -Disabled
+                            Gui, auth: Destroy
+                            Gui, 1: Default
+                            SB_SetText("Username: " . UserInfo.userUserName . " ( " . UserInfo.userFirstName . " " UserInfo.userLastName " ) - " UserInfo.userRole, 1)
+                            SetTimer, %Authentication%, Off
+                            SetTimer, %CheckUserLogin%, 100
+                        }
+                    }
+                    Break
+                }
+            }
+        }
+    }
+}
+
+CheckUserLogin() {
+    IniRead, isLogin, %AuthRemoteFilePath%, AuthenticationSync, IsUserLogin
+    If (!isLogin) {
+        UserLogout()
+        DisplayLogin()
+    }
+}
+
 DisplayLogin() {
     Global
     Gui, auth: +AlwaysOnTop -MinimizeBox -MaximizeBox -Resize +HwndhAuthGui
     Gui, auth: Add, Text, y10 cRed vloginStatusLabel w290, Please login to use the program!
     Gui, auth: Add, GroupBox, xm+0 ym+20 Section w280 h80,
     Gui, auth: Add, Text, xs+10 ys+18, Username:
-    Gui, auth: Add, Edit, xs+90 ys+15 w180 vinUsername,
+    Gui, auth: Add, Edit, xs+90 ys+15 w180 vinUsername hWndhInUsername,
     Gui, auth: Add, Text, xs+10 ys+48, Password:
-    Gui, auth: Add, Edit, xs+90 ys+45 w180 vinPassword +Password,
+    Gui, auth: Add, Edit, xs+90 ys+45 w180 vinPassword hWndhInPassword +Password,
     
     Gui, auth: Add, Button, xs+90 ys+90 w100 gUserLogin, Login
     Gui auth: Add, Link, xs+83 ys+120 gUserSignUp, <a href="#">Sign up a new account!</a>
@@ -1877,9 +1947,9 @@ DisplayLogin() {
     Gui, 1: +Disabled
     
     #Persistent
-    
+    SetTimer, %Authentication%, 10
+    SetTimer, %CheckUserLogin%, Off
     Return  ;;;;;;;;;;;;;;;;
-    
     
     authGuiClose:
         ExitApp
@@ -1891,13 +1961,13 @@ UserLogin() {
     GuiControlGet, userName, , inUsername
     GuiControlGet, userPassword, , inPassword
     
-    If (userName == "" && userPassword == "") {
+    If (userName == "" || userPassword == "") {
         GuiControl, Text, loginStatusLabel, % "Invalid! Please type Username and Password"
         Return
     }
     
-    If FileExist(userMainDataFilePath) {
-        Loop, Read, %userMainDataFilePath%
+    If FileExist(UserMainDataFilePath) {
+        Loop, Read, %UserMainDataFilePath%
         {
             getUserLoginInfo := DecryptString(A_LoopReadLine, Crypt_Key)
             Loop, Parse, getUserLoginInfo, `|
@@ -1917,6 +1987,10 @@ UserLogin() {
                     UserInfo := {userFirstName: getFirstName, userLastName: getLastName, userUserName: getUserName, userPassword: getPassword, userRole: getAcctRole, isLogin: True}
                     Gui, 1: -Disabled
                     Gui, auth: Destroy
+                    IniWrite, % EncryptString(getUserLoginInfo, 2021), %AuthRemoteFilePath%, AuthenticationSync, UserInfo
+                    IniWrite, %True%, %AuthRemoteFilePath%, AuthenticationSync, IsUserLogin
+                    Gui, 1: Default
+                    SB_SetText("Username: " . UserInfo.userUserName . " ( " . UserInfo.userFirstName . " " UserInfo.userLastName " ) - " UserInfo.userRole, 1)
                     Return
                 }
             }
@@ -1927,6 +2001,14 @@ UserLogin() {
         GuiControl, Text, loginStatusLabel, % "No accounts in system. Please create at least 1!"
         Return
     }
+}
+
+UserLogout() {
+    IniDelete, %AuthRemoteFilePath%, AuthenticationSync, UserInfo
+    UserInfo := {userFirstName: "???", userLastName: "???", userUserName: "???", userPassword: "???", userRole: "N/A", isLogin: False}
+    Gui, 1: Default
+    SB_SetText("Username: " . UserInfo.userUserName . " ( " . UserInfo.userFirstName . " " UserInfo.userLastName " ) - " UserInfo.userRole, 1)
+    IniWrite, %False%, %AuthRemoteFilePath%, AuthenticationSync, IsUserLogin
 }
 
 UserSignUp() {
@@ -1976,9 +2058,9 @@ UserSignUp() {
         }
         
         newUserData := newUsername . "|" . newPassword . "|" . firstName . "|" . lastName . "|" acctRole
-        If FileExist(userMainDataFilePath) 
+        If FileExist(UserMainDataFilePath) 
         {
-            Loop, Read, %userMainDataFilePath%
+            Loop, Read, %UserMainDataFilePath%
             {
                 Loop, Parse, A_LoopReadLine, `|
                 {
@@ -1992,11 +2074,11 @@ UserSignUp() {
                 }
             }
             newUserData := EncryptString(newUserData, Crypt_Key)
-            FileAppend, %newUserData%`n, %userMainDataFilePath%
+            FileAppend, %newUserData%`n, %UserMainDataFilePath%
             Gui, authSiUp: Destroy
         } Else {
             newUserData := EncryptString(newUserData, Crypt_Key)
-            FileAppend, %newUserData%`n, %userMainDataFilePath%
+            FileAppend, %newUserData%`n, %UserMainDataFilePath%
             Gui, authSiUp: Destroy
         }
     Return
