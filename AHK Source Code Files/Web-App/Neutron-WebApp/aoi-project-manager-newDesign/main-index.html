@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<!-- ===================================================================== -->
+  <script src="jquery-3.5.1.js"></script>   <!-- Always load JQuery first!  -->
+
+  <!-- Fomantic (Cemantic) - UI Libs -->
+  <link href="semantic.css" rel="stylesheet">
+	<link href="semantic-icons.css" rel="stylesheet">
+	<script src="semantic.js"></script>
+
+	<!-- Custom CSS and JS -->
+	<link href="app-custom.css" rel="stylesheet">
+	<script src="app-custom.js"></script>
+	<!-- ===================================================================== -->
+</head>
+
+<!-- ======================================================================= -->
+<!-- Main Contents -->
+<body class="bg-app-color no-select-text">
+  <!-- Title Bar -->
+  <header class="bg-app-theme-dark" style="">
+    <span class="default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">?????????</span>
+		<span class="title-btn" onclick="neutron.Minimize()"><i class="window minimize icon" style="font-size: .78em;"></i></span>
+		<span class="title-btn" onclick="neutron.Maximize();"><i class="window maximize outline icon" style="font-size: .78em;"></i></span>
+		<span class="title-btn title-btn-close" onclick="neutron.Close()"><i class="times icon"></i></span>
+  </header>
+
+	<!-- Left Nav Bar -->
+	<nav class="left-nav bg-app-theme-light">
+		<div>
+			<img class="ui medium circular image" src="">
+		</div>
+		<ul class="nav-menu">
+			<li><a class="menu-item active" href="#" data-toggle="tab-1"><i class="large search icon"></i></a></li>
+			<li><a class="menu-item" href="#" data-toggle="tab-2"><i class="large tasks icon"></i></a></li>
+		</ul>
+	</nav>
+
+	<!-- Main view -->
+	<main class="">
+
+		<div class="ui tab" data-tab="tab-1">
+		  Hello! 1
+		</div>
+
+		<div class="ui tab" data-tab="tab-2">
+		  Hello! 2
+		</div>
+
+	</main>
+
+	<!-- Status Bar -->
+	<footer class="bg-app-theme-dark">
+		Test
+	</footer>
+</body>
+<!-- ======================================================================= -->
+<script>
+// Expose jQuery to the global object
+window.jQuery = window.$ = window.jq = jQuery;
+
+//
+$(".menu-item").on("click", function() {
+	whichTab = $(this).attr("data-toggle");
+	$.tab('change tab', whichTab);
+
+	$('.menu-item').removeClass('active');
+  $(this).addClass('active');
+});
+</script>
+
+</html>

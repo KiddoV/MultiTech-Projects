@@ -1,0 +1,113 @@
+/*=========================================================*/
+/***********************Default CSS*************************/
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+	font-size: 11pt;
+  min-height: 28px;
+  max-height: 28px;
+  display: flex;
+  z-index: 999;
+}
+nav.left-nav {
+  z-index: 100;
+  min-width: 55px;
+  max-width: 55px;
+  position: fixed;
+  overflow: hidden;
+  top: 28px;
+  left: 0;
+  bottom: 20px;
+}
+main {
+  position: fixed;
+  top: 28px;
+  bottom: 20px;
+  left: 55px;
+  right: 0;
+  padding: 5px;
+}
+footer {
+  z-index: 999;
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 20px;
+  max-height: 20px;
+  color: white;
+}
+
+#title-label {
+	font-weight: bold;
+	font-size: 10pt;
+  color: white;
+  padding: 0.30em 0.5em;
+  flex-grow: 1;
+}
+.title-btn {
+
+	padding: 0.2em 1em 0.2em 1.2em;
+	cursor: pointer;
+  color: #FFFFFF
+}
+.title-btn-disable {
+	pointer-events: none;
+	cursor: default;
+	background: #dadada;
+}
+.title-btn:hover, .footer-btn:hover {
+	background: rgba(0, 0, 0, .3);
+}
+.title-btn-close:hover {
+	background: #dc3545;
+}
+/* ************* */
+/* Prevent user from select text */
+.no-select-text {
+	-ms-user-select: none !important; /* Internet Explorer/Edge */
+}
+.allow-select-text {
+	-ms-user-select: text !important; /* Internet Explorer/Edge */
+}
+.default-mouse {
+	cursor: default;
+}
+.bg-app-color {
+	background: #eeeeee;
+}
+.bg-app-theme-dark {
+	background: #37474F;
+}
+.bg-app-theme-light {
+	background: #546E7A;
+}
+/*=========================================================*/
+/********************Additional CSS*************************/
+.nav-menu {
+  margin: 0;
+  padding: 0;
+  width: 55px;
+  background-color: #546E7A;
+}
+.nav-menu > li a {
+  display: block;
+  color: #000;
+  padding: 10px 15px;
+}
+.nav-menu > li a.active {
+  background-color: #eeeeee;
+  color: black;
+}
+.nav-menu > li a:hover:not(.active) {
+  background-color: #37474F;
+  color: #FFFFFF;
+}
+
+/*=========================================================*/
+/*****************Third-Party CSS MODs**********************/
+.main.ui.toggle.checkbox input:focus:checked ~ label:before, .main.ui.toggle.checkbox input:checked ~ label:before {
+  background-color: #546E7A !important;
+}
