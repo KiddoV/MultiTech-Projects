@@ -43,10 +43,12 @@
 	<!-- Main view -->
 	<main class="">
 
+		<!-- Content on PAGE 1 -->
 		<div class="ui tab" data-tab="tab-1">
-		  Hello! 1
+		  <button class="ui button primary" onclick="ahk.Test(this)">Test</button>
 		</div>
-
+		
+		<!-- Content on PAGE 2 -->
 		<div class="ui tab" data-tab="tab-2">
 		  Hello! 2
 		</div>
@@ -62,15 +64,6 @@
 <script>
 // Expose jQuery to the global object
 window.jQuery = window.$ = window.jq = jQuery;
-
-//
-$(".menu-item").on("click", function() {
-	whichTab = $(this).attr("data-toggle");
-	$.tab('change tab', whichTab);
-
-	$('.menu-item').removeClass('active');
-  $(this).addClass('active');
-});
 </script>
 
 </html>

@@ -111,3 +111,8 @@ footer {
 .main.ui.toggle.checkbox input:focus:checked ~ label:before, .main.ui.toggle.checkbox input:checked ~ label:before {
   background-color: #546E7A !important;
 }
+
+.ui.toast-container {
+  top: 28px !important;
+  z-index: 900 !important;
+}

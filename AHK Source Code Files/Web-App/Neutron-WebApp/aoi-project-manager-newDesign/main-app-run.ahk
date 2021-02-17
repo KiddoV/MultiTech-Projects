@@ -80,13 +80,20 @@ FileInstall, semantic-icons.css, semantic-icons.css
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 Test(neutron, event) {
-    DisplayAlertMsg()
+    DisplayAlertMsg("This is a test message")
 }
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
-DisplayAlertMsg() {
-    NeutronWebApp.wnd.jq("nav").toast({"message": "I am a toast, nice to meet you !"})
+DisplayAlertMsg(msg) {
+    js = 
+    (LTrim
+    $("main").toast({
+        message: "%msg%"
+    });
+    )
+    
+    NeutronWebApp.wnd.execScript(js)
 }
 ;=======================================================================================;
 ;;;;;;;;;;Hot Keys;;;;;;;;;;
