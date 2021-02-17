@@ -8,9 +8,17 @@ $(document).ready(function() {
     //activate tab
     $.tab('change tab', whichTab);
   }
+
+  // Init Overlay Scrollbar
+  $(".scrolling.content").overlayScrollbars({
+    scrollbars : {
+      autoHide: "move",
+    },
+  });
+
 });
 
-$(function(){
+$(function() {
   $(".menu-item").on("click", function() {
     let whichTab = $(this).attr("data-toggle");
     $('.menu-item').removeClass('active');
@@ -18,5 +26,14 @@ $(function(){
 
     //activate tab
     $.tab('change tab', whichTab);
+  });
+});
+
+$(function() {
+  $("#app-settings-btn").on("click", function() {
+    $("#app-settings-modal").modal({
+      centered: false,
+      transition: "slide down",
+    }).modal("show");
   });
 });

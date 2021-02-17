@@ -16,7 +16,6 @@ nav.left-nav {
   min-width: 55px;
   max-width: 55px;
   position: fixed;
-  overflow: hidden;
   top: 28px;
   left: 0;
   bottom: 20px;
@@ -48,7 +47,6 @@ footer {
   flex-grow: 1;
 }
 .title-btn {
-
 	padding: 0.2em 1em 0.2em 1.2em;
 	cursor: pointer;
   color: #FFFFFF
@@ -57,6 +55,10 @@ footer {
 	pointer-events: none;
 	cursor: default;
 	background: #dadada;
+}
+.footer-btn {
+  padding: .1em .2em;
+  cursor: pointer;
 }
 .title-btn:hover, .footer-btn:hover {
 	background: rgba(0, 0, 0, .3);
@@ -98,6 +100,7 @@ footer {
   padding: 10px 15px;
 }
 .nav-menu > li a.active {
+  border-left: 5px solid #37474F;
   background-color: #eeeeee;
   color: black;
 }
@@ -115,4 +118,18 @@ footer {
 .ui.toast-container {
   top: 28px !important;
   z-index: 900 !important;
+}
+
+.ui.modal > .header {
+  padding: .35rem .55rem !important;
+}
+.ui.modal > .content {
+  padding: .65rem;
+}
+.ui.modal > .actions {
+  padding: .35rem .55rem !important;
+}
+.ui.dimmer {
+  top: 28px !important;
+  z-index: 998 !important;
 }

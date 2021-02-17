@@ -29,6 +29,7 @@ FileInstall C:\MultiTech-Projects\Imgs-for-GUI\x_mark.png, C:\V-Projects\RTIAuto
 FileInstall C:\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png, 1
 
 FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz, 1
+FileInstall C:\vbtest\MTCDT\MTCDT-L4N1-246A-DTE 2-ATT-RTI\config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz, 1
 FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\RT_Python_Deps.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_Python_Deps.tar.gz, 1
 FileInstall C:\vbtest\MTCDT\MTCDT-LAT3-240A-RTI\RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz, C:\V-Projects\RTIAuto-FinalConfig\transfering-files\RT_CDC.1.0.3.0.PRD.minimalmodbus.tar.gz, 1
 
@@ -38,6 +39,7 @@ Global config4GFilePath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\
 Global xImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\x_mark.png"
 Global checkImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\check_mark.png"
 Global playImg := "C:\V-Projects\RTIAuto-FinalConfig\imgs-for-gui\play_orange.png"
+Global skuItems := ["94557585LF", "94557700LF"]
 
 Global step0ErrMsg := "Unknown ERROR!!?"
 Global step1ErrMsg := "Unknown ERROR!!?"
@@ -47,7 +49,17 @@ Global step2ErrMsg := "UnKnown ERROR!!?"
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\CreateFormData.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
-Gui, Add, GroupBox, xm+0 ym+0 w190 h155 Section
+Gui, Font, Bold
+Gui, Add, Text, cred x11 y10, SKU#:
+Gui, Font
+For each, item In skuItems
+    items .= (each == 1 ? "" : "|") . item
+Gui, Add, DropDownList, x60 y5 w140 vskuDropList gOnSkuDropDown Choose2, %items%
+GuiControlGet, defaultItem, , skuDropList
+
+Gui Add, Text, x0 y35 w220 h2 +0x10 ;The line in between
+
+Gui, Add, GroupBox, xm+0 ym+35 w190 h155 vskuNumberToRun Section, %defaultItem%
 Gui, Font, Bold
 Gui, Add, Text, xs+40 ys+20 vstep0Label, STEP 0. Commissioning
 Gui, Add, Text, xs+40 ys+45 vstep1Label, STEP 1. Ping Test
@@ -67,7 +79,7 @@ Gui, Add, Button, xs+70 ys+120 w50 h30 gRunAll, RUN
 
 posX := A_ScreenWidth - 300
 posY := A_ScreenHeight - 900
-Gui, Show, x%posX% y%posY%, RTI Auto-Final Configurator    ;Starts GUI
+Gui, Show, x%posX% y%posY% w210, RTI Auto-Final Configurator    ;Starts GUI
 
 Return ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -112,13 +124,17 @@ Return
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN FUNCTIONs;;;;;;;;;;;;;;
 RunAll() {
+    GuiControlGet, skuNum, , skuNumberToRun
+    
     resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, RUN CONFIGURATION, Start running the final configuration steps for RTI?
+    MsgBox 0x81, RUN CONFIGURATION - %skuNum%, Start running the final configuration steps for RTI (%skuNum%)?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
-        if (step0() = 0)
+        startTime := A_TickCount
+        
+        if (step0(skuNum) = 0)
         {
             changeStepLabelStatus("step0Label", "FAIL")
             Progress, Off
@@ -135,18 +151,21 @@ RunAll() {
             Sleep 5000
         }
         Progress, Off
-        if (step1() = 0) {
+        if (step1(skuNum) = 0) {
             MsgBox, 16, STEP 1 FAILED, %step1ErrMsg%
             return
         }
                 
-        if (step2() = 0) {
+        if (step2(skuNum) = 0) {
             MsgBox, 16, STEP 2 FAILED, %step2ErrMsg%
             return
         }
         
+        endTime := A_TickCount - startTime
+        totalTimeInMin := Round((endTime / 1000) / 60)
+        
         OnMessage(0x44, "CheckIcon") ;Add icon
-        MsgBox 0x81, FINISHED, Finished auto-final configuration for RTI.
+        MsgBox 0x81, FINISHED, Finished auto-final configuration for RTI`nTotal time ran from STEP 0 => STEP 2: %totalTimeInMin% (minutes).
         OnMessage(0x44, "") ;Clear icon
     }
     IfMsgBox Cancel
@@ -154,13 +173,15 @@ RunAll() {
 }
 
 RunStep0() {
+    GuiControlGet, skuNum, , skuNumberToRun
+    
     resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, RUN CONFIGURATION, Start running LOGIN STEP for RTI?
+    MsgBox 0x81, RUN CONFIGURATION - %skuNum%, Start running LOGIN STEP for RTI (%skuNum%)?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
-        if (step0() = 0)
+        if (step0(skuNum) = 0)
         {
             changeStepLabelStatus("step0Label", "FAIL")
             Progress, Off
@@ -175,14 +196,16 @@ RunStep0() {
 }
 
 RunStep1() {
+    GuiControlGet, skuNum, , skuNumberToRun
+    
     resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, RUN CONFIGURATION, Start running STEP 1 for RTI?
+    MsgBox 0x81, RUN CONFIGURATION - %skuNum%, Start running STEP 1 for RTI (%skuNum%)?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
         if (checkRTIStatus()) {
-            if (step1() = 0) {
+            if (step1(skuNum) = 0) {
                 MsgBox, 16, STEP 1 FAILED, %step1ErrMsg%
                 return
             }
@@ -197,14 +220,16 @@ RunStep1() {
 }
 
 RunStep2() {
+    GuiControlGet, skuNum, , skuNumberToRun
+    
     resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, RUN CONFIGURATION, Start running STEP 2 for RTI?
+    MsgBox 0x81, RUN CONFIGURATION - %skuNum%, Start running STEP 2 for RTI (%skuNum%)?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
         if (checkRTIStatus()) {
-            if (step2() = 0) {
+            if (step2(skuNum) = 0) {
                 MsgBox, 16, STEP 2 FAILED, %step2ErrMsg%
                 return
             }
@@ -219,25 +244,32 @@ RunStep2() {
 }
 
 RunStep1and2() {
+    GuiControlGet, skuNum, , skuNumberToRun
+
     resetStepLabelStatus()
     OnMessage(0x44, "PlayInCircleIcon") ;Add icon
-    MsgBox 0x81, RUN CONFIGURATION, Start running STEP 1 AND 2 for RTI?
+    MsgBox 0x81, RUN CONFIGURATION - %skuNum%, Start running STEP 1 AND 2 for RTI (%skuNum%)?
     OnMessage(0x44, "") ;Clear icon
     IfMsgBox OK
     {
+        startTime := A_TickCount
+        
         if (checkRTIStatus()) {
-            if (step1() = 0) {
+            if (step1(skuNum) = 0) {
                 MsgBox, 16, STEP 1 FAILED, %step1ErrMsg%
                 return
             }
                 
-            if (step2() = 0) {
+            if (step2(skuNum) = 0) {
                 MsgBox, 16, STEP 2 FAILED, %step2ErrMsg%
                 return
             }
             
+            endTime := A_TickCount - startTime
+            totalTimeInMin := Round((endTime / 1000) / 60)
+            
             OnMessage(0x44, "CheckIcon") ;Add icon
-            MsgBox 0x81, STEP 1&2, STEP 1 & 2 are DONE!!
+            MsgBox 0x81, STEP 1&2, STEP 1 & 2 are DONE!!`nTotal time ran from STEP 1 => STEP 2: %totalTimeInMin% (minutes)
             OnMessage(0x44, "") ;Clear icon
                 
         } else {
@@ -250,7 +282,7 @@ RunStep1and2() {
 }
 
 ;;;;;;;;;;;;;
-step0() {
+step0(sku) {
     changeStepLabelStatus("step0Label", "PLAY")
     Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
     RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
@@ -377,7 +409,11 @@ step0() {
     Sleep 1000
     
     url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
-    configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
+    if (sku == "94557700LF")
+        configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
+    else if (sku == "94557585LF")
+        configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz"
+        
     objParam := { Filedata: [configPath] }
     CreateFormData(PostData, hdr_ContentType, objParam)     ;Create a form data to send file to the server
     req.Open("POST", url, False)
@@ -399,9 +435,9 @@ step0() {
     changeStepLabelStatus("step0Label", "DONE")
 }
 
-step1() {
+step1(sku) {
     changeStepLabelStatus("step1Label", "PLAY")
-    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP1", , Hide, TTWinPID
+    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP1" %sku%, , Hide, TTWinPID
     WinWait, STEP 1 DONE|STEP 1 FAILED
     IfWinExist, STEP 1 FAILED|CONNECTION ERROR
     {
@@ -417,9 +453,9 @@ step1() {
     }
 }
 
-step2() {
+step2(sku) {
     changeStepLabelStatus("step2Label", "PLAY")
-    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP2", , Hide, TTWinPID
+    Run, %ComSpec% /c cd C:\teraterm &&  TTPMACRO.EXE C:\V-Projects\RTIAuto-FinalConfig\ttl\rti_all-config-in-one.ttl "STEP2" %sku%, , Hide, TTWinPID
     WinWait, STEP 2 DONE|STEP 2 FAILED
     IfWinExist, STEP 2 FAILED|CONNECTION ERROR
     {
@@ -440,6 +476,11 @@ step2() {
 
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;ADDITIONAL FUNCTIONs;;;;;;;;;;;
+OnSkuDropDown() {
+    GuiControlGet, skuDropList
+    GuiControl, , skuNumberToRun, %skuDropList%
+}
+
 changeStepLabelStatus(ctrID := "", status := "") {
     Gui, 1: Default
     RegExMatch(ctrID, "\d", num)    ;Get button number in variable

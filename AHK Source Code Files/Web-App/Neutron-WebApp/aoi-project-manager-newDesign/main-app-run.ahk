@@ -80,16 +80,20 @@ FileInstall, semantic-icons.css, semantic-icons.css
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 Test(neutron, event) {
-    DisplayAlertMsg("This is a test message")
+    DisplayAlertMsg("This is a test message", , , "warning")
 }
 ;=======================================================================================;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
-DisplayAlertMsg(msg) {
+DisplayAlertMsg(msg, title := "", timeout := 3000, color := "") {
     js = 
     (LTrim
     $("main").toast({
-        message: "%msg%"
+        title: "%title%",
+        message: "%msg%",
+        showProgress: "bottom",
+        displayTime: %timeout%,
+        class: "%color%"
     });
     )
     

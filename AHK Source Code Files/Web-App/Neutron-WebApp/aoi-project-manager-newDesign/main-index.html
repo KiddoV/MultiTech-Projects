@@ -12,6 +12,10 @@
 	<link href="semantic-icons.css" rel="stylesheet">
 	<script src="semantic.js"></script>
 
+	<!-- Overlay Scrollbar -->
+	<link href="overlayScrollbars.css" rel="stylesheet">
+	<script src="jquery.overlayScrollbars.js"></script>
+
 	<!-- Custom CSS and JS -->
 	<link href="app-custom.css" rel="stylesheet">
 	<script src="app-custom.js"></script>
@@ -35,8 +39,8 @@
 			<img class="ui medium circular image" src="">
 		</div>
 		<ul class="nav-menu">
-			<li><a class="menu-item active" href="#" data-toggle="tab-1"><i class="large search icon"></i></a></li>
-			<li><a class="menu-item" href="#" data-toggle="tab-2"><i class="large tasks icon"></i></a></li>
+			<li><a class="menu-item active" href="#" data-toggle="tab-1" data-inverted="" data-tooltip="AOI Recipe Finder" data-position="right center"><i class="large search icon"></i></a></li>
+			<li><a class="menu-item" href="#" data-toggle="tab-2" data-inverted="" data-tooltip="AOI Task Manager" data-position="right center"><i class="large tasks icon"></i></a></li>
 		</ul>
 	</nav>
 
@@ -45,20 +49,57 @@
 
 		<!-- Content on PAGE 1 -->
 		<div class="ui tab" data-tab="tab-1">
+
 		  <button class="ui button primary" onclick="ahk.Test(this)">Test</button>
-		</div>
-		
+
+		</div>	<!-- =========================================================== -->
+
 		<!-- Content on PAGE 2 -->
 		<div class="ui tab" data-tab="tab-2">
-		  Hello! 2
-		</div>
+
+
+
+		</div>	<!-- =========================================================== -->
 
 	</main>
 
 	<!-- Status Bar -->
 	<footer class="bg-app-theme-dark">
-		Test
+		<div style="right: 0; position: fixed;">
+			<span id="app-settings-btn" class="footer-btn" data-inverted="" data-tooltip="Application Settings" data-position="top right" data-variation="tiny"><i class="cogs icon"></i></span>
+		</div>
 	</footer>
+
+	<!-- Modals -->
+	<div id="app-settings-modal" class="ui modal">
+		<div class="header">Application Settings</div>
+		<div class="scrolling content">
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+			<p>Very long content goes here</p>
+		</div>
+		<div class="actions">
+	    <div class="ui cancel button">Cancel</div>
+	    <div class="ui positive button">OK</div>
+	  </div>
+	</div>
+
 </body>
 <!-- ======================================================================= -->
 <script>

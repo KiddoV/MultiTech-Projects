@@ -1,21 +1,29 @@
 ﻿/*
     Author: Viet Ho
 */
-
+#SingleInstance Force
+#NoEnv
+SetWorkingDir %A_ScriptDir%
+Global WorkingDir
+StringTrimRight WorkingDir, A_ScriptDir, 22
+SetBatchLines -1
 SetTitleMatchMode, RegEx
 
+;;;Include the libraries
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\JSON.ahk
+
+;;;;;;;;;;Installs Folder Location and Files;;;;;;;;;;
 IfNotExist C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
     FileCreateDir C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
 
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\u-boot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP, 1
 FileInstall C:\MultiTech-Projects\Imgs-for-Search-Func\romBoot.BMP, C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\romBoot.BMP, 1
-
 ;;;;;;;;;;;;;Variables Definition;;;;;;;;;;;;;;;;
 Global isMTCDT := True
 Global isMTCAP := False
 Global productName := ""
 
-;Firmware list
+;Firmware list in AHK Object
 Global allMTCDTFirmwareProperties := [{}]
 allMTCDTFirmwareProperties[1] := {fwName: "mLinux 4.0.1", fwPath: "C:\vbtest\MTCDT\mLinux-4.0.1-2x7\mtcdt-rs9113-flash-full-4.0.1.tcl"}
 allMTCDTFirmwareProperties[2] := {fwName: "mLinux 4.0.1 - NO WiFi", fwPath: "C:\vbtest\MTCDT\mLinux-4.0.1-no-WiFiBT\mtcdt-flash-full-4.0.1.tcl"}
@@ -42,17 +50,52 @@ allMTCAPFirmwareProperties[1] := {fwName: "mLinux 5.1.8", fwPath: "C:\vbtest\MTC
 allMTCAPFirmwareProperties[2] := {fwName: "AEP 5.1.6", fwPath: "C:\vbtest\MTCAP\AEP_v5_1_6\mtcap-flash-full-AEP.tcl"}
 allMTCAPFirmwareProperties[3] := {fwName: "AEP 5.2.1", fwPath: "C:\vbtest\MTCAP\AEP_v5_2_1\mtcap-flash-full-AEP521.tcl"}
 
+;Firmware list in JSON format
+Global allFirmwarePropertiesJson := ""
+allFirmwarePropertiesJson =
+(
+{
+    "allMTCDTFirmwareProperties": [
+        { "fwName": "mLinux 4.0.1", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-4.0.1-2x7\\mtcdt-rs9113-flash-full-4.0.1.tcl" },
+        { "fwName": "mLinux 4.0.1 - NO WiFi", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-4.0.1-no-WiFiBT\\mtcdt-flash-full-4.0.1.tcl"},
+        { "fwName": "mLinux 4.1.9", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-4.1.9-2x7\\mtcdt-rs9113-flash-full-4.1.9.tcl"},
+        { "fwName": "mLinux 4.1.9 - NO WiFi", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-4.1.9-no-WiFiBT\\mtcdt-flash-full-4.1.9.tcl"},
+        { "fwName": "mLinux 5.1.8", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-5.1.8-2x7\\mtcdt-rs9113-flash-full-5.1.8.tcl"},
+        { "fwName": "mLinux 5.1.8 - NO WiFi", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-5.1.8-no-WiFiBT\\mtcdt-flash-full-5.1.8.tcl"},
+        { "fwName": "mLinux 5.2.7", "fwPath": "C:\\vbtest\\MTCDT\\mLinux-5.2.7\\mtcdt-flash-full-5.2.7.tcl"},
+        { "fwName": "mLinux-Sag 5.1.8", "fwPath": "C:\\vbtest\\MTCDT\\MLINUX_SagecomImage_518\\mtcdt-flash-full-5.1.8.tcl"},
+        { "fwName": "AEP 1.4.3", "fwPath": "C:\\vbtest\\MTCDT\\AEP-1_4_3\\mtcdt-flash-full-AEP.001.tcl"},
+        { "fwName": "AEP 1.6.4", "fwPath": "C:\\vbtest\\MTCDT\\AEP-1_6_4\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 1.7.4", "fwPath": "C:\\vbtest\\MTCDT\\AEP-1_7_4\\mtcdt-flash-full-AEP_174.tcl"},
+        { "fwName": "AEP 5.0.0", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_0_0\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.1.2", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_1_2\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.1.5", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_1_5\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.1.6", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_1_6\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.2.1", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_2_1\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.2.5", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_2_5\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.3.0", "fwPath": "C:\\vbtest\\MTCDT\\AEP-5_3_0\\mtcdt-flash-full-AEP.tcl"},
+        { "fwName": "Actility 2.2.9", "fwPath": "C:\\vbtest\\MTCDT\\v2.2.9-LoRa-H\\Generic-915\\mtcdt-flash-Generic-915-v2_2_9-LoRa-H.production.tcl"}
+    ],
+    "allMTCAPFirmwareProperties": [
+        { "fwName": "mLinux 5.1.8", "fwPath": "C:\\vbtest\\MTCAP\\mLinux_v5_1_8\\mtcap-flash-full-5.1.8.tcl"},
+        { "fwName": "AEP 5.1.6", "fwPath": "C:\\vbtest\\MTCAP\\AEP_v5_1_6\\mtcap-flash-full-AEP.tcl"},
+        { "fwName": "AEP 5.2.1", "fwPath": "C:\\vbtest\\MTCAP\\AEP_v5_2_1\\mtcap-flash-full-AEP521.tcl"}
+    ]
+}
+)
+
+Global AllFirmwareProperties := {}
+
 ;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
+Global MainPropertiesFilePath := "C:\V-Projects\AFAuto-Installer\properties.json"
 
 Global probarNum := 0
+
+Global JSON := new JSON()
+
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
-#SingleInstance Force
-#NoEnv
-SetWorkingDir %A_ScriptDir%
-Global WorkingDir
-StringTrimRight WorkingDir, A_ScriptDir, 22
-SetBatchLines -1
+ProcessSettings()       ;;;Must run before GUI
 
 ;Menu bar
     Menu FileMenu, Add, Quit, quitHandler
@@ -87,6 +130,9 @@ Gui Add, Progress, x8 y155 w185 h13 -Smooth vprogress, 0
 Gui Font,, Times New Roman
 Gui Add, StatusBar,, Click button to start!
 Gui Font
+
+;;;;;Functions to run BEFORE Gui started
+MsgBox % 
 
 posX := A_ScreenWidth - 300
 Gui Show, w200 h195 x%posX% y300, All Firmware Auto-Installer
@@ -124,7 +170,7 @@ mtcapHandler() {
 }
 
 keyShcutHandler() {
-    MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App    
+    MsgBox 0, Keyboard Shortcuts, Ctrl + R to RUN`nCtrl + Q to Exit App
 }
 aboutHandler() {
     MsgBox 0, Message, Created and Tested by Viet Ho
@@ -143,33 +189,33 @@ mainRun() {
     GuiControl,, progress, 0 ;Set Progress to 0 everytime user hit RUN
     probarNum := 0
     If (isMTCDT)
-        GuiControlGet, fware, , fware ;Get value from DropDownList        
+        GuiControlGet, fware, , fware ;Get value from DropDownList
     If (isMTCAP)
-        GuiControlGet, fware, , mtcapFware ;Get value from DropDownList        
+        GuiControlGet, fware, , mtcapFware ;Get value from DropDownList
 
     GuiControlGet, check ;Get value from CheckBox
-    
+
     If !WinExist("COM.*") {
         SB_SetText("Missing COM port...")
         MsgBox, 8240, Alert, Please connect to PORT first! ;Uses 48 + 8192
         SB_SetText("Run after PORT is connected")
         return
     }
-    
+
     SB_SetText("Starting...")
     If (check = 1) {
         ;MsgBox, 33, Question, Begin Auto-Reprogram firmware %fware%? ;Uses 1 + 32
         OnMessage(0x44, "PlayInCircleIcon")
         MsgBox 0x81, BEGIN, Begin Auto-Reprogram firmware %fware% on %productName%?
         OnMessage(0x44, "")
-        IfMsgBox OK 
+        IfMsgBox OK
         {
             If (searchUboot() = 0) {
                 SB_SetText("...")
                 MsgBox, 16, Error, Can't find U-Boot> prompt`nMake sure you get "U-Boot>" displayed on TeraTerm first!
                 return
             }
-                
+
             If (searchRomBoot() = 1) {
                 addTipMsg("Firmware on the device is already erased`nJump to installing step!", "Tip", 3500)
                 GuiControl , , check, 0
@@ -185,7 +231,7 @@ mainRun() {
             SB_SetText("...")
             return
         }
-    } 
+    }
     Else {
         ;MsgBox, 33, Question, Begin Auto-Install firmware %fware%?
         OnMessage(0x44, "PlayInCircleIcon")
@@ -221,7 +267,7 @@ install_firmware(fw, chk) {
     Run %SAM_BA%
     SB_SetText("Opening SAM-BA...")
     addToProgressBar(5)
-    
+
     WinWaitActive SAM-BA.*
     WinActivate SAM-BA.*
     Send {Enter}
@@ -246,9 +292,9 @@ install_firmware(fw, chk) {
         Send {Down}{Down}{Down}{Down}{Enter}
         WinWaitActive Select Script File.*
         WinActivate Select Script File.*
-        
+
         addToProgressBar(10)
-        
+
         If (isMTCDT) {
             Loop, % allMTCDTFirmwareProperties.Length()
             {
@@ -266,7 +312,7 @@ install_firmware(fw, chk) {
                 }
             }
         }
-        
+
         If (isMTCAP) {
             Loop, % allMTCAPFirmwareProperties.Length()
             {
@@ -284,12 +330,12 @@ install_firmware(fw, chk) {
                 }
             }
         }
-        
-        
+
+
         Sleep 300
         ControlSend Edit1, {Enter}, Select Script File.*
         ControlClick Button2, Select Script File.*, , Left, 3 ;Click button if Enter not working
-        
+
         ;This if statement fix a bug on some old computer
         If WinExist("Select Script File.*") {
             WinActivate Select Script File.*
@@ -297,16 +343,16 @@ install_firmware(fw, chk) {
             Sleep 100
             Click, 511, 365 Left, , Up
         }
-        
+
         ;BlockInput MouseMoveOff
         ;BlockInput Off
-        
+
         WinWaitClose Select Script File.*
-    
+
         WinWaitActive Please Wait.*
         addToProgressBar(10)
         SB_SetText("Waiting for process...")
-        
+
         Loop, 50
         {
             addToProgressBar(1)
@@ -315,7 +361,7 @@ install_firmware(fw, chk) {
             Sleep 1000
         }
         WinWaitClose Please Wait.*
-        
+
         Sleep 500
         WinActivate SAM-BA.*
         WinClose SAM-BA.*
@@ -323,7 +369,7 @@ install_firmware(fw, chk) {
         if (!isMTCAP)
             Send !i
         addToProgressBar(10)
-        
+
         SB_SetText("DONE!")
         GuiControl,, progress, 100
         If (chk = 1) {
@@ -343,6 +389,15 @@ install_firmware(fw, chk) {
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
+ProcessSettings() {
+    IfNotExist, %MainPropertiesFilePath%
+        FileAppend, %allFirmwarePropertiesJson%, %MainPropertiesFilePath%
+    Else
+        FileRead, jsonContents, %MainPropertiesFilePath%
+    
+    AllFirmwareProperties := JSON.Load(jsonContents)
+}
+
 addToProgressBar(number) {
     index := probarNum += number
     GuiControl,, progress, %index%
@@ -350,10 +405,10 @@ addToProgressBar(number) {
 
 addTipMsg(text, title, time) {
     SplashImage, C:\tempImg.gif, FS11, %text%, ,%title%
-    
+
     SetTimer, RemoveTipMsg, %time%
     return
-    
+
     RemoveTipMsg:
     SplashImage, Off
     return
@@ -364,7 +419,7 @@ searchUboot() {
     WinActivate COM.*
     CoordMode, Pixel, Window
     ImageSearch, FoundX, FoundY, 0, 0, 1920, 1080,*50 C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func\u-boot.BMP
-    If ErrorLevel 
+    If ErrorLevel
         return 0 ;Return false if not found
     If ErrorLevel = 0
         return 1 ;Return true if FOUND

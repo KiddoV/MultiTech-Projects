@@ -19,11 +19,15 @@ isStep1 = result
 strcompare whatStep 'STEP2'
 isStep2 = result
 
+skuNum = param3
+strcompare skuNum '94557585LF'
+is94557585LF = result
+
 :CONNECTING
+timeout = 60 ; connection timeout in seconds
 flushrecv
 sprintf2 msg 'CONNECTING TO TERATERM...(%d)' try
 statusbox msg 'TERATERM CONNECTION'
-timeout = 55 ; connection timeout in seconds
 mpause 1000
 connect "192.168.2.1:22 /ssh /2 /auth=password /user=admin /passwd=ThanksForFish42! /nosecuritywarning"
 if result < 2 then
@@ -52,6 +56,9 @@ statusbox 'RUNNING STEP 1' 'STEP 1'
 mpause 1000
 send 13
 wait '#'
+
+if is94557585LF=0 goto check_cell_connection
+
 timeout = 900
 flushrecv
 mpause 500
@@ -126,31 +133,95 @@ statusbox 'CELL CONNECTION IS OK' 'STEP 1'
 mpause 2000
 
 :ping_test
-sprintf2 msg 'RUNNING PING TEST...(%d)' try
-statusbox msg 'STEP 1'
-timeout = 8
-flushrecv
-send 13
-wait '#'
-sendln 'ping -c 5 mt-ping-test.dmz.rti-inc.com'
-wait 'icmp_seq=5'
-;;;echo icmp_seq=5
-if result=0 then
-    try=try+1
-    if try < 4 goto ping_test
-    sprintf2 errMsg 'PING TEST FAILED'
-	if try = 4 goto step1_failed
+if is94557585LF=0 then
+    :94557585LF_ping_test_1
+   	sprintf2 msg 'RUNNING PING TEST 1...(%d)' try
+	statusbox msg 'STEP 1'
+	timeout = 10
+	flushrecv
+	send 13
+	wait '#'
+	sendln 'ping -c 5 dmz.rti-inc.com'
+	wait 'icmp_seq=5'
+	if result=0 then
+	    try=try+1
+	    if try < 4 goto 94557585LF_ping_test_1
+	    sprintf2 errMsg 'PING TEST 1 FAILED'
+		if try = 4 goto step1_failed
+	endif
+	try = 1
+	statusbox 'PING TEST 1 PASSED' 'STEP 1'
+	mpause 2000
+	:94557585LF_ping_test_2
+   	sprintf2 msg 'RUNNING PING TEST 2...(%d)' try
+	statusbox msg 'STEP 1'
+	timeout = 10
+	flushrecv
+	send 13
+	wait '#'
+	sendln 'ping -c 5 corp.rti-inc.com'
+	wait 'icmp_seq=5'
+	if result=0 then
+	    try=try+1
+	    if try < 4 goto 94557585LF_ping_test_2
+	    sprintf2 errMsg 'PING TEST 2 FAILED'
+		if try = 4 goto step1_failed
+	endif
+	try = 1
+	statusbox 'PING TEST 2 PASSED' 'STEP 1'
+	mpause 2000	
+	:94557585LF_ping_test_3
+   	sprintf2 msg 'RUNNING PING TEST 3...(%d)' try
+	statusbox msg 'STEP 1'
+	timeout = 10
+	flushrecv
+	send 13
+	wait '#'
+	sendln 'ping -c 5 dmz.rti-inc.com'
+	wait 'icmp_seq=5'
+	if result=0 then
+	    try=try+1
+	    if try < 4 goto 94557585LF_ping_test_3
+	    sprintf2 errMsg 'PING TEST 3 FAILED'
+		if try = 4 goto step1_failed
+	endif
+	try = 1
+	statusbox 'PING TEST 2 PASSED' 'STEP 1'
+	mpause 2000		
+	
+	;;;Ping tests finished
+	statusbox 'STEP 1 IS FINISHED' 'STEP 1 DONE'
+	mpause 1500
+	
+	closett
+	end	
+else
+	sprintf2 msg 'RUNNING PING TEST...(%d)' try
+	statusbox msg 'STEP 1'
+	timeout = 10
+	flushrecv
+	send 13
+	wait '#'
+	sendln 'ping -c 5 mt-ping-test.dmz.rti-inc.com'
+	wait 'icmp_seq=5'
+	;;;echo icmp_seq=5
+	if result=0 then
+	    try=try+1
+	    if try < 4 goto ping_test
+	    sprintf2 errMsg 'PING TEST FAILED'
+		if try = 4 goto step1_failed
+	endif
+	try = 1
+	statusbox 'PING TEST PASSED' 'STEP 1'
+	mpause 2000
+	
+	statusbox 'STEP 1 IS FINISHED' 'STEP 1 DONE'
+	mpause 1500
+	
+	closett
+	end
 endif
-try = 1
-statusbox 'PING TEST PASSED' 'STEP 1'
-mpause 2000
-
-statusbox 'STEP 1 IS FINISHED' 'STEP 1 DONE'
-mpause 1500
-
-closett
-end
-;;;goto STEP2
+;;;goto STEP2	TTL get call again!. NO NEED for this
 
 :step1_failed
 closesbox
