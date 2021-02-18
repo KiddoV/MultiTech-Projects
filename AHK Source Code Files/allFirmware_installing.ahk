@@ -11,6 +11,7 @@ SetTitleMatchMode, RegEx
 
 ;;;Include the libraries
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\JSON.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\Class_LV_Rows.ahk
 
 ;;;;;;;;;;Installs Folder Location and Files;;;;;;;;;;
 IfNotExist C:\V-Projects\AFAuto-Installer\Imgs-for-Search-Func
@@ -88,7 +89,7 @@ Global AllFirmwareProperties := {}
 
 ;Application Directories
 Global SAM_BA := "C:\Program Files (x86)\Atmel\sam-ba_2.15\sam-ba.exe"
-Global MainPropertiesFilePath := "C:\V-Projects\AFAuto-Installer\properties.json"
+Global MainFwPropertiesFilePath := "C:\V-Projects\AFAuto-Installer\fw-properties.json"
 
 Global probarNum := 0
 
@@ -104,7 +105,7 @@ Menu MenuBar, Add, &File, :FileMenu     ;;Main menu
         Menu ProductsSubMenu, Add, MTCAP, mtcapHandler
     Menu OptionsMenu, Add, Products, :ProductsSubMenu
 Menu MenuBar, Add, &Options, :OptionsMenu     ;;Main menu
-    Menu EditMenu, Add, Change File Location, changeFileHandler
+    Menu EditMenu, Add, Firmware Collection, fwCollectionHandler
 Menu MenuBar, Add, &Edit, :EditMenu     ;;Main menu
 Menu HelpMenu, Add, Keyboard Shortcuts, keyShcutHandler
     Menu HelpMenu, Add, About, aboutHandler
@@ -118,10 +119,10 @@ Gui Font, Bold
 Gui Add, Text, x11 y4 w100 vproLabel, MTCDT
 Gui Font
 Gui Add, GroupBox, x8 y24 w186 h60 Section, Select Firmware Version
-For each, item in allMTCDTFirmwareProperties
+For each, item in AllFirmwareProperties.allMTCDTFirmwareProperties
     firmware .= (each == 1 ? "" : "|") . item.fwName
 Gui Add, DropDownList, x16 y50 w169 vfware Choose1, %firmware%
-For each, item in allMTCAPFirmwareProperties
+For each, item in AllFirmwareProperties.allMTCAPFirmwareProperties
     firmware2 .= (each == 1 ? "" : "|") . item.fwName
 Gui Add, DropDownList, x16 y50 w169 vmtcapFware +Hidden Choose1, %firmware2%
 Gui Add, CheckBox, x9 y90 h23 vcheck, % " Included Re-Program Step"
@@ -132,7 +133,8 @@ Gui Add, StatusBar,, Click button to start!
 Gui Font
 
 ;;;;;Functions to run BEFORE Gui started
-MsgBox % 
+OnMessage(0x100, "WM_KEYDOWN")
+;MsgBox % AllFirmwareProperties.allMTCDTFirmwareProperties[1].fwPath
 
 posX := A_ScreenWidth - 300
 Gui Show, w200 h195 x%posX% y300, All Firmware Auto-Installer
@@ -143,8 +145,11 @@ quitHandler:
 ExitApp
 Return
 
-changeFileHandler() {
-    MsgBox 0, Message, This feature will be added in the future release!
+fwCollectionHandler() {
+    IfWinExist, Firmware Collection
+        WinActivate, Firmware Collection
+    Else
+        OpenFirmwareCollection()
 }
 
 mtcdtHandler() {
@@ -178,11 +183,29 @@ aboutHandler() {
 
 GuiClose:
     ExitApp
+Return
+
+;;;;;;;;;;OnMessage Functions
+WM_KEYDOWN(lparam) {
+    ;;If user press Delete key (46) on a ListView
+    If (lparam == 46 && Instr(A_GuiControl, "LV")) {
+        Gui, fwCollect: Default
+        Gui, ListView, %A_GuiControl%
+        If (LvHandle.Delete())                  ; Deletes seleted rows.
+            LvHandle.Add()                      ; Add an entry in History if there are rows selected.
+    }
+}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;;;;;;;HOT KEYS;;;;;;;;
 ^q:: ExitApp
 ^r:: mainRun()
+^!c::
+    IfWinExist, ahk_id %FWCollectionGui%
+        WinActivate, ahk_id %FWCollectionGui%
+    Else
+        OpenFirmwareCollection()
+return
 ;;;;;;;;;;;;;;;;;;;;;;;;
 
 mainRun() {
@@ -296,10 +319,10 @@ install_firmware(fw, chk) {
         addToProgressBar(10)
 
         If (isMTCDT) {
-            Loop, % allMTCDTFirmwareProperties.Length()
+            Loop, % AllFirmwareProperties.allMTCDTFirmwareProperties.Length()
             {
-                If (fw == allMTCDTFirmwareProperties[A_Index].fwName) {
-                    fwPath := allMTCDTFirmwareProperties[A_Index].fwPath
+                If (fw == AllFirmwareProperties.allMTCDTFirmwareProperties[A_Index].fwName) {
+                    fwPath := AllFirmwareProperties.allMTCDTFirmwareProperties[A_Index].fwPath
                     If !FileExist(fwPath) {
                         MsgBox, 16, File Not Found, % "Could not located this file: `n<" fwPath " >`nPlease check if file is presented!"
                         GuiControl,, progress, 0
@@ -314,10 +337,10 @@ install_firmware(fw, chk) {
         }
 
         If (isMTCAP) {
-            Loop, % allMTCAPFirmwareProperties.Length()
+            Loop, % AllFirmwareProperties.allMTCAPFirmwareProperties.Length()
             {
-                If (fw == allMTCAPFirmwareProperties[A_Index].fwName) {
-                    fwPath := allMTCAPFirmwareProperties[A_Index].fwPath
+                If (fw == AllFirmwareProperties.allMTCAPFirmwareProperties[A_Index].fwName) {
+                    fwPath := AllFirmwareProperties.allMTCAPFirmwareProperties[A_Index].fwPath
                     If !FileExist(fwPath) {
                         MsgBox, 16, % "File Not Found, Could not located this file: `n<" fwPath " >`nPlease check if file is presented!"
                         GuiControl,, progress, 0
@@ -390,12 +413,16 @@ install_firmware(fw, chk) {
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;Additional Functions;;;;;;;;;;;;;;;;
 ProcessSettings() {
-    IfNotExist, %MainPropertiesFilePath%
-        FileAppend, %allFirmwarePropertiesJson%, %MainPropertiesFilePath%
+    IfNotExist, %MainFwPropertiesFilePath%
+    {
+        FileAppend, %allFirmwarePropertiesJson%, %MainFwPropertiesFilePath%
+        AllFirmwareProperties := JSON.Load(allFirmwarePropertiesJson)
+    } 
     Else
-        FileRead, jsonContents, %MainPropertiesFilePath%
-    
-    AllFirmwareProperties := JSON.Load(jsonContents)
+    {
+        FileRead, jsonContents, %MainFwPropertiesFilePath%
+        AllFirmwareProperties := JSON.Load(jsonContents)
+    }
 }
 
 addToProgressBar(number) {
@@ -456,4 +483,176 @@ PlayInCircleIcon() {
         hIcon := LoadPicture("shell32.dll", "w32 Icon138", _)
         SendMessage 0x172, 1, %hIcon%, Static1 ; STM_SETIMAGE
     }
+}
+
+;;=====================================================================================;;
+;;;;;;;;;;;;;Additional GUIs;;;;;;;;;;;;;;;;
+OpenFirmwareCollection() {
+    Global
+    ;;;GUI  ;;===============================;;
+    Gui, fwCollect: Default
+    Gui, fwCollect: +HwndFWCollectionGui
+    
+    Gui, fwCollect: Add, Tab3, Section w525 h340 vfwCollectTabCon, MTCDT|MTCAP
+    Gui, fwCollect: Tab, 1    ;;;;;
+        Gui, fwCollect: Add, ListView, h300 w500 vfwCollectLV1 hWndhfwCollectLV1 gOnLVEvents +Grid, #|Firmware Version|TCL File Path
+    Gui, fwCollect: Tab, 2    ;;;;;
+        Gui, fwCollect: Add, ListView, h300 w500 vfwCollectLV2 hWndhfwCollectLV2 gOnLVEvents +Grid, #|Firmware Version|TCL File Path
+    Gui, fwCollect: Tab
+    
+    Gui, fwCollect: Add, GroupBox, xm+0 h95 w525 Section,
+    Gui, fwCollect: Add, Text, xs+10 ys+15, Firmware Version:
+    Gui, fwCollect: Add, Edit, xs+100 ys+12 vinFwVers,
+    Gui, fwCollect: Add, Text, xs+230 ys+15, (Please follow the DEFAULT format)
+    Gui, fwCollect: Add, Text, xs+10 ys+40, TCL File Path:
+    Gui, fwCollect: Add, Edit, xs+100 ys+37 w355 vinTclFPath,
+    Gui, fwCollect: Add, Button, xs+460 ys+36 gBrowseFWFile, Browse...
+    Gui, fwCollect: Add, Button, xs+425 ys+65 gAddToCollection, Add to Collection
+    
+    Gui, fwCollect: Add, Button, xs+170 ys+100 h30 gSaveCollection, SAVE COLLECTION
+    Gui, fwCollect: Add, Button, xs+290 ys+100 h30 gCancelSaveCollection, CANCEL
+    
+    ;;;;;RUN before GUI started
+    OpenFirmwareCollection_AddDataToLV()
+    
+    LvRowHandle := New LV_Rows(hfwCollectLV1, hfwCollectLV2)
+    ; Set initial history state for both lists
+    LvRowHandle.SetHwnd(hfwCollectLV1)
+    LvRowHandle.Add()
+    LvRowHandle.SetHwnd(hfwCollectLV2)
+    LvRowHandle.Add()
+    
+    Gui, fwCollect: Show, , Firmware Collection
+    Return  ;;===============================;;
+    
+    fwCollectGuiClose:
+        Gui, fwCollect: Destroy
+    Return
+    
+    ;;=======================================;;
+    BrowseFWFile:
+        FileSelectFile, tclFileSelected, 3, C:\vbtest, Select a TCL File, Documents (*.tcl)
+        if (tclFileSelected != "")
+            GuiControl, Text, inTclFPath, %tclFileSelected%
+    Return  ;;;;;;;;;;;;
+    
+    AddToCollection:
+        GuiControlGet, inputFwName, , inFwVers
+        GuiControlGet, inputFwPath, , inTclFPath
+        GuiControlGet, whichTab, , fwCollectTabCon
+        
+        If (inputFwName == "" || inputFwPath == "") {
+            MsgBox, 16, ERROR, Please input values!
+            Return
+        } Else {
+            If (RegExMatch(inputFwPath, "i)^(?:[\w]\:|\\)(\\[a-z_\-\s0-9\.]+)+\.(tcl)$") = 0) {
+                MsgBox, 16, ERROR, Invalid value for TCL file path!!!!
+                Return
+            } Else {
+                If (whichTab == "MTCDT") {
+                    Gui, fwCollect: ListView, fwCollectLV1     ; Specify which listview will be updated with LV commands               
+                    LV_Add("AutoHdr", LV_GetCount() + 1, inputFwName, inputFwPath)
+                    SendMessage, 0x115, 7,,, ahk_id %hfwCollectLV1%  ;WM_VSCROLL | Auto scroll to bottom
+                } Else If (whichTab == "MTCAP") {
+                    Gui, fwCollect: ListView, fwCollectLV2     ; Specify which listview will be updated with LV commands               
+                    LV_Add("AutoHdr", LV_GetCount() + 1, inputFwName, inputFwPath)
+                    SendMessage, 0x115, 7,,, ahk_id %hfwCollectLV2%  ;WM_VSCROLL | Auto scroll to bottom
+                }
+            }
+        }
+    Return  ;;;;;;;;;;;;
+    
+    CancelSaveCollection:
+        MsgBox, % 64 + 4, Cancel, All changes will not be save!`nAre you sure you want to quit this window?
+        IfMsgBox Yes
+            Gui, fwCollect: Destroy
+        IfMsgBox No
+            Return           
+    Return  ;;;;;;;;;;;;
+    
+    SaveCollection:
+        MsgBox, % 49 + 8192, Confirmation, This action will override all existing items in the collection!`nAre you sure you want to proceed?
+        IfMsgBox OK
+        {
+            AllFirmwareProperties := {}     ;;Empty the firmware main object
+            
+            listOfLV := "fwCollectLV1|fwCollectLV2"     ;;Make a loop for multiple LV
+            Loop, Parse, listOfLV, |
+            {
+                listviewIndex := A_Index
+                lvControlName := A_LoopField
+                
+                Gui, fwCollect: ListView, %lvControlName%     ; Specify which listview will be updated with LV commands
+                ;;Create new collection
+                Loop, % LV_GetCount()
+                {
+                    rowNumber := A_Index
+                    Loop, % LV_GetCount("Column")
+                    {
+                        colNumber := A_Index
+                        if (colNumber == 2)
+                            LV_GetText(fwVers, rowNumber, colNumber)
+                        if (colNumber == 3)
+                            LV_GetText(tclPath, rowNumber, colNumber)
+                        if (colNumber == LV_GetCount("Column")) {   ;;End of column
+                            if (listviewIndex == 1)
+                                AllFirmwareProperties.allMTCDTFirmwareProperties[rowNumber] := {fwName: fwVers, fwPath: tclPath}
+                            if (listviewIndex == 2)
+                                AllFirmwareProperties.allMTCAPFirmwareProperties[rowNumber] := {fwName: fwVers, fwPath: tclPath}
+                        }
+                    }
+                }                
+            }
+            
+            newJsonStr := JSON.Dump(AllFirmwareProperties)
+            filehandle := FileOpen(MainFwPropertiesFilePath, "w")
+            If !IsObject(filehandle) {
+                MsgBox, 16, ERROR, Could not open <%MainFwPropertiesFilePath%> for writing!!
+                Return
+            }
+            filehandle.Write(newJsonStr)
+            filehandle.Close()
+            
+            firmware1 := "", firmware2 := ""    ;;Reset each time
+            ;;Change dropdown appearance
+            For each, item in AllFirmwareProperties.allMTCDTFirmwareProperties
+                firmware1 .= (each == 1 ? "|" : "|") . item.fwName
+            GuiControl, 1:, fware, %firmware1%
+            GuiControl, 1: Choose, fware, 1
+            
+            For each, item in AllFirmwareProperties.allMTCAPFirmwareProperties
+                firmware2 .= (each == 1 ? "|" : "|") . item.fwName
+            GuiControl, 1:, mtcapFware, %firmware2%
+            GuiControl, 1: Choose, mtcapFware, 1
+            
+            Gui, fwCollect: Destroy
+        }
+        IfMsgBox Cancel
+            Return
+    Return  ;;;;;;;;;;;;
+    
+    OnLVEvents:
+        Gui, fwCollect: ListView, %A_GuiControl%     ; Set selected ListView as Default.
+        LvRowHandle.SetHwnd(h%A_GuiControl%) ; Select active hwnd in Handle.
+        ActiveList := A_GuiControl
+        ;MsgBox % A_GuiControl ", " A_GuiControlEvent ", " A_GuiEvent     
+    Return  ;;;;;;;;;;;;
+}
+
+OpenFirmwareCollection_AddDataToLV() {
+    Gui, fwCollect: ListView, fwCollectLV1     ; Specify which listview will be updated with LV commands 
+    Loop, % AllFirmwareProperties.allMTCDTFirmwareProperties.Length()
+    {
+        LV_Add("", A_Index, AllFirmwareProperties.allMTCDTFirmwareProperties[A_Index].fwName, AllFirmwareProperties.allMTCDTFirmwareProperties[A_Index].fwPath)
+    }
+    Loop, % LV_GetCount("Column")
+        LV_ModifyCol(A_Index, "AutoHdr")
+    
+    Gui, fwCollect: ListView, fwCollectLV2     ; Specify which listview will be updated with LV commands
+    Loop, % AllFirmwareProperties.allMTCAPFirmwareProperties.Length()
+    {
+        LV_Add("", A_Index, AllFirmwareProperties.allMTCAPFirmwareProperties[A_Index].fwName, AllFirmwareProperties.allMTCAPFirmwareProperties[A_Index].fwPath)
+    }
+    Loop, % LV_GetCount("Column")
+        LV_ModifyCol(A_Index, "AutoHdr")
 }
