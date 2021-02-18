@@ -9,15 +9,7 @@ $(document).ready(function() {
     $.tab('change tab', whichTab);
   }
 
-  // Init Overlay Scrollbar
-  // $(".scrolling.content").overlayScrollbars({
-  //   scrollbars : {
-  //     autoHide: "move",
-  //   },
-  // });
-  $(".test").niceScroll({
-    cursorcolor: "#424242", // change cursor color in hex
-  });
+
 });
 
 $(function() {
@@ -32,10 +24,22 @@ $(function() {
 });
 
 $(function() {
+  var scrollbar
   $("#app-settings-btn").on("click", function() {
     $("#app-settings-modal").modal({
       centered: false,
       transition: "slide down",
+      onVisible: function() {
+        // Init Overlay Scrollbar
+        scrollbar = $(".scrolling.content").overlayScrollbars({
+          scrollbars : {
+            autoHide: "move",
+          },
+        }).overlayScrollbars();
+      },
+      onHidden: function() {
+        scrollbar.destroy();
+      },
     }).modal("show");
   });
 });

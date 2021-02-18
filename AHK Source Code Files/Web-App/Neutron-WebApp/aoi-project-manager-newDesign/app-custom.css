@@ -38,6 +38,9 @@ footer {
   max-height: 20px;
   color: white;
 }
+body{
+	-ms-overflow-style: none;		/* Hide the scrollbar */
+}
 
 #title-label {
 	font-weight: bold;
