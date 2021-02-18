@@ -10,12 +10,14 @@ $(document).ready(function() {
   }
 
   // Init Overlay Scrollbar
-  $(".scrolling.content").overlayScrollbars({
-    scrollbars : {
-      autoHide: "move",
-    },
+  // $(".scrolling.content").overlayScrollbars({
+  //   scrollbars : {
+  //     autoHide: "move",
+  //   },
+  // });
+  $(".test").niceScroll({
+    cursorcolor: "#424242", // change cursor color in hex
   });
-
 });
 
 $(function() {
