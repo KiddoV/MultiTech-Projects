@@ -95,6 +95,7 @@ Global probarNum := 0
 
 Global JSON := new JSON()
 
+Global LvRowHandle := {}        ;;;Instance for Class_LV_Rows.ahk
 ;;;;;;;;;;;;;;;;;;;;;GUI;;;;;;;;;;;;;;;;;;;;;;;;;
 ProcessSettings()       ;;;Must run before GUI
 
@@ -189,10 +190,22 @@ Return
 WM_KEYDOWN(lparam) {
     ;;If user press Delete key (46) on a ListView
     If (lparam == 46 && Instr(A_GuiControl, "LV")) {
-        Gui, fwCollect: Default
         Gui, ListView, %A_GuiControl%
-        If (LvHandle.Delete())                  ; Deletes seleted rows.
-            LvHandle.Add()                      ; Add an entry in History if there are rows selected.
+        LvRowHandle.SetHwnd(h%A_GuiControl%)
+        If (LvRowHandle.Delete())                  ; Deletes seleted rows.
+            LvRowHandle.Add()                      ; Add an entry in History if there are rows selected.
+    }
+    
+    If (lparam == 17) {     ;If user press Ctrl key (17)
+        While, % GetKeyState("Control")     ;While user still hoding Ctrl
+        {
+            If (GetKeyState("Z")) {     ;Wait for user to press Z
+                If (Instr(A_GuiControl, "LV")) {
+                    Gui, ListView, %A_GuiControl%                  
+                    LvRowHandle.Undo()                   ; Go to previous History entry.          
+                }
+            }
+        }
     }
 }
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -591,14 +604,14 @@ OpenFirmwareCollection() {
                     {
                         colNumber := A_Index
                         if (colNumber == 2)
-                            LV_GetText(fwVers, rowNumber, colNumber)
+                            LV_GetText(outFwVers, rowNumber, colNumber)
                         if (colNumber == 3)
-                            LV_GetText(tclPath, rowNumber, colNumber)
+                            LV_GetText(outTclPath, rowNumber, colNumber)
                         if (colNumber == LV_GetCount("Column")) {   ;;End of column
                             if (listviewIndex == 1)
-                                AllFirmwareProperties.allMTCDTFirmwareProperties[rowNumber] := {fwName: fwVers, fwPath: tclPath}
+                                AllFirmwareProperties.allMTCDTFirmwareProperties[rowNumber] := {fwName: outFwVers, fwPath: outTclPath}
                             if (listviewIndex == 2)
-                                AllFirmwareProperties.allMTCAPFirmwareProperties[rowNumber] := {fwName: fwVers, fwPath: tclPath}
+                                AllFirmwareProperties.allMTCAPFirmwareProperties[rowNumber] := {fwName: outFwVers, fwPath: outTclPath}
                         }
                     }
                 }                
@@ -634,8 +647,79 @@ OpenFirmwareCollection() {
     OnLVEvents:
         Gui, fwCollect: ListView, %A_GuiControl%     ; Set selected ListView as Default.
         LvRowHandle.SetHwnd(h%A_GuiControl%) ; Select active hwnd in Handle.
-        ActiveList := A_GuiControl
+        activeList := A_GuiControl
+        If (A_GuiControlEvent == "DoubleClick") {   ;;When user double click!
+            Gui, lvEditor: Destroy
+            rowNumber := LV_GetNext()
+            Loop, % LV_GetCount("Column")
+            {
+                LV_GetText((A_Index == 1) ? outFwIndex : Continue, rowNumber, A_Index)
+                LV_GetText((A_Index == 2) ? outFwName : Continue, rowNumber, A_Index)
+                LV_GetText((A_Index == 3) ? outFwPath : Continue, rowNumber, A_Index)
+            }
+            lvProperties := [rowNumber, activeList]
+            lvItems := [outFwIndex, outFwName, outFwPath]
+            OpenLVEditor(lvProperties, lvItems)
+        }
         ;MsgBox % A_GuiControl ", " A_GuiControlEvent ", " A_GuiEvent     
+    Return  ;;;;;;;;;;;;
+}
+
+OpenLVEditor(lvProperties, lvItems) {
+    Global
+    lvRowNumber := lvProperties[1]
+    lvActiveList := lvProperties[2]
+    lvItemNumber := lvItems[1]
+    
+    ;;;GUI  ;;===============================;;
+    Gui, lvEditor: Default 
+    Gui, lvEditor: +ToolWindow +AlwaysOnTop +hWndLVEditor
+    Gui, lvEditor: Add, GroupBox, x5 y0 w450 h70 Section,
+    Gui, lvEditor: Add, Text, xs+10 ys+15, Firmware Version:
+    Gui, lvEditor: Add, Edit, xs+100 ys+12 w150 vinFwVersEdit, % lvItems[2]
+    Gui, lvEditor: Add, Text, xs+10 ys+45, TCL File Path:
+    Gui, lvEditor: Add, Edit, xs+100 ys+42 w150 w280 r1 vinTclFPathEdit, % lvItems[3]
+    GUi, lvEditor: Add, Button, xs+385 ys+41 gBrowseFWFileEdit, Browse...
+    
+    Gui, lvEditor: Add, Button, xs+160 ys+75 w70 h25 gSaveEdit, Save
+    Gui, lvEditor: Add, Button, xs+240 ys+75 w70 h25 gCancelEdit, Cancel
+    
+    CoordMode, Mouse, Screen
+    MouseGetPos, mPosX, mPosY   ;;Get mouse pos
+    mPosX += 15, mPosY += 10
+    Gui, lvEditor: Show, x%mPosX% y%mPosY%, % "LV Editor - (Item Number: " . lvItemNumber . ")"
+    Return  ;;===============================;;
+    
+    CancelEdit:
+    lvEditorGuiEscape:
+    lvEditorGuiClose:
+        Gui, lvEditor: Destroy
+    Return
+    ;;===================================================;;
+    BrowseFWFileEdit:
+        FileSelectFile, tclFileSelected, 3, C:\vbtest, Select a TCL File, Documents (*.tcl)
+        if (tclFileSelected != "")
+            GuiControl, Text, inTclFPathEdit, %tclFileSelected%
+    Return  ;;;;;;;;;;;;
+    
+    SaveEdit:
+        GuiControlGet, inputFwName, , inFwVersEdit
+        GuiControlGet, inputFwPath, , inTclFPathEdit
+        
+        If (inputFwName == "" || inputFwPath == "") {
+            MsgBox, % 16 + 4096, ERROR, Please input values!
+            Return
+        } Else {
+            If (RegExMatch(inputFwPath, "i)^(?:[\w]\:|\\)(\\[a-z_\-\s0-9\.]+)+\.(tcl)$") = 0) {
+                MsgBox, % 16 + 4096, ERROR, Invalid value for TCL file path!!!!
+                Return
+            } Else {
+                Gui, fwCollect: Default
+                Gui, fwCollect: ListView, %lvActiveList%     ; Specify which listview will be updated with LV commands
+                LV_Modify(lvRowNumber, "AutoHdr", lvItemNumber, inputFwName, inputFwPath)
+                Gui, lvEditor: Destroy
+            }
+        }
     Return  ;;;;;;;;;;;;
 }
 

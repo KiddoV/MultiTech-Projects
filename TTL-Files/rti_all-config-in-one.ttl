@@ -137,12 +137,12 @@ if is94557585LF=0 then
     :94557585LF_ping_test_1
    	sprintf2 msg 'RUNNING PING TEST 1...(%d)' try
 	statusbox msg 'STEP 1'
-	timeout = 10
+	timeout = 40
 	flushrecv
 	send 13
 	wait '#'
 	sendln 'ping -c 5 dmz.rti-inc.com'
-	wait 'icmp_seq=5'
+	wait '5 received'
 	if result=0 then
 	    try=try+1
 	    if try < 4 goto 94557585LF_ping_test_1
@@ -155,12 +155,12 @@ if is94557585LF=0 then
 	:94557585LF_ping_test_2
    	sprintf2 msg 'RUNNING PING TEST 2...(%d)' try
 	statusbox msg 'STEP 1'
-	timeout = 10
+	timeout = 40
 	flushrecv
 	send 13
 	wait '#'
 	sendln 'ping -c 5 corp.rti-inc.com'
-	wait 'icmp_seq=5'
+	wait '5 received'
 	if result=0 then
 	    try=try+1
 	    if try < 4 goto 94557585LF_ping_test_2
@@ -173,12 +173,12 @@ if is94557585LF=0 then
 	:94557585LF_ping_test_3
    	sprintf2 msg 'RUNNING PING TEST 3...(%d)' try
 	statusbox msg 'STEP 1'
-	timeout = 10
+	timeout = 40
 	flushrecv
 	send 13
 	wait '#'
 	sendln 'ping -c 5 dmz.rti-inc.com'
-	wait 'icmp_seq=5'
+	wait '5 received'
 	if result=0 then
 	    try=try+1
 	    if try < 4 goto 94557585LF_ping_test_3
@@ -233,6 +233,7 @@ end
 
 ;;;;;;;;;;;;;;STEP 2
 :STEP2
+timeout = 20
 statusbox 'RUNNING STEP 2' 'STEP 2'
 mpause 1000
 loraUname = 'mtcdt_'
@@ -253,7 +254,11 @@ mpause 4000
 
 statusbox 'SETTING DEVICE HOST NAME...' 'STEP 2'
 sendln 'get-eeprom-device-info'
-waitregex 'device-id'
+waitregex 'device-id' 'command not found'
+if result = 0 || result = 2 then
+   sendln 'mts-id-eeprom --in-file /sys/bus/i2c/devices/0-0056/eeprom'
+   waitregex 'device-id'
+endif
 strmatch inputstr '[\d+]{8}'
 deviceId = matchstr
 strconcat loraUname deviceId

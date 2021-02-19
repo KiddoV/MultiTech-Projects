@@ -117,6 +117,7 @@ CloseCertErrorHelper:
     }
 Return
 
+~^q::
 GuiClose:
     ExitApp
 Return
@@ -165,7 +166,7 @@ RunAll() {
         totalTimeInMin := Round((endTime / 1000) / 60)
         
         OnMessage(0x44, "CheckIcon") ;Add icon
-        MsgBox 0x81, FINISHED, Finished auto-final configuration for RTI`nTotal time ran from STEP 0 => STEP 2: %totalTimeInMin% (minutes).
+        MsgBox 0x80, FINISHED, Finished auto-final configuration for RTI`nTotal time ran from STEP 0 => STEP 2 -- %totalTimeInMin% (minutes).
         OnMessage(0x44, "") ;Clear icon
     }
     IfMsgBox Cancel
@@ -269,7 +270,7 @@ RunStep1and2() {
             totalTimeInMin := Round((endTime / 1000) / 60)
             
             OnMessage(0x44, "CheckIcon") ;Add icon
-            MsgBox 0x81, STEP 1&2, STEP 1 & 2 are DONE!!`nTotal time ran from STEP 1 => STEP 2: %totalTimeInMin% (minutes)
+            MsgBox 0x80, STEP 1&2, STEP 1 & 2 are DONE!!`nTotal time ran from STEP 1 => STEP 2 -- %totalTimeInMin% (minutes)
             OnMessage(0x44, "") ;Clear icon
                 
         } else {
@@ -283,6 +284,10 @@ RunStep1and2() {
 
 ;;;;;;;;;;;;;
 step0(sku) {
+    If (sku == "94557585LF") {
+        step0ErrMsg := "Commissioning Step is currently not working on <94557585LF> part`nPlease use the old method way!!"
+        return 0
+    }
     changeStepLabelStatus("step0Label", "PLAY")
     Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
     RunWait, Taskkill /f /im iexplore.exe, , Hide   ;Fix bug where IE open many times
@@ -293,14 +298,15 @@ step0(sku) {
     Sleep 1000
     SetTimer, CloseSSLHelper, 100
     Progress, ZH0 M FS10, CHECKING FOR CONNECTION..., , STEP 0
+    ;;url := "https://192.168.2.1/commissioning"
     url := "https://192.168.2.1/api/commissioning"
-    req.open("GET", url, True)
+    req.Open("GET", url, True)
     req.Send()
     Loop, 50
     {
         Sleep 1000
         if (A_Index = 50) {
-            step0ErrMsg = Failed to connect to <https://192.168.2.1/commissioning>`nERR: TIMEOUT!!!
+            step0ErrMsg = Failed to connect to <%url%>`nERR: TIMEOUT!!!
             return 0
         } else if (req.readyState = 4){
             Break
@@ -315,7 +321,10 @@ step0(sku) {
     } else if (resObj.error = "commissioning is finished") {
         Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
         Sleep 1000
-        Goto Login-Step 
+        Goto Login-Step
+    } else if (resObj.status == "") {
+        step0ErrMsg = Got empty RESPONSE from the server!!!
+        return 0
     } else {
         Progress, ZH0 M FS10 CTde1212, BYPASS SECURITY FALIED!, , STEP 0
         return 0
@@ -405,15 +414,16 @@ step0(sku) {
     Sleep 2000
     
     ;;;Upload file STEP
-    Progress, ZH0 M FS10, UPLOADING CONFIGURATION FILE..., , STEP 0
-    Sleep 1000
-    
     url:= "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%"
     if (sku == "94557700LF")
         configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_4G_PRD_1_0_3_MTCDT-LAT3-240A_5_1_2_12_20_19.tar.gz"
     else if (sku == "94557585LF")
         configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz"
-        
+    
+    SplitPath, configPath, configFileName
+    Progress, ZH0 M FS10, UPLOADING CONFIGURATION FILE...`nUsing: %configFileName%, , STEP 0
+    Sleep 2000
+    
     objParam := { Filedata: [configPath] }
     CreateFormData(PostData, hdr_ContentType, objParam)     ;Create a form data to send file to the server
     req.Open("POST", url, False)
