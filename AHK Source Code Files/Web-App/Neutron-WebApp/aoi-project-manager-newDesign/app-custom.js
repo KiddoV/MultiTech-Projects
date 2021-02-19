@@ -9,7 +9,9 @@ $(document).ready(function() {
     $.tab('change tab', whichTab);
   }
 
-
+  $(".test").overlayScrollbars({
+    className: "os-theme-block-dark",
+  });
 });
 
 $(function() {
@@ -24,21 +26,22 @@ $(function() {
 });
 
 $(function() {
-  var scrollbar
+  let scrollbarIns
   $("#app-settings-btn").on("click", function() {
     $("#app-settings-modal").modal({
       centered: false,
       transition: "slide down",
       onVisible: function() {
         // Init Overlay Scrollbar
-        scrollbar = $(".scrolling.content").overlayScrollbars({
+        scrollbarIns = $(".scrolling.content").overlayScrollbars({
+          className: "os-theme-block-dark",
           scrollbars : {
             autoHide: "move",
           },
         }).overlayScrollbars();
       },
       onHidden: function() {
-        scrollbar.destroy();
+        scrollbarIns.destroy();
       },
     }).modal("show");
   });
