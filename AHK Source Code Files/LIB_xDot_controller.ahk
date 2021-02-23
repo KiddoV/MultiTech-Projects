@@ -450,9 +450,7 @@ writeAll() {
         totalTimeInMin := (endTime / 1000) / 60
         
         FormatTime, timeNow, , hh:mm:ss tt (MM/dd/yyyy)
-        OnMessage(0x44, "CheckIcon") ;Add icon
-        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nNOTED: Please fix all failure XDots before labelling!"
-        OnMessage(0x44, "") ;Clear icon
+        MsgBox, 64, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nNOTED: Please fix all failure XDots before labelling!"
     }
     IfMsgBox Cancel
         return
@@ -640,9 +638,7 @@ writeEcoLab() {
         totalTimeInMin := (endTime / 1000) / 60
         
         FormatTime, timeNow, , hh:mm:ss tt (MM/dd/yyyy)
-        OnMessage(0x44, "CheckIcon") ;Add icon
-        MsgBox 0x80, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nNOTED: Please fix all failure XDots before labelling!"
-        OnMessage(0x44, "") ;Clear icon
+        MsgBox, 64, Write EUI Finished, % "You just finished writing EUI at: " timeNow "`nTotal time ran: " Round(totalTimeInMin, 2) " (minutes)`nNOTED: Please fix all failure XDots before labelling!"
     }
     
     IfMsgBox Cancel

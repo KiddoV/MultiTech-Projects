@@ -19,6 +19,7 @@ strsplit param2 ','		;Get all datas by 1 param
 writeFirmwareVers = groupmatchstr8
 isSkipWriteFw = 0
 
+firmwareVers = ''
 strcompare writeFirmwareVers 'v3.2.1'
 if result=0 firmwareVers = 'Firmware : 3.2.1-mbed51101'
 strcompare writeFirmwareVers 'v3.1.0'
@@ -256,6 +257,10 @@ endif
 
 :recheck_write_input
 flushrecv
+;;;Fix bug where Teraterm is not sending 'at+freq' at all
+mpause 500
+sendln 'at'
+wait 'OK'
 ;mpause 500
 ;sendln 'at+freq'
 ;waitregex '[A-Z]+([0-9]{3})'

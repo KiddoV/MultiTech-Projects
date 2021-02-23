@@ -661,8 +661,26 @@ OpenFirmwareCollection() {
             lvItems := [outFwIndex, outFwName, outFwPath]
             OpenLVEditor(lvProperties, lvItems)
         }
+        ; Detect Drag event.
+        If (A_GuiControlEvent = "D")
+        {
+            Dragging := True
+            CtrlDrag := GetKeyState("Ctrl", "P")
+            TargetRow := LvRowHandle.Drag(A_GuiEvent,,,,, !CtrlDrag) ; Call Drag function.
+            If (GetKeyState("Ctrl", "P"))          ; Control-Drag = copy
+                GoSub, CopySelection
+            Else If (A_GuiEvent == "d")            ; Right-click drag
+                Menu, MoveCopyMenu, Show
+            LvRowHandle.Add()                         ; Add an entry in History.
+            Dragging := False
+        }
         ;MsgBox % A_GuiControl ", " A_GuiControlEvent ", " A_GuiEvent     
     Return  ;;;;;;;;;;;;
+    
+    CopySelection:
+        LV_Rows.Copy()
+        LV_Rows.Paste(TargetRow)
+    Return
 }
 
 OpenLVEditor(lvProperties, lvItems) {
