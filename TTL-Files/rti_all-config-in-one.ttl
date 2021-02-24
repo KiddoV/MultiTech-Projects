@@ -142,8 +142,8 @@ if is94557585LF=0 then
 	send 13
 	wait '#'
 	sendln 'ping -c 5 dmz.rti-inc.com'
-	wait '5 received'
-	if result=0 then
+	wait '5 received' '#'
+	if result=0 || result=2 then
 	    try=try+1
 	    if try < 4 goto 94557585LF_ping_test_1
 	    sprintf2 errMsg 'PING TEST 1 FAILED'
@@ -160,8 +160,8 @@ if is94557585LF=0 then
 	send 13
 	wait '#'
 	sendln 'ping -c 5 corp.rti-inc.com'
-	wait '5 received'
-	if result=0 then
+	wait '5 received' '#'
+	if result=0 || result=2 then
 	    try=try+1
 	    if try < 4 goto 94557585LF_ping_test_2
 	    sprintf2 errMsg 'PING TEST 2 FAILED'
@@ -178,8 +178,8 @@ if is94557585LF=0 then
 	send 13
 	wait '#'
 	sendln 'ping -c 5 dmz.rti-inc.com'
-	wait '5 received'
-	if result=0 then
+	wait '5 received' '#'
+	if result=0 || result=2 then
 	    try=try+1
 	    if try < 4 goto 94557585LF_ping_test_3
 	    sprintf2 errMsg 'PING TEST 3 FAILED'

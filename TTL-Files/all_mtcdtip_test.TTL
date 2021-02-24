@@ -172,8 +172,19 @@ mpause 1000
 
 :DRIVE_TEST
 timeout = 5
+statusbox 'CHECKING THUMB DRIVE/ SD CARD...' 'THUMB DRIVE/ SD CARD CHECK'
+:check_thumb_drive
+flushrecv
+sendln 'df'
+wait '/dev/sda1' '/dev/sdb1'
+if result=0 then
+  beep
+  messagebox 'THUMB DRIVE NOT DETECTED' 'THUMB DRIVE FAILURE'
+  disconnect
+  closett
+  end
+endif
 :check_sd_card
-statusbox 'CHECKING SD CARD...' 'SD CARD CHECK'
 mpause 300
 send 13
 sendln 'fdisk -l'
@@ -227,7 +238,41 @@ endif
 mpause 1000
 sendln 'rm /media/card/bash'
 wait "#"
-statusbox 'SD CARD CHECK PASSED' 'SD CARD PASSED'
+;statusbox 'SD CARD CHECK PASSED' 'SD CARD PASSED'
+;mpause 1000
+:read_write_thumbdrive_test
+flushrecv
+usbdrive=''
+pause 1
+sendln "df |grep sd |awk '{print $1}'"
+waitln '/dev'
+strconcat usbdrive inputstr
+strremove usbdrive 1 5
+mpause 1
+sendln 'cp /bin/bash /media/'usbdrive
+wait "#"
+flushrecv
+sendln 'ls /media/'usbdrive'
+mpause 500
+sendln "md5sum /bin/bash |awk '{print $1}'"
+strconcat cksum3 inputstr
+wait '#'
+sendln "md5sum /media/"usbdrive"/bash |awk '{print $1}'"
+strconcat cksum4 inputstr
+pause 1
+strcompare cksum3 cksum4
+if result<>0 then
+    messagebox 'THUMB DRIVE READ-WRITE TEST FAILURE' 'THUMB DRIVE FAILURE'
+	disconnect
+    closett
+    end
+endif
+flushrecv
+mpause 500
+sendln 'rm /media/'usbdrive'/bash'
+statusbox 'THUMB DRIVE AND SD CARD PASSED' 'THUMB/ SD PASSED'
+mpause 500
+closesbox
 mpause 1000
 
 :LORA_TEST

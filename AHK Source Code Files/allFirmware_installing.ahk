@@ -371,7 +371,7 @@ install_firmware(fw, chk) {
         Sleep 300
         ControlSend Edit1, {Enter}, Select Script File.*
         ControlClick Button2, Select Script File.*, , Left, 3 ;Click button if Enter not working
-
+        
         ;This if statement fix a bug on some old computer
         If WinExist("Select Script File.*") {
             WinActivate Select Script File.*

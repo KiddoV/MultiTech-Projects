@@ -47,6 +47,7 @@ Global step2ErrMsg := "UnKnown ERROR!!?"
 ;;;;;;;;;;;;;;;;;;;Libraries;;;;;;;;;;;;;;;;;;;;;
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\JSON_ToObj.ahk
 #Include C:\MultiTech-Projects\AHK Source Code Files\lib\CreateFormData.ahk
+#Include C:\MultiTech-Projects\AHK Source Code Files\lib\Chrome.ahk
 ;===============================================;
 ;;;;;;;;;;;;;;;;;;;;;MAIN GUI;;;;;;;;;;;;;;;;;;;;
 Gui, Font, Bold
@@ -285,8 +286,7 @@ RunStep1and2() {
 ;;;;;;;;;;;;;
 step0(sku) {
     If (sku == "94557585LF") {
-        step0ErrMsg := "Commissioning Step is currently not working on <94557585LF> part`nPlease use the old method way!!"
-        return 0
+        return step0Chrome()
     }
     changeStepLabelStatus("step0Label", "PLAY")
     Progress, ZH0 M FS10, RUNNING COMMISSIONING`, PLEASE WAIT......., , STEP 0
@@ -421,7 +421,7 @@ step0(sku) {
         configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz"
     
     SplitPath, configPath, configFileName
-    Progress, ZH0 M FS10, UPLOADING CONFIGURATION FILE...`nUsing: %configFileName%, , STEP 0
+    Progress, ZH0 M FS10 W400, UPLOADING CONFIGURATION FILE...`nUsing: %configFileName%, , STEP 0
     Sleep 2000
     
     objParam := { Filedata: [configPath] }
@@ -479,6 +479,228 @@ step2(sku) {
         changeStepLabelStatus("step2Label", "DONE")
         return 1
     }
+}
+
+step0Chrome() {
+    changeStepLabelStatus("step0Label", "PLAY")
+    Progress, ZH0 M FS10, RUNNING COMMISSIONING ON CHROME`, PLEASE WAIT......., , STEP 0
+
+    FileCreateDir, ChromeProfile
+    ChromeInst := new Chrome("ChromeProfile", , "--ignore-certificate-errors")
+    If (!PageInstance := ChromeInst.GetPage()) {
+        step0ErrMsg = Failed to get chrome page instance!
+        return 0
+    }
+    
+    PageInstance.Call("Page.navigate", {"url": "https://192.168.2.1/commissioning"})
+    PageInstance.WaitForLoad()
+    
+    ;;;Checking for connection
+    js =
+    (
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        window.responseJson = this.responseText;
+      }
+    });
+    xhr.open("POST", "https://192.168.2.1/api/commissioning");
+    xhr.send();
+    )
+    PageInstance.Evaluate(js)
+    resObj := json_toobj(PageInstance.Evaluate("window.responseJson").value)
+
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SUCCESSFULY CONNECTING TO CHOME, , STEP 0
+        Sleep 1000
+    } else if (resObj.error = "commissioning is finished") {
+        Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
+        Sleep 1000
+        Goto Login-Step-Chrome
+    } else if (resObj.status == "") {
+        step0ErrMsg = Got empty RESPONSE from the server!!!
+        return 0
+    } else {
+        step0ErrMsg = Failed to connecting to the host!
+        return 0
+    }
+    
+    ;;;Setting new Username and password
+    Progress, ZH0 M FS10, SETTING UP NEW USERNAME..., , STEP 0
+    Sleep 1000
+    js =
+    (
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    var data = JSON.stringify({"username":"admin","aasID":"","aasAnswer":""});
+
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        window.responseJson = this.responseText;
+      }
+    });
+    xhr.open("POST", "https://192.168.2.1/api/commissioning", false);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+    )
+    PageInstance.Evaluate(js)
+    resObj := json_toobj(PageInstance.Evaluate("window.responseJson").value)
+    
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SET NEW USERNAME SUCCESSFULY!, , STEP 0
+        Sleep 500
+    } else if (resObj.error = "commissioning is finished") {
+        Progress, ZH0 M FS10, COMMISSIONING IS FINISHED!`nGO TO LOGIN STEP!..., , STEP 0
+        Sleep 500
+        Goto Login-Step-Chrome
+    } else {
+        step0ErrMsg := resObj.error
+        return 0
+    }
+    userToken := resObj.result.aasID
+    
+    Progress, ZH0 M FS10, SETTING UP NEW PASSWORD..., , STEP 0
+    Sleep 1000
+    js =
+    (
+    var data = JSON.stringify({"username":"admin","aasID":"%userToken%","aasAnswer":"admin2205!"});
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        window.responseJson = this.responseText;
+      }
+    });
+    xhr.open("POST", "https://192.168.2.1/api/commissioning", false);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+    )
+    PageInstance.Evaluate(js)
+    resObj := json_toobj(PageInstance.Evaluate("window.responseJson").value)
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, SET NEW PASSWORD SUCCESSFULY!, , STEP 0
+        Sleep 500
+    } else {
+        step0ErrMsg := resObj.error
+        return 0
+    }
+    
+    Progress, ZH0 M FS10, CONFIRMMING NEW PASSWORD..., , STEP 0
+    Sleep 1000
+    js =
+    (
+    var data = JSON.stringify({"username":"admin","aasID":"%userToken%","aasAnswer":"admin2205!"});
+
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        window.responseJson = this.responseText;
+      }
+    });
+    xhr.open("POST", "https://192.168.2.1/api/commissioning", false);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+    )
+    PageInstance.Evaluate(js)
+    resObj := json_toobj(PageInstance.Evaluate("window.responseJson").value)
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, CONFIRM NEW PASSWORD SUCCESSFULY!, , STEP 0
+        Sleep 500
+    } else {
+        step0ErrMsg :=  resObj.error
+        return 0
+    }
+    
+    
+    ;;;Login STEP
+    Login-Step-Chrome:
+    Progress, ZH0 M FS10, LOGGING IN..., , STEP 0
+    Sleep 1500
+    
+    js =
+    (
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        window.responseJson = this.responseText;
+      }
+    });
+
+    xhr.open("GET", "https://192.168.2.1/api/login?username=admin&password=admin2205!", false);
+    xhr.send();
+    )
+    PageInstance.Evaluate(js)
+    resObj := json_toobj(PageInstance.Evaluate("window.responseJson").value)
+    
+    if (resObj.status == "success") {
+        Progress, ZH0 M FS10 CT0ac90a, LOGIN SUCCESSFULY!, , STEP 0
+    } else {
+        errMsg := Format("{:U}", resObj.error)  ;CAP string
+        step0ErrMsg = LOGIN FALIED!`nERR: %errMsg%
+        return 0
+    }
+    uploadConfigToken := resObj.result.token
+    Sleep 2000
+    
+    ;;;Upload file STEP
+    configPath := "C:\V-Projects\RTIAuto-FinalConfig\transfering-files\config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz"
+    SplitPath, configPath, configFileName
+    Progress, ZH0 M FS10 W400, UPLOADING CONFIGURATION FILE...`nUsing: %configFileName%, , STEP 0
+    Sleep 2000
+    js =
+    (
+    document.body.insertAdjacentHTML('beforebegin', '<input type="file" id="file-upload" style="position: absolute;"><label for="fileUpload" class="w4">Upload Config File</label>');
+    document.getElementById("file-upload").click();
+    )
+    PageInstance.Evaluate(js)
+    
+    WinWaitActive, Open
+    WinActivate, Open
+    ControlSetText, Edit1, %configPath%, Open
+    ControlSend Edit1, {Enter}, Open
+    ControlClick Button1, Open, , Left, 3 ;Click button if Enter not working
+      
+    js = 
+    (
+    var fileInput = document.getElementById("file-upload");
+    var data = new FormData();
+    data.append("", fileInput.files[0], "/C:/V-Projects/RTIAuto-FinalConfig/transfering-files/config_MTCDT-L4N1-246A_5_3_0_12_02_20.tar.gz");
+     
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function() {
+      if(this.readyState === 4) {
+        window.responseJson = this.responseText;
+      }
+    });
+    xhr.open("POST", "https://192.168.2.1/api/command/upload_config?token=%uploadConfigToken%", false);
+    xhr.send(data);
+    )
+    PageInstance.Evaluate(js)
+    resObj := json_toobj(PageInstance.Evaluate("window.responseJson").value)
+    ;;;MsgBox % PageInstance.Evaluate("window.responseJson").value
+    if (resObj.status = "success") {
+        Progress, ZH0 M FS10 CT0ac90a, UPLOAD CONFIG FILE SUCCESSFULY!, , STEP 0
+        Sleep 500
+    } else {
+        PageInstance.Call("Browser.close")
+        PageInstance.Disconnect()
+        errMsg := Format("{:U}", resObj.error)  ;CAP string
+        step0ErrMsg = UPLOAD CONFIG FILE FALIED!`nERR: %errMsg%
+        return 0
+    }
+    ;;;Close the browser (note: this closes *all* pages/tabs)
+    PageInstance.Call("Browser.close")
+    PageInstance.Disconnect()
+    
+    changeStepLabelStatus("step0Label", "DONE")
 }
 
 ;===============================================;

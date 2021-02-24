@@ -70,7 +70,7 @@ Gui Font, s9 Bold, Consolas
 Gui, Add, Text, xs+40 ys+20 v1LoadConfig, Load Configuration
 Gui, Add, Text, xs+40 ys+40 v2CheckLeds, Check LEDs
 Gui, Add, Text, xs+40 ys+60 v3CheckTemp, Check Temperature
-Gui, Add, Text, xs+40 ys+80 v4CheckSdCard, Check SD Card
+Gui, Add, Text, xs+40 ys+80 v4CheckSdCard, Check Thumb Drive/SD
 Gui, Add, Text, xs+40 ys+100 v5CheckLorMta, Check LORA/MTAC
 Gui, Add, Text, xs+40 ys+120 v6CheckSmc +Disabled, Check SMC/SIM Card
 Gui, Add, Text, xs+40 ys+140 v7CheckGps, Check GPS
@@ -208,15 +208,15 @@ runFuncTest(mtcdtipType, itemNumber, isRunConfig, radioType) {
         changeProcessStatus("3CheckTemp", "DONE")
     
     ;;Check Drive
-    WinWait, SD CARD CHECK
+    WinWait, THUMB DRIVE/ SD CARD CHECK
     changeProcessStatus("4CheckSdCard", "PLAY")
-    WinWait, SD CARD FAILURE|SD CARD PASSED
-    IfWinExist, SD CARD FAILURE
+    WinWait, THUMB DRIVE FAILURE|SD CARD FAILURE|SD CARD PASSED
+    IfWinExist, SD CARD FAILURE|THUMB DRIVE FAILURE
     {
         changeProcessStatus("4CheckSdCard", "FAIL")
         return 0
     }
-    IfWinExist, SD CARD PASSED
+    IfWinExist, THUMB/ SD PASSED
         changeProcessStatus("4CheckSdCard", "DONE")
         
     ;;Check Lora/Mtac

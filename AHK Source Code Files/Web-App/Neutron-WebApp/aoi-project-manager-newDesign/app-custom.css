@@ -125,6 +125,7 @@ body{
 
 .ui.modal > .header {
   padding: .35rem .55rem !important;
+  font-size: 15px !important;
 }
 .ui.modal > .content {
   padding: .65rem;
