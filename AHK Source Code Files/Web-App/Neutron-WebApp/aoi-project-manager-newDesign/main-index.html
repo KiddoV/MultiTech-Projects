@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <!-- saved from url=(0014)about:internet -->
-<html>
+<html ng-app>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<!-- ===================================================================== -->
   <script src="jquery-3.5.1.js"></script>   <!-- Always load JQuery first!  -->
+	<script src="angular.min.js"></script>
 
   <!-- Fomantic (Cemantic) - UI Libs -->
   <link href="semantic.css" rel="stylesheet">
@@ -33,14 +34,35 @@
 		<span class="title-btn title-btn-close" onclick="neutron.Close()"><i class="times icon"></i></span>
   </header>
 
+	<!-- Menu bar -->
+	<menu class="">
+		<div class="dropdown-container">
+			<div class="ui dropdown">
+				<div class="menu-dropdown-item text" data-dropdown="file">File</div>
+				<div class="menu">
+					<div class="item" data-select="reload"><i class="icon"></i>Reload</div>
+					<div class="divider"></div>
+					<div class="item" data-select="exit"><i class="icon"></i>Exit<span class="description">Ctrl+Q</span></div>
+				</div>
+			</div>
+			<div class="ui dropdown">
+				<div class="menu-dropdown-item text">Edit</div>
+				<div class="menu">
+					<div class="item" data-select="test"><i class="icon"></i>Test</div>
+				</div>
+			</div>
+		</div>
+	</menu>
+
 	<!-- Left Nav Bar -->
 	<nav class="left-nav bg-app-theme-light">
 		<div>
-			<img class="ui medium circular image" src="">
+			<img class="ui medium image" src="no-user.jpg">
 		</div>
 		<ul class="nav-menu">
 			<li><a class="menu-item active" href="#" data-toggle="tab-1" data-inverted="" data-tooltip="AOI Recipe Finder" data-position="right center"><i class="large search icon"></i></a></li>
 			<li><a class="menu-item" href="#" data-toggle="tab-2" data-inverted="" data-tooltip="AOI Task Manager" data-position="right center"><i class="large tasks icon"></i></a></li>
+			<li><a class="menu-item" href="#" data-toggle="tab-3" data-inverted="" data-tooltip="Testing/ Debuging" data-position="right center"><i class="large bug icon"></i></a></li>
 		</ul>
 	</nav>
 
@@ -50,35 +72,16 @@
 		<!-- Content on PAGE 1 -->
 		<div class="ui tab" data-tab="tab-1">
 
-		  <button class="ui button primary" onclick="ahk.Test(this)">Test</button>
-
 		</div>	<!-- =========================================================== -->
 
 		<!-- Content on PAGE 2 -->
 		<div class="ui tab" data-tab="tab-2">
 
-			<div class="test" style="height: 200px; overflow: auto; border: 2px solid black">
-					<h2>TEST SCROLL BAR</h2>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-					<p>Very long content goes here</p>
-			</div>
+		</div>	<!-- =========================================================== -->
+
+		<!-- Content on PAGE 3 -->
+		<div class="ui tab" data-tab="tab-3">
+			<button class="ui button primary" onclick="ahk.Test(this)">Test</button>
 
 		</div>	<!-- =========================================================== -->
 
@@ -91,6 +94,7 @@
 		</div>
 	</footer>
 
+	<!-- ===================================================================== -->
 	<!-- Modals -->
 	<div id="app-settings-modal" class="ui large modal">
 		<div class="header">Application Settings</div>

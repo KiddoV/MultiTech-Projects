@@ -210,7 +210,7 @@ runFuncTest(mtcdtipType, itemNumber, isRunConfig, radioType) {
     ;;Check Drive
     WinWait, THUMB DRIVE/ SD CARD CHECK
     changeProcessStatus("4CheckSdCard", "PLAY")
-    WinWait, THUMB DRIVE FAILURE|SD CARD FAILURE|SD CARD PASSED
+    WinWait, THUMB DRIVE FAILURE|SD CARD FAILURE|THUMB/ SD PASSED
     IfWinExist, SD CARD FAILURE|THUMB DRIVE FAILURE
     {
         changeProcessStatus("4CheckSdCard", "FAIL")

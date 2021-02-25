@@ -11,18 +11,29 @@ header {
   display: flex;
   z-index: 999;
 }
+menu {
+  z-index: 101;
+  padding: 0;
+  position: fixed;
+  top: 14px;
+  left: 0;
+  right: 0;
+  min-height: 16px;
+  max-height: 16px;
+  background-color: #cfd8dc;
+}
 nav.left-nav {
   z-index: 100;
   min-width: 55px;
   max-width: 55px;
   position: fixed;
-  top: 28px;
+  top: 44px;
   left: 0;
   bottom: 20px;
 }
 main {
   position: fixed;
-  top: 28px;
+  top: 44px;
   bottom: 20px;
   left: 55px;
   right: 0;
@@ -106,6 +117,7 @@ body{
   border-left: 5px solid #37474F;
   background-color: #eeeeee;
   color: black;
+  cursor: default;
 }
 .nav-menu > li a:hover:not(.active) {
   background-color: #37474F;
@@ -114,12 +126,49 @@ body{
 
 /*=========================================================*/
 /*****************Third-Party CSS MODs**********************/
+/* Fomantic-UI */
+menu > .dropdown-container > .ui.dropdown {
+  line-height: 0 !important;
+  vertical-align: top;
+}
+menu > .dropdown-container > .ui.dropdown > .text {
+  padding: 0 0.5rem !important;
+  font-size: 0.9rem !important;
+  line-height: 1.15rem !important;
+}
+.menu-dropdown-item:hover {
+  background-color: #b0bec5;
+}
+menu > .dropdown-container > .ui.dropdown > .text > i.icon {
+  margin-right: 0 !important;
+  width: inherit !important;
+  margin-left: 0.4rem;
+}
+.ui.dropdown .menu > .item i.icon {
+  margin-right: 0.3em !important;
+}
+menu > .dropdown-container > .ui.dropdown .menu {
+  border-radius: 0.15rem !important;
+  min-width: 200px !important;
+  background-color: #b0bec5;
+}
+menu > .dropdown-container > .ui.dropdown .menu > .item {
+  padding: 0.4rem 0.4rem !important;
+  min-height: inherit !important;
+}
+menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
+  font-family: monospace;
+}
+.ui.dropdown .menu > .divider {
+  margin: 0.2em 0 !important;
+}
+
 .main.ui.toggle.checkbox input:focus:checked ~ label:before, .main.ui.toggle.checkbox input:checked ~ label:before {
   background-color: #546E7A !important;
 }
 
 .ui.toast-container {
-  top: 28px !important;
+  top: 44px !important;
   z-index: 900 !important;
 }
 
