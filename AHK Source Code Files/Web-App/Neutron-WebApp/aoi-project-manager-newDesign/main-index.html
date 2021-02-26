@@ -56,14 +56,15 @@
 
 	<!-- Left Nav Bar -->
 	<nav class="left-nav bg-app-theme-light">
-		<div>
-			<img class="ui medium image" src="no-user.jpg">
+		<div class="bg-app-theme-dark" style="height: 55px;">
+			<!-- <img class="ui circular image" src="no-user.png"> -->
 		</div>
-		<ul class="nav-menu">
+		<ul class="nav-menu" style="height: calc(100vh - 150px);">
 			<li><a class="menu-item active" href="#" data-toggle="tab-1" data-inverted="" data-tooltip="AOI Recipe Finder" data-position="right center"><i class="large search icon"></i></a></li>
 			<li><a class="menu-item" href="#" data-toggle="tab-2" data-inverted="" data-tooltip="AOI Task Manager" data-position="right center"><i class="large tasks icon"></i></a></li>
 			<li><a class="menu-item" href="#" data-toggle="tab-3" data-inverted="" data-tooltip="Testing/ Debuging" data-position="right center"><i class="large bug icon"></i></a></li>
 		</ul>
+		<a id="app-version" class="ui mini label grey">v0.0.10</a>
 	</nav>
 
 	<!-- Main view -->
@@ -82,13 +83,37 @@
 		<!-- Content on PAGE 3 -->
 		<div class="ui tab" data-tab="tab-3">
 			<button class="ui button primary" onclick="ahk.Test(this)">Test</button>
-
+			<div class="ui button">Show flowing popup</div>
+			<div class="ui flowing popup top left transition hidden">
+			  <div class="ui three column divided center aligned grid">
+			    <div class="column">
+			      <h4 class="ui header">Basic Plan</h4>
+			      <p><b>2</b> projects, $10 a month</p>
+			      <div class="ui button">Choose</div>
+			    </div>
+			    <div class="column">
+			      <h4 class="ui header">Business Plan</h4>
+			      <p><b>5</b> projects, $20 a month</p>
+			      <div class="ui button">Choose</div>
+			    </div>
+			    <div class="column">
+			      <h4 class="ui header">Premium Plan</h4>
+			      <p><b>8</b> projects, $25 a month</p>
+			      <div class="ui button">Choose</div>
+			    </div>
+			  </div>
+			</div>
 		</div>	<!-- =========================================================== -->
 
 	</main>
 
 	<!-- Status Bar -->
 	<footer class="bg-app-theme-dark">
+		<div id="app-status-icon-container" style="left: 0; position: fixed;">
+			<span class="app-status-icon"><i class="server icon"></i></span>
+			<span class="app-status-icon"><i class="database icon"></i></span>
+			<span class="app-status-icon"><i class="globe icon"></i></span>
+		</div>
 		<div style="right: 0; position: fixed;">
 			<span id="app-settings-btn" class="footer-btn" data-inverted="" data-tooltip="Application Settings" data-position="top right" data-variation="tiny"><i class="cogs icon"></i></span>
 		</div>
@@ -96,40 +121,38 @@
 
 	<!-- ===================================================================== -->
 	<!-- Modals -->
+	<!-- Settings Modal -->
 	<div id="app-settings-modal" class="ui large modal">
+		<i class="close icon inside"></i>
 		<div class="header">Application Settings</div>
-		<div class="scrolling content">
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
-			<p>Very long content goes here</p>
+		<div class="ui grid">
+		  <div class="three wide stretched column">
+		    <div class="app-settings-tabs ui secondary vertical pointing tabular menu" style="width: 170px; height: 85vh;">
+		      <a class="item active" data-tab="settings-tab-1">General</a>
+		      <a class="item" data-tab="settings-tab-2">Connection</a>
+		    </div>
+		  </div>
+		  <div class="thirteen wide stretched column">
+				<div class="app-settings-content scrolling content" style="overflow-x: hidden; height: 85vh;">
+					<div class="ui tab" data-tab="settings-tab-1">
+						<!-- Setting contents Tab 1 -->
+						1
+					</div>
+					<div class="ui tab" data-tab="settings-tab-2">
+						<!-- Setting contents Tab 2 -->
+						2
+					</div>
+				</div>
+		  </div>
 		</div>
-		<div class="actions">
-	    <div class="ui small cancel button">Cancel</div>
-	    <div class="ui small positive button">OK</div>
-	  </div>
-	</div>
+	</div>	<!-- ======================== -->
 
 </body>
 <!-- ======================================================================= -->
 <script>
 // Expose jQuery to the global object
 window.jQuery = window.$ = window.jq = jQuery;
+
 </script>
 
 </html>

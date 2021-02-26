@@ -55,7 +55,7 @@ IfNotExist, %MainDBFilePath%
 IfExist, %MainDBFilePath%
 {
     If !AOI_Pro_DB.OpenDB(MainDBFilePath) {         ;Connect to the main Database
-        errMsg := "Failed connecting to Database`nMsg:`t" . DB.ErrorMsg . "`nCode:`t" . DB.ErrorCode
+        errMsg := "Err Msg: " . AOI_Pro_DB.ErrorMsg . "<br>Err Code: " . AOI_Pro_DB.ErrorCode
         DisplayAlertMsg(errMsg, "SQLite Error", 0, "error")
     }
 }
@@ -96,7 +96,8 @@ FileInstall, overlayScrollbars.css, overlayScrollbars.css
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 ;;;Called From HTML
 Test(neutron, event) {
-    DisplayAlertMsg("ERROR", "SQLite Error", 0, "error")
+        errMsg := "Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode
+        DisplayAlertMsg(errMsg, "SQLite Error", 0, "error")
 }
 MainMenuHandle(neutron, event, selectedItem) {
     If (selectedItem == "exit") {

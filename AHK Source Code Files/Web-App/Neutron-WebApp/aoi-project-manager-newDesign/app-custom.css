@@ -23,6 +23,7 @@ menu {
   background-color: #cfd8dc;
 }
 nav.left-nav {
+  text-align: center;
   z-index: 100;
   min-width: 55px;
   max-width: 55px;
@@ -71,8 +72,9 @@ body{
 	background: #dadada;
 }
 .footer-btn {
-  padding: .1em .2em;
+  padding: .098em .2em;
   cursor: pointer;
+  vertical-align: bottom;
 }
 .title-btn:hover, .footer-btn:hover {
 	background: rgba(0, 0, 0, .3);
@@ -124,6 +126,18 @@ body{
   color: #FFFFFF;
 }
 
+#app-settings-modal {
+  overflow: hidden;
+}
+#app-settings-modal.ui.top.aligned.modal {
+  top: -20px !important;
+}
+
+.app-status-icon {
+  padding-left: 4px;
+  cursor: default;
+}
+
 /*=========================================================*/
 /*****************Third-Party CSS MODs**********************/
 /* Fomantic-UI */
@@ -169,7 +183,12 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 
 .ui.toast-container {
   top: 44px !important;
-  z-index: 900 !important;
+  z-index: 998 !important;
+}
+.ui.toast {
+  border-radius: 0.15rem !important;
+  padding: 0.4em 0.8em !important;
+  font-size: 0.8em !important;
 }
 
 .ui.modal > .header {
@@ -185,4 +204,8 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 .ui.dimmer {
   top: 28px !important;
   z-index: 998 !important;
+}
+.ui.modal > .close.inside {
+  top: 0rem !important;
+  right: 0rem !important;
 }

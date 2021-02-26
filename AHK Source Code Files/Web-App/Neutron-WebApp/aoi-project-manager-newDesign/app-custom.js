@@ -8,11 +8,14 @@ $(document).ready(function() {
     //activate tab
     $.tab('change tab', whichTab);
   }
+
+  // Events for app settings Tabs
+  $(".app-settings-tabs .item").tab();
 });
 ///////////////////////////////////////
 //Global Variables  //////////////////
-
 ///////////////////////////////////////
+
 //Main Functions  ////////////////////
 //Functions when user hit nav items (Tabs)
 $(function() {
@@ -52,17 +55,21 @@ $(function() {
       centered: false,
       transition: "slide down",
       onVisible: function() {
-        // Init Overlay Scrollbar
-        scrollbarIns = $(".scrolling.content").overlayScrollbars({
+        ///Init Overlay Scrollbar
+        scrollbarIns = $(".app-settings-content").overlayScrollbars({
           className: "os-theme-block-dark",
           scrollbars : {
             autoHide: "move",
           },
+          overflowBehavior : {
+            x : "hidden",
+            y : "scroll"
+          }
         }).overlayScrollbars();
       },
       onHidden: function() {
         scrollbarIns.destroy();
       },
-    }).modal("show");
+    }).modal("toggle set active");
   });
 });
