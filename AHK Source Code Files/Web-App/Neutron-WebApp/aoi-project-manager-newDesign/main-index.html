@@ -62,7 +62,8 @@
 		<ul class="nav-menu" style="height: calc(100vh - 150px);">
 			<li><a class="menu-item active" href="#" data-toggle="tab-1" data-inverted="" data-tooltip="AOI Recipe Finder" data-position="right center"><i class="large search icon"></i></a></li>
 			<li><a class="menu-item" href="#" data-toggle="tab-2" data-inverted="" data-tooltip="AOI Task Manager" data-position="right center"><i class="large tasks icon"></i></a></li>
-			<li><a class="menu-item" href="#" data-toggle="tab-3" data-inverted="" data-tooltip="Testing/ Debuging" data-position="right center"><i class="large bug icon"></i></a></li>
+			<li><a class="menu-item" href="#" data-toggle="tab-3" data-inverted="" data-tooltip="More Tools" data-position="right center"><i class="large toolbox icon"></i></a></li>
+			<li><a class="menu-item" href="#" data-toggle="tab-4" data-inverted="" data-tooltip="Testing/ Debuging" data-position="right center"><i class="large bug icon"></i></a></li>
 		</ul>
 		<a id="app-version" class="ui mini label grey">v0.0.10</a>
 	</nav>
@@ -72,7 +73,16 @@
 
 		<!-- Content on PAGE 1 -->
 		<div class="ui tab" data-tab="tab-1">
-
+			<div class="ui grid">
+				<div class="seven wide column" style="background-color: coral; height: 100vh;">
+					1<br>
+					Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>
+					Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>
+				</div>
+				<div class="nine wide column" style="background-color: green; height: 100vh;">
+					2
+				</div>
+			</div>
 		</div>	<!-- =========================================================== -->
 
 		<!-- Content on PAGE 2 -->
@@ -82,27 +92,12 @@
 
 		<!-- Content on PAGE 3 -->
 		<div class="ui tab" data-tab="tab-3">
+
+		</div>	<!-- =========================================================== -->
+
+		<!-- Content on PAGE 4 -->
+		<div class="ui tab" data-tab="tab-4">
 			<button class="ui button primary" onclick="ahk.Test(this)">Test</button>
-			<div class="ui button">Show flowing popup</div>
-			<div class="ui flowing popup top left transition hidden">
-			  <div class="ui three column divided center aligned grid">
-			    <div class="column">
-			      <h4 class="ui header">Basic Plan</h4>
-			      <p><b>2</b> projects, $10 a month</p>
-			      <div class="ui button">Choose</div>
-			    </div>
-			    <div class="column">
-			      <h4 class="ui header">Business Plan</h4>
-			      <p><b>5</b> projects, $20 a month</p>
-			      <div class="ui button">Choose</div>
-			    </div>
-			    <div class="column">
-			      <h4 class="ui header">Premium Plan</h4>
-			      <p><b>8</b> projects, $25 a month</p>
-			      <div class="ui button">Choose</div>
-			    </div>
-			  </div>
-			</div>
 		</div>	<!-- =========================================================== -->
 
 	</main>
@@ -124,7 +119,7 @@
 	<!-- Settings Modal -->
 	<div id="app-settings-modal" class="ui large modal">
 		<i class="close icon inside"></i>
-		<div class="header">Application Settings</div>
+		<div class="header"><i class="cogs small circular icon"></i>Application Settings</div>
 		<div class="ui grid">
 		  <div class="three wide stretched column">
 		    <div class="app-settings-tabs ui secondary vertical pointing tabular menu" style="width: 170px; height: 85vh;">
