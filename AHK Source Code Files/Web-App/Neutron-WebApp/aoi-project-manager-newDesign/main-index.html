@@ -73,13 +73,20 @@
 
 		<!-- Content on PAGE 1 -->
 		<div class="ui tab" data-tab="tab-1">
-			<div class="ui grid">
-				<div class="seven wide column" style="background-color: coral; height: 100vh;">
-					1<br>
-					Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>
-					Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>Test<br>
+			<div class="ui padded divided grid">
+				<div class="seven wide column" style="height: 100vh; padding: 5px;">
+					<div class="row wide" style="">
+						<div class="ui fluid action input">
+						  <input type="text" placeholder="Enter PCB #, build # or recipe name...">
+						  <div class="ui button" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;"><i class="search icon"></i>Search</div>
+						</div>
+					</div>
+					<span class="ui small blue text ">Result display here...</span>
+					<div class="row" style="height: calc(100vh - 131px);">
+						<div class="ui massive slow active loader"></div>
+					</div>
 				</div>
-				<div class="nine wide column" style="background-color: green; height: 100vh;">
+				<div class="nine wide column" style="height: 100vh; padding: 5px;">
 					2
 				</div>
 			</div>
@@ -119,7 +126,7 @@
 	<!-- Settings Modal -->
 	<div id="app-settings-modal" class="ui large modal">
 		<i class="close icon inside"></i>
-		<div class="header"><i class="cogs small circular icon"></i>Application Settings</div>
+		<div class="header"><i class="cogs small circular inverted icon"></i>Application Settings</div>
 		<div class="ui grid">
 		  <div class="three wide stretched column">
 		    <div class="app-settings-tabs ui secondary vertical pointing tabular menu" style="width: 170px; height: 85vh;">

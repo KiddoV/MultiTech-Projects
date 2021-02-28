@@ -38,7 +38,7 @@ main {
   bottom: 20px;
   left: 55px;
   right: 0;
-  padding: 5px;
+  /* padding: 5px; */
 }
 footer {
   z-index: 999;
