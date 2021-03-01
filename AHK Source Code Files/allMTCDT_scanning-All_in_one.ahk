@@ -121,9 +121,11 @@ mainStart() {
     ;;Add value to check for MTAC present
     Global checkMtac := ""
     If (RegExMatch(skuNum, "94557585LF")) {
-        checkMtac := "Check2"
-    } Else If (RegExMatch(skuNum, "94557700LF")) {
+        checkMtac := "Check1_2"
+    } Else If (RegExMatch(skuNum, "94557700LF|94557598LF|94557611LF|94557619LF|94557620LF|94557650LF|94557651LF|94557716LF|94557717LF")) {
         checkMtac := "Check1"
+    } Else {
+        checkMtac := "Check2"
     }
     
     ;Global skuNumPath := %skuNum%Path

@@ -81,9 +81,63 @@
 						  <div class="ui button" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;"><i class="search icon"></i>Search</div>
 						</div>
 					</div>
-					<span class="ui small blue text ">Result display here...</span>
-					<div class="row" style="height: calc(100vh - 131px);">
-						<div class="ui massive slow active loader"></div>
+					<span class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
+					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px)">
+
+						<!-- Recipe Cards -->
+						<div class="recipe-card notready ui horizontal fluid card">
+						 <div class="content">
+							<div class="ui grid">
+								<div class="header equal width row" style="padding-bottom: 2px !important;">
+									<div class="column">70000000L</div>
+									<div class="column">A00</div>
+									<div class="column">33999</div>
+									<div class="column"><span class="ui mini label black">1000000L</span></div>
+								</div>
+								<div class="meta equal width row" style="padding-top: 2px !important;">
+									<div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_A00</span></div>
+								</div>
+							</div>
+						</div>
+					 </div>
+
+					 <div class="recipe-card usable ui horizontal fluid card">
+						<div class="content">
+						 <div class="ui grid">
+
+							 <div class="row">
+								 <div class="thirteen wide column red">
+									 <div class="row">
+										<div class="four column">70000000L</div>
+	 									<div class="four column">A00</div>
+	 									<div class="four column">33999</div>
+	 									<div class="four column"><span class="ui mini label black">1000000L</span></div>
+									 </div>
+									 <div class="row">
+									 </div>
+								 </div>
+							 	<div class="three wide column green">
+									2
+								</div>
+							 </div>
+
+
+							 <!-- <div class="header equal width row" style="padding-bottom: 2px !important;">
+								 <div class="column">70000000L</div>
+								 <div class="column">A00</div>
+								 <div class="column">33999</div>
+								 <div class="column"><span class="ui mini label black">1000000L</span></div>
+							 </div>
+							 <div class="meta equal width row" style="padding-top: 2px !important;">
+								 <div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_A00</span></div>
+							 </div> -->
+
+
+						 </div>
+					 </div>
+					</div>
+
+						<!-- <div class="ui massive slow active loader"></div> -->
 					</div>
 				</div>
 				<div class="nine wide column" style="height: 100vh; padding: 5px;">

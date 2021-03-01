@@ -11,7 +11,20 @@ $(document).ready(function() {
 
   // Events for app settings Tabs
   $(".app-settings-tabs .item").tab();
-});
+
+  // For search result Container
+  var recipeSearchResultContainer_OSIns = $("#recipe-search-result-container").overlayScrollbars({
+    className: "os-theme-block-dark",
+    scrollbars : {
+      autoHide: "move",
+    },
+    overflowBehavior : {
+      x : "hidden",
+      y : "scroll"
+    }
+  }).overlayScrollbars();
+
+}); ///////////////////////////////////
 ///////////////////////////////////////
 //Global Variables  //////////////////
 ///////////////////////////////////////

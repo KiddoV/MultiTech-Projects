@@ -366,7 +366,7 @@ end
 ;;;;;;;;;;;;;;;;;Additional Labels;;;;;;;;;;;;;;;;;;;;;;
 :CHECK_MTAC_INSTALL
 flushrecv
-strcompare checkMTAC 'Check2'
+strcompare checkMTAC 'Check1_2'
 if result = 0 then
     sendln 03
     sendln 'mts-io-sysfs show ap1/device-id'
@@ -391,6 +391,16 @@ if result = 0 then
 	waitln 'No such file' '20' '21' '80'
 	if result = 1 then
 	    messagebox 'MTAC NOT FOUND IN PORT AP 1. PLEASE CHECK!' 'MTAC FAILURE'
+	    end
+	endif
+endif
+strcompare checkMTAC 'Check2'
+if result = 0 then
+    sendln 03
+    sendln 'mts-io-sysfs show ap2/device-id'
+	waitln 'No such file' '20' '21' '80'
+	if result = 1 then
+	    messagebox 'MTAC NOT FOUND IN PORT AP 2. PLEASE CHECK!' 'MTAC FAILURE'
 	    end
 	endif
 endif
