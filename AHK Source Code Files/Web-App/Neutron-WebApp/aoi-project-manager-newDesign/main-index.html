@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- saved from url=(0014)about:internet -->
-<html ng-app>
+<html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
@@ -25,7 +25,7 @@
 
 <!-- ======================================================================= -->
 <!-- Main Contents -->
-<body class="bg-app-color no-select-text">
+<body class="bg-app-color no-select-text" ng-app="APM-App" ng-controller="APM-App-Controller">
   <!-- Title Bar -->
   <header class="bg-app-theme-dark" style="">
     <span class="default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">?????????</span>
@@ -76,66 +76,83 @@
 			<div class="ui padded divided grid">
 				<div class="seven wide column" style="height: 100vh; padding: 5px;">
 					<div class="row wide" style="">
-						<div class="ui fluid action input">
-						  <input type="text" placeholder="Enter PCB #, build # or recipe name...">
-						  <div class="ui button" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;"><i class="search icon"></i>Search</div>
+						<div id="recipe-search" class="ui fluid search">
+							<div class="ui left icon fluid action input">
+								<i class="search icon"></i>
+							  <input id="recipe-search-field" class="prompt" type="text" placeholder="Enter PCB #, build # or recipe name..." ng-keydown="$event.keyCode == 13 && recipeSearch()">
+							  <div class="ui button" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;">Search</div>
+							</div>
+							<div class="results"></div>
 						</div>
 					</div>
 					<span class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
 					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px)">
 
 						<!-- Recipe Cards -->
-						<div class="recipe-card notready ui horizontal fluid card">
+						<!-- <div class="recipe-card notready ui horizontal fluid card">
 						 <div class="content">
-							<div class="ui grid">
-								<div class="header equal width row" style="padding-bottom: 2px !important;">
-									<div class="column">70000000L</div>
+							<div class="ui equal width grid">
+								<div class="header row" style="padding-bottom: 2px !important;">
+									<div class="column">7000000L</div>
 									<div class="column">A00</div>
 									<div class="column">33999</div>
 									<div class="column"><span class="ui mini label black">1000000L</span></div>
 								</div>
-								<div class="meta equal width row" style="padding-top: 2px !important;">
-									<div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_A00</span></div>
+								<div class="meta row" style="padding-top: 2px !important;">
+									<div class="column" style="font-weight: bold"><span class="recipe-name">7000000L_A00</span></div>
+									<div class="column"><span class="ui basic image label"><img src="yestech-logo.png"/>YesTech</span></div>
 								</div>
 							</div>
 						</div>
-					 </div>
+					 </div> -->
 
-					 <div class="recipe-card usable ui horizontal fluid card">
+					 	<!-- Recipe Cards -->
+					 <div class="recipe-card {{recipe.recipeStatus}} ui horizontal fluid card" ng-repeat="recipe in recipies">
 						<div class="content">
 						 <div class="ui grid">
-
-							 <div class="row">
-								 <div class="thirteen wide column red">
-									 <div class="row">
-										<div class="four column">70000000L</div>
-	 									<div class="four column">A00</div>
-	 									<div class="four column">33999</div>
-	 									<div class="four column"><span class="ui mini label black">1000000L</span></div>
-									 </div>
-									 <div class="row">
-									 </div>
-								 </div>
-							 	<div class="three wide column green">
-									2
+							<div class="thirteen wide column">
+								<div class="ui equal width grid">
+									<div class="row" style="padding-bottom: 2px !important;">
+										<div class="column"><span class="ui mini label green">7000000L</span></div>
+										<div class="column">A00</div>
+										<div class="column">33999</div>
+										<div class="column"><span class="ui mini label blue">1000000L</span></div>
+									</div>
+									<div class="row" style="padding-top: 2px !important;">
+										<div class="column" style="font-weight: bold"><span class="recipe-name">7000000L_A00</span></div>
+									</div>
 								</div>
-							 </div>
-
-
-							 <!-- <div class="header equal width row" style="padding-bottom: 2px !important;">
-								 <div class="column">70000000L</div>
-								 <div class="column">A00</div>
-								 <div class="column">33999</div>
-								 <div class="column"><span class="ui mini label black">1000000L</span></div>
-							 </div>
-							 <div class="meta equal width row" style="padding-top: 2px !important;">
-								 <div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_A00</span></div>
-							 </div> -->
-
-
+						 	</div>
+						 	<div class="three wide column">
+								<img class="ui rounded image bordered right floated" src="yestech-logo.png" style="z-index: 80;" width="50" height="50">
+						 	</div>
 						 </div>
 					 </div>
 					</div>
+
+					<!-- Recipe Cards -->
+				 <!-- <div class="recipe-card usable ui horizontal fluid card">
+					<div class="content">
+					 <div class="ui grid">
+						<div class="thirteen wide column">
+							<div class="ui equal width grid">
+								<div class="row" style="padding-bottom: 2px !important;">
+									<div class="column"><span class="ui mini label green">7000000L</span></div>
+									<div class="column">A00</div>
+									<div class="column">33999</div>
+									<div class="column"><span class="ui mini label blue">1000000L</span></div>
+								</div>
+								<div class="row" style="padding-top: 2px !important;">
+									<div class="column" style="font-weight: bold"><span class="recipe-name">7000000L_A00</span></div>
+								</div>
+							</div>
+						</div>
+						<div class="three wide column">
+							<img class="ui rounded image bordered right floated" src="yestech-logo.png" style="z-index: 80;" width="50" height="50">
+						</div>
+					 </div>
+				 </div>
+				</div> -->
 
 						<!-- <div class="ui massive slow active loader"></div> -->
 					</div>
@@ -158,7 +175,15 @@
 
 		<!-- Content on PAGE 4 -->
 		<div class="ui tab" data-tab="tab-4">
-			<button class="ui button primary" onclick="ahk.Test(this)">Test</button>
+
+			<p>Typing in the input box below updates the key count</p>
+			<input ng-keyup="count = count + 1" ng-init="count=0"> key up count: {{count}}
+
+			<p>Typing in the input box below updates the keycode</p>
+			<input ng-keyup="event=$event">
+			<p>event keyCode: {{ event.keyCode }}</p>
+			<p>event altKey: {{ event.altKey }}</p>
+
 		</div>	<!-- =========================================================== -->
 
 	</main>

@@ -1,7 +1,24 @@
-/*============================================================================*/
-////////////////////////////// Main Functions  /////////////////////////////////
+/*===========================================================================*/
+////////////////////////////// Main Functions  ////////////////////////////////
 //Functions to run when Page is READY//
 $(document).ready(function() {
+  var contents = [
+    { title: '7000' },
+    { title: '123' },
+    { title: '123123' },
+    { title: '123123' },
+    { title: '123123' },
+    { title: '1231231' },
+    { title: '1231231' },
+  ];
+  $("#recipe-search").search({
+    source: contents,
+    showNoResults: false,
+    selectFirstResult: true,
+    onSelect: function (result, response) {
+      ahk.SearchRecipe(result.title);
+    }
+  });
   /*** Event for nav bar menu ***/
   if ($(".menu-item").hasClass("active")) {
     let whichTab = $(this).attr("data-toggle");
@@ -14,7 +31,7 @@ $(document).ready(function() {
 
   // For search result Container
   var recipeSearchResultContainer_OSIns = $("#recipe-search-result-container").overlayScrollbars({
-    className: "os-theme-block-dark",
+    className: "os-theme-minimal-dark",
     scrollbars : {
       autoHide: "move",
     },
@@ -85,4 +102,26 @@ $(function() {
       },
     }).modal("toggle set active");
   });
+});
+
+
+
+/*===========================================================================*/
+//////////////////////////////// AngularJS  ///////////////////////////////////
+var ngApp = angular.module("APM-App", []);
+
+ngApp.controller("APM-App-Controller", function($scope) {
+
+  $scope.recipies = [];
+  $scope.recipies = [
+    {recipeStatus: "usable"},
+    {recipeStatus: "notready"}
+  ];
+
+  $scope.recipeSearch = function() {
+    searchVar = document.getElementById("recipe-search-field").value
+    if ($("#recipe-search .results").is(":visible)")) {
+        ahk.SearchRecipe(searchVar);
+    }
+  };
 });

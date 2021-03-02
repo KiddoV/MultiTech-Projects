@@ -64,6 +64,9 @@ nodeLoraNum = groupmatchstr7
 nodeWifiNum = groupmatchstr8
 checkMTAC = groupmatchstr9
 
+strlen nodeLoraNum
+isNoLora = result
+
 strcompare labelType 'LABELTYPE1'
 isType1 = result
 strcompare labelType 'LABELTYPE2'
@@ -395,7 +398,7 @@ if result = 0 then
 	endif
 endif
 strcompare checkMTAC 'Check2'
-if result = 0 then
+if result = 0 && isNoLora > 0 then
     sendln 03
     sendln 'mts-io-sysfs show ap2/device-id'
 	waitln 'No such file' '20' '21' '80'

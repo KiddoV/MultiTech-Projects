@@ -99,6 +99,11 @@ Test(neutron, event) {
         errMsg := "Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode
         DisplayAlertMsg(errMsg, "SQLite Error", 0, "error")
 }
+
+SearchRecipe(neutron, event) {
+    MsgBox % neutron ", " event
+}
+
 MainMenuHandle(neutron, event, selectedItem) {
     If (selectedItem == "exit") {
         Gosub AOIProManagerClose

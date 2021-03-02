@@ -138,6 +138,9 @@ body{
   cursor: default;
 }
 
+#recipe-search .prompt {
+  border-radius: 5px 0 0 5px !important;
+}
 /*=========================================================*/
 /*****************Third-Party CSS MODs**********************/
 /* Fomantic-UI */

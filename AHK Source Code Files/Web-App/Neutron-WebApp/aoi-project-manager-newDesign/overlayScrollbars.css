@@ -707,7 +707,7 @@ os-theme-minimal-dark
 }
 .os-theme-minimal-dark > .os-scrollbar-vertical > .os-scrollbar-track > .os-scrollbar-handle:hover:before,
 .os-theme-minimal-dark > .os-scrollbar-vertical > .os-scrollbar-track > .os-scrollbar-handle.active:before {
-    width: 100%;
+    width: 60%;
 }
 .os-theme-minimal-dark.os-host-transition > .os-scrollbar-horizontal > .os-scrollbar-track > .os-scrollbar-handle:before {
     transition: opacity 0.3s, height 0.3s;
@@ -787,7 +787,7 @@ os-theme-minimal-light
 }
 .os-theme-minimal-light > .os-scrollbar-vertical > .os-scrollbar-track > .os-scrollbar-handle:hover:before,
 .os-theme-minimal-light > .os-scrollbar-vertical > .os-scrollbar-track > .os-scrollbar-handle.active:before {
-    width: 100%;
+    width: 60%;
 }
 .os-theme-minimal-light.os-host-transition > .os-scrollbar-horizontal > .os-scrollbar-track > .os-scrollbar-handle:before {
     transition: opacity 0.3s, height 0.3s;
