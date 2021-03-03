@@ -96,8 +96,8 @@ FileInstall, overlayScrollbars.css, overlayScrollbars.css
 ;;;;;;;;;;;;;;;;;;MAIN FUNCTION;;;;;;;;;;;;;;;;;;
 ;;;Called From HTML
 Test(neutron, event) {
-        errMsg := "Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode
-        DisplayAlertMsg(errMsg, "SQLite Error", 0, "error")
+    errMsg := "Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode
+    DisplayAlertMsg(errMsg, "SQLite Error", 0, "error")
 }
 
 SearchRecipe(neutron, event) {

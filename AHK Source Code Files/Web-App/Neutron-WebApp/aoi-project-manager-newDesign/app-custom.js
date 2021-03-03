@@ -2,6 +2,9 @@
 ////////////////////////////// Main Functions  ////////////////////////////////
 //Functions to run when Page is READY//
 $(document).ready(function() {
+  //Global Variables  //////////////////
+  ///////////////////////////////////////
+  var $ngScope = getAngularScope("APM-App-Controller");
   var contents = [
     { title: '7000' },
     { title: '123' },
@@ -16,7 +19,9 @@ $(document).ready(function() {
     showNoResults: false,
     selectFirstResult: true,
     onSelect: function (result, response) {
-      ahk.SearchRecipe(result.title);
+      if ($("#recipe-search .results").hasClass("visible)")) {
+          ahk.SearchRecipe(result.title);
+      }
     }
   });
   /*** Event for nav bar menu ***/
@@ -41,11 +46,13 @@ $(document).ready(function() {
     }
   }).overlayScrollbars();
 
+  $ngScope.recipies = [
+    {recipeStatus: "usable"},
+    {recipeStatus: "notready"}
+  ];
+  $ngScope.$apply();
 }); ///////////////////////////////////
 ///////////////////////////////////////
-//Global Variables  //////////////////
-///////////////////////////////////////
-
 //Main Functions  ////////////////////
 //Functions when user hit nav items (Tabs)
 $(function() {
@@ -108,20 +115,24 @@ $(function() {
 
 /*===========================================================================*/
 //////////////////////////////// AngularJS  ///////////////////////////////////
-var ngApp = angular.module("APM-App", []);
+//Function used to get scope outside AngularJS
+function getAngularScope(ctrlName) {
+    var sel = '[ng-controller="' + ctrlName + '"]';
+    return angular.element(sel).scope();
+}
 
+///Init AngularJS
+var ngApp = angular.module("APM-App", []);
 ngApp.controller("APM-App-Controller", function($scope) {
 
   $scope.recipies = [];
-  $scope.recipies = [
-    {recipeStatus: "usable"},
-    {recipeStatus: "notready"}
-  ];
 
+  //When user hit enter on search field
   $scope.recipeSearch = function() {
     searchVar = document.getElementById("recipe-search-field").value
-    if ($("#recipe-search .results").is(":visible)")) {
-        ahk.SearchRecipe(searchVar);
-    }
+    ahk.SearchRecipe(searchVar);
+    // if ($("#recipe-search .results").is("visible)")) {
+    //     ahk.SearchRecipe(searchVar);
+    // }
   };
 });
