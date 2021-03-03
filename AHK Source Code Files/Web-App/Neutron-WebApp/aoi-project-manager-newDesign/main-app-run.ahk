@@ -97,11 +97,90 @@ FileInstall, overlayScrollbars.css, overlayScrollbars.css
 ;;;Called From HTML
 Test(neutron, event) {
     errMsg := "Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode
-    DisplayAlertMsg(errMsg, "SQLite Error", 0, "error")
+    DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
 }
 
 SearchRecipe(neutron, event) {
-    MsgBox % neutron ", " event
+    searchKeyWords := neutron.qs("#recipe-search-field").value
+    
+    If (searchKeyWords == "") {
+        neutron.qs("#recipe-search-status-label").innerHTML := "Please input value..."
+        Return
+    }
+    
+    ;;Get data from DB
+    neutron.qs("#recipe-search-status-label").innerHTML := "Searching..."
+    neutron.qs("#recipe-search .input").classList.add("loading")
+    neutron.qs("#recipe-search-field").value := ""
+    
+    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON prog_pcb_number=pcb_number WHERE prog_build_number LIKE '%" . searchKeyWords . "%' OR prog_full_name LIKE '%" . searchKeyWords . "%' OR prog_pcb_number LIKE '%" . searchKeyWords . "%' OR prog_current_eco LIKE '%" . searchKeyWords . "%' OR prog_current_ecl LIKE '%" . searchKeyWords . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
+    If !AOI_Pro_DB.GetTable(SQL, Result) {
+        DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
+        Return
+    }
+    
+    rowCount := Result.RowCount
+    NeutronWebApp.qs("#recipe-search-status-label").innerHTML := "Found " . rowCount . " result(s)"
+    If (!Result.HasRows) {
+        DisplayAlertMsg("Not found any result!", , , "warning")
+        Return
+    }
+    
+    searchResult := DataBaseTableToObject(Result)
+    ;Return JSON.Dump(searchResult)
+    ;Return searchResult
+    DisplayRecipeCard(searchResult)
+}
+
+DisplayRecipeCard(resultObj) {
+    
+    Loop, % resultObj.Length()
+    {
+        progDBId := programData[A_Index].prog_id
+        progFullName := programData[A_Index].prog_full_name
+        progStatus := programData[A_Index].prog_status
+        buildNum := programData[A_Index].prog_build_number
+        pcbNum := programData[A_Index].prog_pcb_number
+        currentECO := programData[A_Index].prog_current_eco
+        currentECL := programData[A_Index].prog_current_ecl
+        dateTimeCreated := programData[A_Index].prog_date_created
+        dateTimeUpdated := programData[A_Index].prog_date_updated
+        machineBrandName := programData[A_Index].prog_aoi_machine
+        progAltType := programData[A_Index].prog_alternate_type
+        progSubsName := programData[A_Index].prog_substitute
+        progLibName := programData[A_Index].prog_library_name = "" ? "N/A" : programData[A_Index].prog_library_name
+
+        pcbPartStatus := programData[A_Index].pcb_part_status
+            
+        html =
+        (
+         <!-- Recipe Cards -->
+         <div class="recipe-card usable ui horizontal fluid card">
+            <div class="content">
+             <div class="ui grid">
+                <div class="thirteen wide column">
+                    <div class="ui equal width grid">
+                        <div class="row" style="padding-bottom: 2px !important;">
+                            <div class="column"><span class="ui mini label green">70000000L</span></div>
+                            <div class="column">000</div>
+                            <div class="column">12345</div>
+                            <div class="column"><span class="ui mini label blue">10000000L</span></div>
+                        </div>
+                        <div class="row" style="padding-top: 2px !important;">
+                            <div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_000</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="three wide column">
+                    <img class="ui rounded image bordered right floated" src="yestech-logo.png" style="z-index: 80;" width="50" height="50">
+                </div>
+             </div>
+         </div>
+        </div>    
+        )
+    }
+    
+    NeutronWebApp.wnd.jq("#recipe-search-result-container").append(html)
 }
 
 MainMenuHandle(neutron, event, selectedItem) {
@@ -136,6 +215,42 @@ DisplayAlertMsg(msg, title := "", timeout := "auto", color := "", icon := "") {
     )
     
     NeutronWebApp.wnd.execScript(js)
+}
+
+DataBaseTableToObject(ResultSet) {
+    dataObject := [{}]
+    If (ResultSet.HasNames) {
+        If (ResultSet.HasRows) {
+            Loop, % ResultSet.RowCount
+            {
+                colIndex := A_Index
+                ResultSet.Next(Row)
+                Loop, % ResultSet.ColumnCount
+                {
+                    colName := ResultSet.ColumnNames[A_Index]
+                    dataObject[colIndex](colName) := Row[A_Index]
+                }
+            }
+        }
+    }
+
+    Return dataObject
+}
+
+;;;Function to print out JSON format From SQLite DB
+BuildJson(obj) {
+    str := "" , array := true
+    For k in obj
+    {
+        if (k == A_Index)
+            continue
+        array := false
+        break
+    }
+    For a, b in obj
+        str .= (array ? "" : """" a """: ") . (IsObject(b) ? BuildJson(b) : (0 * b == 0) ? b : """" b """") . ", "
+    str := RTrim(str, " ,")
+    Return (array ? "[" str "]" : "{" str "}")
 }
 ;=======================================================================================;
 ;;;;;;;;;;Hot Keys;;;;;;;;;;

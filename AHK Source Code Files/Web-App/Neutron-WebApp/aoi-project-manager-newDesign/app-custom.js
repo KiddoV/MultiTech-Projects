@@ -4,26 +4,19 @@
 $(document).ready(function() {
   //Global Variables  //////////////////
   ///////////////////////////////////////
-  var $ngScope = getAngularScope("APM-App-Controller");
-  var contents = [
-    { title: '7000' },
-    { title: '123' },
-    { title: '123123' },
-    { title: '123123' },
-    { title: '123123' },
-    { title: '1231231' },
-    { title: '1231231' },
-  ];
-  $("#recipe-search").search({
-    source: contents,
-    showNoResults: false,
-    selectFirstResult: true,
-    onSelect: function (result, response) {
-      if ($("#recipe-search .results").hasClass("visible)")) {
-          ahk.SearchRecipe(result.title);
-      }
-    }
-  });
+  // var contents = [
+  //   { title: '7000' },
+  //   { title: '123' },
+  //   { title: '123123' },
+  //   { title: '123123' },
+  //   { title: '123123' },
+  //   { title: '1231231' },
+  //   { title: '1231231' },
+  // ];
+  // $("#recipe-search").search({
+  //   source: contents,
+  //   showNoResults: false,
+  // });
   /*** Event for nav bar menu ***/
   if ($(".menu-item").hasClass("active")) {
     let whichTab = $(this).attr("data-toggle");
@@ -45,12 +38,6 @@ $(document).ready(function() {
       y : "scroll"
     }
   }).overlayScrollbars();
-
-  $ngScope.recipies = [
-    {recipeStatus: "usable"},
-    {recipeStatus: "notready"}
-  ];
-  $ngScope.$apply();
 }); ///////////////////////////////////
 ///////////////////////////////////////
 //Main Functions  ////////////////////
@@ -109,30 +96,4 @@ $(function() {
       },
     }).modal("toggle set active");
   });
-});
-
-
-
-/*===========================================================================*/
-//////////////////////////////// AngularJS  ///////////////////////////////////
-//Function used to get scope outside AngularJS
-function getAngularScope(ctrlName) {
-    var sel = '[ng-controller="' + ctrlName + '"]';
-    return angular.element(sel).scope();
-}
-
-///Init AngularJS
-var ngApp = angular.module("APM-App", []);
-ngApp.controller("APM-App-Controller", function($scope) {
-
-  $scope.recipies = [];
-
-  //When user hit enter on search field
-  $scope.recipeSearch = function() {
-    searchVar = document.getElementById("recipe-search-field").value
-    ahk.SearchRecipe(searchVar);
-    // if ($("#recipe-search .results").is("visible)")) {
-    //     ahk.SearchRecipe(searchVar);
-    // }
-  };
 });

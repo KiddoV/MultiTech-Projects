@@ -191,7 +191,7 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 .ui.toast {
   border-radius: 0.15rem !important;
   padding: 0.4em 0.8em !important;
-  font-size: 0.8em !important;
+  font-size: 0.9em !important;
 }
 
 .ui.modal > .header {

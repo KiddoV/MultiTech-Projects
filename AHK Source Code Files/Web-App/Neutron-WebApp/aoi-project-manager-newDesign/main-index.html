@@ -6,7 +6,7 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<!-- ===================================================================== -->
   <script src="jquery-3.5.1.js"></script>   <!-- Always load JQuery first!  -->
-	<script src="angular.min.js"></script>
+	<!-- <script src="angular.min.js"></script> -->
 
   <!-- Fomantic (Cemantic) - UI Libs -->
   <link href="semantic.css" rel="stylesheet">
@@ -25,7 +25,7 @@
 
 <!-- ======================================================================= -->
 <!-- Main Contents -->
-<body class="bg-app-color no-select-text" ng-app="APM-App" ng-controller="APM-App-Controller">
+<body class="bg-app-color no-select-text">
   <!-- Title Bar -->
   <header class="bg-app-theme-dark" style="">
     <span class="default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">?????????</span>
@@ -79,47 +79,30 @@
 						<div id="recipe-search" class="ui fluid search">
 							<div class="ui left icon fluid action input">
 								<i class="search icon"></i>
-							  <input id="recipe-search-field" class="prompt" type="text" placeholder="Enter PCB #, build # or recipe name..." ng-keydown="$event.keyCode == 13 && recipeSearch()">
-							  <div class="ui button" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;">Search</div>
+							  <input id="recipe-search-field" class="prompt" type="text" placeholder="Enter PCB #, build # or recipe name..." onkeydown="event.keyCode == 13 && ahk.SearchRecipe(this)">
+							  <div class="ui button" onclick="ahk.SearchRecipe(this)" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;">Search</div>
 							</div>
+							<!-- <div class="ui pointing red basic label" style="position: absolute; z-index: 997"></div> -->
 							<div class="results"></div>
 						</div>
 					</div>
-					<span class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
+					<span id="recipe-search-status-label" class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
 					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px)">
 
-						<!-- Recipe Cards -->
-						<!-- <div class="recipe-card notready ui horizontal fluid card">
-						 <div class="content">
-							<div class="ui equal width grid">
-								<div class="header row" style="padding-bottom: 2px !important;">
-									<div class="column">7000000L</div>
-									<div class="column">A00</div>
-									<div class="column">33999</div>
-									<div class="column"><span class="ui mini label black">1000000L</span></div>
-								</div>
-								<div class="meta row" style="padding-top: 2px !important;">
-									<div class="column" style="font-weight: bold"><span class="recipe-name">7000000L_A00</span></div>
-									<div class="column"><span class="ui basic image label"><img src="yestech-logo.png"/>YesTech</span></div>
-								</div>
-							</div>
-						</div>
-					 </div> -->
-
-					 	<!-- Recipe Cards -->
-					 <div class="recipe-card {{recipe.recipeStatus}} ui horizontal fluid card" ng-repeat="recipe in recipies">
+					 <!-- Recipe Cards -->
+					 <div class="recipe-card usable ui horizontal fluid card">
 						<div class="content">
 						 <div class="ui grid">
 							<div class="thirteen wide column">
 								<div class="ui equal width grid">
 									<div class="row" style="padding-bottom: 2px !important;">
-										<div class="column"><span class="ui mini label green">7000000L</span></div>
-										<div class="column">A00</div>
-										<div class="column">33999</div>
-										<div class="column"><span class="ui mini label blue">1000000L</span></div>
+										<div class="column"><span class="ui mini label green">70000000L</span></div>
+										<div class="column">000</div>
+										<div class="column">12345</div>
+										<div class="column"><span class="ui mini label blue">10000000L</span></div>
 									</div>
 									<div class="row" style="padding-top: 2px !important;">
-										<div class="column" style="font-weight: bold"><span class="recipe-name">7000000L_A00</span></div>
+										<div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_000</span></div>
 									</div>
 								</div>
 						 	</div>
@@ -129,30 +112,6 @@
 						 </div>
 					 </div>
 					</div>
-
-					<!-- Recipe Cards -->
-				 <!-- <div class="recipe-card usable ui horizontal fluid card">
-					<div class="content">
-					 <div class="ui grid">
-						<div class="thirteen wide column">
-							<div class="ui equal width grid">
-								<div class="row" style="padding-bottom: 2px !important;">
-									<div class="column"><span class="ui mini label green">7000000L</span></div>
-									<div class="column">A00</div>
-									<div class="column">33999</div>
-									<div class="column"><span class="ui mini label blue">1000000L</span></div>
-								</div>
-								<div class="row" style="padding-top: 2px !important;">
-									<div class="column" style="font-weight: bold"><span class="recipe-name">7000000L_A00</span></div>
-								</div>
-							</div>
-						</div>
-						<div class="three wide column">
-							<img class="ui rounded image bordered right floated" src="yestech-logo.png" style="z-index: 80;" width="50" height="50">
-						</div>
-					 </div>
-				 </div>
-				</div> -->
 
 						<!-- <div class="ui massive slow active loader"></div> -->
 					</div>
