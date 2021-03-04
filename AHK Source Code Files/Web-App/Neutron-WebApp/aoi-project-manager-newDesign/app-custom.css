@@ -223,6 +223,27 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 .recipe-card.usable .recipe-name {
   color: #007E33 !important;
 }
+.recipe-card.needupdate {
+  border: #6a1b9a solid 1px !important;
+  border-left: #6a1b9a solid 7px !important;
+}
+.recipe-card.needupdate .recipe-name {
+  color: #6a1b9a !important;
+}
+.recipe-card.inprogress {
+  border: #ff8f00 solid 1px !important;
+  border-left: #ff8f00 solid 7px !important;
+}
+.recipe-card.inprogress .recipe-name {
+  color: #ff8f00 !important;
+}
+.recipe-card.substitute {
+  border: #757575 solid 1px !important;
+  border-left: #757575 solid 7px !important;
+}
+.recipe-card.substitute .recipe-name {
+  color: #757575 !important;
+}
 .recipe-card.notready {
   border: #d50000 solid 1px !important;
   border-left: #d50000 solid 7px !important;

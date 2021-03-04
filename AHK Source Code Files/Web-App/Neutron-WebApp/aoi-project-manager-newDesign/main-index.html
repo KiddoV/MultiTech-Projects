@@ -3,10 +3,11 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
 	<!-- ===================================================================== -->
   <script src="jquery-3.5.1.js"></script>   <!-- Always load JQuery first!  -->
-	<script src="angular.min.js"></script>
+	<!-- <script src="angular.min.js"></script> -->
+	<script src="knockout.js"></script>
 
   <!-- Fomantic (Cemantic) - UI Libs -->
   <link href="semantic.css" rel="stylesheet">
@@ -25,7 +26,7 @@
 
 <!-- ======================================================================= -->
 <!-- Main Contents -->
-<body class="bg-app-color no-select-text" ng-app="APM-App" ng-controller="APM-App-Controller">
+<body id="APM-App" class="bg-app-color no-select-text">
   <!-- Title Bar -->
   <header class="bg-app-theme-dark" style="">
     <span class="default-mouse" onmousedown="neutron.DragTitleBar()" id="title-label">?????????</span>
@@ -79,40 +80,40 @@
 						<div id="recipe-search" class="ui fluid search">
 							<div class="ui left icon fluid action input">
 								<i class="search icon"></i>
-							  <input id="recipe-search-field" class="prompt" type="text" placeholder="Enter PCB #, build # or recipe name..." ng-keydown="$event.keyCode == 13 && recipeSearch()">
-							  <div class="ui button" onclick="ahk.SearchRecipe(this)" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;">Search</div>
+							  <input id="recipe-search-field" class="prompt" type="text" placeholder="Enter PCB #, build # or recipe name..." onkeydown="event.keyCode == 13 && recipeSearch()">
+							  <div class="ui button" onclick="recipeSearch()" style="background-image: linear-gradient(to right, rgba(0, 117, 207, 0.3), rgba(0, 117, 207,1)); color: white;">Search</div>
 							</div>
 							<!-- <div class="ui pointing red basic label" style="position: absolute; z-index: 997"></div> -->
 							<div class="results"></div>
 						</div>
 					</div>
 					<span id="recipe-search-status-label" class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
-					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px)">
-
-					 <!-- Recipe Cards -->
-					 <div class="recipe-card usable ui horizontal fluid card" ng-repeat="recipe in recipies">
-						<div class="content">
-						 <div class="ui grid">
-							<div class="thirteen wide column">
-								<div class="ui equal width grid">
-									<div class="row" style="padding-bottom: 2px !important;">
-										<div class="column"><span class="ui mini label green">70000000L</span></div>
-										<div class="column">000</div>
-										<div class="column">12345</div>
-										<div class="column"><span class="ui mini label blue">10000000L</span></div>
-									</div>
-									<div class="row" style="padding-top: 2px !important;">
-										<div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_000</span></div>
-									</div>
-								</div>
-						 	</div>
-						 	<div class="three wide column">
-								<img class="ui rounded image bordered right floated" src="no-brand-logo.png" style="z-index: 80;" width="50" height="50">
-						 	</div>
-						 </div>
-					 </div>
-					</div>
-
+					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px); overflow-y: scroll; overflow-x: hidden;">
+						<div data-bind="foreach: recipies">
+						 <!-- Recipe Cards -->
+						 <div class="recipe-card ui horizontal fluid card" data-bind="class: recipeStatusCSSClass">
+								<div class="content">
+								 <div class="ui grid">
+									<div class="thirteen wide column">
+										<div class="ui equal width grid">
+											<div class="row" style="padding-bottom: 2px !important;">
+												<div class="column"><span class="ui mini label green" data-bind="text: prog_build_number">????????L</span></div>
+												<div class="column" data-bind="text: prog_current_ecl">###</div>
+												<div class="column" data-bind="text: prog_current_eco">#####</div>
+												<div class="column"><span class="ui mini label blue" data-bind="text: prog_pcb_number">????????L</span></div>
+											</div>
+											<div class="row" style="padding-top: 2px !important;">
+												<div class="column" style="font-weight: bold"><span class="recipe-name" data-bind="text: prog_full_name">????????L_###</span></div>
+											</div>
+										</div>
+								 	</div>
+								 	<div class="three wide column">
+										<img class="ui rounded image bordered right floated" src="no-brand-logo.png" style="z-index: 80;" width="50" height="50">
+								 	</div>
+								 </div>
+							 </div>
+							</div>
+						</div>
 						<!-- <div class="ui massive slow active loader"></div> -->
 					</div>
 				</div>

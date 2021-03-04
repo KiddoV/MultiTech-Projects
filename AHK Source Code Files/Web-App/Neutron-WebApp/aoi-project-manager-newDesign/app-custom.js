@@ -4,7 +4,20 @@
 $(document).ready(function() {
   //Global Variables  /////////////////
   /////////////////////////////////////
-  var recipiesObj = {recipies: []};
+  app = new AppViewModel();
+  ko.applyBindings(app);
+
+  // For search result Container
+  // window.recipeSearchResultContainer_OSIns = $("#recipe-search-result-container").overlayScrollbars({
+  //   className: "os-theme-minimal-dark",
+  //   scrollbars : {
+  //     autoHide: "move",
+  //   },
+  //   overflowBehavior : {
+  //     x : "hidden",
+  //     y : "scroll"
+  //   }
+  // }).overlayScrollbars();
   /////////////////////////////////////
   /*** Event for nav bar menu ***/
   if ($(".menu-item").hasClass("active")) {
@@ -16,20 +29,27 @@ $(document).ready(function() {
   // Events for app settings Tabs
   $(".app-settings-tabs .item").tab();
 
-  // For search result Container
-  var recipeSearchResultContainer_OSIns = $("#recipe-search-result-container").overlayScrollbars({
-    className: "os-theme-minimal-dark",
-    scrollbars : {
-      autoHide: "move",
-    },
-    overflowBehavior : {
-      x : "hidden",
-      y : "scroll"
-    }
-  }).overlayScrollbars();
+  $(".recipe-card").transition('fly down');
+
 }); ///////////////////////////////////
 ///////////////////////////////////////
 //Main Functions  ////////////////////
+function recipeSearch() {
+  var searchVar = $("#recipe-search-field").val();
+  // window.recipeSearchResultContainer_OSIns.sleep();
+  returnJson = ahk.SearchRecipe(searchVar);  ///Call func from AHK
+  if (!searchVar) {
+    $("#recipe-search .input").removeClass("loading");
+    return
+  } else {
+    app.recipies([]);
+    returnArrObj = JSON.parse(returnJson)
+    for (let i = 0; i < returnArrObj.length; i++) {
+        app.recipies.push(returnArrObj[i]);
+    }
+    $("#recipe-search .input").removeClass("loading");
+  }
+}
 
 //Functions when user hit nav items (Tabs)
 $(function() {
@@ -88,24 +108,36 @@ $(function() {
   });
 });
 /*===========================================================================*/
-//////////////////////////////// AngularJS  ///////////////////////////////////
-//Function used to get scope outside AngularJS
-function getAngularScope(ctrlName) {
-    var sel = '[ng-controller="' + ctrlName + '"]';
-    return angular.element(sel).scope();
+//////////////////////////////// KnockOutJs //////////////////////////////////
+function AppViewModel() {
+  ///Init variables
+  var self = this;
+
+  self.recipies = ko.observableArray([]);
+
+  // Input variables
+  // self.searchText = ko.observable("");
+
+  /////////////////////////////////////
+
+  // self.recipies.subscribe(function(changes) {
+  //   changes.forEach(function(change) {
+  //     // alert(change.status);
+  //     if (change.status === "added") {
+  //       // $(".recipe-card").transition();
+  //     }
+  //   });
+  // }, null, "arrayChange");
+
 }
-///Init AngularJS
-var ngApp = angular.module("APM-App", []);
-ngApp.controller("APM-App-Controller", function($scope) {
-  $scope.recipies = [];
-  var json = [{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"}];
-  //When user hit enter on search field
-  $scope.recipeSearch = function() {
-    searchVar = document.getElementById("recipe-search-field").value
-    //$scope.recipies = ahk.SearchRecipe(searchVar);
-    $scope.recipies = json;
-    // if ($("#recipe-search .results").is("visible)")) {
-    //     ahk.SearchRecipe(searchVar);
-    // }
-  };
-});
+// ko.bindingHandlers.recipeCardTrans = {
+//   'update': function (element, valueAccessor, allBindings) {
+//     var value = valueAccessor();
+//     var valueUnwrapped = ko.unwrap(value);
+//     $(element).transition({
+//       animation: "fly down",
+//       reverse: true,
+//     });
+//   }
+// };
+// ko.applyBindings(new AppViewModel(), document.querySelector("#APM-App"));

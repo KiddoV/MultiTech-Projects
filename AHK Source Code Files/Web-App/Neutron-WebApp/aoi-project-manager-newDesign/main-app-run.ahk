@@ -127,60 +127,14 @@ SearchRecipe(neutron, searchKeyWords) {
     }
     
     searchResult := DataBaseTableToObject(Result)
-    ;Return JSON.Dump(searchResult)
-    Return searchResult := {test: searchResult}
+    objKey := "recipeStatusCSSClass"
+    Loop, % searchResult.Length()
+        searchResult[A_Index, objKey] := (searchResult[A_Index].prog_status == "USABLE") ? "usable" : (searchResult[A_Index].prog_status == "NEED UPDATE") ? "needupdate" : (searchResult[A_Index].prog_status == "NOT READY") ? "notready" : (searchResult[A_Index].prog_status == "IN PROGRESS") ? "inprogress" : (searchResult[A_Index].prog_status == "SUBSTITUTE") ? "substitute" : "black"
+    
+    
+    Return JSON.Dump(searchResult)
+    ;Return searchResult
     ;DisplayRecipeCard(searchResult)
-}
-
-DisplayRecipeCard(resultObj) {
-    
-    Loop, % resultObj.Length()
-    {
-        progDBId := programData[A_Index].prog_id
-        progFullName := programData[A_Index].prog_full_name
-        progStatus := programData[A_Index].prog_status
-        buildNum := programData[A_Index].prog_build_number
-        pcbNum := programData[A_Index].prog_pcb_number
-        currentECO := programData[A_Index].prog_current_eco
-        currentECL := programData[A_Index].prog_current_ecl
-        dateTimeCreated := programData[A_Index].prog_date_created
-        dateTimeUpdated := programData[A_Index].prog_date_updated
-        machineBrandName := programData[A_Index].prog_aoi_machine
-        progAltType := programData[A_Index].prog_alternate_type
-        progSubsName := programData[A_Index].prog_substitute
-        progLibName := programData[A_Index].prog_library_name = "" ? "N/A" : programData[A_Index].prog_library_name
-
-        pcbPartStatus := programData[A_Index].pcb_part_status
-            
-        html =
-        (
-         <!-- Recipe Cards -->
-         <div class="recipe-card usable ui horizontal fluid card">
-            <div class="content">
-             <div class="ui grid">
-                <div class="thirteen wide column">
-                    <div class="ui equal width grid">
-                        <div class="row" style="padding-bottom: 2px !important;">
-                            <div class="column"><span class="ui mini label green">70000000L</span></div>
-                            <div class="column">000</div>
-                            <div class="column">12345</div>
-                            <div class="column"><span class="ui mini label blue">10000000L</span></div>
-                        </div>
-                        <div class="row" style="padding-top: 2px !important;">
-                            <div class="column" style="font-weight: bold"><span class="recipe-name">70000000L_000</span></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="three wide column">
-                    <img class="ui rounded image bordered right floated" src="yestech-logo.png" style="z-index: 80;" width="50" height="50">
-                </div>
-             </div>
-         </div>
-        </div>    
-        )
-    }
-    
-    NeutronWebApp.wnd.jq("#recipe-search-result-container").append(html)
 }
 
 MainMenuHandle(neutron, event, selectedItem) {
