@@ -2,21 +2,10 @@
 ////////////////////////////// Main Functions  ////////////////////////////////
 //Functions to run when Page is READY//
 $(document).ready(function() {
-  //Global Variables  //////////////////
-  ///////////////////////////////////////
-  // var contents = [
-  //   { title: '7000' },
-  //   { title: '123' },
-  //   { title: '123123' },
-  //   { title: '123123' },
-  //   { title: '123123' },
-  //   { title: '1231231' },
-  //   { title: '1231231' },
-  // ];
-  // $("#recipe-search").search({
-  //   source: contents,
-  //   showNoResults: false,
-  // });
+  //Global Variables  /////////////////
+  /////////////////////////////////////
+  var recipiesObj = {recipies: []};
+  /////////////////////////////////////
   /*** Event for nav bar menu ***/
   if ($(".menu-item").hasClass("active")) {
     let whichTab = $(this).attr("data-toggle");
@@ -41,6 +30,7 @@ $(document).ready(function() {
 }); ///////////////////////////////////
 ///////////////////////////////////////
 //Main Functions  ////////////////////
+
 //Functions when user hit nav items (Tabs)
 $(function() {
   $(".menu-item").on("click", function() {
@@ -96,4 +86,26 @@ $(function() {
       },
     }).modal("toggle set active");
   });
+});
+/*===========================================================================*/
+//////////////////////////////// AngularJS  ///////////////////////////////////
+//Function used to get scope outside AngularJS
+function getAngularScope(ctrlName) {
+    var sel = '[ng-controller="' + ctrlName + '"]';
+    return angular.element(sel).scope();
+}
+///Init AngularJS
+var ngApp = angular.module("APM-App", []);
+ngApp.controller("APM-App-Controller", function($scope) {
+  $scope.recipies = [];
+  var json = [{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"},{"name":"John", "age":31, "city":"New York"}];
+  //When user hit enter on search field
+  $scope.recipeSearch = function() {
+    searchVar = document.getElementById("recipe-search-field").value
+    //$scope.recipies = ahk.SearchRecipe(searchVar);
+    $scope.recipies = json;
+    // if ($("#recipe-search .results").is("visible)")) {
+    //     ahk.SearchRecipe(searchVar);
+    // }
+  };
 });

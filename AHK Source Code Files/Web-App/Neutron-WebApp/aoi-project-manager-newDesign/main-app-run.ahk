@@ -100,8 +100,8 @@ Test(neutron, event) {
     DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
 }
 
-SearchRecipe(neutron, event) {
-    searchKeyWords := neutron.qs("#recipe-search-field").value
+SearchRecipe(neutron, searchKeyWords) {
+    ;searchKeyWords := neutron.qs("#recipe-search-field").value
     
     If (searchKeyWords == "") {
         neutron.qs("#recipe-search-status-label").innerHTML := "Please input value..."
@@ -128,8 +128,8 @@ SearchRecipe(neutron, event) {
     
     searchResult := DataBaseTableToObject(Result)
     ;Return JSON.Dump(searchResult)
-    ;Return searchResult
-    DisplayRecipeCard(searchResult)
+    Return searchResult := {test: searchResult}
+    ;DisplayRecipeCard(searchResult)
 }
 
 DisplayRecipeCard(resultObj) {
