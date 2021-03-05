@@ -26,7 +26,7 @@ FileInstall C:\MultiTech-Projects\Imgs-for-GUI\play_orange.png, C:\V-Projects\AM
 Global 266_ItemNums := ["63120927L", "63120928L"]
 Global 267_ItemNums := ["63120925L", "63120926L"]
 
-Global SMC_Items := ["L4E1"]
+Global SMC_Items := ["L4E1", "L4N1"]
 
 Global MainTestFilePath := "C:\V-Projects\AMIPAuto-Tester\TTL-Files\all_mtcdtip_test.ttl"
 

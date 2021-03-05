@@ -32,6 +32,7 @@ if is267L=1 goto CHECK_RADIO_TYPE
 :CHECK_RADIO_TYPE
 isNONE = -1
 isL4E1 = -1
+isL4N1 = -1
 strlen radioType
 if result < 1 then
     isNONE = 1
@@ -42,6 +43,9 @@ endif
 strmatch radioType 'L4E1'
 isL4E1 = result
 if isL4E1=1 goto GET_SMC_INFO
+strmatch radioType 'L4N1'
+isL4N1 = result
+if isL4N1=1 goto GET_SMC_INFO
 
 :GET_SMC_INFO
 apn1_1 = '1,"IPV4V6","",""'
@@ -54,6 +58,13 @@ if isL4E1=1 then
 	rxdivVar = '1,1'
 	fwBuild = '#CFVR: 1'
 	isCSQCheck = 0
+else if isL4N1=1 then
+    radioVersion = '25.20.666'
+	telModuleVer = 'LE910C4-NF'
+	tempSett = '-273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
+	rxdivVar = '1,1'
+	fwBuild = '#CFVR: 2'
+	isCSQCheck = 1	 
 else
     radioVersion = 'N/A'
 	telModuleVer = 'N/A'
