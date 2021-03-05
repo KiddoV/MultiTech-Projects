@@ -18,6 +18,13 @@ $(document).ready(function() {
   //     y : "scroll"
   //   }
   // }).overlayScrollbars();
+  window.recipeLabelsContainer_OSIns = $("#recipe-labels-container").overlayScrollbars({
+    className: "os-theme-thin-dark",
+    overflowBehavior : {
+      x : "scroll",
+      y : "hidden"
+    }
+  }).overlayScrollbars();
   /////////////////////////////////////
   /*** Event for nav bar menu ***/
   if ($(".menu-item").hasClass("active")) {
@@ -37,7 +44,7 @@ $(document).ready(function() {
 function recipeSearch() {
   var searchVar = $("#recipe-search-field").val();
   // window.recipeSearchResultContainer_OSIns.sleep();
-  returnJson = ahk.SearchRecipe(searchVar);  ///Call func from AHK
+  returnJson = ahk.GetRecipesBySearch(searchVar);  ///Call func from AHK
   if (searchVar == null) {
     $("#recipe-search .input").removeClass("loading");
     return
@@ -51,6 +58,15 @@ function recipeSearch() {
   }
 }
 
+function getRecipeInfo(event) {
+  app.recipeLabels.push({id: event.id});
+  // window.recipeLabelsContainer_OSIns.scroll({ x: "100%"  });
+  app.recipies.destroyAll([event.id]);
+  alert(JSON.stringify(app.recipies()));
+}
+function closeRecipeInfo(event) {
+  alert(event.id);
+}
 //Functions when user hit nav items (Tabs)
 $(function() {
   $(".menu-item").on("click", function() {
@@ -112,7 +128,7 @@ $(function() {
 function AppViewModel() {
   ///Init variables
   this.recipies = ko.observableArray([]);
-
+  this.recipeLabels = ko.observableArray([]);
   // Input variables
   // self.searchText = ko.observable("");
 

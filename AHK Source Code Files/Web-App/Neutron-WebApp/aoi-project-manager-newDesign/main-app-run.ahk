@@ -100,7 +100,7 @@ Test(neutron, event) {
     DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
 }
 
-SearchRecipe(neutron, searchKeyWords) {
+GetRecipesBySearch(neutron, searchKeyWords) {
     ;searchKeyWords := neutron.qs("#recipe-search-field").value
     
     If (searchKeyWords == "") {
@@ -113,7 +113,7 @@ SearchRecipe(neutron, searchKeyWords) {
     neutron.qs("#recipe-search .input").classList.add("loading")
     neutron.qs("#recipe-search-field").value := ""
     
-    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON prog_pcb_number=pcb_number WHERE prog_build_number LIKE '%" . searchKeyWords . "%' OR prog_full_name LIKE '%" . searchKeyWords . "%' OR prog_pcb_number LIKE '%" . searchKeyWords . "%' OR prog_current_eco LIKE '%" . searchKeyWords . "%' OR prog_current_ecl LIKE '%" . searchKeyWords . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
+    SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_builds ON prog_build_number=build_number LEFT JOIN aoi_pcbs ON prog_pcb_number=pcb_number WHERE prog_build_number LIKE '%" . searchKeyWords . "%' OR prog_full_name LIKE '%" . searchKeyWords . "%' OR prog_pcb_number LIKE '%" . searchKeyWords . "%' OR prog_current_eco LIKE '%" . searchKeyWords . "%' OR prog_current_ecl LIKE '%" . searchKeyWords . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
     If !AOI_Pro_DB.GetTable(SQL, Result) {
         DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
         Return false
@@ -127,9 +127,13 @@ SearchRecipe(neutron, searchKeyWords) {
     }
     
     searchResult := DataBaseTableToObject(Result)
-    objKey := "recipeStatusCSSClass"
     Loop, % searchResult.Length()
-        searchResult[A_Index, objKey] := (searchResult[A_Index].prog_status == "USABLE") ? "usable" : (searchResult[A_Index].prog_status == "NEED UPDATE") ? "needupdate" : (searchResult[A_Index].prog_status == "NOT READY") ? "notready" : (searchResult[A_Index].prog_status == "IN PROGRESS") ? "inprogress" : (searchResult[A_Index].prog_status == "SUBSTITUTE") ? "substitute" : "black"
+    {
+        searchResult[A_Index, "recipeStatusCSSClass"] := (searchResult[A_Index].prog_status == "USABLE") ? "usable" : (searchResult[A_Index].prog_status == "NEED UPDATE") ? "needupdate" : (searchResult[A_Index].prog_status == "NOT READY") ? "notready" : (searchResult[A_Index].prog_status == "IN PROGRESS") ? "inprogress" : (searchResult[A_Index].prog_status == "SUBSTITUTE") ? "substitute" : "black"
+        searchResult[A_Index, "recipeBrandLogo"] := (searchResult[A_Index].prog_aoi_machine == "YesTech") ? "yestech-logo.png" : (searchResult[A_Index].prog_aoi_machine == "TRI") ? "rti-logo.png" : "no-brand-logo.png"
+        searchResult[A_Index, "buildPartStatusCSSClass"] := (searchResult[A_Index].build_part_status == "ACTIVE") ? "green" : (searchResult[A_Index].build_part_status == "BETA") ? "blue" : (searchResult[A_Index].build_part_status == "OBSOLETE") ? "orange" : (searchResult[A_Index].build_part_status == "USE UP") ? "yellow" : (searchResult[A_Index].build_part_status == "LAST-TIME BUY") ? "teal" : (searchResult[A_Index].build_part_status == "NO DESIGN") ? "brown" : "grey"
+        searchResult[A_Index, "pcbPartStatusCSSClass"] := (searchResult[A_Index].pcb_part_status == "ACTIVE") ? "green" : (searchResult[A_Index].pcb_part_status == "BETA") ? "blue" : (searchResult[A_Index].pcb_part_status == "OBSOLETE") ? "orange" : (searchResult[A_Index].pcb_part_status == "USE UP") ? "yellow" : (searchResult[A_Index].pcb_part_status == "LAST-TIME BUY") ? "teal" : (searchResult[A_Index].pcb_part_status == "NO DESIGN") ? "brown" : "grey"
+    }
     
     
     Return JSON.Dump(searchResult)

@@ -51,7 +51,7 @@ footer {
   color: white;
 }
 body{
-	-ms-overflow-style: none;		/* Hide the scrollbar */
+  -ms-overflow-style: none;		/* Hide the scrollbar */
 }
 
 #title-label {
@@ -257,4 +257,8 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 }
 .recipe-card > .content > .header {
   margin: 0 !important;
+}
+
+.os-theme-thin-dark > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle:before {
+  border-radius: 0 !important;
 }

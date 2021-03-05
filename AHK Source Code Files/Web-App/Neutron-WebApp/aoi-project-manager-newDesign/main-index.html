@@ -88,26 +88,31 @@
 					</div>
 					<span id="recipe-search-status-label" class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
 					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px); overflow-y: scroll; overflow-x: hidden;">
-						<div data-bind="template: {foreach: recipies, beforeRemove: hideRecipeCard, afterAdd: showRecipeCard}">
+						<div style="padding-top: 5px;" data-bind="template: {foreach: recipies, beforeRemove: hideRecipeCard, afterAdd: showRecipeCard}">
 						 <!-- Recipe Cards -->
-						 <div class="recipe-card ui horizontal fluid card" data-bind="class: recipeStatusCSSClass">
+						 <div class="recipe-card ui horizontal fluid link card" data-bind="class: recipeStatusCSSClass, attr: { id: prog_id }" onclick="getRecipeInfo(this)">
 								<div class="content">
 								 <div class="ui grid">
 									<div class="thirteen wide column">
 										<div class="ui equal width grid">
 											<div class="row" style="padding-bottom: 2px !important;">
-												<div class="column"><span class="ui mini label green" data-bind="text: prog_build_number">????????L</span></div>
+												<div class="column"><span class="ui mini label" data-bind="text: prog_build_number, class: buildPartStatusCSSClass">????????L</span></div>
 												<div class="column" data-bind="text: prog_current_ecl">###</div>
 												<div class="column" data-bind="text: prog_current_eco">#####</div>
-												<div class="column"><span class="ui mini label blue" data-bind="text: prog_pcb_number">????????L</span></div>
+												<div class="column"><span class="ui mini label" data-bind="text: prog_pcb_number, class: pcbPartStatusCSSClass">????????L</span></div>
 											</div>
 											<div class="row" style="padding-top: 2px !important;">
-												<div class="column" style="font-weight: bold"><span class="recipe-name" data-bind="text: prog_full_name">????????L_###</span></div>
+												<div class="column" style="font-weight: bold">
+													<span data-bind="if: prog_alternate_type"><a class="ui black empty circular label"></a></span>
+													<span class="recipe-name" data-bind="text: prog_full_name">????????L_###</span> <span data-bind="if: prog_substitute"><span class="ui left pointing red basic tiny label">Use > <span data-bind="text: prog_substitute"></span></span></span>
+												</div>
+												<!-- <div class="column"></div> -->
+												<!-- <div class="column"></div> -->
 											</div>
 										</div>
 								 	</div>
 								 	<div class="three wide column">
-										<img class="ui rounded image bordered right floated" src="no-brand-logo.png" style="z-index: 80;" width="50" height="50">
+										<img class="ui rounded image bordered right floated" data-bind="attr: { src: recipeBrandLogo }" style="z-index: 80;" width="50" height="50">
 								 	</div>
 								 </div>
 							 </div>
@@ -117,7 +122,15 @@
 					</div>
 				</div>
 				<div class="nine wide column" style="height: 100vh; padding: 5px;">
-					2
+					<div class="ui equal padded width aligned grid">
+						<div id="recipe-labels-container" class="row center aligned wide" style="height: 40px; max-width: 100vh; padding-top: 0; padding-bottom: 0.5em; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
+							<div class="ui labels" data-bind="foreach: recipeLabels.slice(0).reverse()">
+								<a class="ui label green"><span data-bind="text: id">????????L_###</span><i class="icon close" onclick="closeRecipeInfo(this)"></i></a>
+							</div>
+						</div>
+						<div class="row wide yellow" style="height: calc(100vh - 113px);">
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>	<!-- =========================================================== -->
