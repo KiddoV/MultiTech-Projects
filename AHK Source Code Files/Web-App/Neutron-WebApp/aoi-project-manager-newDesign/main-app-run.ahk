@@ -105,7 +105,7 @@ SearchRecipe(neutron, searchKeyWords) {
     
     If (searchKeyWords == "") {
         neutron.qs("#recipe-search-status-label").innerHTML := "Please input value..."
-        Return
+        Return false
     }
     
     ;;Get data from DB
@@ -116,14 +116,14 @@ SearchRecipe(neutron, searchKeyWords) {
     SQL := "SELECT * FROM aoi_programs LEFT JOIN aoi_pcbs ON prog_pcb_number=pcb_number WHERE prog_build_number LIKE '%" . searchKeyWords . "%' OR prog_full_name LIKE '%" . searchKeyWords . "%' OR prog_pcb_number LIKE '%" . searchKeyWords . "%' OR prog_current_eco LIKE '%" . searchKeyWords . "%' OR prog_current_ecl LIKE '%" . searchKeyWords . "%' ORDER BY prog_pcb_number, prog_build_number ASC"
     If !AOI_Pro_DB.GetTable(SQL, Result) {
         DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
-        Return
+        Return false
     }
     
     rowCount := Result.RowCount
     NeutronWebApp.qs("#recipe-search-status-label").innerHTML := "Found " . rowCount . " result(s)"
     If (!Result.HasRows) {
         DisplayAlertMsg("Not found any result!", , , "warning")
-        Return
+        Return false
     }
     
     searchResult := DataBaseTableToObject(Result)

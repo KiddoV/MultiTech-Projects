@@ -38,12 +38,12 @@ function recipeSearch() {
   var searchVar = $("#recipe-search-field").val();
   // window.recipeSearchResultContainer_OSIns.sleep();
   returnJson = ahk.SearchRecipe(searchVar);  ///Call func from AHK
-  if (!searchVar) {
+  if (searchVar == null) {
     $("#recipe-search .input").removeClass("loading");
     return
   } else {
     app.recipies([]);
-    returnArrObj = JSON.parse(returnJson)
+    returnArrObj = JSON.parse(returnJson);
     for (let i = 0; i < returnArrObj.length; i++) {
         app.recipies.push(returnArrObj[i]);
     }
@@ -111,14 +111,28 @@ $(function() {
 //////////////////////////////// KnockOutJs //////////////////////////////////
 function AppViewModel() {
   ///Init variables
-  var self = this;
-
-  self.recipies = ko.observableArray([]);
+  this.recipies = ko.observableArray([]);
 
   // Input variables
   // self.searchText = ko.observable("");
 
   /////////////////////////////////////
+  // Init Functions
+this.showRecipeCard = function(element) {
+  if (element.nodeType === 1) {
+    $(element).transition({
+      animation: "fly down in",
+    });
+  }
+};
+this.hideRecipeCard = function(element) {
+  if (element.nodeType === 1) {
+    $(element).transition({
+      animation: "fade out",
+    });
+    $(element).remove();
+  }
+};
 
   // self.recipies.subscribe(function(changes) {
   //   changes.forEach(function(change) {
@@ -128,7 +142,6 @@ function AppViewModel() {
   //     }
   //   });
   // }, null, "arrayChange");
-
 }
 // ko.bindingHandlers.recipeCardTrans = {
 //   'update': function (element, valueAccessor, allBindings) {

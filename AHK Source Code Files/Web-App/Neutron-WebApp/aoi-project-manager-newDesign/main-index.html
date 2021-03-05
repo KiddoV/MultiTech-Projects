@@ -6,7 +6,6 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge, Chrome=1">
 	<!-- ===================================================================== -->
   <script src="jquery-3.5.1.js"></script>   <!-- Always load JQuery first!  -->
-	<!-- <script src="angular.min.js"></script> -->
 	<script src="knockout.js"></script>
 
   <!-- Fomantic (Cemantic) - UI Libs -->
@@ -89,7 +88,7 @@
 					</div>
 					<span id="recipe-search-status-label" class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
 					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px); overflow-y: scroll; overflow-x: hidden;">
-						<div data-bind="foreach: recipies">
+						<div data-bind="template: {foreach: recipies, beforeRemove: hideRecipeCard, afterAdd: showRecipeCard}">
 						 <!-- Recipe Cards -->
 						 <div class="recipe-card ui horizontal fluid card" data-bind="class: recipeStatusCSSClass">
 								<div class="content">
