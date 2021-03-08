@@ -88,10 +88,11 @@
 					</div>
 					<span id="recipe-search-status-label" class="ui small blue text" style="padding-left: 5px;">Result display here...</span>
 					<div id="recipe-search-result-container" class="row" style="height: calc(100vh - 131px); overflow-y: scroll; overflow-x: hidden;">
-						<div style="padding-top: 5px;" data-bind="template: {foreach: recipies, beforeRemove: hideRecipeCard, afterAdd: showRecipeCard}">
+						<div style="padding-top: 5px;" data-bind="template: {foreach: recipies, afterAdd: showRecipeCard}">
 						 <!-- Recipe Cards -->
-						 <div class="recipe-card ui horizontal fluid link card" data-bind="class: recipeStatusCSSClass, attr: { id: prog_id }" onclick="getRecipeInfo(this)">
+						 <div class="recipe-card ui horizontal fluid link card" data-bind="class: recipeStatusCSSClass, attr: { id: prog_id }, click: function(){ getRecipeInfo($data, $element) }">
 								<div class="content">
+								 <span data-bind="checkPined: $root.recipeLabels"><span class="ui mini right grey corner label" style="z-index: 800" data-bind="class: recipeStatusCSSClass"><i class="pin icon"></i></span></span>
 								 <div class="ui grid">
 									<div class="thirteen wide column">
 										<div class="ui equal width grid">
@@ -112,7 +113,7 @@
 										</div>
 								 	</div>
 								 	<div class="three wide column">
-										<img class="ui rounded image bordered right floated" data-bind="attr: { src: recipeBrandLogo }" style="z-index: 80;" width="50" height="50">
+										<img class="ui rounded image bordered right floated" style="z-index: 799" data-bind="attr: { src: recipeBrandLogo }" style="z-index: 80;" width="50" height="50">
 								 	</div>
 								 </div>
 							 </div>
@@ -122,13 +123,29 @@
 					</div>
 				</div>
 				<div class="nine wide column" style="height: 100vh; padding: 5px;">
-					<div class="ui equal padded width aligned grid">
-						<div id="recipe-labels-container" class="row center aligned wide" style="height: 40px; max-width: 100vh; padding-top: 0; padding-bottom: 0.5em; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
-							<div class="ui labels" data-bind="foreach: recipeLabels.slice(0).reverse()">
-								<a class="ui label green"><span data-bind="text: id">????????L_###</span><i class="icon close" onclick="closeRecipeInfo(this)"></i></a>
+					<div class="ui equal padded width grid">
+						<div class="two wide column" style="padding: 0; width: 55px !important; height: 30px; background-color: #E0E0E0; border-radius: 5px 0 0 5px;">
+							<div class="" style="opacity: 0.5; padding: 5px 0; padding-left: 5px;">
+								<i class="pin icon" style="margin: 0;"></i>
+								<span class="ui text" style="font-weight: bold;" data-bind="text: recipeLabels().length">0</span>
 							</div>
 						</div>
-						<div class="row wide yellow" style="height: calc(100vh - 113px);">
+						<div class="fourteen wide column" style="padding: 0; height: 35px;">
+							<div id="recipe-labels-container" class="ui row wide" style="height: 100%; max-width: 100vh; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
+								<div style="margin-left: 5px;" class="ui labels" data-bind="template: {foreach: recipeLabels.slice(0).reverse(), includeDestroyed: false, beforeRemove: hideRecipeLabel, afterAdd: showRecipeLabel}">
+									<a style="opacity: 0.8" class="recipe-label ui label" data-bind="class: recipeStatusCSSClass, click: function(){ showRecipeInfo($data, $element)}"><span data-bind="text: prog_full_name">????????L_###</span><i class="icon close" data-bind="click: function() {closeRecipeInfo($data)}"></i></a>
+								</div>
+							</div>
+						</div>
+						<div class="row wide" style="height: calc(100vh - 110px); padding-top: 2px; padding-bottom: 0;">
+							<div class="ui fluid segment" style="width: 100%; padding: 5px;">
+								<div class="ui top attached label" style="text-align: center;" data-bind="text: recipeInView().prog_full_name">????????L_###</div>
+								<div class="content">
+								</div>
+								<div class="ui bottom attached label" style="padding: 5px;">
+									<button class="mini ui button">TEST</button>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -149,6 +166,25 @@
 		<div class="ui tab" data-tab="tab-4">
 
 			<button class="ui primary button" onclick="testFnc()">Test</button>
+
+			<div class="ui two column grid">
+			  <div class="column">
+			    <div class="ui fluid image">
+			      <a class="ui left corner label">
+			        <i class="heart icon"></i>
+			      </a>
+			      <img src="/images/wireframe/image.png">
+			    </div>
+			  </div>
+			  <div class="column">
+			    <div class="ui fluid image">
+			      <a class="ui red right corner label" style="color: white !important;">
+			        <i class="save icon"></i>
+			      </a>
+			      <img src="/images/wireframe/image.png">
+			    </div>
+			  </div>
+			</div>
 
 		</div>	<!-- =========================================================== -->
 

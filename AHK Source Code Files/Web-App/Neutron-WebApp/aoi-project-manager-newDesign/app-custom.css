@@ -223,12 +223,28 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 .recipe-card.usable .recipe-name {
   color: #007E33 !important;
 }
+.recipe-label.usable {
+  color: #FFFFFF !important;
+  background-color: #007E33 !important;
+}
+.recipe-card .usable.ui.corner.label:after {
+  opacity: 0.8 !important;
+  border-right: 4em solid #007E33 !important;
+}
 .recipe-card.needupdate {
   border: #6a1b9a solid 1px !important;
   border-left: #6a1b9a solid 7px !important;
 }
 .recipe-card.needupdate .recipe-name {
   color: #6a1b9a !important;
+}
+.recipe-label.needupdate {
+  color: #FFFFFF !important;
+  background-color: #6a1b9a !important;
+}
+.recipe-card .needupdate.ui.corner.label:after {
+  opacity: 0.8 !important;
+  border-right: 4em solid #6a1b9a !important;
 }
 .recipe-card.inprogress {
   border: #ff8f00 solid 1px !important;
@@ -237,12 +253,28 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 .recipe-card.inprogress .recipe-name {
   color: #ff8f00 !important;
 }
+.recipe-label.inprogress {
+  color: #FFFFFF !important;
+  background-color: #ff8f00 !important;
+}
+.recipe-card .inprogress.ui.corner.label:after {
+  opacity: 0.8 !important;
+  border-right: 4em solid #ff8f00 !important;
+}
 .recipe-card.substitute {
   border: #757575 solid 1px !important;
   border-left: #757575 solid 7px !important;
 }
 .recipe-card.substitute .recipe-name {
   color: #757575 !important;
+}
+.recipe-label.substitute {
+  color: #FFFFFF !important;
+  background-color: #757575 !important;
+}
+.recipe-card .substitute.ui.corner.label:after {
+  opacity: 0.8 !important;
+  border-right: 4em solid #757575 !important;
 }
 .recipe-card.notready {
   border: #d50000 solid 1px !important;
@@ -251,12 +283,23 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 .recipe-card.notready .recipe-name {
   color: #d50000 !important;
 }
+.recipe-label.notready {
+  color: #FFFFFF !important;
+  background-color: #d50000 !important;
+}
+.recipe-card .notready.ui.corner.label:after {
+  opacity: 0.8 !important;
+  border-right: 4em solid #d50000 !important;
+}
 .recipe-card > .content {
   font-size: 1em !important;
   padding: 2px !important;
 }
 .recipe-card > .content > .header {
   margin: 0 !important;
+}
+.recipe-label:hover {
+  opacity: 1 !important;
 }
 
 .os-theme-thin-dark > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle:before {

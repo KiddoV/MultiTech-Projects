@@ -135,7 +135,6 @@ GetRecipesBySearch(neutron, searchKeyWords) {
         searchResult[A_Index, "pcbPartStatusCSSClass"] := (searchResult[A_Index].pcb_part_status == "ACTIVE") ? "green" : (searchResult[A_Index].pcb_part_status == "BETA") ? "blue" : (searchResult[A_Index].pcb_part_status == "OBSOLETE") ? "orange" : (searchResult[A_Index].pcb_part_status == "USE UP") ? "yellow" : (searchResult[A_Index].pcb_part_status == "LAST-TIME BUY") ? "teal" : (searchResult[A_Index].pcb_part_status == "NO DESIGN") ? "brown" : "grey"
     }
     
-    
     Return JSON.Dump(searchResult)
     ;Return searchResult
     ;DisplayRecipeCard(searchResult)

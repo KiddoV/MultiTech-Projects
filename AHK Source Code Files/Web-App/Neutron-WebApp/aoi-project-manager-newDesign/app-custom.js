@@ -58,14 +58,24 @@ function recipeSearch() {
   }
 }
 
-function getRecipeInfo(event) {
-  app.recipeLabels.push({id: event.id});
-  // window.recipeLabelsContainer_OSIns.scroll({ x: "100%"  });
-  app.recipies.destroyAll([event.id]);
-  alert(JSON.stringify(app.recipies()));
+function getRecipeInfo(data, element) {
+  // app.recipies()[0].isPined = 1;
+  app.recipeInView(data);
+  if ($.grep(app.recipeLabels(), function(item) { return item.prog_id === data.prog_id;}).length === 0) {
+    app.recipeLabels.push(data);
+  } else {
+    $(element).transition("shake");
+  }
+  window.recipeLabelsContainer_OSIns.scroll({ x: "0%"  });
 }
-function closeRecipeInfo(event) {
-  alert(event.id);
+
+function showRecipeInfo(data, element) {
+  app.recipeInView(data);
+}
+function closeRecipeInfo(data) {
+  app.recipeLabels.remove(function(item) {
+    return item === data;
+  })
 }
 //Functions when user hit nav items (Tabs)
 $(function() {
@@ -129,28 +139,49 @@ function AppViewModel() {
   ///Init variables
   this.recipies = ko.observableArray([]);
   this.recipeLabels = ko.observableArray([]);
+  this.recipeInView = ko.observable({})
   // Input variables
   // self.searchText = ko.observable("");
 
   /////////////////////////////////////
   // Init Functions
-this.showRecipeCard = function(element) {
-  if (element.nodeType === 1) {
-    $(element).transition({
-      animation: "fly down in",
-    });
-  }
-};
-this.hideRecipeCard = function(element) {
-  if (element.nodeType === 1) {
-    $(element).transition({
-      animation: "fade out",
-    });
-    $(element).remove();
-  }
-};
+  this.showRecipeCard = function(element) {
+    if (element.nodeType === 1) {
+      $(element).transition({
+        animation: "fly down in",
+      });
+    }
+  };
+  // this.hideRecipeCard = function(element) {
+  //   if (element.nodeType === 1) {
+  //     $(element).transition({
+  //       animation: "fade out",
+  //       onHide: function() {
+  //           $(element).remove();
+  //       }
+  //     });
+  //   }
+  // };
 
-  // self.recipies.subscribe(function(changes) {
+  this.showRecipeLabel = function(element) {
+    if (element.nodeType === 1) {
+      $(element).transition({
+        animation: "zoom in",
+      });
+    }
+  };
+  this.hideRecipeLabel = function(element) {
+    if (element.nodeType === 1) {
+      $(element).transition({
+        animation: "zoom out",
+        onHide: function() {
+          $(element).remove();
+        }
+      });
+    }
+  };
+
+  // this.recipies.subscribe(function(changes) {
   //   changes.forEach(function(change) {
   //     // alert(change.status);
   //     if (change.status === "added") {
@@ -158,6 +189,18 @@ this.hideRecipeCard = function(element) {
   //     }
   //   });
   // }, null, "arrayChange");
+}
+ko.bindingHandlers.checkPined = {
+  "init": function(element, valueAccessor, allBindings, viewModel) {
+    $(element).hide();
+  },
+  "update": function(element, valueAccessor, allBindings, viewModel) {
+    if ($.grep(app.recipeLabels(), function(item) { return item.prog_id === viewModel.prog_id;}).length !== 0) {
+      $(element).show();
+    } else {
+      $(element).hide();
+    }
+  }
 }
 // ko.bindingHandlers.recipeCardTrans = {
 //   'update': function (element, valueAccessor, allBindings) {
@@ -170,3 +213,4 @@ this.hideRecipeCard = function(element) {
 //   }
 // };
 // ko.applyBindings(new AppViewModel(), document.querySelector("#APM-App"));
+///////////////////////////////////////////////////////////////////////////////
