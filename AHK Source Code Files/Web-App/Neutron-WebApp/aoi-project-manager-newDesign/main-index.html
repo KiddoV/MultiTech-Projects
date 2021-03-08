@@ -92,7 +92,7 @@
 						 <!-- Recipe Cards -->
 						 <div class="recipe-card ui horizontal fluid link card" data-bind="class: recipeStatusCSSClass, attr: { id: prog_id }, click: function(){ getRecipeInfo($data, $element) }">
 								<div class="content">
-								 <span data-bind="checkPined: $root.recipeLabels"><span class="ui mini right grey corner label" style="z-index: 800" data-bind="class: recipeStatusCSSClass"><i class="pin icon"></i></span></span>
+								 <span data-bind="checkRecipePined: null"><span class="ui mini right grey corner label" style="z-index: 800" data-bind="class: recipeStatusCSSClass"><i class="pin icon"></i></span></span>
 								 <div class="ui grid">
 									<div class="thirteen wide column">
 										<div class="ui equal width grid">
@@ -133,14 +133,19 @@
 						<div class="fourteen wide column" style="padding: 0; height: 35px;">
 							<div id="recipe-labels-container" class="ui row wide" style="height: 100%; max-width: 100vh; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
 								<div style="margin-left: 5px;" class="ui labels" data-bind="template: {foreach: recipeLabels.slice(0).reverse(), includeDestroyed: false, beforeRemove: hideRecipeLabel, afterAdd: showRecipeLabel}">
-									<a style="opacity: 0.8" class="recipe-label ui label" data-bind="class: recipeStatusCSSClass, click: function(){ showRecipeInfo($data, $element)}"><span data-bind="text: prog_full_name">????????L_###</span><i class="icon close" data-bind="click: function() {closeRecipeInfo($data)}"></i></a>
+									<a style="opacity: 0.8" class="recipe-label ui basic label" data-bind="checkRecipeActive: $root.recipeInView, class: recipeStatusCSSClass, click: function(){ showRecipeInfo($data, $element)}"><span data-bind="text: prog_full_name">????????L_###</span><i class="icon close" data-bind="click: function() {closeRecipeInfo($data)}"></i></a>
 								</div>
 							</div>
 						</div>
 						<div class="row wide" style="height: calc(100vh - 110px); padding-top: 2px; padding-bottom: 0;">
-							<div class="ui fluid segment" style="width: 100%; padding: 5px;">
-								<div class="ui top attached label" style="text-align: center;" data-bind="text: recipeInView().prog_full_name">????????L_###</div>
+							<div id="active-view-recipe-container" class="ui fluid segment" style="width: 100%; padding: 5px;">
+								<div class="ui top attached label" style="text-align: center; padding: 7px; font-size: 1.2rem; height: 32px;" data-bind="class: recipeInView().recipeStatusCSSClass">
+									<span data-bind="if: recipeInView().prog_alternate_type"><span class="ui horizontal black label" data-bind="text: recipeInView().prog_alternate_type"></span></span>
+									<span data-bind="text: recipeInView().prog_full_name">????????L_###</span>
+									<span data-bind="if: recipeInView().prog_substitute"><span class="ui left pointing red label" style="vertical-align: middle !important; margin-top: -0.35em !important;" data-bind="text: 'Use > ' + recipeInView().prog_substitute"></span></span>
+								</div>
 								<div class="content">
+									<!--  -->
 								</div>
 								<div class="ui bottom attached label" style="padding: 5px;">
 									<button class="mini ui button">TEST</button>

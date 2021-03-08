@@ -47,24 +47,30 @@ strmatch radioType 'L4N1'
 isL4N1 = result
 if isL4N1=1 goto GET_SMC_INFO
 
+mpause 1000
 :GET_SMC_INFO
-apn1_1 = '1,"IPV4V6","",""'
-apn1_2 = '2,"IPV4V6","ims"'
-apn1_3 = '3,"IPV4V6","sos"'
 if isL4E1=1 then
     radioVersion = '25.20.676'
 	telModuleVer = 'LE910C4-EU'
 	tempSett = '-273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 	rxdivVar = '1,1'
 	fwBuild = '#CFVR: 1'
+	apn1_1 = '1,"IPV4V6","",""'
+	apn1_2 = '2,"IPV4V6","ims"'
+	apn1_3 = '3,"IPV4V6","sos"'	
 	isCSQCheck = 0
+	isApn1Check = 1
 else if isL4N1=1 then
     radioVersion = '25.20.666'
 	telModuleVer = 'LE910C4-NF'
 	tempSett = '-273,-33,0,-35,-28,0,-30,94,0,80,99,2,82,105,3'
 	rxdivVar = '1,1'
 	fwBuild = '#CFVR: 2'
-	isCSQCheck = 1	 
+	apn1_1 = '1,"IPV4V6","nxtgenphone",""'
+	apn1_2 = '2,"IPV4V6","ims"'
+	apn1_3 = '3,"IPV4V6","sos"'			
+	isCSQCheck = 1
+	isApn1Check = 1
 else
     radioVersion = 'N/A'
 	telModuleVer = 'N/A'
@@ -394,6 +400,9 @@ if result = 0 then
     sendln cmd
     goto rxdiv_check
 endif
+
+if isApn1Check = 0 goto smc_info_check
+
 :apn1_check
 flushrecv
 mpause 500
@@ -456,7 +465,7 @@ endif
 if isCSQCheck != 1 goto smc_test_pass
 
 try = 1
-timeout = 30
+timeout = 10
 :csq_check
 expectedRSSI = 7
 mpause 500
@@ -465,6 +474,12 @@ wait '99'
 try = try + 1
 if try > 10 goto csq_fail
 if result = 1 goto csq_check
+mpause 500
+sendln 'at+csq'
+wait 'OK'
+mpause 500
+sendln 'at+csq'
+wait 'OK'
 mpause 500
 sendln 'at+csq'
 waitrecv '+CSQ: ' 10 1

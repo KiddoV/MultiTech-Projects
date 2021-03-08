@@ -211,6 +211,9 @@ BuildJson(obj) {
 }
 ;=======================================================================================;
 ;;;;;;;;;;Hot Keys;;;;;;;;;;
-^q::
+~^q::
     Gosub AOIProManagerClose
-Return
+return
+~^f::
+    NeutronWebApp.wnd.jq("#recipe-search-field").focus()
+return

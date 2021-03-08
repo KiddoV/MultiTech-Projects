@@ -61,21 +61,22 @@ function recipeSearch() {
 function getRecipeInfo(data, element) {
   // app.recipies()[0].isPined = 1;
   app.recipeInView(data);
-  if ($.grep(app.recipeLabels(), function(item) { return item.prog_id === data.prog_id;}).length === 0) {
+  if ($.grep(app.recipeLabels(), function(item) { return item === data;}).length === 0) {
     app.recipeLabels.push(data);
+    window.recipeLabelsContainer_OSIns.scroll({ x: "0%"  });
   } else {
+    // app.recipeLabels.replace(function(item){return item.prog_full_name = "Viet Ho"});
     $(element).transition("shake");
   }
-  window.recipeLabelsContainer_OSIns.scroll({ x: "0%"  });
 }
 
 function showRecipeInfo(data, element) {
   app.recipeInView(data);
 }
 function closeRecipeInfo(data) {
-  app.recipeLabels.remove(function(item) {
+  app.recipeLabels.remove( function(item) {
     return item === data;
-  })
+  });
 }
 //Functions when user hit nav items (Tabs)
 $(function() {
@@ -190,7 +191,8 @@ function AppViewModel() {
   //   });
   // }, null, "arrayChange");
 }
-ko.bindingHandlers.checkPined = {
+/////// KnockOutJs Custom Bindings
+ko.bindingHandlers.checkRecipePined = {
   "init": function(element, valueAccessor, allBindings, viewModel) {
     $(element).hide();
   },
@@ -199,6 +201,20 @@ ko.bindingHandlers.checkPined = {
       $(element).show();
     } else {
       $(element).hide();
+    }
+  }
+}
+
+ko.bindingHandlers.checkRecipeActive = {
+  "update": function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+    var value = valueAccessor();
+    var varlueUnwrapped = ko.unwrap(value);
+
+    if (bindingContext.$data.prog_id === varlueUnwrapped.prog_id) {
+      $(element).addClass("active").removeClass("basic");
+      window.recipeLabelsContainer_OSIns.scroll({el: $(element), block: "center"}, 200);
+    } else {
+      $(element).addClass("basic").removeClass("active");
     }
   }
 }
