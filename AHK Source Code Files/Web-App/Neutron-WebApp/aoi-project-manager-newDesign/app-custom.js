@@ -25,6 +25,14 @@ $(document).ready(function() {
       y : "hidden"
     }
   }).overlayScrollbars();
+
+  window.recipeActiveViewNotes_OSIns = $("#active-view-recipe-notes").overlayScrollbars({
+    className: "os-theme-thin-dark",
+    overflowBehavior : {
+      x : "hidden",
+      y : "scroll"
+    }
+  }).overlayScrollbars();
   /////////////////////////////////////
   /*** Event for nav bar menu ***/
   if ($(".menu-item").hasClass("active")) {
@@ -35,6 +43,8 @@ $(document).ready(function() {
 
   // Events for app settings Tabs
   $(".app-settings-tabs .item").tab();
+
+  $("#active-view-recipe-tab-nav .item").tab();
 
   $(".recipe-card").transition('fly down');
 
@@ -61,7 +71,7 @@ function recipeSearch() {
 function getRecipeInfo(data, element) {
   // app.recipies()[0].isPined = 1;
   app.recipeInView(data);
-  if ($.grep(app.recipeLabels(), function(item) { return item === data;}).length === 0) {
+  if ($.grep(app.recipeLabels(), function(item) { return JSON.stringify(item) === JSON.stringify(data);}).length === 0) {
     app.recipeLabels.push(data);
     window.recipeLabelsContainer_OSIns.scroll({ x: "0%"  });
   } else {

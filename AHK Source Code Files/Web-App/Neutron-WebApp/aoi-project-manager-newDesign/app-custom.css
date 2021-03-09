@@ -141,6 +141,11 @@ body{
 #recipe-search .prompt {
   border-radius: 5px 0 0 5px !important;
 }
+
+.label-aligned {
+  vertical-align: middle !important;
+  margin-top: -0.35em !important;
+}
 /*=========================================================*/
 /*****************Third-Party CSS MODs**********************/
 /* Fomantic-UI */
@@ -228,7 +233,7 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
   color: #007E33 !important;
   border-color: #007E33 !important;
 }
-.recipe-label.usable.active, #active-view-recipe-container .attached.label.usable {
+.recipe-label.usable.active, #active-view-recipe-container .attached.label.usable, #active-view-recipe-container .horizontal.label.usable {
   color: #FFFFFF !important;
   background-color: #007E33 !important;
 }
@@ -248,7 +253,7 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
   color: #6a1b9a !important;
   border-color: #6a1b9a !important;
 }
-.recipe-label.needupdate.active, #active-view-recipe-container .attached.label.needupdate {
+.recipe-label.needupdate.active, #active-view-recipe-container .attached.label.needupdate, #active-view-recipe-container .horizontal.label.needupdate {
   color: #FFFFFF !important;
   background-color: #6a1b9a !important;
 }
@@ -268,7 +273,7 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
   color: #ff8f00 !important;
   border-color: #ff8f00 !important;
 }
-.recipe-label.inprogress.active, #active-view-recipe-container .attached.label.inprogress {
+.recipe-label.inprogress.active, #active-view-recipe-container .attached.label.inprogress, #active-view-recipe-container .horizontal.label.inprogress {
   color: #FFFFFF !important;
   background-color: #ff8f00 !important;
 }
@@ -288,7 +293,7 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
   color: #757575 !important;
   border-color: #757575 !important;
 }
-.recipe-label.substitute.active, #active-view-recipe-container .attached.label.substitute {
+.recipe-label.substitute.active, #active-view-recipe-container .attached.label.substitute, #active-view-recipe-container .horizontal.label.substitute {
   color: #FFFFFF !important;
   background-color: #757575 !important;
 }
@@ -308,7 +313,7 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
   color: #d50000 !important;
   border-color: #d50000 !important;
 }
-.recipe-label.notready.active, #active-view-recipe-container .top.label.notready {
+.recipe-label.notready.active, #active-view-recipe-container .top.label.notready, #active-view-recipe-container .horizontal.label.notready {
   color: #FFFFFF !important;
   background-color: #d50000 !important;
 }
@@ -329,4 +334,9 @@ menu > .dropdown-container > .ui.dropdown .menu > .item > .description {
 
 .os-theme-thin-dark > .os-scrollbar > .os-scrollbar-track > .os-scrollbar-handle:before {
   border-radius: 0 !important;
+}
+
+.horizontal.divider.header {
+  padding: 5px 0;
+  margin: 0;
 }

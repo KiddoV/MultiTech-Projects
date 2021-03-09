@@ -104,7 +104,7 @@ GetRecipesBySearch(neutron, searchKeyWords) {
     ;searchKeyWords := neutron.qs("#recipe-search-field").value
     
     If (searchKeyWords == "") {
-        neutron.qs("#recipe-search-status-label").innerHTML := "Please input value..."
+        neutron.qs("#recipe-search-status-label").innerHTML := "Please input value..."	
         Return false
     }
     
@@ -133,8 +133,18 @@ GetRecipesBySearch(neutron, searchKeyWords) {
         searchResult[A_Index, "recipeBrandLogo"] := (searchResult[A_Index].prog_aoi_machine == "YesTech") ? "yestech-logo.png" : (searchResult[A_Index].prog_aoi_machine == "TRI") ? "rti-logo.png" : "no-brand-logo.png"
         searchResult[A_Index, "buildPartStatusCSSClass"] := (searchResult[A_Index].build_part_status == "ACTIVE") ? "green" : (searchResult[A_Index].build_part_status == "BETA") ? "blue" : (searchResult[A_Index].build_part_status == "OBSOLETE") ? "orange" : (searchResult[A_Index].build_part_status == "USE UP") ? "yellow" : (searchResult[A_Index].build_part_status == "LAST-TIME BUY") ? "teal" : (searchResult[A_Index].build_part_status == "NO DESIGN") ? "brown" : "grey"
         searchResult[A_Index, "pcbPartStatusCSSClass"] := (searchResult[A_Index].pcb_part_status == "ACTIVE") ? "green" : (searchResult[A_Index].pcb_part_status == "BETA") ? "blue" : (searchResult[A_Index].pcb_part_status == "OBSOLETE") ? "orange" : (searchResult[A_Index].pcb_part_status == "USE UP") ? "yellow" : (searchResult[A_Index].pcb_part_status == "LAST-TIME BUY") ? "teal" : (searchResult[A_Index].pcb_part_status == "NO DESIGN") ? "brown" : "grey"
+        If (searchResult[A_Index].prog_created_by != "") {
+            createdByUserID := searchResult[A_Index].prog_created_by
+            SQL := "SELECT * FROM users WHERE user_id=" . createdByUserID
+            If !AOI_Pro_DB.GetTable(SQL, RecipeCreatedUserInfo) {
+                DisplayAlertMsg("Err Msg: " . DB.ErrorMsg . "<br>Err Code: " . DB.ErrorCode, "SQLite Error", 0, "error")
+                Return false
+            }
+            searchResult[A_Index, "recipeCreatedByUserInfo"] := DataBaseTableToObject(RecipeCreatedUserInfo)
+        }
     }
     
+    Clipboard := JSON.Dump(searchResult)
     Return JSON.Dump(searchResult)
     ;Return searchResult
     ;DisplayRecipeCard(searchResult)

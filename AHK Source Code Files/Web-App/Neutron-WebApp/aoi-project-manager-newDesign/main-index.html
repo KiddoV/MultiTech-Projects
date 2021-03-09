@@ -124,14 +124,14 @@
 				</div>
 				<div class="nine wide column" style="height: 100vh; padding: 5px;">
 					<div class="ui equal padded width grid">
-						<div class="two wide column" style="padding: 0; width: 55px !important; height: 30px; background-color: #E0E0E0; border-radius: 5px 0 0 5px;">
+						<div class="two wide column" style="padding: 0; height: 30px; background-color: #E0E0E0; border-radius: 5px 0 0 5px;">
 							<div class="" style="opacity: 0.5; padding: 5px 0; padding-left: 5px;">
 								<i class="pin icon" style="margin: 0;"></i>
 								<span class="ui text" style="font-weight: bold;" data-bind="text: recipeLabels().length">0</span>
 							</div>
 						</div>
-						<div class="fourteen wide column" style="padding: 0; height: 35px;">
-							<div id="recipe-labels-container" class="ui row wide" style="height: 100%; max-width: 100vh; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
+						<div class="fourteen wide fluid column" style="padding: 0; height: 35px;">
+							<div id="recipe-labels-container" class="ui row wide" style="height: 100%; overflow-x: scroll; overflow-y: hidden; white-space: nowrap;">
 								<div style="margin-left: 5px;" class="ui labels" data-bind="template: {foreach: recipeLabels.slice(0).reverse(), includeDestroyed: false, beforeRemove: hideRecipeLabel, afterAdd: showRecipeLabel}">
 									<a style="opacity: 0.8" class="recipe-label ui basic label" data-bind="checkRecipeActive: $root.recipeInView, class: recipeStatusCSSClass, click: function(){ showRecipeInfo($data, $element)}"><span data-bind="text: prog_full_name">????????L_###</span><i class="icon close" data-bind="click: function() {closeRecipeInfo($data)}"></i></a>
 								</div>
@@ -140,15 +140,64 @@
 						<div class="row wide" style="height: calc(100vh - 110px); padding-top: 2px; padding-bottom: 0;">
 							<div id="active-view-recipe-container" class="ui fluid segment" style="width: 100%; padding: 5px;">
 								<div class="ui top attached label" style="text-align: center; padding: 7px; font-size: 1.2rem; height: 32px;" data-bind="class: recipeInView().recipeStatusCSSClass">
-									<span data-bind="if: recipeInView().prog_alternate_type"><span class="ui horizontal black label" data-bind="text: recipeInView().prog_alternate_type"></span></span>
+									<span data-bind="if: recipeInView().prog_alternate_type"><span class="ui horizontal black label label-aligned" data-bind="text: recipeInView().prog_alternate_type"></span></span>
 									<span data-bind="text: recipeInView().prog_full_name">????????L_###</span>
-									<span data-bind="if: recipeInView().prog_substitute"><span class="ui left pointing red label" style="vertical-align: middle !important; margin-top: -0.35em !important;" data-bind="text: 'Use > ' + recipeInView().prog_substitute"></span></span>
+									<span data-bind="if: recipeInView().prog_substitute"><span class="ui left pointing red label label-aligned" style="" data-bind="text: 'Use > ' + recipeInView().prog_substitute"></span></span>
 								</div>
-								<div class="content">
-									<!--  -->
+								<div class="content" style="height: calc(100vh - 185px)">
+									<div class="ui tab" data-tab="active-view-recipe-tab-1">
+										<h5 class="ui horizontal divider header">Basic Infomation</h5>
+										<div class="ui aligned padded grid">
+											<div class="equal width row" style="padding: 0;">
+												<div class="column" style="padding: 0;">Build #: <span data-bind="text: recipeInView().prog_build_number">????????L</span></div>
+												<div class="column">ECL: <span data-bind="text: recipeInView().prog_current_ecl">###</span></div>
+												<div class="column">ECO: <span data-bind="text: recipeInView().prog_current_eco">#####</span></div>
+												<div class="column" style="padding: 0;">PCB: <span data-bind="text: recipeInView().prog_pcb_number">????????L</span></div>
+											</div>
+											<div class="row">
+												<div class="ten wide column row" style="padding: 5px 0;">
+													<div class="ui padded one column grid" style="font-size: 1.1em">
+													  <div class="wide column" style="padding: 4px 0;">Recipe Status: <span class="ui horizontal label" data-bind="class: recipeInView().recipeStatusCSSClass, text: recipeInView().prog_status">READY</span></div>
+													  <div class="wide column" style="padding: 4px 0;">Date Created: </div>
+													  <div class="wide column" style="padding: 4px 0;">Created By: <span data-bind="text: recipeInView().user_firstname"></span></div>
+													  <div class="wide column" style="padding: 4px 0;">ECO Last Updated On: </div>
+														<div class="wide column" style="padding: 4px 0;">Updated By: </div>
+														<div class="wide column" style="padding: 4px 0;">Alternate Type: </div>
+														<div class="wide column" style="padding: 4px 0;">Library Name: </div>
+													</div>
+												</div>
+												<div class="six wide center aligned column row" style="padding: 5px 0;">
+													<div class="column"><img class="ui image rounded bordered" data-bind="attr: { src: recipeInView().recipeBrandLogo }"></div>
+												</div>
+											</div>
+										</div>
+										<h5 class="ui horizontal divider header">Recipe Notes & Comments</h5>
+										<div class="ui padded one column grid">
+											<div class="wide column" style="padding: 4px 0;">RTF Notes: </div>
+											<div class="wide column" style="padding: 4px 0;">Recipe Comments: </div>
+											<div class="wide column" style="padding: 4px 0;">
+												<div class="ui input">
+										      <div class="ui segment" style="width: 100vw; height: calc(100vh - 700px); padding: 2px 2px 2px 30px;">
+														<a class="ui left corner mini label"><i class="pen icon"></i></a>
+														<textarea id="active-view-recipe-notes" class="allow-oncontext" style="width: 100%; height: 100%; padding-right: 10px; font-family: monospace; border: 0;">...</textarea>
+													</div>
+										  	</div>
+											</div>
+										</div>
+										<h5 class="ui horizontal divider header">Recipe Locations</h5>
+										<div class="">
+											Locations:
+										</div>
+									</div>
+									<div class="ui tab" data-tab="active-view-recipe-tab-2">2</div>
+									<div class="ui tab" data-tab="active-view-recipe-tab-3">3</div>
 								</div>
 								<div class="ui bottom attached label" style="padding: 5px;">
-									<button class="mini ui button">TEST</button>
+									<div id="active-view-recipe-tab-nav" class="ui fluid three item menu">
+									  <a class="active item" data-tab="active-view-recipe-tab-1">Recipe Info</a>
+									  <a class="item" data-tab="active-view-recipe-tab-2">Build Info</a>
+									  <a class="item" data-tab="active-view-recipe-tab-3">PCB Info</a>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -241,6 +290,7 @@
 // Expose jQuery to the global object
 window.jQuery = window.$ = window.jq = jQuery;
 
+// $("body:not(.allow-oncontext)").contextmenu(function() { return false; });
 </script>
 
 </html>
